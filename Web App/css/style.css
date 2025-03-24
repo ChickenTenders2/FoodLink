@@ -21,6 +21,10 @@ body {
     margin: 0;
 }
 
+h1 {
+    margin-bottom: 20px;
+}
+
 .dashboard-container {
     display: flex;
     flex-direction: column;
@@ -68,7 +72,7 @@ h1 {
 }
 
 .tile {
-    background-color: #c5e1a5;
+    background-color: #d4edc9;
     padding: 30px;
     text-align: center;
     border-radius: 10px;
@@ -146,6 +150,12 @@ h1 {
     transition: transform 0.2s ease-in-out;
 }
 
+a.tile-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+}
+
 .inventory-tile:hover {
     transform: scale(1.1); /* Slight zoom on hover */
 }
@@ -160,7 +170,7 @@ h1 {
 /* Hover Effect: Show Item Name */
 .item-name {
     position: absolute;
-    bottom: -20px;
+    bottom: -5px;
     left: 50%;
     transform: translateX(-50%);
     background-color: rgba(0, 100, 0, 0.8); /* Dark green */
@@ -218,23 +228,123 @@ h1 {
 .recipes-container {
     width: 100%;
     max-width: 1000px;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
+    padding-top: 20px;
 }
 
 .recipe-tile {
-    background-color: #c5e1a5;
+    background-color: #d4edc9;
     border-radius: 10px;
     padding: 20px;
     font-size: 18px;
     cursor: pointer;
     transition: transform 0.2s ease-in-out;
-    width: 100%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .recipe-tile:hover {
     transform: scale(1.02);
 }
 
+.recipe-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.recipe-actions button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #d4edc9;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.recipe-actions button:hover {
+    background-color: #aed581;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    border-radius: 10px;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+}
+
+.modal-content button {
+    /*margin-right: 10px;*/
+    margin-left: 10px;
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    background-color: #aed581;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+/* Shopping List Page Styles */
+
+.shopping-list-container {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-top: 20px;
+}
+
+.shopping-item {
+    background-color: #d4edc9;
+    border-radius: 10px;
+    padding: 15px 20px;
+    font-size: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s ease-in-out;
+}
+
+.shopping-item:hover {
+    transform: scale(1.02);
+}
+
+.item-actions button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    background-color: #aed581;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.item-actions button:hover {
+    background-color: #9ccc65;
+}

@@ -124,6 +124,76 @@ h1 {
     height: 400px;
 }
 
+/*Login/Register Styles*/
+
+.auth-container {
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.auth-container h2 {
+    margin-bottom: 30px;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.name-group {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+}
+
+.name-group input {
+    flex: 1;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 30px;
+    background-color: #f3f3f3;
+    box-sizing: border-box;
+}
+
+.input-group input {
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 30px;
+    background-color: #f3f3f3;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.auth-button {
+    padding: 12px 24px;
+    font-size: 18px;
+    border: none;
+    border-radius: 30px;
+    background-color: #a6d785;
+    color: #000;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 48%;
+    box-sizing: border-box;
+}
+
+.auth-button:hover {
+    background-color: #8fca6c;
+}
+
+
 /* Inventory Grid */
 .inventory-container {
     display: grid;
@@ -228,8 +298,8 @@ a.tile-link {
 .recipes-container {
     width: 100%;
     max-width: 1000px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 20px;
     padding-top: 20px;
 }
@@ -243,7 +313,6 @@ a.tile-link {
     transition: transform 0.2s ease-in-out;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     width: 100%;
-    box-sizing: border-box;
 }
 
 .recipe-tile:hover {

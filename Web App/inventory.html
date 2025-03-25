@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Fridge Inventory</title>
+    <link rel="stylesheet" href="C:\Users\hp\Documents\group1_cm2305\Web App\css\style.css"> <!-- Link to the external CSS file -->
+</head>
+<body>
+    <div class="inventory-container">
+        <div class="inventory-tile" onclick="openPopup('Milk', 2, '2025-04-10')">
+            <img src="milk.png" alt="Milk">
+            <span class="item-name">Milk</span>
+        </div>
+        <div class="inventory-tile" onclick="openPopup('Eggs', 12, '2025-04-15')">
+            <img src="eggs.png" alt="Eggs">
+            <span class="item-name">Eggs</span>
+        </div>
+        <div class="inventory-tile" onclick="openPopup('Apples', 5, '2025-04-08')">
+            <img src="apples.png" alt="Apples">
+            <span class="item-name">Apples</span>
+        </div>
+    </div>
+
+    <!-- Pop-Up for Editing Quantity & Expiration Date -->
+    <div id="popup" class="popup">
+        <h2 id="popup-title"></h2>
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" min="1">
+        <br>
+        <label for="expiry">Expiration Date:</label>
+        <input type="date" id="expiry">
+        <br>
+        <button onclick="closePopup()">Save</button>
+    </div>
+
+    <script>
+        function openPopup(itemName, quantity, expiryDate) {
+            document.getElementById('popup-title').innerText = `Edit ${itemName}`;
+            document.getElementById('quantity').value = quantity;
+            document.getElementById('expiry').value = expiryDate;
+            document.getElementById('popup').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

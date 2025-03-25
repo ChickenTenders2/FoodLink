@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport">
+    <title>Utensil Selection</title>
+</head>
+<body>
+    <h2>Select Your Kitchen Utensils</h2>
+    <form id="utensil-form">
+        <div id="utensil-list"></div>
+        <button type="submit">Save Selection</button>
+    </form>
+
+    <script>
+        const userId = 1; // Waiting for log in system
+
+        // get utensils from backend
+        fetch("http://127.0.0.1:5000/get-utensils")
+            .then(response => response.json())
+            .then(data => {
+                const utensilList = document.getElementById("utensil-list");
+                data.forEach(utensil => {
+                    const label = document.createElement("label");
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.value = utensil;
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(utensil));
+                    utensilList.appendChild(label);
+                    utensilList.appendChild(document.createElement("br"));
+                });
+            });
+
+        //  form submission
+        document.getElementById("utensil-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const selectedUtensils = [];
+            document.querySelectorAll("input[type=checkbox]:checked").forEach(checkbox => {
+                selectedUtensils.push(checkbox.value);
+            });
+
+            fetch("http://127.0.0.1:5000/save-utensils", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: userId, utensils: selectedUtensils })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message || data.error));
+        });
+    </script>
+</body>
+</html>

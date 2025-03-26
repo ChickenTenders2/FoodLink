@@ -17,6 +17,15 @@ class inventory(database):
     def __init__(self):
         super().__init__()
 
+    def get_items(self, user_id):
+        cursor = self.connection.cursor()
+        query = "SELECT * FROM inventory where user_id = %s;"
+        data = (user_id,)
+        cursor.execute(query, data)
+        items = cursor.fetchall()
+        cursor.close()
+        return items
+
     def add_item(self, user_id, item_id, quantity, expiry_date):
         cursor = self.connection.cursor()
         query = "INSERT INTO inventory (user_id, item_id, quantity, expiry_date) VALUES (%s, %s, %s, %s);"

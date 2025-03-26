@@ -19,7 +19,7 @@ class inventory(database):
 
     def get_items(self, user_id):
         cursor = self.connection.cursor()
-        query = "SELECT * FROM inventory where user_id = %s;"
+        query = "SELECT inv.id, i.name, i.brand, quantity, i.unit, expiry_date FROM FoodLink.inventory inv JOIN FoodLink.item i ON (inv.item_id = i.id) WHERE inv.user_id = %s;"
         data = (user_id,)
         cursor.execute(query, data)
         items = cursor.fetchall()
@@ -61,5 +61,5 @@ class inventory(database):
 
 if __name__ == "__main__":
     i = inventory()
-    i.update_expiry(3, date(2025, 4, 2))
+    print(i.get_items(2))
     

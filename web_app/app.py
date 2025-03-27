@@ -23,8 +23,11 @@ inv = inventory()
 def get_inventory():
     user_id = 2
     items = inv.get_items(user_id)
+    for item in items:
+        item[6] = item[6].strftime('%Y-%m-%d')
     return render_template("inventory.html", items=items)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    #app.run(debug=True)
+    get_inventory()
 

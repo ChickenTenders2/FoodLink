@@ -19,12 +19,12 @@ class inventory(database):
 
     def get_items(self, user_id):
         cursor = self.connection.cursor()
-        query = "SELECT inv.id, i.name, i.brand, quantity, i.unit, expiry_date FROM FoodLink.inventory inv JOIN FoodLink.item i ON (inv.item_id = i.id) WHERE inv.user_id = %s;"
+        query = "SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date FROM FoodLink.inventory inv JOIN FoodLink.item i ON (inv.item_id = i.id) WHERE inv.user_id = %s;"
         data = (user_id,)
         cursor.execute(query, data)
         items = cursor.fetchall()
         cursor.close()
-        return items
+        return list(items)
 
     def add_item(self, user_id, item_id, quantity, expiry_date):
         cursor = self.connection.cursor()

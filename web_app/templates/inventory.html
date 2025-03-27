@@ -10,9 +10,9 @@
         <!-- EDIT THIS TO ITERATE OVER ITEMS IN DATABASE -->
     <div class="inventory-container">
         {% for item in items %}
-            <div class="inventory-tile" onclick="openPopup('{{ item[1] }}', '{{ item[3] }}', '{{ item[5] }}')">
-                <!--<img src="{{ item[1] | lower }}.png" alt="{{ item[1] }}">-->
-                <span class="item-name">{{ item[1] }} ({{ item[3] }} {{ item[4] }})</span>
+            <div class="inventory-tile" onclick="openPopup('{{ item[2] }}', '{{ item[4] }}', '{{ item[6] }}')">
+                <img src="{{ url_for('static', filename='images/' + item[1]|string + '.jpg') }}" alt="{{ item[2] }}">
+                <span class="item-name">{{ item[2] }} ({{ item[4] }} {{ item[5] }})</span>
             </div>
         {% endfor %}
     </div>

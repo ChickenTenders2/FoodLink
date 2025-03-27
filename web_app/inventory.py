@@ -73,7 +73,7 @@ class inventory(database):
         query = """ SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity 
                 FROM FoodLink.inventory inv 
                 JOIN FoodLink.item i ON (inv.item_id = i.id) 
-                WHERE inv.user_id = %s AND i.name LIKE ?"""
+                WHERE inv.user_id = ? AND i.name LIKE ?"""
         data = [user_id, f"%{search_term}"]
         cursor.execute(query, data)
         items = cursor.fetchall()

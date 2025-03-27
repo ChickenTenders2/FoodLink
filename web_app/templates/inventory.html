@@ -7,6 +7,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> <!-- Link to the external CSS file -->
 </head>
 <body>
+    <!-- search form -->
+     <form method="GET" action="/inventory" class="search-form">
+        <input type="text" name="search" placeholder="Search inventory..." value="{{request.args.get('search', '')}}">
+        <button type="submit">Search</button>
+     </form>
+     
     <!-- displays each users items-->
     <div class="inventory-container">
         {% for item in items %}

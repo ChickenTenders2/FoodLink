@@ -22,7 +22,13 @@ inv = inventory()
 @app.route('/inventory')
 def get_inventory():
     user_id = 2
-    items = inv.get_items(user_id)
+    search_query = request.args.get('search')
+
+    if search_query:
+        items = inv.search_items(user_id, search_query)
+    else:
+        items = inv.get_items(user_id)
+    #items = inv.get_items(user_id)
     for item in items:
         item[6] = item[6].strftime('%Y-%m-%d')
     return render_template("inventory.html", items=items)

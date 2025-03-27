@@ -4,23 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Fridge Inventory</title>
-    <link rel="stylesheet" href="style.css"> <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> <!-- Link to the external CSS file -->
 </head>
 <body>
         <!-- EDIT THIS TO ITERATE OVER ITEMS IN DATABASE -->
     <div class="inventory-container">
-        <div class="inventory-tile" onclick="openPopup('Milk', 2, '2025-04-10')">
-            <img src="milk.png" alt="Milk">
-            <span class="item-name">Milk</span>
-        </div>
-        <div class="inventory-tile" onclick="openPopup('Eggs', 12, '2025-04-15')">
-            <img src="eggs.png" alt="Eggs">
-            <span class="item-name">Eggs</span>
-        </div>
-        <div class="inventory-tile" onclick="openPopup('Apples', 5, '2025-04-08')">
-            <img src="apples.png" alt="Apples">
-            <span class="item-name">Apples</span>
-        </div>
+        {% for item in items %}
+            <div class="inventory-tile" onclick="openPopup('{{ item[1] }}', '{{ item[3] }}', '{{ item[5] }}')">
+                <!--<img src="{{ item[1] | lower }}.png" alt="{{ item[1] }}">-->
+                <span class="item-name">{{ item[1] }} ({{ item[3] }} {{ item[4] }})</span>
+            </div>
+        {% endfor %}
     </div>
 
     <!-- Pop-Up for Editing Quantity & Expiration Date -->

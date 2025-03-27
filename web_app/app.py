@@ -1,18 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import mariadb
 import os
+from inventory import inventory
 
-app = Flask(__name__)
+
+app = Flask(__name__, template_folder="templates")
 app.secret_key = os.urandom(24)
 
-# Database connection function
-def get_db_connection():
-    return mariadb.connect(
-        host = "foodlink.ddns.net",
-        user = "FoodLink",
-        password = "Pianoconclusiontown229!",
-        database = "FoodLink"
-    )
+
 
 # Dashboard Route
 
@@ -22,7 +16,15 @@ def get_db_connection():
 
 # Logout Route
 
-# Inventoy Interface Route
+# Inventory Interface Route
+inv = inventory()
+
+@app.route('/inventory')
+def get_inventory():
+    user_id = 2
+    items = inv.get_items(user_id)
+    return render_template("inventory.html", items=items)
 
 if __name__ == '__main__':
     app.run(debug=True)
+

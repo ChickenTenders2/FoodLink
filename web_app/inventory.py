@@ -7,7 +7,7 @@ class database():
 
     def connect(self):
         return mariadb.connect(
-            host = "foodlink.ddns.net",
+            host = "80.0.43.124",
             user = "FoodLink",
             password = "Pianoconclusiontown229!",
             database = "FoodLink"

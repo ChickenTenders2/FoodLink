@@ -68,3 +68,15 @@ class inventory(database):
         self.connection.commit()
         cursor.close()
     
+    def search_items(self, user_id, search_term):
+        cursor = self.connection.cursor()
+        query = """ SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity 
+                FROM FoodLink.inventory inv 
+                JOIN FoodLink.item i ON (inv.item_id = i.id) 
+                WHERE inv.user_id = %s AND i.name LIKE ?"""
+        data = [user_id, f"%{search_term}"]
+        cursor.execute(query, data)
+        items = cursor.fetchall()
+        cursor.close()
+        items = [list(i) for i in items]
+        return items

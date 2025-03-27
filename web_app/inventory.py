@@ -52,13 +52,13 @@ class inventory(database):
         self.connection.commit()
         cursor.close()
     
-    def update_expiry(self, inventory_id, expiry_date):    
-        cursor = self.connection.cursor()
-        query = "UPDATE inventory SET expiry_date = %s WHERE id = %s;"
-        data = [expiry_date, inventory_id]
-        cursor.execute(query, data)
-        self.connection.commit()
-        cursor.close()
+    # def update_expiry(self, inventory_id, expiry_date):    
+    #     cursor = self.connection.cursor()
+    #     query = "UPDATE inventory SET expiry_date = %s WHERE id = %s;"
+    #     data = [expiry_date, inventory_id]
+    #     cursor.execute(query, data)
+    #     self.connection.commit()
+    #     cursor.close()
 
     def update_item(self, inventory_id, quantity, expiry_date):
         cursor = self.connection.cursor()

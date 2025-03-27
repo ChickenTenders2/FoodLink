@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> <!-- Link to the external CSS file -->
 </head>
 <body>
-        <!-- EDIT THIS TO ITERATE OVER ITEMS IN DATABASE -->
+    <!-- displays each users items-->
     <div class="inventory-container">
         {% for item in items %}
-            <div class="inventory-tile" onclick="openPopup('{{ item[2] }}', '{{ item[4] }}', '{{ item[6] }}')">
+            <div class="inventory-tile" onclick="openPopup('{{ item[2] }}', '{{ item[4] }}', '{{item[7]}}', '{{ item[6] }}', '{{ item[0]}}')">
                 <img src="{{ url_for('static', filename='images/' + item[1]|string + '.jpg') }}" alt="{{ item[2] }}">
                 <span class="item-name">{{ item[2] }} ({{ item[4] }} {{ item[5] }})</span>
             </div>
@@ -20,26 +20,31 @@
     <!-- Pop-Up for Editing Quantity & Expiration Date -->
     <div id="popup" class="popup">
         <h2 id="popup-title"></h2>
+        <form id="update-form" method="POST" action="/update_item">
         <label for="quantity">Quantity:</label>
-        <input type="number" id="quantity" min="1">
+        <input type="number" id="quantity" name ="quantity" min ="1">
         <br>
         <label for="expiry">Expiration Date:</label>
-        <input type="date" id="expiry">
+        <input type="date" id="expiry" name="expiry_date">
         <br>
-        <button onclick="closePopup()">Save</button>
+        <input type="hidden" id="inventory-id" name="inventory_id">
+        <button type="submit">Save</button>
+        </form>
     </div>
 
     <script>
-        function openPopup(itemName, quantity, expiryDate) {
+        function openPopup(itemName, quantity, deafult_quantity, expiry_date, inventory_id) {
             document.getElementById('popup-title').innerText = `Edit ${itemName}`;
             document.getElementById('quantity').value = quantity;
-            document.getElementById('expiry').value = expiryDate;
+            document.getElementById('quantity').max = deafult_quantity;
+            document.getElementById('expiry').value = expiry_date;
+            document.getElementById('inventory-id').value = inventory_id;
             document.getElementById('popup').style.display = 'block';
         }
-
-        function closePopup() {
-            document.getElementById('popup').style.display = 'none';
-        }
+        
+        //function closePopup() {
+        //    document.getElementById('popup').style.display = 'none';
+        //}
     </script>
 </body>
 </html>

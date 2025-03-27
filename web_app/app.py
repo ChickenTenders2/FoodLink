@@ -27,7 +27,17 @@ def get_inventory():
         item[6] = item[6].strftime('%Y-%m-%d')
     return render_template("inventory.html", items=items)
 
+@app.route('/update_item', methods=['POST'])
+def update_item():
+    inventory_id = request.form['inventory_id']
+    quantity = request.form['quantity']
+    expiry_date = request.form['expiry_date']
+    print(inventory_id, quantity, expiry_date)
+    # Update the database with new quantity and expiry date
+    inv.update_item(inventory_id, quantity, expiry_date)
+    
+    return redirect(url_for('get_inventory'))
+
 if __name__ == '__main__':
-    #app.run(debug=True)
-    get_inventory()
+    app.run(debug=True)
 

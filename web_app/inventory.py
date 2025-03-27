@@ -19,12 +19,13 @@ class inventory(database):
 
     def get_items(self, user_id):
         cursor = self.connection.cursor()
-        query = "SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date FROM FoodLink.inventory inv JOIN FoodLink.item i ON (inv.item_id = i.id) WHERE inv.user_id = %s;"
+        query = "SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity FROM FoodLink.inventory inv JOIN FoodLink.item i ON (inv.item_id = i.id) WHERE inv.user_id = %s;"
         data = (user_id,)
         cursor.execute(query, data)
         items = cursor.fetchall()
         cursor.close()
-        return list(items)
+        items = [list(i) for i in items]
+        return items
 
     def add_item(self, user_id, item_id, quantity, expiry_date):
         cursor = self.connection.cursor()
@@ -59,7 +60,11 @@ class inventory(database):
         self.connection.commit()
         cursor.close()
 
-if __name__ == "__main__":
-    i = inventory()
-    print(i.get_items(2))
+    def update_item(self, inventory_id, quantity, expiry_date):
+        cursor = self.connection.cursor()
+        query = "UPDATE inventory SET quantity = %s, expiry_date = %s WHERE id = %s;"
+        data = [quantity, expiry_date, inventory_id]
+        cursor.execute(query, data)
+        self.connection.commit()
+        cursor.close()
     

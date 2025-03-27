@@ -68,3 +68,7 @@ class inventory(database):
         self.connection.commit()
         cursor.close()
     
+if __name__ == "__main__":
+        i = inventory()
+        i.add_item(2, 3, 400, date(2026, 3, 31))
+        i.add_item(2, 4, 500, date(2025, 3, 31))

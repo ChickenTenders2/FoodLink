@@ -10,7 +10,7 @@
     <!-- displays each users items-->
     <div class="inventory-container">
         {% for item in items %}
-            <div class="inventory-tile" onclick="openPopup('{{ item[2] }}', '{{ item[4] }}', '{{item[7]}}', '{{ item[6] }}', '{{ item[0]}}')">
+            <div class="inventory-tile" onclick="open_popup('{{ item[2] }}', '{{ item[4] }}', '{{item[7]}}', '{{ item[6] }}', '{{ item[0]}}')">
                 <img src="{{ url_for('static', filename='images/' + item[1]|string + '.jpg') }}" alt="{{ item[2] }}">
                 <span class="item-name">{{ item[2] }} ({{ item[4] }} {{ item[5] }})</span>
             </div>
@@ -20,26 +20,67 @@
     <!-- Pop-Up for Editing Quantity & Expiration Date -->
     <div id="popup" class="popup">
         <h2 id="popup-title"></h2>
-        <form id="update-form" method="POST" action="/update_item">
-        <label for="quantity">Quantity:</label>
-        <input type="number" id="quantity" name ="quantity" min ="1">
-        <br>
-        <label for="expiry">Expiration Date:</label>
-        <input type="date" id="expiry" name="expiry_date">
-        <br>
-        <input type="hidden" id="inventory-id" name="inventory_id">
-        <button type="submit">Save</button>
+        <form id="update-form" method="POST" onsubmit="submit_update(event)">
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name ="quantity" min ="1">
+            <br>
+            <label for="expiry">Expiration Date:</label>
+            <input type="date" id="expiry" name="expiry_date">
+            <br>
+            <input type="hidden" id="inventory-id" name="inventory_id">
+            <input type="hidden" id="original-quantity" name="original_quantity">
+            <input type="hidden" id="original-expiry" name="original_expiry">
+            <button type="submit">Save</button>
         </form>
     </div>
 
     <script>
-        function openPopup(itemName, quantity, deafult_quantity, expiry_date, inventory_id) {
+        function open_popup(itemName, quantity, default_quantity, expiry_date, inventory_id) {
             document.getElementById('popup-title').innerText = `Edit ${itemName}`;
             document.getElementById('quantity').value = quantity;
-            document.getElementById('quantity').max = deafult_quantity;
+            document.getElementById('original-quantity').value = quantity;
+            document.getElementById('quantity').max = default_quantity;
             document.getElementById('expiry').value = expiry_date;
+            document.getElementById('original-expiry').value = expiry_date;
             document.getElementById('inventory-id').value = inventory_id;
             document.getElementById('popup').style.display = 'block';
+        }
+
+        function close_popup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+
+
+        async function submit_update(event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+
+            const originalQuantity = document.getElementById('original-quantity').value;
+            const originalExpiry = document.getElementById('original-expiry').value;
+
+            const newQuantity = document.getElementById('quantity').value;
+            const newExpiry = document.getElementById('expiry').value;
+
+            if (newQuantity == originalQuantity && newExpiry == originalExpiry) {
+                close_popup();
+                return;  // Prevent sending the update request
+            }
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const response = await fetch('/update_item', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Updates page
+                location.reload();
+            } else {
+                alert('There was an error updating the item.');
+            }
         }
     </script>
 </body>

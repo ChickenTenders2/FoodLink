@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, jsonify, render_template, request, redirect, url_for, session
 import os
 from inventory import inventory
 
@@ -33,10 +33,13 @@ def update_item():
     quantity = request.form['quantity']
     expiry_date = request.form['expiry_date']
     print(inventory_id, quantity, expiry_date)
-    # Update the database with new quantity and expiry date
-    inv.update_item(inventory_id, quantity, expiry_date)
     
-    return redirect(url_for('get_inventory'))
+    try:
+        # Update the database with new quantity and expiry date
+        inv.update_item(inventory_id, quantity, expiry_date)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -12,7 +12,16 @@
         <input type="text" name="search" placeholder="Search inventory..." value="{{request.args.get('search', '')}}">
         <button type="submit">Search</button>
      </form>
-     
+
+     <!-- sort form -->
+      <form method="GET" action="/inventory" class="sort-form">
+        <select name="sort_by">
+            <option value="name">Sort by Name</option>
+            <option value="expiry">Sort by Expiry</option>
+        </select>
+        <button type="submit">Sort</button>
+      </form>
+      
     <!-- displays each users items-->
     <div class="inventory-container">
         {% for item in items %}

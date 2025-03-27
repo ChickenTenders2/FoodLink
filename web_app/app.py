@@ -23,11 +23,15 @@ inv = inventory()
 def get_inventory():
     user_id = 2
     search_query = request.args.get('search')
+    sort_by = request.args.get('sort_by')
 
     if search_query:
         items = inv.search_items(user_id, search_query)
     else:
         items = inv.get_items(user_id)
+    
+    if sort_by in ['name', 'expiry']:
+        items = inv.sort_items(user_id, sort_by)
     #items = inv.get_items(user_id)
     for item in items:
         item[6] = item[6].strftime('%Y-%m-%d')

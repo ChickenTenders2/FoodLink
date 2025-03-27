@@ -70,12 +70,22 @@ class inventory(database):
     
     def search_items(self, user_id, search_term):
         cursor = self.connection.cursor()
-        query = """ SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity 
-                FROM FoodLink.inventory inv 
-                JOIN FoodLink.item i ON (inv.item_id = i.id) 
-                WHERE inv.user_id = ? AND i.name LIKE ?"""
+        query = "SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity FROM FoodLink.inventory inv JOIN FoodLink.item i ON (inv.item_id = i.id) WHERE inv.user_id = ? AND i.name LIKE ?"
         data = [user_id, f"%{search_term}"]
         cursor.execute(query, data)
+        items = cursor.fetchall()
+        cursor.close()
+        items = [list(i) for i in items]
+        return items
+
+    def sort_items(self, user_id, sort_by):
+        cursor = self.connection.cursor()
+        query = "SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity FROM FoodLink.inventory inv JOIN FoodLink.item i ON (inv.item_id = i.id) WHERE inv.user_id = ?"
+        if sort_by == 'name':
+            query += " ORDER BY i.name ASC"
+        elif sort_by == 'expiry':
+            query += " ORDER BY expiry_date ASC"
+        cursor.execute(query, [user_id])
         items = cursor.fetchall()
         cursor.close()
         items = [list(i) for i in items]

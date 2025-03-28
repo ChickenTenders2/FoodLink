@@ -417,3 +417,41 @@ a.tile-link {
 .item-actions button:hover {
     background-color: #9ccc65;
 }
+
+/* Search and Sort Styling */
+.search-form,
+.sort-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-form input[type="text"],
+.sort-form select {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 30px;
+    border: none;
+    background-color: #f3f3f3;
+    width: 250px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.search-form button,
+.sort-form button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 30px;
+    background-color: #a6d785;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.search-form button:hover,
+.sort-form button:hover {
+    background-color: #8fca6c;
+}

@@ -419,8 +419,7 @@ a.tile-link {
 }
 
 /* Search and Sort Styling */
-.search-form,
-.sort-form {
+.filter-form {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
@@ -429,8 +428,8 @@ a.tile-link {
     flex-wrap: wrap;
 }
 
-.search-form input[type="text"],
-.sort-form select {
+.filter-form input[type="text"],
+.filter-form select {
     padding: 10px;
     font-size: 16px;
     border-radius: 30px;
@@ -440,8 +439,7 @@ a.tile-link {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.search-form button,
-.sort-form button {
+.filter-form button {
     padding: 10px 20px;
     font-size: 16px;
     border: none;
@@ -451,7 +449,6 @@ a.tile-link {
     transition: background-color 0.2s ease;
 }
 
-.search-form button:hover,
-.sort-form button:hover {
+.filter-form button:hover {
     background-color: #8fca6c;
 }

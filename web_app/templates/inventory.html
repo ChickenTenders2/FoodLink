@@ -7,20 +7,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> <!-- Link to the external CSS file -->
 </head>
 <body>
-    <!-- search form -->
-     <form method="GET" action="/inventory" class="search-form">
+    <!-- search and sort form -->
+    <form method="GET" action="/inventory" class="filter-form">
         <input type="text" name="search" placeholder="Search inventory..." value="{{request.args.get('search', '')}}">
-        <button type="submit">Search</button>
-     </form>
-
-     <!-- sort form -->
-      <form method="GET" action="/inventory" class="sort-form">
         <select name="sort_by">
-            <option value="name">Sort by Name</option>
-            <option value="expiry">Sort by Expiry</option>
+            <option value="name" >Sort by Name</option>
+            <option value="expiry" {% if sort_by == "expiry" %} selected {% endif %}>Sort by Expiry</option>
         </select>
-        <button type="submit">Sort</button>
-      </form>
+    <button type="submit">Apply</button>
+    </form>
       
     <!-- displays each users items-->
     <div class="inventory-container">

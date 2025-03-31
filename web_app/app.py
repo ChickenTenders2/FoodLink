@@ -25,17 +25,18 @@ def get_inventory():
     search_query = request.args.get('search')
     sort_by = request.args.get('sort_by')
 
+
     if search_query:
         items = inv.search_items(user_id, search_query)
     else:
         items = inv.get_items(user_id)
     
     if sort_by in ['name', 'expiry']:
-        items = inv.sort_items(user_id, sort_by)
+        items = sorted(items, key=lambda x: x[2] if sort_by == 'name' else x[6])
     #items = inv.get_items(user_id)
     for item in items:
         item[6] = item[6].strftime('%Y-%m-%d')
-    return render_template("inventory.html", items=items)
+    return render_template("inventory.html", items=items, sort_by=sort_by)
 
 @app.route('/update_item', methods=['POST'])
 def update_item():

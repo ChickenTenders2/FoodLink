@@ -5,6 +5,7 @@ class database():
     def __init__(self):
         self.connection = self.connect()
 
+    # returns db connection
     def connect(self):
         return mariadb.connect(
             host = "80.0.43.124",
@@ -71,12 +72,18 @@ class inventory(database):
     def search_items(self, user_id, search_term):
         cursor = self.connection.cursor()
         #query = "SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity FROM FoodLink.inventory inv JOIN FoodLink.item i ON (inv.item_id = i.id) WHERE inv.user_id = ? AND i.name LIKE ?"
+
+        # search query uses full text for relevance based searching of items
         query = "SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity FROM FoodLink.inventory inv JOIN FoodLink.item i ON inv.item_id = i.id WHERE (inv.user_id = %s AND MATCH(i.name) AGAINST (%s IN NATURAL LANGUAGE MODE));"
         data = (user_id, search_term)
         cursor.execute(query, data)
         items = cursor.fetchall()
         cursor.close()
+        # formats each item as list for easier modification of date format
         items = [list(i) for i in items]
+        # formats date for front end
+        for item in items:
+            item[6] = item[6].strftime('%Y-%m-%d')
         return items
 
     # def sort_items(self, user_id, sort_by):

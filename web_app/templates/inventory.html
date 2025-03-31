@@ -11,6 +11,7 @@
     <form method="GET" action="/inventory" class="filter-form">
         <input type="text" name="search" placeholder="Search inventory..." value="{{request.args.get('search', '')}}">
         <select name="sort_by">
+            <!-- if statments make sure the current sort is shown as the default option-->
             <option value="relevance" {% if sort_by == "relevance" %} selected {% endif %}>Sort by Relevance</option>
             <option value="name" {% if sort_by == "name" %} selected {% endif %}>Sort by Name</option>
             <option value="expiry" {% if sort_by == "expiry" %} selected {% endif %}>Sort by Expiry</option>
@@ -38,6 +39,7 @@
             <label for="expiry">Expiration Date:</label>
             <input type="date" id="expiry" name="expiry_date">
             <br>
+            <!-- hidden inputs used so js code has variables needed to update-->
             <input type="hidden" id="inventory-id" name="inventory_id">
             <input type="hidden" id="original-quantity" name="original_quantity">
             <input type="hidden" id="original-expiry" name="original_expiry">
@@ -47,6 +49,7 @@
 
     <script>
         function open_popup(itemName, quantity, default_quantity, expiry_date, inventory_id) {
+            // Sets values in popup to those of the item
             document.getElementById('popup-title').innerText = `Edit ${itemName}`;
             document.getElementById('quantity').value = quantity;
             document.getElementById('original-quantity').value = quantity;
@@ -63,27 +66,35 @@
 
 
         async function submit_update(event) {
-            event.preventDefault(); // Prevent the form from submitting normally
+            // Prevent the form from submitting normally
+            event.preventDefault(); 
 
+            // Gets original values
             const originalQuantity = document.getElementById('original-quantity').value;
             const originalExpiry = document.getElementById('original-expiry').value;
 
+            // Gets new values
             const newQuantity = document.getElementById('quantity').value;
             const newExpiry = document.getElementById('expiry').value;
 
+            // Checks if values have not been edited
             if (newQuantity == originalQuantity && newExpiry == originalExpiry) {
+                // Prevent sending the update request
                 close_popup();
-                return;  // Prevent sending the update request
+                return;  
             }
 
+            // Recreates form
             const form = event.target;
             const formData = new FormData(form);
 
+            // Sends update command and waits for response
             const response = await fetch('/update_item', {
                 method: 'POST',
                 body: formData,
             });
 
+            //Waits until result is recieved
             const result = await response.json();
 
             if (result.success) {

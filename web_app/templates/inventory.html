@@ -11,12 +11,13 @@
     <form method="GET" action="/inventory" class="filter-form">
         <input type="text" name="search" placeholder="Search inventory..." value="{{request.args.get('search', '')}}">
         <select name="sort_by">
-            <option value="name" >Sort by Name</option>
+            <option value="relevance" {% if sort_by == "relevance" %} selected {% endif %}>Sort by Relevance</option>
+            <option value="name" {% if sort_by == "name" %} selected {% endif %}>Sort by Name</option>
             <option value="expiry" {% if sort_by == "expiry" %} selected {% endif %}>Sort by Expiry</option>
         </select>
     <button type="submit">Apply</button>
     </form>
-      
+
     <!-- displays each users items-->
     <div class="inventory-container">
         {% for item in items %}

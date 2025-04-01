@@ -9,5 +9,21 @@
     <div class="video-window">
         <img src="{{ url_for('barcode_scanner') }}" alt="Barcode Scanner">
     </div>
+
+    <script>
+        async function check_barcode() {
+            try {
+                let response = await fetch("/check_barcode");
+                let data = await response.json();
+
+                if (data.barcode) {
+                    console.log(data.barcode);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        setInterval(check_barcode, 500);
+    </script>
 </body>
 </html>

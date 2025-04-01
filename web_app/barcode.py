@@ -6,6 +6,9 @@ class barcode():
         self.video = cv2.VideoCapture(0)
         self.number = None
 
+    def get_barcode(self):
+        return self.number
+
     def decode_barcode(self):
         self.number = None
         while True:

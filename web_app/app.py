@@ -69,6 +69,11 @@ def barcode_scanner():
 def scan_barcode():
     return render_template('scan.html')
 
+@app.route('/check_barcode')
+def check_barcode():
+    return jsonify({"barcode": scanner.get_barcode()})   
+    
+
 if __name__ == '__main__':
     app.run(debug=True)
 

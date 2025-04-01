@@ -2,14 +2,15 @@ from flask import Flask, jsonify, render_template, request, redirect, url_for, s
 import os
 from inventory import inventory
 
-
 app = Flask(__name__, template_folder="templates")
 app.secret_key = os.urandom(24)
 
-
-
 # Dashboard Route
-
+@app.route('/')
+def index():
+    temp_url = "https://thingsboard.cs.cf.ac.uk/dashboard/9c597b10-0b04-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2" 
+    humid_url = "https://thingsboard.cs.cf.ac.uk/dashboard/74d87180-0dbc-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2"
+    return render_template('index.html', temp_url=temp_url, humid_url = humid_url)
 # Login Route
 
 # Register Route
@@ -34,6 +35,12 @@ def get_inventory():
     if sort_by in ['name', 'expiry']:
         # sorts by name or expiry
         items = sorted(items, key=lambda x: x[2] if sort_by == 'name' else x[6])
+
+    # formats each item as list for easier modification of date format
+    items = [list(i) for i in items]
+    # formats date for front end
+    for item in items:
+        item[6] = item[6].strftime('%Y-%m-%d')
 
     return render_template("inventory.html", items=items, sort_by=sort_by)
 

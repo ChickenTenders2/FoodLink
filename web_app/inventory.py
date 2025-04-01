@@ -25,7 +25,6 @@ class inventory(database):
         cursor.execute(query, data)
         items = cursor.fetchall()
         cursor.close()
-        items = [list(i) for i in items]
         return items
 
     def add_item(self, user_id, item_id, quantity, expiry_date):
@@ -79,11 +78,6 @@ class inventory(database):
         cursor.execute(query, data)
         items = cursor.fetchall()
         cursor.close()
-        # formats each item as list for easier modification of date format
-        items = [list(i) for i in items]
-        # formats date for front end
-        for item in items:
-            item[6] = item[6].strftime('%Y-%m-%d')
         return items
 
     # def sort_items(self, user_id, sort_by):

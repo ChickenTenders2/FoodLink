@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, render_template, request, redirect, url_for, session
+from flask import Flask, jsonify, render_template, request, url_for, Response
 import os
 from inventory import inventory
+from barcode import barcode
 
 app = Flask(__name__, template_folder="templates")
 app.secret_key = os.urandom(24)
@@ -19,6 +20,7 @@ def index():
 
 # Inventory Interface Route
 inv = inventory()
+scanner = barcode()
 
 @app.route('/inventory')
 def get_inventory():
@@ -58,6 +60,19 @@ def update_item():
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/barcode_scanner')
+def barcode_scanner():
+    return Response(scanner.decode_barcode(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route('/scan_barcode')
+def scan_barcode():
+    return render_template('scan.html')
+
+@app.route('/check_barcode')
+def check_barcode():
+    return jsonify({"barcode": scanner.get_barcode()})
+    
 
 if __name__ == '__main__':
     app.run(debug=True)

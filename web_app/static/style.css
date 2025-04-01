@@ -478,3 +478,8 @@ a.tile-link {
 .filter-form button:hover {
     background-color: #8fca6c;
 }
+
+.video-window {
+    margin-top: 20px;
+    text-align: center;
+}

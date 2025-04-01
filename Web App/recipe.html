@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipes</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <h1>Recipes</h1>
+    <div class="recipes-container">
+        <div class="recipe-tile" onclick="openModal('Tomato Pasta')">
+            <h2>Tomato Pasta</h2>
+            <p>Ingredients: Tomato, Pasta, Garlic, Olive Oil</p>
+        </div>
+        <div class="recipe-tile" onclick="openModal('Cheese Omelette')">
+            <h2>Cheese Omelette</h2>
+            <p>Ingredients: Eggs, Cheese, Salt, Pepper</p>
+        </div>
+        <div class="recipe-tile" onclick="openModal('Fruit Salad')">
+            <h2>Fruit Salad</h2>
+            <p>Ingredients: Apple, Banana, Orange, Honey</p>
+        </div>
+    </div>
+
+    <div id="recipeModal" class="modal">
+        <div class="modal-content">
+            <span onclick="closeModal()" style="float:right;cursor:pointer;font-size:20px;">&times;</span>
+            <h2 id="modal-title">Recipe Title</h2>
+            <p><strong>Ingredients:</strong> <span id="modal-ingredients"></span></p>
+            <p><strong>Instructions:</strong> <span id="modal-instructions"></span></p>
+            <button onclick="alert('Make this recipe!')">Make</button>
+            <button onclick="alert('Cloned!')">Clone</button>
+            <button onclick="alert('Edit function coming soon')">Edit</button>
+            <button onclick="alert('Deleted!')">Delete</button>
+        </div>
+    </div>
+
+    <script>
+        const recipes = {
+            "Tomato Pasta": {
+                ingredients: "Tomato, Pasta, Garlic, Olive Oil",
+                instructions: "Boil pasta. Sauté garlic and tomato. Mix and serve."
+            },
+            "Cheese Omelette": {
+                ingredients: "Eggs, Cheese, Salt, Pepper",
+                instructions: "Beat eggs. Pour into pan. Add cheese. Fold and serve."
+            },
+            "Fruit Salad": {
+                ingredients: "Apple, Banana, Orange, Honey",
+                instructions: "Chop fruits. Mix in a bowl. Add honey. Serve chilled."
+            }
+        };
+
+        function openModal(recipeName) {
+            document.getElementById('modal-title').textContent = recipeName;
+            document.getElementById('modal-ingredients').textContent = recipes[recipeName].ingredients;
+            document.getElementById('modal-instructions').textContent = recipes[recipeName].instructions;
+            document.getElementById('recipeModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('recipeModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('recipeModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        };
+    </script>
+</body>
+</html>

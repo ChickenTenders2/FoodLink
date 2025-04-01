@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, redirect, url_for, session, Response
+from flask import Flask, jsonify, render_template, request, redirect, url_for, Response
 import os
 from inventory import inventory
 from barcode import barcode

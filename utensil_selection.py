@@ -4,7 +4,7 @@ import mariadb
 app = Flask(__name__)
 
 # Database connection details
-HOST = "foodlink.ddns.net"
+HOST = "80.0.43.124"
 USER = "FoodLink"
 PASSWORD = "Pianoconclusiontown229!"
 DATABASE = "FoodLink"
@@ -43,7 +43,12 @@ def save_utensils():
             cursor.execute("INSERT INTO user_tool (user_id, tool_id) SELECT ?, id FROM tool WHERE name = ?", (user_id, utensil))
 
         conn.commit()
-        return jsonify({"message": "Utensils saved successfully!"})
+
+        # Get the updated list of user's utensils
+        cursor.execute("SELECT t.name FROM tool t JOIN user_tool ut ON t.id = ut.tool_id WHERE ut.user_id = ?", (user_id,))
+        user_utensils = [row[0] for row in cursor.fetchall()]
+
+        return jsonify({"message": "Utensils saved successfully!", "user_utensils": user_utensils})
 
     except mariadb.Error as e:
         return jsonify({"error": str(e)})
@@ -51,6 +56,7 @@ def save_utensils():
     finally:
         cursor.close()
         conn.close()
+
 
 if __name__ == "__main__":
     app.run(debug=True)

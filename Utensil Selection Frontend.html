@@ -2,52 +2,168 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Utensil Selection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #4CAF50; /* Green background */
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h2 {
+            color: white;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .utensil-option {
+            width: 120px;
+            height: 120px;
+            background-color: white; /* White background for the utensil squares */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            color: #333; /* Text color inside squares */
+            font-weight: bold;
+            margin: 10px;
+            text-align: center;
+        }
+
+        .utensil-option.selected {
+            background-color: #81C784; /* Light green when selected */
+            color: white;
+        }
+
+        .utensil-option:hover {
+            background-color: #dcdcdc; /* Slightly darker grey when hovered */
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .list-container {
+            margin-top: 40px;
+        }
+
+        .list-container ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .list-container li {
+            background-color: #f1f1f1;
+            margin: 8px;
+            padding: 8px;
+            border-radius: 5px;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
     <h2>Select Your Kitchen Utensils</h2>
-    <form id="utensil-form">
-        <div id="utensil-list"></div>
-        <button type="submit">Save Selection</button>
-    </form>
+    <div class="container" id="utensil-list"></div>
+
+    <button id="save-button">Save Selection</button>
+
+    <div class="list-container">
+        <h3>Your Utensils:</h3>
+        <ul id="user-utensils-list"></ul>
+        <h3>Available Utensils to Buy:</h3>
+        <ul id="available-utensils-list"></ul>
+    </div>
 
     <script>
-        const userId = 1; // Waiting for log in system
+        const userId = 1; // Replace with actual logged-in user ID
+        let selectedUtensils = [];
 
-        // get utensils from backend
-        fetch("http://127.0.0.1:5000/get-utensils")
+        // List of available utensils
+        const availableUtensils = [
+            "Knife", "Cutting Board", "Frying Pan", "Saucepan", "Oven", "Microwave",
+            "Blender", "Whisk", "Grater", "Rolling Pin", "Toaster", "Pressure Cooker",
+            "AirFryer"
+        ];
+
+        // Fetch utensils from the backend
+        fetch("http://80.0.43.124/get-utensils")
             .then(response => response.json())
             .then(data => {
                 const utensilList = document.getElementById("utensil-list");
+
                 data.forEach(utensil => {
-                    const label = document.createElement("label");
-                    const checkbox = document.createElement("input");
-                    checkbox.type = "checkbox";
-                    checkbox.value = utensil;
-                    label.appendChild(checkbox);
-                    label.appendChild(document.createTextNode(utensil));
-                    utensilList.appendChild(label);
-                    utensilList.appendChild(document.createElement("br"));
+                    const utensilDiv = document.createElement("div");
+                    utensilDiv.classList.add("utensil-option");
+                    utensilDiv.textContent = utensil;
+                    utensilDiv.onclick = () => {
+                        utensilDiv.classList.toggle("selected");
+                        if (utensilDiv.classList.contains("selected")) {
+                            selectedUtensils.push(utensil);
+                        } else {
+                            selectedUtensils = selectedUtensils.filter(item => item !== utensil);
+                        }
+                    };
+                    utensilList.appendChild(utensilDiv);
                 });
             });
 
-        //  form submission
-        document.getElementById("utensil-form").addEventListener("submit", function(event) {
-            event.preventDefault();
-            const selectedUtensils = [];
-            document.querySelectorAll("input[type=checkbox]:checked").forEach(checkbox => {
-                selectedUtensils.push(checkbox.value);
-            });
-
-            fetch("http://127.0.0.1:5000/save-utensils", {
+        // Save selected utensils and update lists
+        document.getElementById("save-button").addEventListener("click", function() {
+            fetch("http://80.0.43.124/save-utensils", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ user_id: userId, utensils: selectedUtensils })
             })
             .then(response => response.json())
-            .then(data => alert(data.message || data.error));
+            .then(data => {
+                alert(data.message || data.error);
+                displayUtensils(data.user_utensils); // Update user's utensils list
+            });
         });
+
+        // Display user's utensils
+        function displayUtensils(userUtensils) {
+            const userUtensilsList = document.getElementById("user-utensils-list");
+            userUtensilsList.innerHTML = ''; // Clear existing list
+
+            userUtensils.forEach(utensil => {
+                const listItem = document.createElement("li");
+                listItem.textContent = utensil;
+                userUtensilsList.appendChild(listItem);
+            });
+
+            const availableUtensilsList = document.getElementById("available-utensils-list");
+            availableUtensilsList.innerHTML = ''; // Clear available list
+
+            // Display remaining available utensils
+            availableUtensils.forEach(utensil => {
+                if (!userUtensils.includes(utensil)) {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = utensil;
+                    availableUtensilsList.appendChild(listItem);
+                }
+            });
+        }
     </script>
 </body>
 </html>
+

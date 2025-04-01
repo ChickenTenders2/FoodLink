@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, redirect, url_for, Response
+from flask import Flask, jsonify, render_template, request, url_for, Response
 import os
 from inventory import inventory
 from barcode import barcode
@@ -71,7 +71,7 @@ def scan_barcode():
 
 @app.route('/check_barcode')
 def check_barcode():
-    return jsonify({"barcode": scanner.get_barcode()})   
+    return jsonify({"barcode": scanner.get_barcode()})
     
 
 if __name__ == '__main__':

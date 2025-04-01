@@ -24,11 +24,11 @@ class item(database):
         cursor.close()
         return items
     
-    def add_item(self, admin_id, barcode, name, brand, expiry_time, default_quantity, unit):
+    def add_item(self, barcode, name, brand, expiry_time, default_quantity, unit, user_id = None):
         cursor = self.connection.cursor()
         # search query uses full text for relevance based searching of items
-        query = "INSERT INTO FoodLink.item (barcode, name, brand, expiry_time, default_quantity, unit) VALUES (%s, %s, %s, %s, %s, %s);"
-        data = (search_term, user_id)
+        query = "INSERT INTO FoodLink.item (barcode, name, brand, expiry_time, default_quantity, unit) VALUES (%s, %s, %s, %s, %s, %s, %s);"
+        data = (barcode, name, brand, expiry_time, default_quantity, unit, user_id)
         cursor.execute(query, data)
         items = cursor.fetchall()
         cursor.close()

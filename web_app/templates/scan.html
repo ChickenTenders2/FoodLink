@@ -12,19 +12,24 @@
     </div>
 
     <script>
+        window.onbeforeunload = function(){
+            fetch("/close_capture");
+        }   
+
         async function check_barcode() {
             try {
                 let response = await fetch("/check_barcode");
                 let data = await response.json();
 
                 if (data.barcode) {
+                    //fetch("/close_capture");
                     console.log(data.barcode);
                 }
             } catch (e) {
                 console.log(e);
             }
         }
-        setInterval(check_barcode, 500);
+        setInterval(check_barcode, 1000);
     </script>
 </body>
 </html>

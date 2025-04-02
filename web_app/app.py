@@ -72,8 +72,12 @@ def scan_barcode():
 @app.route('/check_barcode')
 def check_barcode():
     return jsonify({"barcode": scanner.get_barcode()})
-    
 
+@app.route('/close_capture')
+def close_capture():
+    scanner.release_capture()
+    return jsonify({"success":True})
+    
 if __name__ == '__main__':
     app.run(debug=True)
 

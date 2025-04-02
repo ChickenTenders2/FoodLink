@@ -3,7 +3,7 @@ from pyzbar.pyzbar import decode
 
 class barcode():
     def __init__(self):
-        self.video = cv2.VideoCapture(0)
+        self.capture = None
         self.number = None
 
     def get_barcode(self):
@@ -11,8 +11,9 @@ class barcode():
 
     def decode_barcode(self):
         self.number = None
+        self.capture = cv2.VideoCapture(0)
         while True:
-            ret, frame = self.video.read()
+            ret, frame = self.capture.read()
             if not ret:
                 break
             decoded = decode(frame)
@@ -23,4 +24,11 @@ class barcode():
                 ret, buffer = cv2.imencode('.jpeg', frame)
                 frame = buffer.tobytes()
                 yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')      
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    
+    def release_capture(self):
+        if self.capture.isOpened:
+            self.capture.release()
+
+    
+

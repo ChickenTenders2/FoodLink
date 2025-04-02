@@ -8,6 +8,9 @@ class barcode():
 
     def get_barcode(self):
         return self.number
+    
+    def clear_barcode(self):
+        self.number = None
 
     def decode_barcode(self):
         self.number = None

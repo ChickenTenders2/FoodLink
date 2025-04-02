@@ -73,6 +73,11 @@ def scan_barcode():
 def check_barcode():
     return jsonify({"barcode": scanner.get_barcode()})
 
+@app.route('/clear_barcode')
+def clear_barcode():
+    scanner.clear_barcode()
+    return jsonify({"success":True})
+
 @app.route('/close_capture')
 def close_capture():
     scanner.release_capture()

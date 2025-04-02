@@ -14,29 +14,30 @@
     <!-- added popup from inventory.html for inputting data of new item-->
     <div id="popup" class="popup">
         <h2 id="popup-title">Add Item</h2>
+        <button onclick="close_popup()">X</button>
         <form id="update-form" method="POST" onsubmit="submit_item(event)">
             <!-- all fields must be filled to add item (using required tag)-->
             <label>Barcode:</label>
             <input type="text" id="barcode" name="barcode" required>
             <br>
             <label>Item Name:</label>
-            <input type="text" name="name" required>
+            <input type="text" id="name" name="name" required>
             <br>
             <label>Brand:</label>
-            <input type="text" name="brand" required>
+            <input type="text" id="brand" name="brand" required>
             <br>
             <label>Expiry Time (days):</label>
-            <input type="number" name="expiry_time" required>
+            <input type="number" id="expiry_time" name="expiry_time" required>
             <br>
             <label>Quantity:</label>
-            <input type="number" name="default_quantity" required>
+            <input type="number" id="default_quantity" name="default_quantity" required>
             <br>
             <label>Unit:</label>
-            <input type="text" name="unit" required>
+            <input type="text" id="unit" name="unit" required>
             <br>
             <label>Upload Image:</label>
             <!-- only accepts image files -->
-            <input type="file" name="item_image" accept="image/jpg" required>
+            <input type="file" id="item_image" name="item_image" accept="image/jpeg" required>
 
             <button type="submit">Add Item</button>
         </form>
@@ -44,17 +45,31 @@
 
     <script>
         function open_popup(barcode_number) {
+            stop_check();
             document.getElementById('barcode').value = barcode_number;
             document.getElementById('popup').style.display = 'block';
         }
 
         function close_popup() {
             document.getElementById('popup').style.display = 'none';
+            document.getElementById("name").value = null;
+            document.getElementById("brand").value = null;
+            document.getElementById("expiry_time").value = null;
+            document.getElementById("default_quantity").value = null;
+            document.getElementById("unit").value = null;
+            document.getElementById("item_image").value = null;
+
+            fetch("/clear_barcode");
+            start_check();
         }
 
         window.onbeforeunload = function(){
             fetch("/close_capture");
         }   
+
+        window.onload = function(){
+            start_check();
+        }
 
         async function check_barcode() {
             try {
@@ -69,7 +84,15 @@
                 console.log(e);
             }
         }
-        setInterval(check_barcode, 1000);
+        
+        function start_check() {
+            window.interval_id = setInterval(check_barcode, 1000);
+        }
+
+        function stop_check() {
+            clearInterval(window.interval_id);
+        }
+
     </script>
 </body>
 </html>

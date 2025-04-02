@@ -100,10 +100,17 @@ def append_item_db():
         unit = request.form.get("unit")
 
         # gets expiry time and converts to int to remove any leading zeros
+        # also checks inputs are numbers
         day = int(request.form.get("expiry_day"))
         month = int(request.form.get("expiry_month"))
         year = int(request.form.get("expiry_year"))
-        # converts back to string
+
+        # makes sure expire date is not 0 and that each number is within the correct range
+        if (day == 0 and month == 0 and year == 0) \
+            or not (0 <= day < 31 and 0 <= month < 12 and 0 <= year < 100):
+            return jsonify({"success": False, "error": "Expiry time out of range."})
+
+        # formats expiry time as string
         expiry_time = f"{day}/{month}/{year}"
 
         # adds item to db and gets item id

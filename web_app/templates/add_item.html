@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Scanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+</head>
+<body>
+    <div class="video-window">
+        <img src="{{ url_for('barcode_scanner') }}" alt="Barcode Scanner">
+    </div>
+
+    <!-- added popup from inventory.html for inputting data of new item-->
+    <div id="popup" class="popup">
+        <h2 id="popup-title">Add Item</h2>
+        <form id="update-form" method="POST" onsubmit="submit_item(event)">
+            <!-- all fields must be filled to add item (using required tag)-->
+            <label>Barcode:</label>
+            <input type="text" id="barcode" name="barcode" required>
+            <br>
+            <label>Item Name:</label>
+            <input type="text" name="name" required>
+            <br>
+            <label>Brand:</label>
+            <input type="text" name="brand" required>
+            <br>
+            <label>Expiry Time (days):</label>
+            <input type="number" name="expiry_time" required>
+            <br>
+            <label>Quantity:</label>
+            <input type="number" name="default_quantity" required>
+            <br>
+            <label>Unit:</label>
+            <input type="text" name="unit" required>
+            <br>
+            <label>Upload Image:</label>
+            <!-- only accepts image files -->
+            <input type="file" name="item_image" accept="image/jpg" required>
+
+            <button type="submit">Add Item</button>
+        </form>
+    </div>
+
+    <script>
+        function open_popup(barcode_number) {
+            document.getElementById('barcode').value = barcode_number;
+            document.getElementById('popup').style.display = 'block';
+        }
+
+        function close_popup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+
+        window.onbeforeunload = function(){
+            fetch("/close_capture");
+        }   
+
+        async function check_barcode() {
+            try {
+                let response = await fetch("/check_barcode");
+                let data = await response.json();
+
+                if (data.barcode) {
+                    console.log(data.barcode);
+                    open_popup(data.barcode);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        setInterval(check_barcode, 1000);
+    </script>
+</body>
+</html>

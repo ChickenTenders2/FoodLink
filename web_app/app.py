@@ -77,6 +77,10 @@ def check_barcode():
 def close_capture():
     scanner.release_capture()
     return jsonify({"success":True})
+
+@app.route('/add_item')
+def add_item():
+    return render_template("add_item.html")
     
 if __name__ == '__main__':
     app.run(debug=True)

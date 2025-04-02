@@ -1,104 +1,60 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, render_template, request
 import mariadb
-from flask_cors import CORS  # Import CORS
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
 
-# Database connection details
-HOST = "80.0.43.124"
-USER = "FoodLink"
-PASSWORD = "Pianoconclusiontown229!"
-DATABASE = "FoodLink"
-
+# Database connection
 def get_db_connection():
     return mariadb.connect(
-        host=HOST, user=USER, password=PASSWORD, database=DATABASE
+        host="80.0.43.124",
+        user="FoodLink",
+        password="Pianoconclusiontown229!",
+        database="FoodLink"
     )
 
-@app.route("/get-utensils", methods=["GET"])
-def get_utensils():
-    user_id = request.args.get('user_id')
-    
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        
-        # Get all kitchen tools from database
-        cursor.execute("SELECT name FROM tool WHERE type = 'kitchen'")
-        all_utensils = [row[0] for row in cursor.fetchall()]
-        
-        # Get user's selected utensils if user_id provided
-        user_utensils = []
-        if user_id:
-            cursor.execute("""
-                SELECT t.name 
-                FROM tool t 
-                JOIN user_tool ut ON t.id = ut.tool_id 
-                WHERE ut.user_id = ?
-            """, (user_id,))
-            user_utensils = [row[0] for row in cursor.fetchall()]
-        
-        return jsonify({
-            "all_utensils": all_utensils, 
-            "user_utensils": user_utensils
-        })
-    except mariadb.Error as e:
-        return jsonify({"error": str(e)})
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'conn' in locals():
-            conn.close()
+# Linking to utensil selection page
+@app.route("/")
+def index():
+    return render_template("UtensilSelection.html")
 
-@app.route("/save-utensils", methods=["POST"])
-def save_utensils():
-    data = request.json
-    user_id = data.get("user_id")
-    selected_utensils = data.get("utensils", [])
-    
-    if not user_id:
-        return jsonify({"error": "User ID is required"})
-    
+# Getting utensils from database
+@app.route("/utensils")
+def get_utensils():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        # Clear existing utensils for this user
-        cursor.execute("DELETE FROM user_tool WHERE user_id = ?", (user_id,))
-        
-        # Insert new utensils
-        for utensil in selected_utensils:
-            # Get the tool_id for the utensil
-            cursor.execute("SELECT id FROM tool WHERE name = ?", (utensil,))
-            result = cursor.fetchone()
-            if result:
-                tool_id = result[0]
-                cursor.execute("INSERT INTO user_tool (user_id, tool_id) VALUES (?, ?)", 
-                               (user_id, tool_id))
-        
+        cursor.execute("SELECT id, name FROM tool")
+        utensils = [{"id": row[0], "name": row[1]} for row in cursor.fetchall()]
+        conn.close()
+        return jsonify(utensils)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Save selected utensils to database for a user
+@app.route("/save_selection", methods=["POST"])
+def save_selection():
+    try:
+        data = request.json
+        user_id = 1  # Change this to dynamic user authentication later
+        selected_utensils = data.get("utensils", [])
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Clear previous selection
+        cursor.execute("DELETE FROM user_tools WHERE user_id = ?", (user_id,))
+
+        # Insert new selection
+        for utensil_id in selected_utensils:
+            cursor.execute("INSERT INTO user_tools (user_id, tool_id) VALUES (?, ?)", (user_id, utensil_id))
+
         conn.commit()
-        
-        # Get the updated list of user's utensils
-        cursor.execute("""
-            SELECT t.name 
-            FROM tool t 
-            JOIN user_tool ut ON t.id = ut.tool_id 
-            WHERE ut.user_id = ?
-        """, (user_id,))
-        user_utensils = [row[0] for row in cursor.fetchall()]
-        
-        return jsonify({
-            "message": "Utensils saved successfully!", 
-            "user_utensils": user_utensils
-        })
-    except mariadb.Error as e:
-        return jsonify({"error": str(e)})
-    finally:
-        if 'cursor' in locals():
-            cursor.close()
-        if 'conn' in locals():
-            conn.close()
+        conn.close()
+
+        return jsonify({"message": "Utensils saved successfully!"})
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0')  # Listen on all interfaces
+    app.run(debug=True)

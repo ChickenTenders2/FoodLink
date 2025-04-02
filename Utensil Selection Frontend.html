@@ -5,203 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Utensil Selection</title>
     <style>
+        /* common css features */
         body {
+            background-color: lightgreen;
             font-family: Arial, sans-serif;
-            background-color: #4CAF50; /* Green background */
-            color: white;
-            text-align: center;
-            padding: 20px;
         }
-
-        h2 {
-            color: white;
-        }
-
         .container {
+            max-width: 600px;
+            margin: auto;
+            text-align: center;
+        }
+        #utensil-list, #selected-list {
             display: flex;
             flex-wrap: wrap;
+            gap: 10px;
             justify-content: center;
-            gap: 20px;
-            margin-bottom: 30px;
         }
-
-        .utensil-option {
-            width: 120px;
-            height: 120px;
-            background-color: white; /* White background for the utensil squares */
+        .utensil {
+            width: 100px;
+            height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
+            text-align: center;
+            border: 2px solid #333;
             border-radius: 10px;
             cursor: pointer;
-            transition: background-color 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            color: #333; /* Text color inside squares */
-            font-weight: bold;
-            margin: 10px;
-            text-align: center;
         }
-
-        .utensil-option.selected {
-            background-color: #81C784; /* Light green when selected */
+        .selected {
+            background-color: darkgreen;
             color: white;
         }
-
-        .utensil-option:hover {
-            background-color: #dcdcdc; /* Slightly darker grey when hovered */
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
+        #save-btn {
             margin-top: 20px;
-        }
-
-        .list-container {
-            margin-top: 40px;
-        }
-
-        .list-container ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .list-container li {
-            background-color: #f1f1f1;
-            margin: 8px;
-            padding: 8px;
-            border-radius: 5px;
-            color: #333;
+            padding: 10px;
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <h2>Select Your Kitchen Utensils</h2>
-    <div class="container" id="utensil-list"></div>
 
-    <button id="save-button">Save Selection</button>
+<div class="container">
+    <h2>Available Utensils</h2>
+    <div id="utensil-list"></div>
 
-    <div class="list-container">
-        <h3>Your Utensils:</h3>
-        <ul id="user-utensils-list"></ul>
-        <h3>Available Utensils to Buy:</h3>
-        <ul id="available-utensils-list"></ul>
-    </div>
+    <h2>Your Selected Utensils</h2>
+    <div id="selected-list"></div>
 
-    <script>
-    const userId = 1; // Replace with actual logged-in user ID
-    let selectedUtensils = [];
-    let allUtensils = [];
+    <button id="save-btn">Save Utensils</button>
+</div>
 
-    // Fetch utensils from the backend
-    fetch(`http://80.0.43.124/get-utensils?user_id=${userId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Data from server:", data); // Debug output
-            
-            allUtensils = data.all_utensils || [];
-            selectedUtensils = data.user_utensils || [];
-            
-            const utensilList = document.getElementById("utensil-list");
-            utensilList.innerHTML = '';
-            
-            // Display all available utensils
-            allUtensils.forEach(utensil => {
-                const utensilDiv = document.createElement("div");
-                utensilDiv.classList.add("utensil-option");
-                utensilDiv.textContent = utensil;
+<script>
+    let selectedUtensils = new Set();
+    //grabbing utensils from python script
+    function fetchUtensils() {
+        fetch("/utensils")
+            .then(response => response.json())
+            .then(data => {
+                const utensilList = document.getElementById("utensil-list");
+                utensilList.innerHTML = ""; // Clear previous content
                 
-                // Mark as selected if user already has this utensil
-                if (selectedUtensils.includes(utensil)) {
-                    utensilDiv.classList.add("selected");
-                }
-                
-                utensilDiv.onclick = () => {
-                    utensilDiv.classList.toggle("selected");
-                    if (utensilDiv.classList.contains("selected")) {
-                        if (!selectedUtensils.includes(utensil)) {
-                            selectedUtensils.push(utensil);
-                        }
-                    } else {
-                        selectedUtensils = selectedUtensils.filter(item => item !== utensil);
-                    }
-                };
-                utensilList.appendChild(utensilDiv);
-            });
-            
-            updateLists();
-        })
-        .catch(error => {
-            console.error("Error fetching utensils:", error);
-            alert("Failed to load utensils. Please check the console for details.");
-        });
+                data.forEach(utensil => {
+                    const div = document.createElement("div");
+                    div.className = "utensil";
+                    div.textContent = utensil.name;
+                    div.dataset.id = utensil.id;
 
-    // Save selected utensils and update lists
-    document.getElementById("save-button").addEventListener("click", function() {
-        console.log("Sending utensils to save:", selectedUtensils); // Debug output
-        
-        fetch("http://80.0.43.124/save-utensils", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user_id: userId, utensils: selectedUtensils })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Save response:", data); // Debug output
-            
-            if (data.error) {
-                alert("Error: " + data.error);
-            } else {
-                alert(data.message || "Utensils saved successfully!");
-                selectedUtensils = data.user_utensils || selectedUtensils;
-                updateLists();
-            }
-        })
-        .catch(error => {
-            console.error("Error saving utensils:", error);
-            alert("Failed to save utensils. Please check the console for details.");
-        });
-    });
+                    div.addEventListener("click", function() {
+                        toggleUtensil(this);
+                    });
 
-    // Update the lists of user utensils and available utensils
-    function updateLists() {
-        const userUtensilsList = document.getElementById("user-utensils-list");
-        userUtensilsList.innerHTML = '';
-
-        selectedUtensils.forEach(utensil => {
-            const listItem = document.createElement("li");
-            listItem.textContent = utensil;
-            userUtensilsList.appendChild(listItem);
-        });
-
-        const availableUtensilsList = document.getElementById("available-utensils-list");
-        availableUtensilsList.innerHTML = '';
-
-        // Display remaining available utensils
-        allUtensils.forEach(utensil => {
-            if (!selectedUtensils.includes(utensil)) {
-                const listItem = document.createElement("li");
-                listItem.textContent = utensil;
-                availableUtensilsList.appendChild(listItem);
-            }
-        });
+                    utensilList.appendChild(div);
+                });
+            })
+            .catch(error => console.error("Error fetching utensils:", error));
     }
+
+    function toggleUtensil(element) {
+        const utensilId = element.dataset.id;
+        
+        if (selectedUtensils.has(utensilId)) {
+            selectedUtensils.delete(utensilId);
+            element.classList.remove("selected");
+            document.getElementById("utensil-list").appendChild(element);
+        } else {
+            selectedUtensils.add(utensilId);
+            element.classList.add("selected");
+            document.getElementById("selected-list").appendChild(element);
+        }
+    }
+    //saving utensils to database once buttom clicked
+    function saveSelectedUtensils() {
+        fetch("/save_selection", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ utensils: Array.from(selectedUtensils) })
+        })
+        .then(response => response.json())
+        .then(data => alert("Utensils saved successfully!"))
+        .catch(error => console.error("Error saving utensils:", error));
+    }
+
+    document.getElementById("save-btn").addEventListener("click", saveSelectedUtensils);
+
+    fetchUtensils(); 
 </script>
+
 </body>
 </html>
 

@@ -2,6 +2,7 @@ from flask import Flask, jsonify, render_template, request, url_for, Response
 import os
 from inventory import inventory
 from barcode import barcode
+from item import item_table
 
 app = Flask(__name__, template_folder="templates")
 app.secret_key = os.urandom(24)
@@ -21,6 +22,7 @@ def index():
 # Inventory Interface Route
 inv = inventory()
 scanner = barcode()
+item = item_table()
 
 @app.route('/inventory')
 def get_inventory():
@@ -86,7 +88,40 @@ def close_capture():
 @app.route('/add_item')
 def add_item():
     return render_template("add_item.html")
-    
+
+@app.route('/add_item/add', methods=["POST"])
+def append_item_db():
+    try:
+        # gets item information
+        barcode = request.form.get("barcode")
+        name = request.form.get("name")
+        brand = request.form.get("brand")
+        default_quantity = request.form.get("default_quantity")
+        unit = request.form.get("unit")
+
+        # gets expiry time and converts to int to remove any leading zeros
+        day = int(request.form.get("expiry_day"))
+        month = int(request.form.get("expiry_month"))
+        year = int(request.form.get("expiry_year"))
+        # converts back to string
+        expiry_time = f"{day}/{month}/{year}"
+
+        # adds item to db and gets item id
+        item_id = item.add_item(barcode, name, brand, expiry_time, default_quantity, unit)
+
+        # gets image if uploaded otherwise equals none
+        image = request.files.get("item_image", None)
+        # if an image is uploaded
+        if image:
+            # store image in server with name item id
+            path = f"static/images/{item_id}.jpg"
+            image.save(path)
+
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 

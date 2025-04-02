@@ -8,6 +8,8 @@
 </head>
 <body>
     <div class="video-window">
+        <button onclick="open_popup(null)">Manually enter barcode</button>
+        <br>
         <img src="{{ url_for('barcode_scanner') }}" alt="Barcode Scanner">
     </div>
 
@@ -26,8 +28,12 @@
             <label>Brand:</label>
             <input type="text" id="brand" name="brand" required>
             <br>
-            <label>Expiry Time (days):</label>
-            <input type="number" id="expiry_time" name="expiry_time" required>
+            <label>Expiry Time:</label>
+            <input type="number" id="expiry_day" class="date_field" name="expiry_day" min="0" max="30" placeholder="DD" required>
+            <label>/</label>
+            <input type="number" id="expiry_month" class="date_field" name="expiry_month" min="0" max="11" placeholder="MM" required>
+            <label>/</label>
+            <input type="number" id="expiry_year" class="date_field" name="expiry_year" min="0" max="99" placeholder="YY" required>
             <br>
             <label>Quantity:</label>
             <input type="number" id="default_quantity" name="default_quantity" required>
@@ -37,7 +43,7 @@
             <br>
             <label>Upload Image:</label>
             <!-- only accepts image files -->
-            <input type="file" id="item_image" name="item_image" accept="image/jpeg" required>
+            <input type="file" id="item_image" name="item_image" accept="image/jpeg">
 
             <button type="submit">Add Item</button>
         </form>
@@ -54,7 +60,9 @@
             document.getElementById('popup').style.display = 'none';
             document.getElementById("name").value = null;
             document.getElementById("brand").value = null;
-            document.getElementById("expiry_time").value = null;
+            document.getElementById("expiry_day").value = null;
+            document.getElementById("expiry_month").value = null;
+            document.getElementById("expiry_year").value = null;
             document.getElementById("default_quantity").value = null;
             document.getElementById("unit").value = null;
             document.getElementById("item_image").value = null;
@@ -93,6 +101,42 @@
             clearInterval(window.interval_id);
         }
 
+        async function submit_item(event) {
+            // Prevent the form from submitting normally
+            event.preventDefault(); 
+            if (!valid_expiry()) {
+                alert("Expiry time must be at least one day.")
+                return;
+            }
+
+            // Recreates form
+            const form = event.target;
+            const formData = new FormData(form);
+
+            // Sends update command and waits for response
+            const response = await fetch('/add_item/add', {
+                method: 'POST',
+                body: formData,
+            });
+
+            //Waits until result is recieved
+            const result = await response.json();
+
+            if (result.success) {
+                alert("Item added succesfully.");
+                close_popup();
+            } else {
+                alert('There was an error adding the item. Error: ' + result.error);
+            }
+        }
+
+        function valid_expiry() {
+            const day = parseInt(document.getElementById("expiry_day").value);
+            const month = parseInt(document.getElementById("expiry_month").value);
+            const year = parseInt(document.getElementById("expiry_year").value);
+            return !(day == 0 && month == 0 && year == 0);
+
+        }
     </script>
 </body>
 </html>

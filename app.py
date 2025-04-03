@@ -34,7 +34,7 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def register(username, email, password):           
-        user = User(username=username, email=email, name='John abc')     
+        user = User(username=username, email=email, name='null')     
         user.set_password(password)
         db.session.add(user)
         db.session.commit()

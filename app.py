@@ -1,4 +1,5 @@
-from flask import Flask, redirect, url_for, session
+from flask import Flask, redirect, url_for, session, render_template
+from flask_login import login_required, current_user
 from extensions import db, login_manager
 import os
 
@@ -70,6 +71,12 @@ def auto_login():
     # Store theme in session for template access
     session['theme'] = user.theme
     return redirect(url_for('settings.settings_page'))
+
+@app.route('/utensils')
+@login_required
+def utensils_page():
+    # Temporary placeholder page for the utensils feature
+    return render_template('utensils.html', user=current_user)
     
 if __name__ == '__main__':
     app.run(debug=True)

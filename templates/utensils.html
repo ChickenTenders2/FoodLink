@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodLink - Utensils</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="{{ session.get('theme', 'light') }}">
+    <div class="container">
+        <header>
+            <h1>Utensils Management</h1>
+            <nav>
+                <a href="{{ url_for('settings.settings_page') }}">Back to Settings</a>
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            </nav>
+        </header>
+
+        <div class="content-area">
+            <div class="placeholder-message">
+                <h2>Utensils Management Feature</h2>
+                <p>Add the real Utensils page here</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

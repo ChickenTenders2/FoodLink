@@ -1,6 +1,6 @@
 from database import database
 
-class item(database):
+class item_table(database):
     def __init__(self):
         super().__init__()
 
@@ -26,12 +26,11 @@ class item(database):
     
     def add_item(self, barcode, name, brand, expiry_time, default_quantity, unit, user_id = None):
         cursor = self.connection.cursor()
-        # search query uses full text for relevance based searching of items
-        query = "INSERT INTO FoodLink.item (barcode, name, brand, expiry_time, default_quantity, unit) VALUES (%s, %s, %s, %s, %s, %s, %s);"
+        query = "INSERT INTO FoodLink.item (barcode, name, brand, expiry_time, default_quantity, unit, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s);"
         data = (barcode, name, brand, expiry_time, default_quantity, unit, user_id)
         cursor.execute(query, data)
-        items = cursor.fetchall()
+        self.connection.commit()
+        # gets id of the item inserted
+        item_id = cursor.lastrowid
         cursor.close()
-        return items
-
-    
+        return item_id

@@ -3,11 +3,14 @@ from pyzbar.pyzbar import decode
 
 class barcode():
     def __init__(self):
-        self.capture = None
+        self.capture = cv2.VideoCapture(0)
         self.number = None
 
     def get_barcode(self):
         return self.number
+    
+    def clear_barcode(self):
+        self.number = None
 
     def decode_barcode(self):
         self.number = None

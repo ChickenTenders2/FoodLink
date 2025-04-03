@@ -479,7 +479,22 @@ a.tile-link {
     background-color: #8fca6c;
 }
 
+/* centres barcode scanner window*/
 .video-window {
     margin-top: 20px;
     text-align: center;
+}
+
+/* shortens date boxes for adding item expiry time */
+.date_field {
+    text-align: center;
+    width: calc(1ch*3);
+    padding: 1px;
+}
+
+/* hide spinboxes for expiry time date boxes */
+.date_field::-webkit-outer-spin-button,
+.date_field::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }

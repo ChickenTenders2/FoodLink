@@ -5,8 +5,8 @@ app = Flask(__name__)
 tool_sql = tool()
 user_id = 1
 
-@app.route('/')
-def index():
+@app.route('/select_tools')
+def select_tools():
     utensils = tool_sql.get_utensils()
     appliances = tool_sql.get_appliances()
     tool_ids = tool_sql.get_user_tool_ids(user_id)
@@ -16,7 +16,9 @@ def index():
 def save_tools():
     selected_tools = request.form.getlist('tool')
     tool_sql.save_user_tools(user_id, selected_tools)
-    return redirect(url_for('index'))
+    return redirect(url_for('select_tools'))
+    # change to main page once merged
+    # return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)

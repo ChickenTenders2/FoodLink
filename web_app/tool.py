@@ -30,16 +30,20 @@ class tool(database):
     
     def get_user_tool_ids(self, user_id):
         cursor = self.connection.cursor()
+        # gets the tool_id for each tool a user has selected previously
         query = "SELECT tool_id FROM user_tool WHERE user_id = %s;"
         data = (user_id,)
         cursor.execute(query, data)
         ids = cursor.fetchall()
         cursor.close()
+        # formats each id into a list
         ids = [id[0] for id in ids]
         return ids
 
     def save_user_tools(self, user_id, tool_ids):
         cursor = self.connection.cursor()
+        
+        # removes all tools so any unhighlighted options are removed
         query = "DELETE FROM user_tool WHERE user_id = %s;"
         data = (user_id,)
         cursor.execute(query, data)

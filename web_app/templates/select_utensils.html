@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Tools</title>
+</head>
+<body>
+    <h1>Select Your Tools</h1>
+    
+    <form action="{{ url_for('save_tools') }}" method="POST">
+        <div id="utensils">
+            <h2>Utensils</h2>
+            {% for utensil in utensils %}
+                <input type="checkbox" name="tool" value="{{ utensil[0] }}" {% if utensil[0] in selected_ids %}checked{% endif %}> {{ utensil[1] }}<br>
+            {% endfor %}
+        </div>
+
+        <div id="appliances" style="display: none;">
+            <h2>Appliances</h2>
+            {% for appliance in appliances %}
+                <input type="checkbox" name="tool" value="{{ appliance[0] }}" {% if appliance[0] in selected_ids %}checked{% endif %}> {{ appliance[1] }}<br>
+            {% endfor %}
+        </div>
+
+        <br>
+        <button type="button" id="nextButton" onclick="showAppliances()">Next</button>
+        <button type="button" id="backButton" onclick="showUtensils()" style="display: none;">Back</button>
+        <button type="submit" id="saveButton" style="display: none;">Save Selection</button>
+    </form>
+
+    <script>
+        function showAppliances() {
+            document.getElementById("utensils").style.display = "none";
+            document.getElementById("appliances").style.display = "block";
+            document.getElementById("nextButton").style.display = "none";
+            document.getElementById("backButton").style.display = "inline";
+            document.getElementById("saveButton").style.display = "inline";
+        }
+
+        function showUtensils() {
+            document.getElementById("appliances").style.display = "none";
+            document.getElementById("utensils").style.display = "block";
+            document.getElementById("nextButton").style.display = "inline";
+            document.getElementById("backButton").style.display = "none";
+            document.getElementById("saveButton").style.display = "none";
+        }
+    </script>
+</body>
+</html>

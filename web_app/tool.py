@@ -48,6 +48,10 @@ class tool(database):
         data = (user_id,)
         cursor.execute(query, data)
 
+        # stops inserting tools if none were selected
+        if not tool_ids:
+            return
+
         query = "INSERT INTO user_tool (user_id, tool_id) VALUES (%s, %s);"
         # creates list of the data needed to execute each query for storing user tools
         data = [(user_id, tool_id) for tool_id in tool_ids]

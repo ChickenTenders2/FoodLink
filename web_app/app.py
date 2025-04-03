@@ -1,11 +1,9 @@
 from flask import Flask, jsonify, render_template, request, url_for, Response
-import os
 from inventory import inventory
 from barcode import barcode
 from item import item_table
 
 app = Flask(__name__, template_folder="templates")
-app.secret_key = os.urandom(24)
 
 # Dashboard Route
 @app.route('/')
@@ -66,10 +64,6 @@ def update_item():
 @app.route('/barcode_scanner')
 def barcode_scanner():
     return Response(scanner.decode_barcode(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-@app.route('/scan_barcode')
-def scan_barcode():
-    return render_template('scan.html')
 
 @app.route('/check_barcode')
 def check_barcode():

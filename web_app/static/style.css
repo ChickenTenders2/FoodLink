@@ -44,6 +44,13 @@ h1 {
     text-align: left;
 }
 
+h2 {
+    margin-bottom: 30px;
+    font-size: 32px;
+    /* font-weight: bold; */
+    text-align: center;
+}
+
 .user-section {
     display: flex;
     align-items: center;
@@ -145,7 +152,7 @@ h1 {
 .input-group {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 5px;
     margin-bottom: 20px;
     width: 100%;
 }
@@ -267,7 +274,19 @@ a.tile-link {
     border-radius: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
     display: none; /* Initially hidden */
+    z-index: 1001;
 }
+
+.popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+  }
 
 /* Responsive Styling */
 @media (max-width: 768px) {
@@ -403,6 +422,15 @@ a.tile-link {
     transform: scale(1.02);
 }
 
+.bought {
+    text-decoration: line-through;
+}
+
+.item-actions {
+    display: flex;
+    gap: 2px;
+}
+
 .item-actions button {
     margin-left: 10px;
     padding: 5px 10px;
@@ -455,3 +483,88 @@ a.tile-link {
 .sort-form button:hover {
     background-color: #8fca6c;
 }
+
+/* Existing style.css content ... */
+
+/* Standard Button Styles */
+button,
+input[type="submit"] {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 30px;
+    background-color: #a6d785; /* Light green */
+    color: #000;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover,
+input[type="submit"]:hover {
+    background-color: #8fca6c; /* Slightly darker green */
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+    /* margin-bottom: 10px; */
+    margin-top: 10px;
+}
+
+.input-group .button-group {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+    /* margin-bottom: 10px; */
+    margin-top: 10px;
+}
+
+/* Toast Styling */
+.toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: #4caf50; /* Medium green */
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1001;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    font-size: 17px;
+}
+
+.toast.show {
+    visibility: visible;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+
+/* Popup Styling Enhancement */
+.popup form button,
+.popup button {
+    margin-top: 10px;
+    margin-right: 10px;
+    background-color: #a6d785;
+    color: #000;
+}
+
+.popup form button:hover,
+.popup button:hover {
+    background-color: #8fca6c;
+}
+  

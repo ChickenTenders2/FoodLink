@@ -1,38 +1,230 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping List</title>
-    <link rel="stylesheet" href="C:\Users\hp\Documents\group1_cm2305\Web App\css\style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping List</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Shopping List</h1>
-    <div class="shopping-list-container">
-        <div class="shopping-item">
-            <span>Milk</span>
-            <div class="item-actions">
-                <button onclick="alert('Marked as bought')">✔</button>
-                <button onclick="alert('Edit item')">✎</button>
-                <button onclick="alert('Deleted')">🗑</button>
-            </div>
-        </div>
-        <div class="shopping-item">
-            <span>Bread</span>
-            <div class="item-actions">
-                <button onclick="alert('Marked as bought')">✔</button>
-                <button onclick="alert('Edit item')">✎</button>
-                <button onclick="alert('Deleted')">🗑</button>
-            </div>
-        </div>
-        <div class="shopping-item">
-            <span>Eggs</span>
-            <div class="item-actions">
-                <button onclick="alert('Marked as bought')">✔</button>
-                <button onclick="alert('Edit item')">✎</button>
-                <button onclick="alert('Deleted')">🗑</button>
-            </div>
-        </div>
+  <h1>Shopping List</h1>
+
+  <div class="button-group">
+    <button class="item-actions" onclick="openAddPopup()">Add Item</button>
+    <form id="clearForm" class="clear-form" method="post" action="/add-shopping-item">
+      <input type="hidden" name="clear" value="1">
+      <button class="item-actions" type="submit">Clear Shopping List</button>
+    </form>
+  </div>
+
+  <div id="overlay" class="popup-overlay"></div>
+
+  <div id="add-popup" class="popup">
+    <form id="addForm" class="input-group">
+      <h2>Add Item</h2>
+      <input type="text" name="item_name" id="item_name" placeholder="Item Name" required>
+      <input type="number" name="quantity" id="quantity" placeholder="Quantity" required><br>
+      <div class="button-group">
+        <button type="submit">Add</button>
+        <button onclick="closeAddPopup()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="edit-popup" class="popup">
+    <form id="editForm" class="input-group">
+      <h2>Edit Item</h2>
+      <input type="hidden" name="edit_item_id" id="edit_item_id">
+      <input type="text" name="edit_item_name" id="edit_item_name" placeholder="Item Name" required>
+      <input type="number" name="edit_quantity" id="edit_quantity" placeholder="Quantity" required><br>
+      <div class="button-group">
+        <button type="submit">Update</button>
+        <button onclick="closeEditPopup()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="shopping-list-container">
+    {% for item in unbought_items %}
+    <div class="shopping-item" onclick="editItem({{ item[0] }}, '{{ item[1] }}', {{ item[2] }})">
+      {{ item[1] }}
+      <div class="item-actions">
+        <button type="button" disabled>{{ item[2] }}</button>
+        <form class="boughtForm" method="post" action="/shopping-list">
+          <input type="hidden" name="mark_bought" value="{{ item[0] }}">
+          <input type="hidden" name="bought" value="1">
+          <button type="submit" onclick="event.stopPropagation();">✔</button>
+        </form>
+        <form class="removeForm" method="post" action="/shopping-list">
+          <input type="hidden" name="remove" value="{{ item[0] }}">
+          <button type="submit" onclick="event.stopPropagation();">🗑</button>
+        </form>
+      </div>
     </div>
+    {% endfor %}
+  </div>
+
+  <div class="shopping-list-container">
+    {% if bought_items %}
+    <h2>Bought Items</h2>
+    {% for item in bought_items %}
+    <div class="shopping-item">
+      <span class="bought">{{ item[1] }}</span>
+      <div class="item-actions">
+        <button type="button" disabled>{{ item[2] }}</button>
+        <form class="boughtForm" method="post" action="/shopping-list">
+          <input type="hidden" name="mark_bought" value="{{ item[0] }}">
+          <input type="hidden" name="bought" value="0">
+          <button type="submit" onclick="event.stopPropagation();">↩</button>
+        </form>
+        <form class="removeForm" method="post" action="/shopping-list">
+          <input type="hidden" name="remove" value="{{ item[0] }}">
+          <button type="submit" onclick="event.stopPropagation();">🗑</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    function openAddPopup() {
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('add-popup').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeAddPopup() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('add-popup').style.display = 'none';
+      document.getElementById('item_name').value = '';
+      document.getElementById('quantity').value = '';
+      document.body.style.overflow = '';
+    }
+    function openEditPopup() {
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('edit-popup').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeEditPopup() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('edit-popup').style.display = 'none';
+      document.getElementById('edit_item_id').value = '';
+      document.getElementById('edit_item_name').value = '';
+      document.getElementById('edit_quantity').value = '';
+      document.body.style.overflow = '';
+    }
+    function markBought(button) {
+      button.closest('.shopping-item').style.textDecoration = 'line-through';
+    }
+    function editItem(id, name, quantity){
+      document.getElementById('edit_item_id').value = id;
+      document.getElementById('edit_item_name').value = name;
+      document.getElementById('edit_quantity').value = quantity;
+      openEditPopup();
+    }
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.innerText = message;
+      toast.className = "toast show";
+      setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    }
+    
+    document.getElementById('editForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const form = e.target;
+      const formData = new FormData(form);
+      fetch('/update-shopping-item', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showToast(`Updated "${data.item}" to shopping list.`);
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          alert('Failed to update item: ' + data.error);
+        }
+      });
+    });
+
+    document.getElementById('addForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      fetch('/add-shopping-item', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showToast(`Added "${data.item}" to shopping list.`);
+          setTimeout(() => location.reload(), 1000);
+        } else {
+          alert('Failed to add item: ' + data.error);
+        }
+      });
+    });
+
+    document.querySelectorAll('.boughtForm').forEach(form => {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const boughtValue = formData.get('bought');
+        fetch('/shopping-list', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.action === 'mark_bought') {
+            const message = boughtValue === '1'
+              ? 'Item marked as bought'
+              : 'Item moved back to list'
+            showToast(message);
+            setTimeout(() => location.reload(), 1000);
+          }
+        });
+      });
+    });
+
+    document.querySelectorAll('.removeForm').forEach(form => {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+        fetch('/shopping-list', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.action === 'remove') {
+            showToast(`Removed item.`);
+            setTimeout(() => location.reload(), 1000);
+          }
+        });
+      });
+    });
+
+    document.getElementById('clearForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      fetch('/shopping-list', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.action === 'clear') {
+          showToast('Shopping list cleared.');
+          setTimeout(() => location.reload(), 1000);
+        }
+      });
+    });
+  </script>
 </body>
 </html>

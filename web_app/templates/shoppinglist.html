@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+
   <h1>Shopping List</h1>
 
   <div class="button-group">
@@ -15,6 +16,26 @@
       <input type="hidden" name="clear" value="1">
       <button class="item-actions" type="submit">Clear Shopping List</button>
     </form>
+  </div>
+
+  <div class="shopping-list-container">
+    {% if low_stock %}
+    <h3>Suggested Items</h3>
+    {% for item in low_stock %}
+      {% if item[0] not in unbought_items | map(attribute=1) | list and item[0] not in bought_items | map(attribute=1) | list %}
+        <div class="shopping-item">
+          {{ item[0] }}
+          <div class="item-actions">
+            <form class="suggestForm" method="post" action="/add-shopping-item">
+              <input type="hidden" name="item_name" value="{{ item[0] }}">
+              <input type="hidden" name="quantity" value="{{ item[1] }}">
+              <button type="submit">Add to Shopping List</button>
+            </form>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+    {% endif %}
   </div>
 
   <div id="overlay" class="popup-overlay"></div>
@@ -45,6 +66,7 @@
   </div>
 
   <div class="shopping-list-container">
+    <h3>Shopping List</h3>
     {% for item in unbought_items %}
     <div class="shopping-item" onclick="editItem({{ item[0] }}, '{{ item[1] }}', {{ item[2] }})">
       {{ item[1] }}
@@ -66,7 +88,7 @@
 
   <div class="shopping-list-container">
     {% if bought_items %}
-    <h2>Bought Items</h2>
+    <h3>Bought Items</h3>
     {% for item in bought_items %}
     <div class="shopping-item">
       <span class="bought">{{ item[1] }}</span>
@@ -186,6 +208,24 @@
               ? 'Item marked as bought'
               : 'Item moved back to list'
             showToast(message);
+            setTimeout(() => location.reload(), 1000);
+          }
+        });
+      });
+    });
+
+    document.querySelectorAll('.suggestForm').forEach(form => {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+        fetch(form.action, {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.action === 'add') {
+            showToast(`Added "${data.item}" to shopping list.`);
             setTimeout(() => location.reload(), 1000);
           }
         });

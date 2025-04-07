@@ -48,6 +48,15 @@ class shoppingList(database):
         cursor.close()
         print("Item:", item_id, "Bought:", bought)
 
+    def low_stock_items(self, user_id):
+        cursor = self.connection.cursor()
+        query = "SELECT i.name, i.default_quantity, inv.quantity FROM inventory inv JOIN item i ON inv.item_id = i.id WHERE inv.user_id = %s AND inv.quantity <= i.default_quantity / 10"
+        data = (user_id,)
+        cursor.execute(query, data)
+        items = cursor.fetchall()
+        cursor.close()
+        return items
+
     def remove_item(self, item_id):
         cursor = self.connection.cursor()
         cursor.execute("DELETE FROM shopping_list WHERE id = ?", (item_id,))

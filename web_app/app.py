@@ -48,7 +48,11 @@ def get_shoppingList():
     items = shop.get_items(user_id)
     unbought_items = [item for item in items if item[3] == 0]
     bought_items = [item for item in items if item[3] == 1]
-    return render_template("shoppinglist.html", items=items, unbought_items=unbought_items, bought_items=bought_items)
+
+    low_stock = shop.low_stock_items(user_id)
+    print("low stock items:", low_stock)
+    print('items:', items)
+    return render_template("shoppinglist.html", items=items, unbought_items=unbought_items, bought_items=bought_items, low_stock=low_stock)
 
 @app.route('/add-shopping-item', methods=['POST'])
 def add_shopping_item():

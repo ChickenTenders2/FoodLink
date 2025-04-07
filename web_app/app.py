@@ -76,7 +76,6 @@ def get_item_by_barcode():
             date_values = item_info[3].split("/")
             estimated_expiry = date.today() + date(date_values[2], date_values[1], date_values[0])
             item_info[3] = estimated_expiry
-            print(item_info)
             return jsonify({"success": True, "item":item_info})
         else:
             return jsonify({"success": False, "error": "Item not found."})

@@ -45,7 +45,7 @@
         function open_popup(id, barcode_number, name, brand, estimated_expiry, default_quantity, unit) {
             stop_check();
             document.getElementById("item_id").value = id;
-            document.getElementById("item_image").src = url_for('static', filename='images/' + id + '.jpg');
+            //document.getElementById("item_image").src = url_for('static', filename='images/' + id + '.jpg');
             document.getElementById("item_image").alt = name;
             document.getElementById('barcode').value = barcode_number;
             document.getElementById("name").value = name;

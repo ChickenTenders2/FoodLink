@@ -2,6 +2,7 @@ from flask import Flask, jsonify, render_template, request, url_for, Response
 from inventory import inventory
 from barcode import barcode
 from item import item_table
+from datetime import date
 
 app = Flask(__name__, template_folder="templates")
 
@@ -45,6 +46,42 @@ def get_inventory():
         item[6] = item[6].strftime('%Y-%m-%d')
 
     return render_template("inventory.html", items=items, sort_by=sort_by)
+
+@app.route("/inventory/add_item")
+def add_to_inventory():
+    user_id = 2
+    return render_template("inventory_add.html")
+
+@app.route("/inventory/add_item/add", methods=["POST"])
+def append_inventory():
+    user_id = 2
+    try:
+        id = request.form["item-id"]
+        quantity = request.form["quantity"]
+        expiry = request.form["expiry_date"]
+        inv.add_item(user_id, id, quantity, expiry)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+
+@app.route("/barcode_search", methods = ["POST"])
+def get_item_by_barcode():
+    user_id = 2
+    try:
+        barcode_number = request.form["barcode"]
+        item_info = item.barcode_search(user_id, barcode_number)
+        if item_info:
+            # converts expiry time to the estimated expiry of the item
+            date_values = item_info[3].split("/")
+            estimated_expiry = date.today() + date(date_values[2], date_values[1], date_values[0])
+            item_info[3] = estimated_expiry
+            print(item_info)
+            return jsonify({"success": True, "item":item_info})
+        else:
+            return jsonify({"success": False, "error": "Item not found."})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
 
 @app.route('/update_item', methods=['POST'])
 def update_item():

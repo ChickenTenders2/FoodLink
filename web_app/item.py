@@ -6,13 +6,13 @@ class item_table(database):
 
     def barcode_search(self, user_id, barcode_number):
         cursor = self.connection.cursor()
-        # search query uses full text for relevance based searching of items
+        # searches for an item by barcode
         query = "SELECT id, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE barcode = %s AND (user_id IS NULL OR user_id = %s);"
         data = (barcode_number, user_id)
         cursor.execute(query, data)
-        items = cursor.fetchall()
+        item = cursor.fetchall()
         cursor.close()
-        return items
+        return item
 
     def text_search(self, user_id, search_term):
         cursor = self.connection.cursor()

@@ -45,7 +45,7 @@ class inventory(database):
         cursor.execute(query, data)
         self.connection.commit()
         cursor.close()
-    
+
     def search_items(self, user_id, search_term):
         cursor = self.connection.cursor()
         # search query uses full text for relevance based searching of items

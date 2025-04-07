@@ -28,15 +28,15 @@
             <input type="text" id="brand" name="brand" readonly>
             <br>
             <label>Expiry Date:</label>
-            <input type="date" id="expiry" name="expiry_date" required>
+            <input type="date" id="expiry_date" name="expiry_date" required>
             <br>
             <label>Quantity:</label>
-            <input type="number" id="quantity" name="quantity" required>
+            <input type="number" id="quantity" name="quantity" min="1" required>
             <br>
             <label>Unit:</label>
             <input type="text" id="unit" name="unit" readonly>
             <br>
-            <input type="hidden" id="item_id" name="id">
+            <input type="hidden" id="item_id" name="item_id">
             <button type="submit">Add Item</button>
         </form>
     </div>
@@ -46,12 +46,13 @@
             stop_check();
             document.getElementById("item_id").value = id;
             //document.getElementById("item_image").src = url_for('static', filename='images/' + id + '.jpg');
-            document.getElementById("item_image").alt = name;
-            document.getElementById('barcode').value = barcode_number;
+            //document.getElementById("item_image").alt = name;
+            document.getElementById("barcode").value = barcode_number;
             document.getElementById("name").value = name;
             document.getElementById("brand").value = brand;
             document.getElementById("expiry_date").value = estimated_expiry;
             document.getElementById("quantity").value = default_quantity;
+            document.getElementById("quantity").max = default_quantity;
             document.getElementById("unit").value = unit;
             document.getElementById('popup').style.display = 'block';
         }
@@ -110,7 +111,7 @@
             const formData = new FormData(form);
 
             // Sends update command and waits for response
-            const response = await fetch('inventory/add_item/add', {
+            const response = await fetch('/inventory/add_item/add', {
                 method: 'POST',
                 body: formData,
             });
@@ -137,7 +138,6 @@
                 });
 
                 let data = await response.json();
-                console.log(data.error)
                 if (data.success) {
                     open_popup(data.item[0], barcode_number, data.item[1], data.item[2], data.item[3], data.item[4], data.item[5]);
                 }

@@ -57,7 +57,7 @@ def add_to_inventory():
 def append_inventory():
     user_id = 2
     try:
-        id = request.form["item-id"]
+        id = request.form["item_id"]
         quantity = request.form["quantity"]
         expiry = request.form["expiry_date"]
         inv.add_item(user_id, id, quantity, expiry)
@@ -80,7 +80,7 @@ def get_item_by_barcode():
             months = int(expiry_time_values[1])
             years = int(expiry_time_values[2])
             estimated_expiry = date.today() + relativedelta(years=years, months=months, days=days)
-            item_info[3] = estimated_expiry
+            item_info[3] = estimated_expiry.strftime('%Y-%m-%d')
             print(item_info)
             return jsonify({"success": True, "item":item_info})
         else:

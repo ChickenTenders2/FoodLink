@@ -1,16 +1,27 @@
 from flask import Flask, jsonify, render_template, request, redirect, url_for, session
 import os
 from inventory import inventory
+from notification import notification
 
 app = Flask(__name__, template_folder="templates")
 app.secret_key = os.urandom(24)
 
+# notification class instance
+notif = notification()  
+
 # Dashboard Route
 @app.route('/')
 def index():
+    user_id = 2
+
     temp_url = "https://thingsboard.cs.cf.ac.uk/dashboard/9c597b10-0b04-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2" 
     humid_url = "https://thingsboard.cs.cf.ac.uk/dashboard/74d87180-0dbc-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2"
-    return render_template('index.html', temp_url=temp_url, humid_url = humid_url)
+
+    temp_humid = notif.temperature_humidity_notification(user_id, temp_url, humid_url)
+
+    notifications = notif.get_notifications(user_id)
+
+    return render_template('index.html', temp_url=temp_url, humid_url = humid_url, notifications=notifications)
 # Login Route
 
 # Register Route

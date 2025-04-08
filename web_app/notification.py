@@ -1,3 +1,5 @@
+import mariadb
+
 class database():
     def __init__(self):
         self.connection = self.connect()
@@ -12,6 +14,15 @@ class database():
         )
 
 class notification(database):
+    def get_notifications(self, user_id):
+        cursor = self.connection.cursor()
+        query = "SELECT id, type, message, date_created, read, severity FROM notification WHERE user_id = %s;"
+        data = (user_id,)
+        cursor.execute(query, data)
+        notifications = cursor.fetchall()
+        cursor.close()
+        return notifications
+
     def temperature_humidity_notification(self, user_id, temperature, humidity):
         cursor = self.connection.cursor()
         query = "SELECT min_temperature, max_temperature, max_humidity, temperature_alerts FROM settings WHERE user_id = %s;"
@@ -21,6 +32,12 @@ class notification(database):
 
         if settings:
             min_temperature, max_humidity, max_humidity, alerts_enabled = settings
+        
+        temperature = float(temperature)
+        humidity = float(humidity)
+        min_temperature = float(min_temperature)
+        max_temperature = float(max_temperature)
+        max_humidity = float(max_humidity)
         
         if alerts_enabled:
             if temperature is not None:

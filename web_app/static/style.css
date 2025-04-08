@@ -479,3 +479,56 @@ a.tile-link {
 .filter-form button:hover {
     background-color: #8fca6c;
 }
+
+
+/* Notification Styles */
+.notification-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .notif-badge {
+    color: red;
+    font-size: 24px;
+    position: absolute;
+    top: -6px;
+    right: -6px;
+  }
+  
+  .notification-popup {
+    display: none;
+    position: absolute;
+    right: 10px;
+    top: 50px;
+    width: 300px;
+    max-height: 400px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    padding: 10px;
+    z-index: 1000;
+  }
+  
+  .notification-popup h3 {
+    margin-top: 0;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .notification-popup li {
+    list-style: none;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  
+  .notification-popup li.unread {
+    font-weight: bold;
+  }
+  
+  .notification-popup li.read {
+    color: #888;
+  }
+  

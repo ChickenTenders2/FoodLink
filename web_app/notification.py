@@ -1,4 +1,5 @@
 import mariadb
+import requests
 
 class database():
     def __init__(self):
@@ -16,7 +17,7 @@ class database():
 class notification(database):
     def get_notifications(self, user_id):
         cursor = self.connection.cursor()
-        query = "SELECT id, type, message, date_created, read, severity FROM notification WHERE user_id = %s;"
+        query = "SELECT id, type, message, date_created, is_read, severity FROM notification WHERE user_id = %s;"
         data = (user_id,)
         cursor.execute(query, data)
         notifications = cursor.fetchall()
@@ -30,9 +31,14 @@ class notification(database):
         cursor.execute(query, data)
         settings = cursor.fetchone()
 
+        print(settings)
+
         if settings:
-            min_temperature, max_humidity, max_humidity, alerts_enabled = settings
-        
+            min_temperature = settings[0]
+            max_temperature = settings[1]
+            max_humidity = settings[2]
+            alerts_enabled = settings[3]
+                
         temperature = float(temperature)
         humidity = float(humidity)
         min_temperature = float(min_temperature)
@@ -42,13 +48,20 @@ class notification(database):
         if alerts_enabled:
             if temperature is not None:
                 if temperature < min_temperature:
-                    query = "INSERT INTO notification (user_id, type, message, date_created, read, severity) VALUES (%s, 'temperature', %s, NOW(), 0, 'warning')"
+                    query = "INSERT INTO notification (user_id, type, message, date_created, is_read, severity) VALUES (%s, 'temperature', %s, NOW(), 0, 'warning')"
                     data = (user_id, f"Low temperature detected: {temperature}°C")
+                    self.connection.commit()
+                    cursor.execute(query, data)
                 elif temperature > max_temperature:
-                    query = "INSERT INTO notification (user_id, type, message, date_created, read, severity) VALUES (%s, 'temperature', %s, NOW(), 0, 'critical')"
+                    query = "INSERT INTO notification (user_id, type, message, date_created, is_read, severity) VALUES (%s, 'temperature', %s, NOW(), 0, 'critical')"
                     data = (user_id, f"High temperature detected: {temperature}°C")
+                    self.connection.commit()
+                    cursor.execute(query, data)
                 
             if humidity is not None:
                 if humidity > max_humidity:
-                    query = "INSERT INTO notification (user_id, type, message, date_created, read, severity) VALUES (%s, 'humidity', %s, NOW(), 0, 'warning')"
+                    query = "INSERT INTO notification (user_id, type, message, date_created, is_read, severity) VALUES (%s, 'humidity', %s, NOW(), 0, 'warning')"
                     data = (user_id, f"High humidity detected: {humidity}%")
+                    self.connection.commit()
+                    cursor.execute(query, data)
+        cursor.close()

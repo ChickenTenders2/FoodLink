@@ -62,24 +62,7 @@ def get_telemetry(token, device_id):
 # Dashboard Route
 @app.route('/')
 def index():
-    # JWT_TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJncm91cDAxQGNhcmRpZmYuYWMudWsiLCJzY29wZXMiOlsiVEVOQU5UX0FETUlOIl0sInVzZXJJZCI6IjQ5ODQwYWQwLWQxOTQtMTFlZi05NjkzLWY3NWRhNjRlN2IzYSIsImVuYWJsZWQiOnRydWUsImlzUHVibGljIjpmYWxzZSwidGVuYW50SWQiOiJjY2E5MzhjMC1kMTkxLTExZWYtOTY5My1mNzVkYTY0ZTdiM2EiLCJjdXN0b21lcklkIjoiMTM4MTQwMDAtMWRkMi0xMWIyLTgwODAtODA4MDgwODA4MDgwIiwiaXNzIjoidGhpbmdzYm9hcmQuaW8iLCJpYXQiOjE3NDQyMDEwODYsImV4cCI6MTc0NDIxMDA4Nn0.BWM6GJX9qHUSLM8x21bAzVBkxmCNc1qAn94U-4ulUQ9h_D5f0LWVASdA_InfZOrZU5H3hA781Wubdrz81i_KsA"
     device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
-
-    # headers = {
-    #     "Authorization": f"Bearer {JWT_TOKEN}",
-    #     "Content-Type": "application/json"
-    # }
-
-    # url = f"https://thingsboard.cs.cf.ac.uk/api/plugins/telemetry/DEVICE/{device_id}/values/timeseries?keys=temperature,humidity"
-
-    # # s = requests.Session()
-    # response = requests.get(url, headers=headers)
-
-    # if response.ok:
-    #     data = response.json()
-    #     print("Telemetry: ", data)
-    # else:
-    #     print("Error: ", response.status_code, response.text)
 
     token = get_jwt_token()
     data = get_telemetry(token, device_id)
@@ -93,10 +76,6 @@ def index():
 
     temp_url = "https://thingsboard.cs.cf.ac.uk/dashboard/9c597b10-0b04-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2" 
     humid_url = "https://thingsboard.cs.cf.ac.uk/dashboard/74d87180-0dbc-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2"
-
-    # temperature = get_thingsboard_value("temperature")
-    # humidity = get_thingsboard_value("humidity")
-    # print(temperature, humidity)
 
     notif.temperature_humidity_notification(user_id, temperature, humidity)
 

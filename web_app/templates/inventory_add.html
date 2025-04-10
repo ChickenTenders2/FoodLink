@@ -27,7 +27,7 @@
     <div id="popup" class="popup">
         <h2 id="popup-title">Add Item To Inventory</h2>
         <button onclick="close_popup()">X</button>
-        <img id="item_image" src="" alt="">
+        <img class="item_img" id="item_image" src="" alt="">
         <form id="update-form" method="POST" onsubmit="submit_item(event)">
             <!-- item fields are readonly-->
             <label>Barcode:</label>
@@ -57,8 +57,8 @@
         function open_popup(id, barcode_number, name, brand, estimated_expiry, default_quantity, unit) {
             stop_check();
             document.getElementById("item_id").value = id;
-            //document.getElementById("item_image").src = url_for('static', filename='images/' + id + '.jpg');
-            //document.getElementById("item_image").alt = name;
+            document.getElementById("item_image").src = "/static/images/" + id + ".jpg";
+            document.getElementById("item_image").alt = name;
             document.getElementById("barcode").value = barcode_number;
             document.getElementById("name").value = name;
             document.getElementById("brand").value = brand;
@@ -77,8 +77,8 @@
             document.getElementById("expiry_date").value = null;
             document.getElementById("quantity").value = null;
             document.getElementById("unit").value = null;
-            //document.getElementById("item_image").src = null;
-            //document.getElementById("item_image").alt = null;
+            document.getElementById("item_image").src = null;
+            document.getElementById("item_image").alt = null;
 
             fetch("/clear_barcode");
             start_check();
@@ -203,8 +203,12 @@
                 });
 
                 let data = await response.json();
+                console.log(data.success)
                 if (data.success) {
                     open_popup(data.item[0], barcode_number, data.item[1], data.item[2], data.item[3], data.item[4], data.item[5]);
+                } else {
+                    alert(data.error)
+                    fetch("/clear_barcode")
                 }
             } catch (e) {
                 alert(e);

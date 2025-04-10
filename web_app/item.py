@@ -12,8 +12,6 @@ class item_table(database):
         cursor.execute(query, data)
         item = cursor.fetchall()
         cursor.close()
-        # one item per barcode so only a single item will be returned
-        item = list(item[0])
         return item
 
     def text_search(self, user_id, search_term):

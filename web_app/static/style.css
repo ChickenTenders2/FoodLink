@@ -510,3 +510,10 @@ a.tile-link {
 .search_result_item:hover {
     background-color: #f0f0f0;
 }
+
+.item_img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 5px;
+}

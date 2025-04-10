@@ -83,8 +83,10 @@ def get_item_by_barcode():
     try:
         barcode_number = request.form["barcode"]
         item_info = item.barcode_search(user_id, barcode_number)
+        print(item_info)
         if item_info:
-            print(item_info)
+            # one item per barcode so only a single item will be returned
+            item_info = list(item_info[0])
             # converts expiry time to the estimated expiry of the item
             expiry_time_values = item_info[3].split("/")
             days = int(expiry_time_values[0])
@@ -92,7 +94,6 @@ def get_item_by_barcode():
             years = int(expiry_time_values[2])
             estimated_expiry = date.today() + relativedelta(years = years, months = months, days = days)
             item_info[3] = estimated_expiry.strftime('%Y-%m-%d')
-            print(item_info)
             return jsonify({"success": True, "item": item_info})
         else:
             return jsonify({"success": False, "error": "Item not found."})

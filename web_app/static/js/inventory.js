@@ -3,7 +3,10 @@ function open_popup(itemName, quantity, default_quantity, expiry_date, inventory
     document.getElementById('popup-title').innerText = `Edit ${itemName}`;
     document.getElementById('quantity').value = quantity;
     document.getElementById('original-quantity').value = quantity;
-    document.getElementById('quantity').max = default_quantity;
+    // if item is singular, multiple should be allowed to stored together so no max quantity
+    if (default_quantity > 1) {
+        document.getElementById("quantity").max = default_quantity;
+    }
     document.getElementById('expiry').value = expiry_date;
     document.getElementById('original-expiry').value = expiry_date;
     document.getElementById('inventory-id').value = inventory_id;

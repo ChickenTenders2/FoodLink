@@ -9,7 +9,10 @@ function open_popup(id, barcode_number, name, brand, estimated_expiry, default_q
     document.getElementById("brand").value = brand;
     document.getElementById("expiry_date").value = estimated_expiry;
     document.getElementById("quantity").value = default_quantity;
-    document.getElementById("quantity").max = default_quantity;
+    // if item is singular, multiple should be allowed to stored together so no max quantity
+    if (default_quantity > 1) {
+        document.getElementById("quantity").max = default_quantity;
+    }
     document.getElementById("unit").value = unit;
     document.getElementById('popup').style.display = 'block';
 }

@@ -19,7 +19,7 @@ class item_table(database):
     def text_search(self, user_id, search_term):
         cursor = self.connection.cursor()
         # search query uses full text for relevance based searching of items
-        query = "SELECT * FROM FoodLink.item WHERE MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE) AND (user_id IS NULL OR user_id = %s);"
+        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE) AND (user_id IS NULL OR user_id = %s);"
         data = (search_term, user_id)
         cursor.execute(query, data)
         items = cursor.fetchall()

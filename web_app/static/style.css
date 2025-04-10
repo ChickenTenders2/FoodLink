@@ -498,3 +498,15 @@ a.tile-link {
     -webkit-appearance: none;
     margin: 0;
 }
+
+
+.search_result_item {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.search_result_item:hover {
+    background-color: #f0f0f0;
+}

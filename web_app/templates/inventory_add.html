@@ -47,9 +47,10 @@
         <h2 id="popup-title">Search for item</h2>
         <button onclick="close_search_popup()">X</button>
         <form id="update-form" method="POST" onsubmit="search_item(event)">
-            <input type="text" id="search_term" placeholder="Enter item name..." required>
+            <input type="text" id="search_term" name="search_term" placeholder="Enter item name..." required>
             <button type="submit">Search</button>
         </form>
+        <div id="search_results"></div>
     </div>
 
     <script>
@@ -91,6 +92,49 @@
         function close_search_popup() {
             document.getElementById('search_popup').style.display = 'none';
             start_check();
+        }
+
+        async function search_item(event) {
+            // Prevent the form from submitting normally
+            event.preventDefault(); 
+
+            // Recreates form
+            const form = event.target;
+            const formData = new FormData(form);
+
+            // Sends update command and waits for response
+            const response = await fetch('/inventory/add_item/search', {
+                method: 'POST',
+                body: formData,
+            });
+
+            //Waits until result is recieved
+            const result = await response.json();
+            if (result.success) {
+                display_search(result.items)
+            } else {
+                alert('There was an error searching. Error: ' + result.error);
+            }
+        }
+
+        function display_search(items) {
+            // gets div to put results in
+            const container = document.getElementById("search_results");
+            // Resets text incase no items were found previously
+            container.innerHTML = "";
+            // creates a container for each item
+            for (let item in items) {
+                const div = document.createElement("div");
+                // gets variables from item
+                const [id, barcode, name, brand, expiry_time, default_quantity, unit] = item;
+                // adds the item information
+                div.innerHTML = `${name} (${brand}) - ${default_quantity} ${unit}`;
+                div.className = "search_result_item";
+                // opens popup when item is clicked on
+                div.onclick = () => open_popup(id, barcode, name, brand, expiry_time, default_quantity, unit);
+                // adds container to search results container
+                container.appendChild(div);
+            }
         }
 
         window.onbeforeunload = function(){

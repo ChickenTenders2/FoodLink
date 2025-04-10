@@ -5,7 +5,7 @@ from item import item_table
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__, template_folder = "templates")
 
 # Dashboard Route
 @app.route('/')
@@ -46,7 +46,7 @@ def get_inventory():
     for item in items:
         item[6] = item[6].strftime('%Y-%m-%d')
 
-    return render_template("inventory.html", items=items, sort_by=sort_by)
+    return render_template("inventory.html", items = items, sort_by = sort_by)
 
 @app.route("/inventory/add_item")
 def add_to_inventory():
@@ -79,17 +79,17 @@ def get_item_by_barcode():
             days = int(expiry_time_values[0])
             months = int(expiry_time_values[1])
             years = int(expiry_time_values[2])
-            estimated_expiry = date.today() + relativedelta(years=years, months=months, days=days)
+            estimated_expiry = date.today() + relativedelta(years = years, months = months, days = days)
             item_info[3] = estimated_expiry.strftime('%Y-%m-%d')
             print(item_info)
-            return jsonify({"success": True, "item":item_info})
+            return jsonify({"success": True, "item": item_info})
         else:
             return jsonify({"success": False, "error": "Item not found."})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-@app.route('/update_item', methods=['POST'])
-def update_item():
+@app.route('/update_item', methods = ['POST'])
+def update_item(): 
     # gets variables needed to update item
     inventory_id = request.form['inventory_id']
     quantity = request.form['quantity']

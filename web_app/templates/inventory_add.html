@@ -8,6 +8,8 @@
 </head>
 <body>
     <div class="video-window">
+        <button onclick="open_search_popup()">Text search</button>
+        <br>
         <img src="{{ url_for('barcode_scanner') }}" alt="Barcode Scanner">
     </div>
 
@@ -41,6 +43,15 @@
         </form>
     </div>
 
+    <div id="search_popup" class="popup">
+        <h2 id="popup-title">Search for item</h2>
+        <button onclick="close_search_popup()">X</button>
+        <form id="update-form" method="POST" onsubmit="search_item(event)">
+            <input type="text" id="search_term" placeholder="Enter item name..." required>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
     <script>
         function open_popup(id, barcode_number, name, brand, estimated_expiry, default_quantity, unit) {
             stop_check();
@@ -69,6 +80,16 @@
             document.getElementById("item_image").alt = null;
 
             fetch("/clear_barcode");
+            start_check();
+        }
+
+        function open_search_popup() {
+            stop_check();
+            document.getElementById('search_popup').style.display = 'block';
+        }
+
+        function close_search_popup() {
+            document.getElementById('search_popup').style.display = 'none';
             start_check();
         }
 
@@ -145,6 +166,8 @@
                 alert(e);
             }
         }
+
+
     </script>
 </body>
 </html>

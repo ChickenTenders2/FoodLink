@@ -13,6 +13,16 @@
         <img src="{{ url_for('barcode_scanner') }}" alt="Barcode Scanner">
     </div>
 
+    <div id="search_popup" class="popup">
+        <h2 id="popup-title">Search for item</h2>
+        <button onclick="close_search_popup()">X</button>
+        <form id="update-form" method="POST" onsubmit="search_item(event)">
+            <input type="text" id="search_term" name="search_term" placeholder="Enter item name..." required>
+            <button type="submit">Search</button>
+        </form>
+        <div id="search_results"></div>
+    </div>
+
     <!-- added popup from inventory.html for inputting data of new item-->
     <div id="popup" class="popup">
         <h2 id="popup-title">Add Item To Inventory</h2>
@@ -43,16 +53,6 @@
         </form>
     </div>
 
-    <div id="search_popup" class="popup">
-        <h2 id="popup-title">Search for item</h2>
-        <button onclick="close_search_popup()">X</button>
-        <form id="update-form" method="POST" onsubmit="search_item(event)">
-            <input type="text" id="search_term" name="search_term" placeholder="Enter item name..." required>
-            <button type="submit">Search</button>
-        </form>
-        <div id="search_results"></div>
-    </div>
-
     <script>
         function open_popup(id, barcode_number, name, brand, estimated_expiry, default_quantity, unit) {
             stop_check();
@@ -77,8 +77,8 @@
             document.getElementById("expiry_date").value = null;
             document.getElementById("quantity").value = null;
             document.getElementById("unit").value = null;
-            document.getElementById("item_image").src = null;
-            document.getElementById("item_image").alt = null;
+            //document.getElementById("item_image").src = null;
+            //document.getElementById("item_image").alt = null;
 
             fetch("/clear_barcode");
             start_check();

@@ -27,7 +27,8 @@
     <div id="popup" class="popup">
         <h2 id="popup-title">Add Item To Inventory</h2>
         <button onclick="close_popup()">X</button>
-        <img class="item_img" id="item_image" src="" alt="">
+        <!-- on error used to set default image if there is no image for the item-->
+        <img class="item_img" id="item_image" src="" alt="" onerror="this.src='/static/images/null.jpg'">
         <form id="update-form" method="POST" onsubmit="submit_item(event)">
             <!-- item fields are readonly-->
             <label>Barcode:</label>
@@ -79,8 +80,6 @@
             document.getElementById("unit").value = null;
             document.getElementById("item_image").src = null;
             document.getElementById("item_image").alt = null;
-
-            fetch("/clear_barcode");
             start_check();
         }
 
@@ -151,7 +150,6 @@
                 let data = await response.json();
 
                 if (data.barcode) {
-                    console.log(data.barcode)
                     get_item(data.barcode);
                 }
             } catch (e) {
@@ -194,6 +192,7 @@
 
         async function get_item(barcode_number) {
             try {
+                fetch("/clear_barcode")
                 const formData = new FormData();
                 formData.append("barcode", barcode_number)
                 // Sends update command and waits for response
@@ -203,19 +202,15 @@
                 });
 
                 let data = await response.json();
-                console.log(data.success)
                 if (data.success) {
                     open_popup(data.item[0], barcode_number, data.item[1], data.item[2], data.item[3], data.item[4], data.item[5]);
                 } else {
                     alert(data.error)
-                    fetch("/clear_barcode")
                 }
             } catch (e) {
                 alert(e);
             }
         }
-
-
     </script>
 </body>
 </html>

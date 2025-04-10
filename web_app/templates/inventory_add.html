@@ -127,7 +127,11 @@
                 // gets variables from item
                 const [id, barcode, name, brand, expiry_time, default_quantity, unit] = item;
                 // adds the item information
-                div.innerHTML = `${name} (${brand}) - ${default_quantity} ${unit}`;
+                div.innerHTML = `
+                <img src="/static/images/${id}.jpg" alt="${name}" class="item_img">
+                <div class="item_info">
+                    ${name} (${brand}) - ${default_quantity} ${unit}
+                </div>`;
                 div.className = "search_result_item";
                 // opens popup when item is clicked on
                 div.onclick = () => open_popup(id, barcode, name, brand, expiry_time, default_quantity, unit);
@@ -150,6 +154,9 @@
                 let data = await response.json();
 
                 if (data.barcode) {
+                    // resets barcode number
+                    fetch("/clear_barcode")
+                    // searches for item by barcode
                     get_item(data.barcode);
                 }
             } catch (e) {
@@ -192,16 +199,18 @@
 
         async function get_item(barcode_number) {
             try {
-                fetch("/clear_barcode")
+                // Creates form with barcode number
                 const formData = new FormData();
                 formData.append("barcode", barcode_number)
-                // Sends update command and waits for response
+                
+                // Searches for item by barcode and awaits result
                 const response = await fetch('/barcode_search', {
                     method: 'POST',
                     body: formData
-                });
-
+                });                 
                 let data = await response.json();
+
+                // If an item is found
                 if (data.success) {
                     open_popup(data.item[0], barcode_number, data.item[1], data.item[2], data.item[3], data.item[4], data.item[5]);
                 } else {

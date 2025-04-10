@@ -517,3 +517,7 @@ a.tile-link {
     object-fit: cover;
     border-radius: 5px;
 }
+
+.item_info {
+    flex-grow: 1;
+}

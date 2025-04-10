@@ -123,7 +123,7 @@
             // Resets text incase no items were found previously
             container.innerHTML = "";
             // creates a container for each item
-            for (let item in items) {
+            for (let item of items) {
                 const div = document.createElement("div");
                 // gets variables from item
                 const [id, barcode, name, brand, expiry_time, default_quantity, unit] = item;

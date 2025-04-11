@@ -64,8 +64,6 @@ function display_search_results(items) {
         const div = document.createElement("div");
         // gets variables from item
         const [id, barcode, name, brand, expiry_time, default_quantity, unit] = item;
-        // Calculates estimated expiry
-        const estimated_expiry = estimate_expiry_date(expiry_time);
         // adds the item information and image
         div.innerHTML = `
         <img src="/static/images/${id}.jpg" alt="${name}" class="item_img" onerror="this.src='/static/images/null.jpg'">
@@ -73,8 +71,8 @@ function display_search_results(items) {
             ${name} (${brand}) - ${default_quantity} ${unit}
         </div>`;
         div.className = "search_result_item";
-        // opens popup when item is clicked on
-        div.onclick = () => open_item_popup(id, barcode, name, brand, estimated_expiry, default_quantity, unit);
+        // estimates expiry for the item and opens popup when item container is clicked on
+        div.onclick = () => open_item_popup(id, barcode, name, brand, estimate_expiry_date(expiry_time), default_quantity, unit);
         // adds container to search results container
         container.appendChild(div);
     }

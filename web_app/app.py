@@ -2,8 +2,6 @@ from flask import Flask, jsonify, render_template, request, url_for, Response
 from inventory import inventory
 from barcode import barcode
 from item import item_table
-from datetime import date
-from dateutil.relativedelta import relativedelta
 
 app = Flask(__name__, template_folder = "templates")
 

@@ -17,3 +17,17 @@ function stop_check() {
 function start_check() {
     window.interval_id = setInterval(get_barcode, 1000);
 }
+
+// Checks if a barcode has been found
+async function get_barcode() {
+    try {
+        let response = await fetch("/get_barcode");
+        let data = await response.json();
+        if (data.success) {
+            // Redirects to correct function for each page
+            process_barcode(data.barcode);
+        }
+    } catch (e) {
+        alert(e);
+    }
+}

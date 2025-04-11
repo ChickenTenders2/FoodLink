@@ -18,19 +18,8 @@ function close_popup() {
 }
 
 // Opens popup to add item information once barcode is scanned succesfully
-async function get_barcode() {
-    try {
-        let response = await fetch("/get_barcode");
-        let data = await response.json();
-        
-        if (data.success) {
-            // resets barcode number
-            fetch("/clear_barcode");
-            open_popup(data.barcode);
-        }
-    } catch (e) {
-        console.log(e);
-    }
+function process_barcode(barcode) {
+    open_popup(barcode);
 }
 
 // Adds item to item table

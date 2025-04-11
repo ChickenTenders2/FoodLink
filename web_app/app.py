@@ -99,6 +99,7 @@ def close_scanner():
 def get_barcode():
     barcode = scanner.get_barcode()
     if (barcode):
+        scanner.clear_barcode()
         return jsonify({"success": True, "barcode": barcode})
     else:
         return jsonify({"success": False})
@@ -119,8 +120,6 @@ def text_search():
     try:
         search_term = request.form["search_term"]
         items = item.text_search(user_id, search_term)
-        # formats each item as list for easier modification of date format
-        #items = [list(i) for i in items]
         return jsonify({"success": True, "items": items})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})

@@ -79,19 +79,8 @@ function display_search_results(items) {
 }
 
 // Checks if a barcode has been found
-async function get_barcode() {
-    try {
-        let response = await fetch("/get_barcode");
-        let data = await response.json();
-        if (data.success) {
-            // resets barcode number
-            fetch("/clear_barcode");
-            // searches for item by barcode
-            barcode_search_item(data.barcode);
-        }
-    } catch (e) {
-        alert(e);
-    }
+function process_barcode(barcode) {
+    barcode_search_item(barcode);
 }
 
 // Checks if barcode is in item table

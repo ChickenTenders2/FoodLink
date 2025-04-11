@@ -1,3 +1,4 @@
+// Opens item information popup
 function open_popup(itemName, quantity, default_quantity, expiry_date, inventory_id) {
     // Sets values in popup to those of the item
     document.getElementById('popup-title').innerText = `Edit ${itemName}`;
@@ -13,10 +14,12 @@ function open_popup(itemName, quantity, default_quantity, expiry_date, inventory
     document.getElementById('popup').style.display = 'block';
 }
 
+// Closes item information popup
 function close_popup() {
     document.getElementById('popup').style.display = 'none';
 }
 
+// Updates item in inventory
 async function submit_update(event) {
     // Prevent the form from submitting normally
     event.preventDefault(); 
@@ -41,7 +44,7 @@ async function submit_update(event) {
     const formData = new FormData(form);
 
     // Sends update command and waits for response
-    const response = await fetch('/update_item', {
+    const response = await fetch('/inventory/update_item', {
         method: 'POST',
         body: formData,
     });

@@ -5,19 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barcode Scanner</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='js/inventory_add.js') }}"></script> 
 </head>
 <body>
     <div class="video-window">
         <button onclick="open_search_popup()">Text search</button>
         <br>
-        <img src="{{ url_for('barcode_scanner') }}" alt="Barcode Scanner">
+        <img src="{{ url_for('get_scanner') }}" alt="Barcode Scanner">
     </div>
 
     <div id="search_popup" class="popup">
         <h2 id="popup-title">Search for item</h2>
         <button onclick="close_search_popup()">X</button>
-        <form id="update-form" method="POST" onsubmit="search_item(event)">
+        <form id="update-form" method="POST" onsubmit="text_search_item(event)">
             <input type="text" id="search_term" name="search_term" placeholder="Enter item name..." required>
             <button type="submit">Search</button>
         </form>
@@ -27,10 +26,10 @@
     <!-- added popup from inventory.html for inputting data of new item-->
     <div id="popup" class="popup">
         <h2 id="popup-title">Add Item To Inventory</h2>
-        <button onclick="close_popup()">X</button>
+        <button onclick="close_item_popup()">X</button>
         <!-- on error used to set default image if there is no image for the item-->
         <img class="item_img" id="item_image" src="" alt="" onerror="this.src='/static/images/null.jpg'">
-        <form id="update-form" method="POST" onsubmit="submit_item(event)">
+        <form id="update-form" method="POST" onsubmit="add_item(event)">
             <!-- item fields are readonly apart from expiry and quantity as they can be different per item-->
             <label>Barcode:</label>
             <input type="text" id="barcode" name="barcode" readonly>
@@ -54,5 +53,7 @@
             <button type="submit">Add Item</button>
         </form>
     </div>
+    <script src="{{ url_for('static', filename='js/barcode_scan.js') }}"></script> 
+    <script src="{{ url_for('static', filename='js/inventory_add.js') }}"></script> 
 </body>
 </html>

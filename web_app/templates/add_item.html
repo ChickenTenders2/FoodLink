@@ -5,20 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barcode Scanner</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='js/item_add.js') }}"></script> 
 </head>
 <body>
     <div class="video-window">
         <button onclick="open_popup(null)">Manually enter barcode</button>
         <br>
-        <img src="{{ url_for('barcode_scanner') }}" alt="Barcode Scanner">
+        <img src="{{ url_for('get_scanner') }}" alt="Barcode Scanner">
     </div>
 
     <!-- added popup from inventory.html for inputting data of new item-->
     <div id="popup" class="popup">
         <h2 id="popup-title">Add Item</h2>
         <button onclick="close_popup()">X</button>
-        <form id="update-form" method="POST" onsubmit="submit_item(event)">
+        <form id="update-form" method="POST" onsubmit="add_item(event)">
             <!-- all fields must be filled to add item (using required tag)-->
             <label>Barcode:</label>
             <input type="text" id="barcode" name="barcode" required>
@@ -49,5 +48,7 @@
             <button type="submit">Add Item</button>
         </form>
     </div>
+    <script src="{{ url_for('static', filename='js/barcode_scan.js') }}"></script> 
+    <script src="{{ url_for('static', filename='js/add_item.js') }}"></script> 
 </body>
 </html>

@@ -19,17 +19,15 @@ def index():
 
 # Logout Route
 
-# Inventory Interface Route
-inv = inventory()
-scanner = barcode()
-item = item_table()
 
-@app.route('/inventory')
+### INVENTORY ROUTES ###
+
+# Inventory interface
+@app.route('/inventory/')
 def get_inventory():
     user_id = 2
     search_query = request.args.get('search')
     sort_by = request.args.get('sort_by')
-
     # searches for an item if query is provided otherwise gets all items
     if search_query:
         items = inv.search_items(user_id, search_query)
@@ -48,11 +46,13 @@ def get_inventory():
 
     return render_template("inventory.html", items = items, sort_by = sort_by)
 
-@app.route("/inventory/add_item")
+# Add item to inventory interface
+@app.route("/inventory/add_item/")
 def add_to_inventory():
     user_id = 2
     return render_template("inventory_add.html")
 
+# Add item to inventory
 @app.route("/inventory/add_item/add", methods=["POST"])
 def append_inventory():
     user_id = 2
@@ -65,7 +65,56 @@ def append_inventory():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-@app.route("/inventory/add_item/search", methods=["POST"])
+# Update quantity and expiry of item in inventory
+@app.route('/inventory/update_item', methods = ['POST'])
+def update_item(): 
+    # gets variables needed to update item
+    inventory_id = request.form['inventory_id']
+    quantity = request.form['quantity']
+    expiry_date = request.form['expiry_date']
+    
+    try:
+        # Update the database with new quantity and expiry date
+        inv.update_item(inventory_id, quantity, expiry_date)
+        # returns response to js code
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+### BARCODE SCANNING ROUTES ###
+
+# Opens camera module and returns feed
+@app.route('/get_scanner')
+def get_scanner():
+    return Response(scanner.decode_barcode(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+# Closes camera module
+@app.route('/close_scanner')
+def close_scanner():
+    scanner.release_capture()
+    return jsonify({"success":True})
+
+# Returns the barcode number if one is found
+@app.route('/get_barcode')
+def get_barcode():
+    barcode = scanner.get_barcode()
+    if (barcode):
+        return jsonify({"success": True, "barcode": barcode})
+    else:
+        return jsonify({"success": False})
+
+# Resets the barcode number to null
+@app.route('/clear_barcode')
+def clear_barcode():
+    scanner.clear_barcode()
+    return jsonify({"success":True})
+
+
+### ITEM ROUTES ###
+
+# Get items by text search
+@app.route("/items/text_search", methods=["POST"])
 def text_search():
     user_id = 2
     try:
@@ -77,7 +126,8 @@ def text_search():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-@app.route("/barcode_search", methods = ["POST"])
+# Get item by barcode search
+@app.route("/items/barcode_search", methods = ["POST"])
 def get_item_by_barcode():
     user_id = 2
     try:
@@ -100,43 +150,12 @@ def get_item_by_barcode():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-@app.route('/update_item', methods = ['POST'])
-def update_item(): 
-    # gets variables needed to update item
-    inventory_id = request.form['inventory_id']
-    quantity = request.form['quantity']
-    expiry_date = request.form['expiry_date']
-    
-    try:
-        # Update the database with new quantity and expiry date
-        inv.update_item(inventory_id, quantity, expiry_date)
-        # returns response to js code
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
-
-@app.route('/barcode_scanner')
-def barcode_scanner():
-    return Response(scanner.decode_barcode(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-@app.route('/check_barcode')
-def check_barcode():
-    return jsonify({"barcode": scanner.get_barcode()})
-
-@app.route('/clear_barcode')
-def clear_barcode():
-    scanner.clear_barcode()
-    return jsonify({"success":True})
-
-@app.route('/close_capture')
-def close_capture():
-    scanner.release_capture()
-    return jsonify({"success":True})
-
+# Add item interface
 @app.route('/add_item')
 def add_item():
     return render_template("add_item.html")
 
+# Add item to item table
 @app.route('/add_item/add', methods=["POST"])
 def append_item_db():
     try:
@@ -178,5 +197,11 @@ def append_item_db():
 
 
 if __name__ == '__main__':
+    # Classes for handling sql expressions
+    inv = inventory()
+    item = item_table()
+    # Class for handling barcode scanning
+    scanner = barcode()
+    # Runs the app
     app.run(debug=True)
 

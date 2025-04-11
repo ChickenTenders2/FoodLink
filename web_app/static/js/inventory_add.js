@@ -1,5 +1,4 @@
-
-function open_popup(id, barcode_number, name, brand, estimated_expiry, default_quantity, unit) {
+function open_item_popup(id, barcode_number, name, brand, estimated_expiry, default_quantity, unit) {
     stop_check();
     document.getElementById("item_id").value = id;
     document.getElementById("item_image").src = "/static/images/" + id + ".jpg";
@@ -17,9 +16,9 @@ function open_popup(id, barcode_number, name, brand, estimated_expiry, default_q
     document.getElementById('popup').style.display = 'block';
 }
 
-function close_popup() {
-    document.getElementById('popup').style.display = 'none';
+function close_item_popup() {
     start_check();
+    document.getElementById('popup').style.display = 'none';
 }
 
 function open_search_popup() {
@@ -28,11 +27,11 @@ function open_search_popup() {
 }
 
 function close_search_popup() {
-    document.getElementById('search_popup').style.display = 'none';
     start_check();
+    document.getElementById('search_popup').style.display = 'none';
 }
 
-async function search_item(event) {
+async function text_search_item(event) {
     // Prevent the form from submitting normally
     event.preventDefault(); 
 
@@ -41,7 +40,7 @@ async function search_item(event) {
     const formData = new FormData(form);
 
     // Sends update command and waits for response
-    const response = await fetch('/inventory/add_item/search', {
+    const response = await fetch('/items/text_search', {
         method: 'POST',
         body: formData,
     });
@@ -49,13 +48,13 @@ async function search_item(event) {
     //Waits until result is recieved
     const result = await response.json();
     if (result.success) {
-        display_search(result.items)
+        display_search_results(result.items)
     } else {
         alert('There was an error searching. Error: ' + result.error);
     }
 }
 
-function display_search(items) {
+function display_search_results(items) {
     // gets div to put results in
     const container = document.getElementById("search_results");
     // Resets text incase no items were found previously
@@ -73,45 +72,57 @@ function display_search(items) {
         </div>`;
         div.className = "search_result_item";
         // opens popup when item is clicked on
-        div.onclick = () => open_popup(id, barcode, name, brand, expiry_time, default_quantity, unit);
+        div.onclick = () => open_item_popup(id, barcode, name, brand, expiry_time, default_quantity, unit);
         // adds container to search results container
         container.appendChild(div);
     }
 }
 
-window.onbeforeunload = function(){
-    fetch("/close_capture");
-}   
-
-window.onload = function(){
-    start_check();
-}
-
-async function check_barcode() {
+// Checks if a barcode has been found
+async function get_barcode() {
     try {
-        let response = await fetch("/check_barcode");
+        let response = await fetch("/get_barcode");
         let data = await response.json();
 
-        if (data.barcode) {
+        if (data.success) {
             // resets barcode number
-            fetch("/clear_barcode")
+            fetch("/clear_barcode");
             // searches for item by barcode
-            get_item(data.barcode);
+            barcode_search_item(data.barcode);
         }
     } catch (e) {
         alert(e);
     }
 }
 
-function start_check() {
-    window.interval_id = setInterval(check_barcode, 1000);
+// Checks if barcode is in item table
+async function barcode_search_item(barcode_number) {
+    try {
+        // Creates form with barcode number
+        const formData = new FormData();
+        formData.append("barcode", barcode_number);
+        
+        // Searches for item by barcode and awaits result
+        const response = await fetch('/items/barcode_search', {
+            method: 'POST',
+            body: formData
+        });                 
+        let data = await response.json();
+
+        // If an item is found
+        if (data.success) {
+            const [id, name, brand, expiry_date, default_quantity, unit] = item;
+            open_item_popup(id, data.barcode, name, brand, expiry_date, default_quantity, unit);
+        } else {
+            alert(data.error);
+        }
+    } catch (e) {
+        alert(e);
+    }
 }
 
-function stop_check() {
-    clearInterval(window.interval_id);
-}
-
-async function submit_item(event) {
+// Adds item to inventory
+async function add_item(event) {
     // Prevent the form from submitting normally
     event.preventDefault(); 
 
@@ -130,32 +141,8 @@ async function submit_item(event) {
 
     if (result.success) {
         alert("Item added succesfully.");
-        close_popup();
+        close_item_popup();
     } else {
         alert('There was an error adding the item. Error: ' + result.error);
-    }
-}
-
-async function get_item(barcode_number) {
-    try {
-        // Creates form with barcode number
-        const formData = new FormData();
-        formData.append("barcode", barcode_number)
-        
-        // Searches for item by barcode and awaits result
-        const response = await fetch('/barcode_search', {
-            method: 'POST',
-            body: formData
-        });                 
-        let data = await response.json();
-
-        // If an item is found
-        if (data.success) {
-            open_popup(data.item[0], barcode_number, data.item[1], data.item[2], data.item[3], data.item[4], data.item[5]);
-        } else {
-            alert(data.error)
-        }
-    } catch (e) {
-        alert(e);
     }
 }

@@ -5,6 +5,7 @@ function open_popup(barcode_number) {
 }
 
 function close_popup() {
+    start_check();
     document.getElementById('popup').style.display = 'none';
     document.getElementById("name").value = null;
     document.getElementById("brand").value = null;
@@ -14,26 +15,17 @@ function close_popup() {
     document.getElementById("default_quantity").value = null;
     document.getElementById("unit").value = null;
     document.getElementById("item_image").value = null;
-
-    fetch("/clear_barcode");
-    start_check();
 }
 
-window.onbeforeunload = function(){
-    fetch("/close_capture");
-}   
-
-window.onload = function(){
-    start_check();
-}
-
-async function check_barcode() {
+// Opens popup to add item information once barcode is scanned succesfully
+async function get_barcode() {
     try {
-        let response = await fetch("/check_barcode");
+        let response = await fetch("/get_barcode");
         let data = await response.json();
-
-        if (data.barcode) {
-            console.log(data.barcode);
+        
+        if (data.success) {
+            // resets barcode number
+            fetch("/clear_barcode");
             open_popup(data.barcode);
         }
     } catch (e) {
@@ -41,17 +33,12 @@ async function check_barcode() {
     }
 }
 
-function start_check() {
-    window.interval_id = setInterval(check_barcode, 1000);
-}
-
-function stop_check() {
-    clearInterval(window.interval_id);
-}
-
-async function submit_item(event) {
+// Adds item to item table
+async function add_item(event) {
     // Prevent the form from submitting normally
     event.preventDefault(); 
+
+    // Makes sure item expiry is more than one day
     if (!valid_expiry()) {
         alert("Expiry time must be at least one day.")
         return;
@@ -61,7 +48,7 @@ async function submit_item(event) {
     const form = event.target;
     const formData = new FormData(form);
 
-    // Sends update command and waits for response
+    // Sends add command and waits for response
     const response = await fetch('/add_item/add', {
         method: 'POST',
         body: formData,
@@ -78,6 +65,7 @@ async function submit_item(event) {
     }
 }
 
+// Returns if expiry time is more than a day
 function valid_expiry() {
     const day = parseInt(document.getElementById("expiry_day").value);
     const month = parseInt(document.getElementById("expiry_month").value);

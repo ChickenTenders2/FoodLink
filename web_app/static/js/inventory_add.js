@@ -64,6 +64,8 @@ function display_search_results(items) {
         const div = document.createElement("div");
         // gets variables from item
         const [id, barcode, name, brand, expiry_time, default_quantity, unit] = item;
+        // Calculates estimated expiry
+        const estimated_expiry = estimate_expiry_date(expiry_time);
         // adds the item information and image
         div.innerHTML = `
         <img src="/static/images/${id}.jpg" alt="${name}" class="item_img" onerror="this.src='/static/images/null.jpg'">
@@ -72,7 +74,7 @@ function display_search_results(items) {
         </div>`;
         div.className = "search_result_item";
         // opens popup when item is clicked on
-        div.onclick = () => open_item_popup(id, barcode, name, brand, expiry_time, default_quantity, unit);
+        div.onclick = () => open_item_popup(id, barcode, name, brand, estimated_expiry, default_quantity, unit);
         // adds container to search results container
         container.appendChild(div);
     }
@@ -83,7 +85,6 @@ async function get_barcode() {
     try {
         let response = await fetch("/get_barcode");
         let data = await response.json();
-
         if (data.success) {
             // resets barcode number
             fetch("/clear_barcode");
@@ -111,8 +112,10 @@ async function barcode_search_item(barcode_number) {
 
         // If an item is found
         if (data.success) {
-            const [id, name, brand, expiry_date, default_quantity, unit] = item;
-            open_item_popup(id, data.barcode, name, brand, expiry_date, default_quantity, unit);
+            const [id, name, brand, expiry_time, default_quantity, unit] = data.item;
+            // Calculates estimated expiry
+            const estimated_expiry = estimate_expiry_date(expiry_time);
+            open_item_popup(id, barcode_number, name, brand, estimated_expiry, default_quantity, unit);
         } else {
             alert(data.error);
         }
@@ -145,4 +148,20 @@ async function add_item(event) {
     } else {
         alert('There was an error adding the item. Error: ' + result.error);
     }
+}
+
+// Calculate an estimate of the expiry date
+function estimate_expiry_date(expiry_time) {
+    // Gets each part of the expiry string and maps it to a number
+    const [days, months, years] = expiry_time.split('/').map(Number);
+    // Todays date
+    const today = new Date();
+    // Calucates the expiry from todays date
+    const estimated_expiry = new Date(
+        today.getFullYear() + years,
+        today.getMonth() + months,
+        today.getDate() + days
+    );
+    // Formats to YYYY-MM-DD
+    return estimated_expiry.toISOString().split('T')[0];
 }

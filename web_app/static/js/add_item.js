@@ -49,7 +49,7 @@ async function add_item(event) {
     const formData = new FormData(form);
 
     // Sends add command and waits for response
-    const response = await fetch('/add_item/add', {
+    const response = await fetch('/items/add_item/add', {
         method: 'POST',
         body: formData,
     });

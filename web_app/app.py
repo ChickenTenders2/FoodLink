@@ -13,6 +13,7 @@ def index():
     temp_url = "https://thingsboard.cs.cf.ac.uk/dashboard/9c597b10-0b04-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2" 
     humid_url = "https://thingsboard.cs.cf.ac.uk/dashboard/74d87180-0dbc-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2"
     return render_template('index.html', temp_url = temp_url, humid_url = humid_url)
+
 # Login Route
 
 # Register Route
@@ -132,31 +133,23 @@ def get_item_by_barcode():
     user_id = 2
     try:
         barcode_number = request.form["barcode"]
+        print(barcode_number)
         item_info = item.barcode_search(user_id, barcode_number)
-        print(item_info)
         if item_info:
-            # one item per barcode so only a single item will be returned
-            item_info = list(item_info[0])
-            # converts expiry time to the estimated expiry of the item
-            expiry_time_values = item_info[3].split("/")
-            days = int(expiry_time_values[0])
-            months = int(expiry_time_values[1])
-            years = int(expiry_time_values[2])
-            estimated_expiry = date.today() + relativedelta(years = years, months = months, days = days)
-            item_info[3] = estimated_expiry.strftime('%Y-%m-%d')
-            return jsonify({"success": True, "item": item_info})
+            # returns the first item in the list as barcodes are unique
+            return jsonify({"success": True, "item": item_info[0]})
         else:
             return jsonify({"success": False, "error": "Item not found."})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
 # Add item interface
-@app.route('/add_item')
+@app.route('/items/add_item')
 def add_item():
     return render_template("add_item.html")
 
 # Add item to item table
-@app.route('/add_item/add', methods=["POST"])
+@app.route('/items/add_item/add', methods=["POST"])
 def append_item_db():
     try:
         # gets item information
@@ -204,4 +197,3 @@ if __name__ == '__main__':
     scanner = barcode()
     # Runs the app
     app.run(debug=True)
-

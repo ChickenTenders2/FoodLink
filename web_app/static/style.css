@@ -521,3 +521,8 @@ a.tile-link {
 .item_info {
     flex-grow: 1;
 }
+
+#inventory_fields {
+    display: none;
+    padding-bottom: 0;
+}

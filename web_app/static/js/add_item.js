@@ -60,5 +60,4 @@ function valid_expiry() {
     const month = parseInt(document.getElementById("expiry_month").value);
     const year = parseInt(document.getElementById("expiry_year").value);
     return !(day == 0 && month == 0 && year == 0);
-
 }

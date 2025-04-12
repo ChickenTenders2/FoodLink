@@ -30,7 +30,7 @@
         <!-- on error used to set default image if there is no image for the item-->
         <img class="item_img" id="item_image" src="" alt="" onerror="this.src='/static/images/null.jpg'">
         <!-- allows user to edit incorrect item information -->
-        <button onclick="clone_item()">Edit Item</button>
+        <button onclick="open_add_popup()">Edit Item</button>
         <form id="update-form" method="POST" onsubmit="add_item(event)">
             <!-- item fields are readonly apart from expiry and quantity as they can be different per item-->
             <label>Barcode:</label>
@@ -52,6 +52,56 @@
             <input type="text" id="unit" name="unit" readonly>
             <br>
             <input type="hidden" id="item_id" name="item_id">
+            <input type="hidden" id="expiry_time" name="expiry_time">
+            <button type="submit">Add Item</button>
+        </form>
+    </div>
+
+    <div id="add-popup" class="popup">
+        <h2 id="popup-title">Add To Personal Items</h2>
+        <button onclick="close_add_popup()">X</button>
+        <!-- on error used to set default image if there is no image for the item-->
+        <img class="item_img" id="image_preview" src="" alt="" onerror="this.src='/static/images/null.jpg'">
+        <!-- allows user to edit incorrect item information -->
+        <form id="add-form" method="POST" onsubmit="add_item(event)">
+            <!-- item fields are readonly apart from expiry and quantity as they can be different per item-->
+            <label>Barcode:</label>
+            <input type="text" id="barcode_edit" name="barcode">
+            <br>
+            <label>Item Name:</label>
+            <input type="text" id="name_edit" name="name" required>
+            <br>
+            <label>Brand:</label>
+            <input type="text" id="brand_edit" name="brand" required>
+            <br>
+            <label>Expiry Time:</label>
+            <input type="number" id="expiry_day" class="date_field" name="expiry_day" min="0" max="30" placeholder="DD" required>
+            <label>/</label>
+            <input type="number" id="expiry_month" class="date_field" name="expiry_month" min="0" max="11" placeholder="MM" required>
+            <label>/</label>
+            <input type="number" id="expiry_year" class="date_field" name="expiry_year" min="0" max="99" placeholder="YY" required>
+            <br>
+            <label>Default Quantity:</label>
+            <input type="number" id="default_quantity" name="quantity" min="1" required>
+            <br>
+            <label>Unit:</label>
+            <input type="text" id="unit_edit" name="unit" required>
+            <br>
+            <label>Add item to inventory?</label>
+            <input type="checkbox" id="add_to_inventory" name="add_to_inventory" onchange="toggle_inventory_fields()">
+            <br>
+            <div id="inventory_fields">
+                <label>Expiry Date:</label>
+                <input type="date" id="expiry_date2" name="expiry_date">
+                <br>
+                <label>Quantity:</label>
+                <input type="number" id="quantity2" name="quantity" min="1">
+            </div>
+            <label>Upload Image:</label>
+            <!-- only accepts image files -->
+            <input type="file" id="item_image_edit" name="item_image" accept="image/jpeg" onchange="update_image()">
+            <br>
+            <input type="hidden" id="original_item_id" name="item_id">
             <button type="submit">Add Item</button>
         </form>
     </div>

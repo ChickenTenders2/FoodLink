@@ -124,7 +124,7 @@ def text_search():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-# Get item by barcode search
+# Get item by barcode search         ###############              ####### MAKE SURE WHEN ADDING TO ITEM TABLE THERE IS ONLY 1 BARCODE FOR EACH USER_ID IN ITEM TABLE
 @app.route("/items/barcode_search", methods = ["POST"])
 def get_item_by_barcode():
     user_id = 2

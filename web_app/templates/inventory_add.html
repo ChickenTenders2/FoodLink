@@ -17,7 +17,7 @@
         <h2 id="popup-title">Search for item</h2>
         <button onclick="close_search_popup()">X</button>
         <form id="update-form" method="POST" onsubmit="text_search_item(event)">
-            <input type="text" id="search_term" name="search_term" placeholder="Enter item name..." required>
+            <input type="text" spellcheck="true" id="search_term" name="search_term" placeholder="Enter item name..." required>
             <button type="submit">Search</button>
         </form>
         <div id="search_results"></div>
@@ -29,6 +29,8 @@
         <button onclick="close_item_popup()">X</button>
         <!-- on error used to set default image if there is no image for the item-->
         <img class="item_img" id="item_image" src="" alt="" onerror="this.src='/static/images/null.jpg'">
+        <!-- allows user to edit incorrect item information -->
+        <button onclick="clone_item()">Edit Item</button>
         <form id="update-form" method="POST" onsubmit="add_item(event)">
             <!-- item fields are readonly apart from expiry and quantity as they can be different per item-->
             <label>Barcode:</label>

@@ -7,7 +7,7 @@ class item_table(database):
     def barcode_search(self, user_id, barcode_number):
         cursor = self.connection.cursor()
         # searches for an item by barcode
-        query = "SELECT id, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE barcode = %s AND (user_id IS NULL OR user_id = %s);"
+        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE barcode = %s AND (user_id IS NULL OR user_id = %s);"
         data = (barcode_number, user_id)
         cursor.execute(query, data)
         item = cursor.fetchall()

@@ -1,10 +1,17 @@
-function open_item_popup(id, barcode_number, name, brand, expiry_time, estimated_expiry, default_quantity, unit) {
-    stop_check();
+function open_item_popup(item, estimated_expiry, from_scanner) {
+    // If the popup was opened from the scanner
+    if (from_scanner) {
+        document.getElementById("close-popup").onclick = close_item_popup(true);
+        stop_check();
+    }
+    // gets variables from item
+    const [id, barcode, name, brand, expiry_time, default_quantity, unit] = item;
+
     document.getElementById("item_id").value = id;
     document.getElementById("expiry_time").value = expiry_time;
     document.getElementById("item_image").src = "/static/images/" + id + ".jpg";
     document.getElementById("item_image").alt = name;
-    document.getElementById("barcode").value = barcode_number;
+    document.getElementById("barcode").value = barcode;
     document.getElementById("name").value = name;
     document.getElementById("brand").value = brand;
     document.getElementById("expiry_date").value = estimated_expiry;
@@ -17,19 +24,13 @@ function open_item_popup(id, barcode_number, name, brand, expiry_time, estimated
     document.getElementById('popup').style.display = 'block';
 }
 
-function open_item_popup_from_scanner(id, barcode_number, name, brand, expiry_time, estimated_expiry, default_quantity, unit) {
-    document.getElementById("close-popup").onclick = close_item_popup_from_scanner();
-    open_item_popup(id, barcode_number, name, brand, expiry_time, estimated_expiry, default_quantity, unit);
-}
-
-function close_item_popup() {
+function close_item_popup(to_scanner) {
+    // If the scanner will be in focus after closing
+    if (to_scanner) {
+        document.getElementById("close-popup").onclick = close_item_popup(false);
+        start_check();
+    }
     document.getElementById('popup').style.display = 'none';
-}
-
-function close_item_popup_from_scanner() {
-    close_item_popup();
-    document.getElementById("close-popup").onclick = close_item_popup();
-    start_check();
 }
 
 function open_search_popup() {
@@ -40,6 +41,148 @@ function open_search_popup() {
 function close_search_popup() {
     start_check();
     document.getElementById('search_popup').style.display = 'none';
+}
+
+function display_search_results(items) {
+    // gets div to put results in
+    const container = document.getElementById("search_results");
+    // Resets text incase no items were found previously
+    container.innerHTML = "";
+    // creates a container for each item
+    for (let item of items) {
+        const div = document.createElement("div");
+        // gets variables from item
+        const [id, , name, brand, , default_quantity, unit] = item;
+        // adds the item information and image
+        div.innerHTML = `
+        <img src="/static/images/${id}.jpg" alt="${name}" class="item_img" onerror="this.src='/static/images/null.jpg'">
+        <div class="item_info">
+            ${name} (${brand}) - ${default_quantity} ${unit}
+        </div>`;
+        div.className = "search_result_item";
+        // estimates expiry for the item and opens popup when item container is clicked on
+        div.onclick = () => select_item(item);
+        // adds container to search results container
+        container.appendChild(div);
+    }
+}
+
+function select_item(item) {
+    expiry_time = item[4];
+    const [days, months, years] = get_expiry_values(expiry_time);
+    const estimated_expiry = estimate_expiry_date(days, months, years);
+    open_item_popup(item, estimated_expiry, false)
+}
+
+function open_add_popup(from_clone, barcode = null) {
+    if (from_clone) {
+        add_clone_info();
+    } 
+    else if (barcode) {
+        stop_check();
+        document.getElementById('barcode_edit').value = barcode;
+        // Barcode scanning should only start if the popup leads back to the main window
+        document.getElementById("close-add-popup").onclick = close_add_popup(true);
+    }
+    // Displays popup
+    document.getElementById('add-popup').style.display = 'block';
+}
+
+function add_clone_info() {
+    // Gets information from the item to clone
+    const original_id = document.getElementById("item_id").value;
+    const expiry_time = document.getElementById("expiry_time").value;
+    const [days, months, years] = get_expiry_values(expiry_time);
+    const name = document.getElementById("name").value;
+    const barcode = document.getElementById("barcode").value;
+    const brand = document.getElementById("brand").value;
+    const default_quantity = document.getElementById("quantity").max;
+    const unit = document.getElementById("unit").value;
+    // Fills in input boxes with information
+    document.getElementById("expiry_day").value = days;
+    document.getElementById("expiry_month").value = months;
+    document.getElementById("expiry_year").value = years;
+    document.getElementById("image_preview").src = "/static/images/" + original_id + ".jpg";
+    document.getElementById("image_preview").alt = name;
+    document.getElementById("original_item_id").value = original_id;
+    document.getElementById("name_edit").value = name;
+    document.getElementById("barcode_edit").value = barcode;
+    document.getElementById("brand_edit").value = brand;
+    document.getElementById("default_quantity").value = default_quantity;
+    document.getElementById("unit_edit").value = unit;
+}
+
+function close_add_popup(to_scanner) {
+    if (to_scanner) {
+        start_check();
+        document.getElementById("close-add-popup").onclick = close_add_popup(false);
+    }
+    document.getElementById("expiry_day").value = null;
+    document.getElementById("expiry_month").value = null;
+    document.getElementById("expiry_year").value = null;
+    document.getElementById("image_preview").src = "";
+    document.getElementById("image_preview").alt = null;
+    document.getElementById("original_item_id").value = null;
+    document.getElementById("name_edit").value = null;
+    document.getElementById("barcode_edit").value = null;
+    document.getElementById("brand_edit").value = null;
+    document.getElementById("default_quantity").value = null;
+    document.getElementById("quantity2").max = null;
+    document.getElementById("quantity2").value = null;
+    document.getElementById("expiry_date2").value = null;
+    document.getElementById("item_image_edit").value = null;
+    document.getElementById("add_to_inventory").checked = false;
+    toggle_inventory_fields();
+
+    document.getElementById("add-popup").style.display = "none";
+}
+
+function toggle_inventory_fields() {
+    const checkbox = document.getElementById("add_to_inventory").checked;
+    const expiry_input = document.getElementById("expiry_date2");
+    const quantity_input = document.getElementById("quantity2");
+    const inputs_container = document.getElementById("inventory_fields");
+
+    // If the checkbox is unticked
+    if (!checkbox) {
+        expiry_input.required = false;
+        quantity_input.required = false;
+        inputs_container.style.display = "none";
+        return;
+    }
+
+    // Makes sure values are entered
+    expiry_input.required = true;
+    quantity_input.required = true;
+
+    // Calculates estimated expiry from new expiry time 
+    const days = parseInt(document.getElementById("expiry_day").value);
+    const months = parseInt(document.getElementById("expiry_month").value);
+    const years = parseInt(document.getElementById("expiry_year").value);
+    const estimated_expiry = estimate_expiry_date(days, months, years);
+    
+    expiry_input.value = estimated_expiry;
+    
+    // Automatically sets quantity to default and doesnt allow any bigger
+    const default_quantity = parseInt(document.getElementById("default_quantity").value);
+    quantity_input.value = default_quantity;
+    // if item is singular, multiple should be allowed to stored together so no max quantity
+    if (default_quantity > 1) {
+        quantity_input.max = default_quantity;
+    }
+    
+    // Displays extra inputs
+    inputs_container.style.display = "block";
+}
+
+function update_image_preview(event) {
+    if (event.target.files && event.target.files[0]) {
+        image = document.getElementById("image_preview");
+        image.src = URL.createObjectURL(event.target.files[0]);
+        image.onload = function() {
+            URL.revokeObjectURL(image.src); //Frees up memory after image is changed
+        }
+    }
 }
 
 async function text_search_item(event) {
@@ -65,31 +208,7 @@ async function text_search_item(event) {
     }
 }
 
-function display_search_results(items) {
-    // gets div to put results in
-    const container = document.getElementById("search_results");
-    // Resets text incase no items were found previously
-    container.innerHTML = "";
-    // creates a container for each item
-    for (let item of items) {
-        const div = document.createElement("div");
-        // gets variables from item
-        const [id, barcode, name, brand, expiry_time, default_quantity, unit] = item;
-        // adds the item information and image
-        div.innerHTML = `
-        <img src="/static/images/${id}.jpg" alt="${name}" class="item_img" onerror="this.src='/static/images/null.jpg'">
-        <div class="item_info">
-            ${name} (${brand}) - ${default_quantity} ${unit}
-        </div>`;
-        div.className = "search_result_item";
-        // estimates expiry for the item and opens popup when item container is clicked on
-        div.onclick = () => open_item_popup(id, barcode, name, brand, expiry_time, estimate_expiry_from_string(expiry_time), default_quantity, unit);
-        // adds container to search results container
-        container.appendChild(div);
-    }
-}
-
-// Checks if a barcode has been found
+// Redirects to correct function once barcode is found
 function process_barcode(barcode) {
     barcode_search_item(barcode);
 }
@@ -171,102 +290,4 @@ function estimate_expiry_date(days, months, years) {
 function get_expiry_values(expiry_time) {
     // Gets each part of the expiry string and maps it to a number
     return expiry_time.split('/').map(Number);
-}
-
-function open_add_popup_clone() {
-    // Gets item information if the user is trying to edit an item
-    const original_id = document.getElementById("item_id").value;
-    const expiry_time = document.getElementById("expiry_time").value;
-    const [days, months, years] = get_expiry_values(expiry_time);
-    const name = document.getElementById("name").value;
-    const barcode = document.getElementById("barcode").value;
-    const brand = document.getElementById("brand").value;
-    const default_quantity = document.getElementById("quantity").max;
-    const unit = document.getElementById("unit").value;
-    document.getElementById("expiry_day").value = days;
-    document.getElementById("expiry_month").value = months;
-    document.getElementById("expiry_year").value = years;
-    document.getElementById("image_preview").src = "/static/images/" + original_id + ".jpg";
-    document.getElementById("image_preview").alt = name;
-    document.getElementById("original_item_id").value = original_id;
-    document.getElementById("name_edit").value = name;
-    document.getElementById("barcode_edit").value = barcode;
-    document.getElementById("brand_edit").value = brand;
-    document.getElementById("default_quantity").value = default_quantity;
-    document.getElementById("unit_edit").value = unit;
-
-    document.getElementById("add-popup").style.display = "block";
-}
-
-function open_add_popup() {
-    document.getElementById('add-popup').style.display = 'block';
-}
-
-function open_add_popup_from_scanner(barcode) {
-    stop_check();
-    document.getElementById('barcode_edit').value = barcode;
-    document.getElementById('add-popup').style.display = 'block';
-    // Barcode scanning should only start if the popup leads back to the main window
-    document.getElementById("close-add-popup").onclick = close_add_popup_from_scanner();
-}
-
-function close_add_popup_from_scanner() {
-    start_check();
-    document.getElementById("close-add-popup").onclick = close_add_popup();
-    close_add_popup();
-}
-
-function close_add_popup() {
-    document.getElementById("expiry_day").value = null;
-    document.getElementById("expiry_month").value = null;
-    document.getElementById("expiry_year").value = null;
-    document.getElementById("image_preview").src = "";
-    document.getElementById("image_preview").alt = null;
-    document.getElementById("original_item_id").value = null;
-    document.getElementById("name_edit").value = null;
-    document.getElementById("barcode_edit").value = null;
-    document.getElementById("brand_edit").value = null;
-    document.getElementById("default_quantity").value = null;
-    document.getElementById("quantity2").max = null;
-    document.getElementById("quantity2").value = null;
-    document.getElementById("expiry_date2").value = null;
-    document.getElementById("item_image_edit").value = null;
-
-    document.getElementById("add-popup").style.display = "none";
-}
-
-function toggle_inventory_fields() {
-    const checkbox = document.getElementById("add_to_inventory").checked;
-    if (checkbox) {
-        document.getElementById("inventory_fields").style.display = "block";
-    } else {
-        document.getElementById("inventory_fields").style.display = "none";
-    }
-    
-    // Calculates estimated expiry from new expiry time 
-    const days = parseInt(document.getElementById("expiry_day").value);
-    const months = parseInt(document.getElementById("expiry_month").value);
-    const years = parseInt(document.getElementById("expiry_year").value);
-    const estimated_expiry = estimate_expiry_date(days, months, years);
-    document.getElementById("expiry_date2").value = estimated_expiry;
-
-    // Automatically sets quantity to default and doesnt allow any bigger
-    const default_quantity = parseInt(document.getElementById("default_quantity").value);
-    // if item is singular, multiple should be allowed to stored together so no max quantity
-    if (default_quantity > 1) {
-        document.getElementById("quantity2").max = default_quantity;
-    }
-    document.getElementById("quantity2").value = default_quantity;
-}
-
-function hide_inventory_fields() {
-    document.getElementById("inventory_fields").style.display = "none";
-}
-
-function update_image_preview(event) {
-    image = document.getElementById("image_preview");
-    image.src = URL.createObjectURL(event.target.files[0]);
-    image.onload = function() {
-        URL.revokeObjectURL(image.src); //Frees up memory after image is changed
-    }
 }

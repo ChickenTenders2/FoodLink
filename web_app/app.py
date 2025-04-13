@@ -79,6 +79,10 @@ def update_item():
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+    
+@app.route("/inventory/add_item/new", methods = ["POST"])
+def new_item():
+    pass
 
 
 ### BARCODE SCANNING ROUTES ###
@@ -177,7 +181,6 @@ def append_item_db():
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
-
 
 if __name__ == '__main__':
     # Classes for handling sql expressions

@@ -202,10 +202,14 @@ async function display_search_results(items) {
         const [id, , name, brand, , default_quantity, unit] = item;
         // adds the item information and image
         const image_path = await get_image_path(id);
+        let brand_text = "";
+        if (brand) {
+            brand_text = `(${brand})`;
+        }
         div.innerHTML = `
         <img src="${image_path}" alt="${name}" class="item_img">
         <div class="item_info">
-            ${name} (${brand}) - ${default_quantity} ${unit}
+            ${name} ${brand_text} - ${default_quantity} ${unit}
         </div>`;
         div.className = "search_result_item";
         // estimates expiry for the item and opens popup when item container is clicked on

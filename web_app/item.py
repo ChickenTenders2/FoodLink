@@ -40,9 +40,9 @@ class item_table(database):
     def process_add_form(self, form, files, user_id = None):
         try:
             # gets item information
-            barcode = form.get("barcode")
+            barcode = form.get("barcode") or None
             name = form.get("name")
-            brand = form.get("brand")
+            brand = form.get("brand") or None
             default_quantity = form.get("default_quantity")
             unit = form.get("unit")
 

@@ -13,6 +13,8 @@
         <img src="{{ url_for('get_scanner') }}" alt="Barcode Scanner">
     </div>
 
+    
+
     <div id="search_popup" class="popup">
         <h2 id="popup-title">Search for item</h2>
         <button onclick="close_search_popup()">X</button>
@@ -76,7 +78,7 @@
             <input type="text" id="name_edit" name="name" required>
             <br>
             <label>Brand:</label>
-            <input type="text" id="brand_edit" name="brand" required>
+            <input type="text" id="brand_edit" name="brand">
             <br>
             <label>Expiry Time:</label>
             <input type="number" id="expiry_day" class="date_field" name="expiry_day" min="0" max="30" placeholder="DD" required>

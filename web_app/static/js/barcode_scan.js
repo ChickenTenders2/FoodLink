@@ -24,7 +24,6 @@ function start_check() {
 
 // Checks if a barcode has been found
 async function get_barcode() {
-    stop_check()
     try {
         let response = await fetch("/get_barcode");
         let data = await response.json();
@@ -36,5 +35,4 @@ async function get_barcode() {
     } catch (e) {
         alert(e);
     }
-    start_check()
 }

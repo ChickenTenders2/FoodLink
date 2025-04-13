@@ -21,6 +21,7 @@
             <button type="submit">Search</button>
         </form>
         <div id="search_results"></div>
+        <button onclick="open_add_popup(false)">Add Missing Item</button>
     </div>
 
     <!-- added popup from inventory.html for inputting data of new item-->
@@ -59,7 +60,7 @@
 
     <div id="add-popup" class="popup">
         <h2 id="popup-title">Add To Personal Items</h2>
-        <button id="close-add-popup" onclick="close_add_popup()">X</button>
+        <button id="close-add-popup" onclick="close_add_popup(false)">X</button>
         <!-- on error used to set default image if there is no image for the item-->
         <img class="item_img" id="image_preview" src="" alt="" onerror="this.src='/static/images/null.jpg'">
         <!-- allows user to edit incorrect item information -->

@@ -1,7 +1,7 @@
 function open_item_popup(item, estimated_expiry, from_scanner) {
     // If the popup was opened from the scanner
     if (from_scanner) {
-        document.getElementById("close-popup").onclick = close_item_popup(true);
+        document.getElementById("close-popup").onclick = () => close_item_popup(true);
         stop_check();
     }
     // gets variables from item
@@ -27,7 +27,7 @@ function open_item_popup(item, estimated_expiry, from_scanner) {
 function close_item_popup(to_scanner) {
     // If the scanner will be in focus after closing
     if (to_scanner) {
-        document.getElementById("close-popup").onclick = close_item_popup(false);
+        document.getElementById("close-popup").onclick = () => close_item_popup(false);
         start_check();
     }
     document.getElementById('popup').style.display = 'none';
@@ -41,30 +41,6 @@ function open_search_popup() {
 function close_search_popup() {
     start_check();
     document.getElementById('search_popup').style.display = 'none';
-}
-
-function display_search_results(items) {
-    // gets div to put results in
-    const container = document.getElementById("search_results");
-    // Resets text incase no items were found previously
-    container.innerHTML = "";
-    // creates a container for each item
-    for (let item of items) {
-        const div = document.createElement("div");
-        // gets variables from item
-        const [id, , name, brand, , default_quantity, unit] = item;
-        // adds the item information and image
-        div.innerHTML = `
-        <img src="/static/images/${id}.jpg" alt="${name}" class="item_img" onerror="this.src='/static/images/null.jpg'">
-        <div class="item_info">
-            ${name} (${brand}) - ${default_quantity} ${unit}
-        </div>`;
-        div.className = "search_result_item";
-        // estimates expiry for the item and opens popup when item container is clicked on
-        div.onclick = () => select_item(item);
-        // adds container to search results container
-        container.appendChild(div);
-    }
 }
 
 function select_item(item) {
@@ -82,7 +58,11 @@ function open_add_popup(from_clone, barcode = null) {
         stop_check();
         document.getElementById('barcode_edit').value = barcode;
         // Barcode scanning should only start if the popup leads back to the main window
-        document.getElementById("close-add-popup").onclick = close_add_popup(true);
+        document.getElementById("close-add-popup").onclick = () => close_add_popup(true);
+    }
+    else {
+        const search_term = document.getElementById("search_term").value;
+        document.getElementById("name_edit").value = search_term;
     }
     // Displays popup
     document.getElementById('add-popup').style.display = 'block';
@@ -115,7 +95,7 @@ function add_clone_info() {
 function close_add_popup(to_scanner) {
     if (to_scanner) {
         start_check();
-        document.getElementById("close-add-popup").onclick = close_add_popup(false);
+        document.getElementById("close-add-popup").onclick = () => close_add_popup(false);
     }
     document.getElementById("expiry_day").value = null;
     document.getElementById("expiry_month").value = null;
@@ -156,9 +136,9 @@ function toggle_inventory_fields() {
     quantity_input.required = true;
 
     // Calculates estimated expiry from new expiry time 
-    const days = parseInt(document.getElementById("expiry_day").value);
-    const months = parseInt(document.getElementById("expiry_month").value);
-    const years = parseInt(document.getElementById("expiry_year").value);
+    const days = parseInt(document.getElementById("expiry_day").value) || 0;
+    const months = parseInt(document.getElementById("expiry_month").value) || 0;
+    const years = parseInt(document.getElementById("expiry_year").value) || 0;
     const estimated_expiry = estimate_expiry_date(days, months, years);
     
     expiry_input.value = estimated_expiry;
@@ -208,6 +188,30 @@ async function text_search_item(event) {
     }
 }
 
+function display_search_results(items) {
+    // gets div to put results in
+    const container = document.getElementById("search_results");
+    // Resets text incase no items were found previously
+    container.innerHTML = "";
+    // creates a container for each item
+    for (let item of items) {
+        const div = document.createElement("div");
+        // gets variables from item
+        const [id, , name, brand, , default_quantity, unit] = item;
+        // adds the item information and image
+        div.innerHTML = `
+        <img src="/static/images/${id}.jpg" alt="${name}" class="item_img" onerror="this.src='/static/images/null.jpg'">
+        <div class="item_info">
+            ${name} (${brand}) - ${default_quantity} ${unit}
+        </div>`;
+        div.className = "search_result_item";
+        // estimates expiry for the item and opens popup when item container is clicked on
+        div.onclick = () => select_item(item);
+        // adds container to search results container
+        container.appendChild(div);
+    }
+}
+
 // Redirects to correct function once barcode is found
 function process_barcode(barcode) {
     barcode_search_item(barcode);
@@ -231,10 +235,12 @@ async function barcode_search_item(barcode_number) {
         if (data.success) {
             const [id, name, brand, expiry_time, default_quantity, unit] = data.item;
             // Calculates estimated expiry
-            const estimated_expiry = estimate_expiry_from_string(expiry_time);
-            open_item_popup_from_scanner(id, barcode_number, name, brand, expiry_time, estimated_expiry, default_quantity, unit);
+            const [days, months, years] = get_expiry_values(expiry_time);
+            const estimated_expiry = estimate_expiry_date(days, months, years);
+            open_item_popup(item, estimated_expiry, true);
         } else {
             alert(data.error);
+            open_add_popup(false, barcode_number);
         }
     } catch (e) {
         alert(e);
@@ -271,7 +277,6 @@ function estimate_expiry_from_string(expiry_time) {
     const [days, months, years] = get_expiry_values(expiry_time);
     return estimate_expiry_date(days, months, years);
 }
-
 
 // Calculate an estimate of the expiry date
 function estimate_expiry_date(days, months, years) {

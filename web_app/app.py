@@ -2,7 +2,8 @@ from flask import Flask, jsonify, render_template, request, url_for, Response
 from inventory import inventory
 from barcode import barcode
 from item import item_table
-
+from os.path import join as create_path
+from os.path import isfile as file_exists
 app = Flask(__name__, template_folder = "templates")
 
 # Dashboard Route
@@ -157,6 +158,13 @@ def append_item_db():
         return jsonify({"success": True})
     else:
         return jsonify(response)
+
+
+@app.route("/find_image/<item_id>")
+def find_image(item_id):
+    path = create_path(app.static_folder, "images", f"{item_id}.jpg")
+    exists = file_exists(path)
+    return jsonify({"success": exists})
 
 if __name__ == '__main__':
     # Classes for handling sql expressions

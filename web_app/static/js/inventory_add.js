@@ -1,4 +1,4 @@
-function open_item_popup(item, estimated_expiry, from_scanner) {
+async function open_item_popup(item, estimated_expiry, from_scanner) {
     // If the popup was opened from the scanner
     if (from_scanner) {
         document.getElementById("close-popup").onclick = () => close_item_popup(true);
@@ -9,7 +9,7 @@ function open_item_popup(item, estimated_expiry, from_scanner) {
 
     document.getElementById("item_id").value = id;
     document.getElementById("expiry_time").value = expiry_time;
-    document.getElementById("item_image").src = "/static/images/" + id + ".jpg";
+    document.getElementById("item_image").src = await get_image_path(id);
     document.getElementById("item_image").alt = name;
     document.getElementById("barcode").value = barcode;
     document.getElementById("name").value = name;
@@ -70,7 +70,7 @@ function open_add_popup(from_clone, barcode = null) {
     document.getElementById('add-popup').style.display = 'block';
 }
 
-function add_clone_info() {
+async function add_clone_info() {
     // Gets information from the item to clone
     const original_id = document.getElementById("item_id").value;
     const expiry_time = document.getElementById("expiry_time").value;
@@ -84,7 +84,7 @@ function add_clone_info() {
     document.getElementById("expiry_day").value = days;
     document.getElementById("expiry_month").value = months;
     document.getElementById("expiry_year").value = years;
-    document.getElementById("image_preview").src = "/static/images/" + original_id + ".jpg";
+    document.getElementById("image_preview").src = await get_image_path(original_id);
     document.getElementById("image_preview").alt = name;
     document.getElementById("original_item_id").value = original_id;
     document.getElementById("name_edit").value = name;
@@ -190,7 +190,7 @@ async function text_search_item(event) {
     }
 }
 
-function display_search_results(items) {
+async function display_search_results(items) {
     // gets div to put results in
     const container = document.getElementById("search_results");
     // Resets text incase no items were found previously
@@ -201,8 +201,9 @@ function display_search_results(items) {
         // gets variables from item
         const [id, , name, brand, , default_quantity, unit] = item;
         // adds the item information and image
+        const image_path = await get_image_path(id);
         div.innerHTML = `
-        <img src="/static/images/${id}.jpg" alt="${name}" class="item_img" onerror="this.src='/static/images/null.jpg'">
+        <img src="${image_path}" alt="${name}" class="item_img">
         <div class="item_info">
             ${name} (${brand}) - ${default_quantity} ${unit}
         </div>`;
@@ -324,4 +325,18 @@ function estimate_expiry_date(days, months, years) {
 function get_expiry_values(expiry_time) {
     // Gets each part of the expiry string and maps it to a number
     return expiry_time.split('/').map(Number);
+}
+
+async function get_image_path(id) {
+    let image_name = "null";
+    try {
+        const response = await fetch("/find_image/" + id);
+        const result = await response.json();
+        if (result.success) {
+            image_name = id;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+    return "/static/images/" + image_name + ".jpg";
 }

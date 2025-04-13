@@ -24,7 +24,7 @@ class item_table(database):
         cursor.close()
         return items
     
-    def add_item(self, barcode, name, brand, expiry_time, default_quantity, unit, user_id = None):
+    def add_item(self, barcode, name, brand, expiry_time, default_quantity, unit, user_id):
         cursor = self.connection.cursor()
         query = "INSERT INTO FoodLink.item (barcode, name, brand, expiry_time, default_quantity, unit, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s);"
         data = (barcode, name, brand, expiry_time, default_quantity, unit, user_id)
@@ -34,3 +34,41 @@ class item_table(database):
         item_id = cursor.lastrowid
         cursor.close()
         return item_id
+
+    def process_add_form(self, form, files, user_id = None):
+        try:
+            # gets item information
+            barcode = form.get("barcode")
+            name = form.get("name")
+            brand = form.get("brand")
+            default_quantity = form.get("default_quantity")
+            unit = form.get("unit")
+
+            # gets expiry time and converts to int to remove any leading zeros
+            # also checks inputs are numbers
+            day = int(form.get("expiry_day"))
+            month = int(form.get("expiry_month"))
+            year = int(form.get("expiry_year"))
+
+            # makes sure expire date is not 0 and that each number is within the correct range
+            if (day == 0 and month == 0 and year == 0) \
+                or not (0 <= day < 31 and 0 <= month < 12 and 0 <= year < 100):
+                return {"success": False, "error": "Expiry time out of range."}
+
+            # formats expiry time as string
+            expiry_time = f"{day}/{month}/{year}"
+
+            # adds item to db and gets item id
+            item_id = self.add_item(barcode, name, brand, expiry_time, default_quantity, unit, user_id)
+
+            # gets image if uploaded otherwise equals none
+            image = files.get("item_image", None)
+            # if an image is uploaded
+            if image:
+                # store image in server with name item id
+                path = f"static/images/{item_id}.jpg"
+                image.save(path)
+
+            return {"success": True, "item_id": item_id}
+        except Exception as e:
+            return {"success": False, "error": str(e)}

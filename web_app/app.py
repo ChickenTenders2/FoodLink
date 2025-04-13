@@ -48,21 +48,15 @@ def get_inventory():
 # Add item to inventory interface
 @app.route("/inventory/add_item/")
 def add_to_inventory():
-    user_id = 2
     return render_template("inventory_add.html")
 
 # Add item to inventory
 @app.route("/inventory/add_item/add", methods=["POST"])
 def append_inventory():
     user_id = 2
-    try:
-        id = request.form["item_id"]
-        quantity = request.form["quantity"]
-        expiry = request.form["expiry_date"]
-        inv.add_item(user_id, id, quantity, expiry)
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+    item_id = request.form.get("item_id")
+    response = inv.process_add_form(user_id, item_id, request.form)
+    return jsonify(response)
 
 # Update quantity and expiry of item in inventory
 @app.route('/inventory/update_item', methods = ['POST'])
@@ -82,7 +76,19 @@ def update_item():
     
 @app.route("/inventory/add_item/new", methods = ["POST"])
 def new_item():
-    pass
+    user_id = 2
+    response = item.process_add_form(request.form, request.files, user_id)
+
+    # if the item was not succesffuly added to the item table
+    if not response["success"]:
+        return jsonify(response)
+    
+    if not request.form.get("add_to_inventory"):
+        return jsonify({"success": True})
+    
+    item_id = response["item_id"]
+    response = inv.process_add_form(user_id, item_id, request.form)
+    return jsonify(response)
 
 
 ### BARCODE SCANNING ROUTES ###
@@ -145,42 +151,12 @@ def add_item():
 # Add item to item table
 @app.route('/items/add_item/add', methods=["POST"])
 def append_item_db():
-    try:
-        # gets item information
-        barcode = request.form.get("barcode")
-        name = request.form.get("name")
-        brand = request.form.get("brand")
-        default_quantity = request.form.get("default_quantity")
-        unit = request.form.get("unit")
-
-        # gets expiry time and converts to int to remove any leading zeros
-        # also checks inputs are numbers
-        day = int(request.form.get("expiry_day"))
-        month = int(request.form.get("expiry_month"))
-        year = int(request.form.get("expiry_year"))
-
-        # makes sure expire date is not 0 and that each number is within the correct range
-        if (day == 0 and month == 0 and year == 0) \
-            or not (0 <= day < 31 and 0 <= month < 12 and 0 <= year < 100):
-            return jsonify({"success": False, "error": "Expiry time out of range."})
-
-        # formats expiry time as string
-        expiry_time = f"{day}/{month}/{year}"
-
-        # adds item to db and gets item id
-        item_id = item.add_item(barcode, name, brand, expiry_time, default_quantity, unit)
-
-        # gets image if uploaded otherwise equals none
-        image = request.files.get("item_image", None)
-        # if an image is uploaded
-        if image:
-            # store image in server with name item id
-            path = f"static/images/{item_id}.jpg"
-            image.save(path)
-
+    response = item.process_add_form(request.form, request.files)
+    if response["success"]:
+        # item id does not need to be returned
         return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+    else:
+        return jsonify(response)
 
 if __name__ == '__main__':
     # Classes for handling sql expressions

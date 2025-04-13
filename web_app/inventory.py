@@ -55,3 +55,12 @@ class inventory(database):
         items = cursor.fetchall()
         cursor.close()
         return items
+    
+    def process_add_form(self, user_id, item_id, form):
+        try:
+            quantity = form["quantity"]
+            expiry = form["expiry_date"]
+            self.add_item(user_id, item_id, quantity, expiry)
+            return {"success": True}
+        except Exception as e:
+            return {"success": False, "error": str(e)}

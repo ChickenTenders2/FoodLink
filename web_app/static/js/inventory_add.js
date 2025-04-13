@@ -40,6 +40,8 @@ function open_search_popup() {
 
 function close_search_popup() {
     start_check();
+    document.getElementById("search_term").value = "";
+    document.getElementById("search_results").innerHTML = "";
     document.getElementById('search_popup').style.display = 'none';
 }
 
@@ -258,6 +260,33 @@ async function add_item(event) {
 
     // Sends update command and waits for response
     const response = await fetch('/inventory/add_item/add', {
+        method: 'POST',
+        body: formData,
+    });
+
+    //Waits until result is recieved
+    const result = await response.json();
+
+    if (result.success) {
+        alert("Item added succesfully.");
+        close_item_popup();
+    } else {
+        alert('There was an error adding the item. Error: ' + result.error);
+    }
+}
+
+// Adds item to inventory
+async function add_new_item(event) {
+    console.log("new item");
+    // Prevent the form from submitting normally
+    event.preventDefault(); 
+
+    // Recreates form
+    const form = event.target;
+    const formData = new FormData(form);
+
+    // Sends update command and waits for response
+    const response = await fetch('/inventory/add_item/new', {
         method: 'POST',
         body: formData,
     });

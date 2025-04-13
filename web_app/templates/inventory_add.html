@@ -29,7 +29,7 @@
         <h2 id="popup-title">Add Item To Inventory</h2>
         <button id="close-popup" onclick="close_item_popup(false)">X</button>
         <!-- on error used to set default image if there is no image for the item-->
-        <img class="item_img" id="item_image" src="" alt="" onerror="this.src='/static/images/null.jpg'">
+        <img class="item_img" id="item_image" src="" alt="">
         <!-- allows user to edit incorrect item information -->
         <button onclick="open_add_popup(true)">Clone Item</button>
         <form id="update-form" method="POST" onsubmit="add_item(event)">
@@ -64,7 +64,7 @@
         <!-- on error used to set default image if there is no image for the item-->
         <img class="item_img" id="image_preview" src="" alt="" onerror="this.src='/static/images/null.jpg'">
         <!-- allows user to edit incorrect item information -->
-        <form id="add-form" method="POST" onsubmit="add_item(event)">
+        <form id="add-form" method="POST" onsubmit="add_new_item(event)">
             <label>Select Image:</label>
             <!-- only accepts image files -->
             <input type="file" id="item_image_edit" name="item_image" accept="image/jpeg" onchange="update_image_preview(event)">
@@ -86,7 +86,7 @@
             <input type="number" id="expiry_year" class="date_field" name="expiry_year" min="0" max="99" placeholder="YY" required>
             <br>
             <label>Default Quantity:</label>
-            <input type="number" id="default_quantity" name="quantity" min="1" required>
+            <input type="number" id="default_quantity" name="default_quantity" min="1" required>
             <br>
             <label>Unit:</label>
             <input type="text" id="unit_edit" name="unit" required>

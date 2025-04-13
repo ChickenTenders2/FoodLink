@@ -230,6 +230,7 @@ function close_add_popup() {
     document.getElementById("quantity2").max = null;
     document.getElementById("quantity2").value = null;
     document.getElementById("expiry_date2").value = null;
+    document.getElementById("item_image_edit").value = null;
 
     document.getElementById("add-popup").style.display = "none";
 }
@@ -260,4 +261,12 @@ function toggle_inventory_fields() {
 
 function hide_inventory_fields() {
     document.getElementById("inventory_fields").style.display = "none";
+}
+
+function update_image_preview(event) {
+    image = document.getElementById("image_preview");
+    image.src = URL.createObjectURL(event.target.files[0]);
+    image.onload = function() {
+        URL.revokeObjectURL(image.src); //Frees up memory after image is changed
+    }
 }

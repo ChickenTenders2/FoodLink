@@ -64,7 +64,10 @@
         <img class="item_img" id="image_preview" src="" alt="" onerror="this.src='/static/images/null.jpg'">
         <!-- allows user to edit incorrect item information -->
         <form id="add-form" method="POST" onsubmit="add_item(event)">
-            <!-- item fields are readonly apart from expiry and quantity as they can be different per item-->
+            <label>Select Image:</label>
+            <!-- only accepts image files -->
+            <input type="file" id="item_image_edit" name="item_image" accept="image/jpeg" onchange="update_image_preview(event)">
+            <br>
             <label>Barcode:</label>
             <input type="text" id="barcode_edit" name="barcode">
             <br>
@@ -97,10 +100,6 @@
                 <label>Quantity:</label>
                 <input type="number" id="quantity2" name="quantity" min="1">
             </div>
-            <label>Upload Image:</label>
-            <!-- only accepts image files -->
-            <input type="file" id="item_image_edit" name="item_image" accept="image/jpeg" onchange="update_image_preview()">
-            <br>
             <input type="hidden" id="original_item_id" name="item_id">
             <button type="submit">Add Item</button>
         </form>

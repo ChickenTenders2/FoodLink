@@ -17,9 +17,19 @@ function open_item_popup(id, barcode_number, name, brand, expiry_time, estimated
     document.getElementById('popup').style.display = 'block';
 }
 
+function open_item_popup_from_scanner(id, barcode_number, name, brand, expiry_time, estimated_expiry, default_quantity, unit) {
+    document.getElementById("close-popup").onclick = close_item_popup_from_scanner();
+    open_item_popup(id, barcode_number, name, brand, expiry_time, estimated_expiry, default_quantity, unit);
+}
+
 function close_item_popup() {
-    start_check();
     document.getElementById('popup').style.display = 'none';
+}
+
+function close_item_popup_from_scanner() {
+    close_item_popup();
+    document.getElementById("close-popup").onclick = close_item_popup();
+    start_check();
 }
 
 function open_search_popup() {
@@ -73,7 +83,7 @@ function display_search_results(items) {
         </div>`;
         div.className = "search_result_item";
         // estimates expiry for the item and opens popup when item container is clicked on
-        div.onclick = () => open_item_popup(id, barcode, name, brand, expiry_time, estimate_expiry_date(expiry_time), default_quantity, unit);
+        div.onclick = () => open_item_popup(id, barcode, name, brand, expiry_time, estimate_expiry_from_string(expiry_time), default_quantity, unit);
         // adds container to search results container
         container.appendChild(div);
     }
@@ -102,8 +112,8 @@ async function barcode_search_item(barcode_number) {
         if (data.success) {
             const [id, name, brand, expiry_time, default_quantity, unit] = data.item;
             // Calculates estimated expiry
-            const estimated_expiry = estimate_expiry_date(expiry_time);
-            open_item_popup(id, barcode_number, name, brand, expiry_time, estimated_expiry, default_quantity, unit);
+            const estimated_expiry = estimate_expiry_from_string(expiry_time);
+            open_item_popup_from_scanner(id, barcode_number, name, brand, expiry_time, estimated_expiry, default_quantity, unit);
         } else {
             alert(data.error);
         }
@@ -138,10 +148,14 @@ async function add_item(event) {
     }
 }
 
-// Calculate an estimate of the expiry date
-function estimate_expiry_date(expiry_time) {
-    // Gets each part of the expiry string and maps it to a number
+function estimate_expiry_from_string(expiry_time) {
     const [days, months, years] = get_expiry_values(expiry_time);
+    return estimate_expiry_date(days, months, years);
+}
+
+
+// Calculate an estimate of the expiry date
+function estimate_expiry_date(days, months, years) {
     // Todays date
     const today = new Date();
     // Calucates the expiry from todays date
@@ -155,29 +169,68 @@ function estimate_expiry_date(expiry_time) {
 }
 
 function get_expiry_values(expiry_time) {
+    // Gets each part of the expiry string and maps it to a number
     return expiry_time.split('/').map(Number);
 }
 
-function open_add_popup() {
-    // document.getElementById("barcode").removeAttribute("readonly");
-    // document.getElementById("name").removeAttribute("readonly");
-    // document.getElementById("brand").removeAttribute("readonly");
-    // document.getElementById("name").setAttribute("required", true);
-    // document.getElementById("brand").setAttribute("required", true);
-
-
-    // for (let div of document.querySelectorAll(".item_fields")) {
-    //     div.style.display = "block";
-    // }
-
-    // for (let div of document.querySelectorAll(".inventory_fields")) {
-    //     div.style.display = "none";
-    // }
+function open_add_popup_clone() {
+    // Gets item information if the user is trying to edit an item
+    const original_id = document.getElementById("item_id").value;
+    const expiry_time = document.getElementById("expiry_time").value;
+    const [days, months, years] = get_expiry_values(expiry_time);
+    const name = document.getElementById("name").value;
+    const barcode = document.getElementById("barcode").value;
+    const brand = document.getElementById("brand").value;
+    const default_quantity = document.getElementById("quantity").max;
+    const unit = document.getElementById("unit").value;
+    document.getElementById("expiry_day").value = days;
+    document.getElementById("expiry_month").value = months;
+    document.getElementById("expiry_year").value = years;
+    document.getElementById("image_preview").src = "/static/images/" + original_id + ".jpg";
+    document.getElementById("image_preview").alt = name;
+    document.getElementById("original_item_id").value = original_id;
+    document.getElementById("name_edit").value = name;
+    document.getElementById("barcode_edit").value = barcode;
+    document.getElementById("brand_edit").value = brand;
+    document.getElementById("default_quantity").value = default_quantity;
+    document.getElementById("unit_edit").value = unit;
 
     document.getElementById("add-popup").style.display = "block";
 }
 
+function open_add_popup() {
+    document.getElementById('add-popup').style.display = 'block';
+}
+
+function open_add_popup_from_scanner(barcode) {
+    stop_check();
+    document.getElementById('barcode_edit').value = barcode;
+    document.getElementById('add-popup').style.display = 'block';
+    // Barcode scanning should only start if the popup leads back to the main window
+    document.getElementById("close-add-popup").onclick = close_add_popup_from_scanner();
+}
+
+function close_add_popup_from_scanner() {
+    start_check();
+    document.getElementById("close-add-popup").onclick = close_add_popup();
+    close_add_popup();
+}
+
 function close_add_popup() {
+    document.getElementById("expiry_day").value = null;
+    document.getElementById("expiry_month").value = null;
+    document.getElementById("expiry_year").value = null;
+    document.getElementById("image_preview").src = "";
+    document.getElementById("image_preview").alt = null;
+    document.getElementById("original_item_id").value = null;
+    document.getElementById("name_edit").value = null;
+    document.getElementById("barcode_edit").value = null;
+    document.getElementById("brand_edit").value = null;
+    document.getElementById("default_quantity").value = null;
+    document.getElementById("quantity2").max = null;
+    document.getElementById("quantity2").value = null;
+    document.getElementById("expiry_date2").value = null;
+
     document.getElementById("add-popup").style.display = "none";
 }
 
@@ -188,10 +241,21 @@ function toggle_inventory_fields() {
     } else {
         document.getElementById("inventory_fields").style.display = "none";
     }
-    const default_quantity = document.getElementById("default_quantity").value;
+    
+    // Calculates estimated expiry from new expiry time 
+    const days = parseInt(document.getElementById("expiry_day").value);
+    const months = parseInt(document.getElementById("expiry_month").value);
+    const years = parseInt(document.getElementById("expiry_year").value);
+    const estimated_expiry = estimate_expiry_date(days, months, years);
+    document.getElementById("expiry_date2").value = estimated_expiry;
+
+    // Automatically sets quantity to default and doesnt allow any bigger
+    const default_quantity = parseInt(document.getElementById("default_quantity").value);
+    // if item is singular, multiple should be allowed to stored together so no max quantity
     if (default_quantity > 1) {
-        document.getElementById("quantity").max = default_quantity;
+        document.getElementById("quantity2").max = default_quantity;
     }
+    document.getElementById("quantity2").value = default_quantity;
 }
 
 function hide_inventory_fields() {

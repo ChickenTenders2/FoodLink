@@ -104,12 +104,6 @@ def get_barcode():
     else:
         return jsonify({"success": False})
 
-# Resets the barcode number to null
-@app.route('/clear_barcode')
-def clear_barcode():
-    scanner.clear_barcode()
-    return jsonify({"success":True})
-
 
 ### ITEM ROUTES ###
 
@@ -130,7 +124,6 @@ def get_item_by_barcode():
     user_id = 2
     try:
         barcode_number = request.form["barcode"]
-        print(barcode_number)
         item_info = item.barcode_search(user_id, barcode_number)
         if item_info:
             # returns the first item in the list as barcodes are unique

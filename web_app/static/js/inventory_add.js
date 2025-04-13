@@ -102,7 +102,7 @@ function close_add_popup(to_scanner) {
     document.getElementById("expiry_day").value = null;
     document.getElementById("expiry_month").value = null;
     document.getElementById("expiry_year").value = null;
-    document.getElementById("image_preview").src = "";
+    document.getElementById("image_preview").src = "/static/images/null.jpg";
     document.getElementById("image_preview").alt = null;
     document.getElementById("original_item_id").value = null;
     document.getElementById("name_edit").value = null;
@@ -327,6 +327,7 @@ function get_expiry_values(expiry_time) {
     return expiry_time.split('/').map(Number);
 }
 
+// returns the image path for an item or the placeholder image if it doesnt have one
 async function get_image_path(id) {
     let image_name = "null";
     try {

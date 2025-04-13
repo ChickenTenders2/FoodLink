@@ -1,4 +1,6 @@
 from database import database
+from os.path import isfile as file_exists
+from shutil import copyfile
 
 class item_table(database):
     def __init__(self):
@@ -24,7 +26,7 @@ class item_table(database):
         cursor.close()
         return items
     
-    def add_item(self, barcode, name, brand, expiry_time, default_quantity, unit, user_id):
+    def add_item(self, barcode, name, brand, expiry_time, default_quantity, unit, user_id = None):
         cursor = self.connection.cursor()
         query = "INSERT INTO FoodLink.item (barcode, name, brand, expiry_time, default_quantity, unit, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s);"
         data = (barcode, name, brand, expiry_time, default_quantity, unit, user_id)
@@ -63,12 +65,21 @@ class item_table(database):
 
             # gets image if uploaded otherwise equals none
             image = files.get("item_image", None)
+            original_item_id = form.get("item_id")
             # if an image is uploaded
             if image:
                 # store image in server with name item id
                 path = f"static/images/{item_id}.jpg"
                 image.save(path)
-
+            # if a cloned item uses the original item image
+            elif original_item_id:
+                old_path = f"static/images/{original_item_id}.jpg"
+                # makes sure original item has an image
+                if file_exists(old_path):
+                    path = f"static/images/{item_id}.jpg"
+                    # clone the image as well
+                    copyfile(old_path, path)
+            
             return {"success": True, "item_id": item_id}
         except Exception as e:
             return {"success": False, "error": str(e)}

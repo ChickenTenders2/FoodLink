@@ -114,6 +114,10 @@ def get_barcode():
     else:
         return jsonify({"success": False})
 
+@app.route("/unpause_scanner")
+def unpause_scanner():
+    scanner.unpause_scanner()
+    return jsonify({"success":True})
 
 ### ITEM ROUTES ###
 

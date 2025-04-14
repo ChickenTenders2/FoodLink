@@ -36,6 +36,7 @@ function close_item_popup(to_scanner) {
 function open_search_popup() {
     stop_check();
     document.getElementById('search_popup').style.display = 'block';
+    close_not_found_popup();
 }
 
 function close_search_popup() {
@@ -45,11 +46,11 @@ function close_search_popup() {
     document.getElementById('search_popup').style.display = 'none';
 }
 
-function select_item(item) {
+function select_item(item, from_scanner) {
     expiry_time = item[4];
     const [days, months, years] = get_expiry_values(expiry_time);
     const estimated_expiry = estimate_expiry_date(days, months, years);
-    open_item_popup(item, estimated_expiry, false)
+    open_item_popup(item, estimated_expiry, from_scanner)
 }
 
 function open_add_popup(from_clone, barcode = null) {
@@ -117,6 +118,23 @@ function close_add_popup(to_scanner) {
     toggle_inventory_fields();
 
     document.getElementById("add-popup").style.display = "none";
+}
+
+function open_not_found_popup(barcode) {
+    stop_check();
+    document.getElementById("not_found_popup").style.display = "block";
+    const button = document.getElementById("open_not_found_button")
+    // runs functions when button is pressed
+    button.onclick = () => {
+        close_not_found_popup();
+        open_add_popup(false, barcode);
+    }
+}
+
+function close_not_found_popup() {
+    start_check();
+    document.getElementById("not_found_popup").style.display = "none";
+    document.getElementById("open_not_found_button").onclick = null;
 }
 
 function toggle_inventory_fields() {
@@ -232,22 +250,17 @@ async function barcode_search_item(barcode_number) {
         formData.append("barcode", barcode_number);
         
         // Searches for item by barcode and awaits result
-        const response = await fetch('/items/barcode_search', {
+        const result = await fetch('/items/barcode_search', {
             method: 'POST',
             body: formData
         });                 
-        let data = await response.json();
+        let response = await result.json();
 
         // If an item is found
-        if (data.success) {
-            const [id, name, brand, expiry_time, default_quantity, unit] = data.item;
-            // Calculates estimated expiry
-            const [days, months, years] = get_expiry_values(expiry_time);
-            const estimated_expiry = estimate_expiry_date(days, months, years);
-            open_item_popup(item, estimated_expiry, true);
+        if (response.success) {
+            select_item(response.item, true);
         } else {
-            alert(data.error);
-            open_add_popup(false, barcode_number);
+            open_not_found_popup(barcode_number);
         }
     } catch (e) {
         alert(e);
@@ -282,7 +295,6 @@ async function add_item(event) {
 
 // Adds item to inventory
 async function add_new_item(event) {
-    console.log("new item");
     // Prevent the form from submitting normally
     event.preventDefault(); 
 

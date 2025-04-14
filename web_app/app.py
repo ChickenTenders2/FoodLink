@@ -2,6 +2,7 @@ from flask import Flask, jsonify, render_template, request, url_for, Response
 from inventory import inventory
 from barcode import barcode
 from item import item_table
+from item_error import item_error
 from os.path import isfile as file_exists
 app = Flask(__name__, template_folder = "templates")
 
@@ -84,12 +85,12 @@ def new_item():
         return jsonify(response)
     
     if not request.form.get("add_to_inventory"):
-        return jsonify({"success": True, "message": "Item added to personal items."})
+        return jsonify({"success": True, "item_id": response["item_id"], "message": "Item added to personal items."})
     
     item_id = response["item_id"]
     response = inv.process_add_form(user_id, item_id, request.form)
     if response["success"]:
-        return jsonify({"success": True, "message": "Item added to inventory and personal items."})
+        return jsonify({"success": True, "item_id": response["item_id"], "message": "Item added to inventory and personal items."})
     else:
         return jsonify(response)
 
@@ -172,10 +173,26 @@ def find_image(item_id):
     exists = file_exists(path)
     return jsonify({"success": exists})
 
+
+### ITEM REPORT ROUTES
+
+@app.route("/items/report_item", methods=["POST"])
+def report_item():
+    try:
+        user_id = 2
+        new_item_id = request.form.get("new_item_id")
+        item_id = request.form.get("item_id") or None
+        item_report.add_report(new_item_id, item_id, user_id)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error":str(e)})
+
+
 if __name__ == '__main__':
     # Classes for handling sql expressions
     inv = inventory()
     item = item_table()
+    item_report = item_error()
     # Class for handling barcode scanning
     scanner = barcode()
     # Runs the app

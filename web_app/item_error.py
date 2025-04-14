@@ -4,12 +4,12 @@ class item_error(database):
     def __init__(self):
         super().__init__()
 
-    def add_report(self, new_item_id, item_id, item_barcode, user_id):
+    def add_report(self, new_item_id, item_id, user_id):
         cursor = self.connection.cursor()
-        query = "INSERT INTO item_error (new_item_id, item_id, item_barcode, error_type, user_id) VALUES (%s, %s, %s, %s, %s);"
+        query = "INSERT INTO item_error (new_item_id, item_id, error_type, user_id) VALUES (%s, %s, %s, %s);"
         # calculates error type
         error_type = "missing" if item_id is None else "misinformation"
-        data = (new_item_id, item_id, item_barcode, error_type, user_id)
+        data = (new_item_id, item_id, error_type, user_id)
         cursor.execute(query, data)
         self.connection.commit()
         cursor.close()

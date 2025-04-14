@@ -137,16 +137,15 @@ function close_not_found_popup() {
     document.getElementById("open_not_found_button").onclick = null;
 }
 
-function open_report_popup(event, original_item_id) {
+function open_report_popup(original_item_id, item_id) { 
     if (original_item_id) {
         document.getElementById("report_message").innerHTML = "Report item error?";
     }
     document.getElementById("report_popup").style.display = "block";
-    const button = document.getElementById("report_button")
+    const button = document.getElementById("report_button");
     // runs functions when button is pressed
     button.onclick = () => {
-        //send_report(event);
-        document.getElementById("report_message").innerHTML = "Item reported."
+        send_report(original_item_id, item_id);
         button.innerHTML = "Done";
         button.onclick = () => {
             close_report_popup(); 
@@ -156,8 +155,9 @@ function open_report_popup(event, original_item_id) {
 
 function close_report_popup() {
     document.getElementById("report_message").innerHTML = "Report missing item?"
+    document.getElementById("report_button").innerHTML = "Send Report";
     document.getElementById("report_popup").style.display = "none";
-    document.getElementById("report_button").onclick = null;  
+    document.getElementById("report_button").onclick = null;
 }
 
 function toggle_inventory_fields() {
@@ -337,13 +337,33 @@ async function add_new_item(event) {
     if (result.success) {
         alert(result.message);
         const original_item_id = document.getElementById("original_item_id").value;
+        
+        open_report_popup(original_item_id, result.item_id);
         close_add_popup(false);
-        open_report_popup(event, original_item_id)
+
     } else {
         alert('There was an error adding the item. Error: ' + result.error);
     }
 }
 
+async function send_report(original_item_id, item_id) {
+
+    const formData = new FormData();
+    formData.append("new_item_id", item_id);
+    formData.append("item_id", original_item_id);
+
+    // Sends update command and waits for response
+    const response = await fetch('/items/report_item', {
+        method: 'POST',
+        body: formData,
+    });
+
+    //Waits until result is recieved
+    const result = await response.json();
+
+    document.getElementById("report_message").innerHTML = result.success ? "Item reported." : 
+                            "Error reporting item: " + result.error + ". Please try again later.";
+}
 
 
 function estimate_expiry_from_string(expiry_time) {

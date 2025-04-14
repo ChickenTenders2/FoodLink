@@ -137,6 +137,29 @@ function close_not_found_popup() {
     document.getElementById("open_not_found_button").onclick = null;
 }
 
+function open_report_popup(event, original_item_id) {
+    if (original_item_id) {
+        document.getElementById("report_message").innerHTML = "Report item error?";
+    }
+    document.getElementById("report_popup").style.display = "block";
+    const button = document.getElementById("report_button")
+    // runs functions when button is pressed
+    button.onclick = () => {
+        //send_report(event);
+        document.getElementById("report_message").innerHTML = "Item reported."
+        button.innerHTML = "Done";
+        button.onclick = () => {
+            close_report_popup(); 
+        }
+    }
+}
+
+function close_report_popup() {
+    document.getElementById("report_message").innerHTML = "Report missing item?"
+    document.getElementById("report_popup").style.display = "none";
+    document.getElementById("report_button").onclick = null;  
+}
+
 function toggle_inventory_fields() {
     const checkbox = document.getElementById("add_to_inventory").checked;
     const expiry_input = document.getElementById("expiry_date2");
@@ -312,12 +335,16 @@ async function add_new_item(event) {
     const result = await response.json();
 
     if (result.success) {
-        alert("Item added succesfully.");
-        close_item_popup();
+        alert(result.message);
+        const original_item_id = document.getElementById("original_item_id").value;
+        close_add_popup(false);
+        open_report_popup(event, original_item_id)
     } else {
         alert('There was an error adding the item. Error: ' + result.error);
     }
 }
+
+
 
 function estimate_expiry_from_string(expiry_time) {
     const [days, months, years] = get_expiry_values(expiry_time);

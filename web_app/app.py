@@ -84,11 +84,14 @@ def new_item():
         return jsonify(response)
     
     if not request.form.get("add_to_inventory"):
-        return jsonify({"success": True})
+        return jsonify({"success": True, "message": "Item added to personal items."})
     
     item_id = response["item_id"]
     response = inv.process_add_form(user_id, item_id, request.form)
-    return jsonify(response)
+    if response["success"]:
+        return jsonify({"success": True, "message": "Item added to inventory and personal items."})
+    else:
+        return jsonify(response)
 
 
 ### BARCODE SCANNING ROUTES ###

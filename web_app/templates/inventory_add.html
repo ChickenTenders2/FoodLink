@@ -112,6 +112,14 @@
             <button type="submit">Add Item</button>
         </form>
     </div>
+
+    <div id="report_popup" class="popup">
+        <h2>Report Item</h2>
+        <button onclick="close_report_popup()">X</button>
+        <p id="report_message">Report missing item?</p>
+        <button id="report_button">Send Report</button>       
+    </div>
+
     <script src="{{ url_for('static', filename='js/barcode_scan.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/inventory_add.js') }}"></script> 
 </body>

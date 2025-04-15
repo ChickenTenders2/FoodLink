@@ -36,7 +36,7 @@ def get_inventory():
     
     if sort_by in ['name', 'expiry']:
         # sorts by name or expiry
-        items = sorted(items, key=lambda x: x[2] if sort_by == 'name' else x[6])
+        items = sorted(items, key = lambda x: x[2] if sort_by == 'name' else x[6])
 
     # formats each item as list for easier modification of date format
     items = [list(i) for i in items]
@@ -187,6 +187,18 @@ def report_item():
     except Exception as e:
         return jsonify({"success": False, "error":str(e)})
 
+@app.route("/items/reports")
+def display_reports():
+    return render_template("reports.html")
+
+@app.route("/items/get_reports")
+def get_reports():
+    return jsonify({"success": True, "reports": item_report.get_reports()})
+
+@app.route("/items/reports/<new_item_id>")
+def display_report(new_item_id):
+    report = item_report.get_report(new_item_id)
+    return render_template("report.html", report = report)
 
 if __name__ == '__main__':
     # Classes for handling sql expressions

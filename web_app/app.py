@@ -19,13 +19,13 @@ def index():
 
 # Logout Route
 
-
+user_id = 3
 ### INVENTORY ROUTES ###
 
 # Inventory interface
 @app.route('/inventory/')
 def get_inventory():
-    user_id = 2
+    
     search_query = request.args.get('search')
     sort_by = request.args.get('sort_by')
     # searches for an item if query is provided otherwise gets all items
@@ -54,7 +54,7 @@ def add_to_inventory():
 # Add item to inventory
 @app.route("/inventory/add_item/add", methods=["POST"])
 def append_inventory():
-    user_id = 2
+    
     item_id = request.form.get("item_id")
     response = inv.process_add_form(user_id, item_id, request.form)
     return jsonify(response)
@@ -77,20 +77,20 @@ def update_item():
     
 @app.route("/inventory/add_item/new", methods = ["POST"])
 def new_item():
-    user_id = 2
+    
     response = item.process_add_form(request.form, request.files, user_id)
+    item_id = response["item_id"]
 
     # if the item was not succesffuly added to the item table
     if not response["success"]:
         return jsonify(response)
     
     if not request.form.get("add_to_inventory"):
-        return jsonify({"success": True, "item_id": response["item_id"], "message": "Item added to personal items."})
+        return jsonify({"success": True, "item_id": item_id, "message": "Item added to personal items."})
     
-    item_id = response["item_id"]
     response = inv.process_add_form(user_id, item_id, request.form)
     if response["success"]:
-        return jsonify({"success": True, "item_id": response["item_id"], "message": "Item added to inventory and personal items."})
+        return jsonify({"success": True, "item_id": item_id, "message": "Item added to inventory and personal items."})
     else:
         return jsonify(response)
 
@@ -128,7 +128,7 @@ def unpause_scanner():
 # Get items by text search
 @app.route("/items/text_search", methods=["POST"])
 def text_search():
-    user_id = 2
+    
     try:
         search_term = request.form["search_term"]
         items = item.text_search(user_id, search_term)
@@ -139,7 +139,7 @@ def text_search():
 # Get item by barcode search         ###############              ####### MAKE SURE WHEN ADDING TO ITEM TABLE THERE IS ONLY 1 BARCODE FOR EACH USER_ID IN ITEM TABLE
 @app.route("/items/barcode_search/<barcode>")
 def get_item_by_barcode(barcode):
-    user_id = 2
+    
     try:
         item_info = item.barcode_search(user_id, barcode)
         if item_info:
@@ -186,7 +186,7 @@ def find_image(item_id):
 @app.route("/items/report_item", methods=["POST"])
 def report_item():
     try:
-        user_id = 2
+        
         new_item_id = request.form.get("new_item_id")
         item_id = request.form.get("item_id") or None
         item_report.add_report(new_item_id, item_id, user_id)
@@ -208,69 +208,81 @@ def display_report(new_item_id, item_id):
 
 @app.route("/items/reports/resolve", methods=["POST"])
 def resolve_report():
-    action = request.form.get("action")
-    barcode = request.form.get("barcode")
-    new_item_id = request.form.get("new_item_id")
-    original_item_id = request.form.get("item_id") or None
-    if action == "approve":
-        # if the error was misinformation 
-        if original_item_id:
-            # updates original item with correct information
-            # sets the user_id = null for the item so it appears for all users
-            item.process_update_form(original_item_id, request.form, request.files)
-            # finds other reports that reported the original item
-            duplicate_reports = item_report.get_duplicate_reports(original_item_id, "id")
-            for personal_item_id, user_id in duplicate_reports:
-                # replaces the personal item the user made with the now corrected item
-                inv.correct_personal_item(original_item_id, personal_item_id)
-                # removes the users personal item as it is no longer needed
-                item.remove_item(personal_item_id)
-                #####################################################
-                            ### NOTIFY USER OF CHANGE ###
-                #####################################################
-                print(user_id)
-        # if error was a missing item
-        else:
-            # updates the missing item incase it needs additional changes
-            # sets the user_id = null for the item so it appears for all users
-            item.process_update_form(new_item_id, request.form, request.files)
-            # find other reports that reported the missing item
-            duplicate_reports = item_report.get_duplicate_reports(barcode, "barcode")
-            for personal_item_id, user_id in duplicate_reports:
-                # the missing item uses the users personal item id but removes the user id from the item
-                # this means the personal item from the report does not need updating or removing
-                if personal_item_id != new_item_id:
+    try:
+        action = request.form.get("action")
+        barcode = request.form.get("barcode")
+        new_item_id = request.form.get("new_item_id")
+        original_item_id = request.form.get("item_id") or None
+        if action == "approve":
+            # if the error was misinformation 
+            if original_item_id:
+                # updates original item with correct information
+                # sets the user_id = null for the item so it appears for all users
+                item.process_update_form(original_item_id, request.form, request.files)
+                # finds other reports that reported the original item
+                duplicate_reports = item_report.get_duplicate_reports(original_item_id, "id")
+                for personal_item_id, user_id in duplicate_reports:
                     # replaces the personal item the user made with the now corrected item
-                    inv.correct_personal_item(new_item_id, personal_item_id)
+                    inv.correct_personal_item(original_item_id, personal_item_id)
                     # removes the users personal item as it is no longer needed
                     item.remove_item(personal_item_id)
-                # all users that reported should still be notified no matter if the item id was originally theirs or not
-                #####################################################
-                            ### NOTIFY USER OF CHANGE ###
-                #####################################################
-                print(user_id)
-    # if item is denied
-    else:
-        # if the error was misinformation but the original wasnt incorrect
-        if original_item_id:
-            duplicate_reports = item_report.get_duplicate_reports(original_item_id, "id")
-            for personal_item_id, user_id in duplicate_reports:
-                # replaces the personal item the user made with the original 
-                inv.correct_personal_item(original_item_id, personal_item_id)
-                # removes the users personal item as it is no longer needed
-                item.remove_item(personal_item_id)
-                #####################################################
-                            ### NOTIFY USER TO DOUBLE CHECK BEFORE REPORTING ###
-                #####################################################
-                print(user_id)
-        # item is missing but not approved to be accessible to all users
+                    #####################################################
+                                ### NOTIFY USER OF CHANGE ###
+                    #####################################################
+                    print(user_id)
+            # if error was a missing item
+            else:
+                # updates the missing item incase it needs additional changes
+                # sets the user_id = null for the item so it appears for all users
+                item.process_update_form(new_item_id, request.form, request.files)
+                # find other reports that reported the missing item
+                duplicate_reports = item_report.get_duplicate_reports(barcode, "barcode")
+                for personal_item_id, user_id in duplicate_reports:
+                    # the missing item uses the users personal item id but removes the user id from the item
+                    # this means the personal item from the report does not need updating or removing
+                    if personal_item_id != new_item_id:
+                        # replaces the personal item the user made with the now corrected item
+                        inv.correct_personal_item(new_item_id, personal_item_id)
+                        # removes the users personal item as it is no longer needed
+                        item.remove_item(personal_item_id)
+                    # all users that reported should still be notified no matter if the item id was originally theirs or not
+                    #####################################################
+                                ### NOTIFY USER OF CHANGE ###
+                    #####################################################
+                    print(user_id)
+        # if item is denied
         else:
-            # gets the user_id that added the missing item
-            user_id = item.get_user_id_item(new_item_id)
-            print(user_id)
-            #####################################################
-                            ### NOTIFY USER ITEM IS NOT CURRENTLY ELLIGABLE FOR ADDITION (or something like that) ###
-            #####################################################
+            # if the error was misinformation but the original wasnt incorrect
+            if original_item_id:
+                duplicate_reports = item_report.get_duplicate_reports(original_item_id, "id")
+                for personal_item_id, user_id in duplicate_reports:
+                    # replaces the personal item the user made with the original 
+                    inv.correct_personal_item(original_item_id, personal_item_id)
+                    # removes the users personal item as it is no longer needed
+                    item.remove_item(personal_item_id)
+                    #####################################################
+                                ### NOTIFY USER TO DOUBLE CHECK BEFORE REPORTING ###
+                    #####################################################
+                    print(user_id)
+            # item is missing but not approved to be accessible to all users
+            else:
+                # gets the user_id that added the missing item
+                user_id = item.get_user_id_item(new_item_id)
+                print(user_id)
+                #####################################################
+                                ### NOTIFY USER ITEM IS NOT CURRENTLY ELLIGABLE FOR ADDITION (or something like that) ###
+                #####################################################
+
+        # removes the reports once resolved
+        if original_item_id:
+            item_report.remove_reports(original_item_id, "id")
+        else:
+            item_report.remove_reports(barcode, "barcode")
+        
+        return jsonify({"success": True})
+    
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
 
 
 

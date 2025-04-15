@@ -198,13 +198,81 @@ def report_item():
 def display_reports():
     return render_template("reports.html")
 
-@app.route("/items/get_reports")
+@app.route("/items/reports/get")
 def get_reports():
     return jsonify({"success": True, "reports": item_report.get_reports()})
 
 @app.route("/items/reports/<new_item_id>/<item_id>")
 def display_report(new_item_id, item_id):
     return render_template("report.html", new_item_id = new_item_id, item_id = item_id)
+
+@app.route("/items/reports/resolve", methods=["POST"])
+def resolve_report():
+    action = request.form.get("action")
+    barcode = request.form.get("barcode")
+    new_item_id = request.form.get("new_item_id")
+    original_item_id = request.form.get("item_id") or None
+    if action == "approve":
+        # if the error was misinformation 
+        if original_item_id:
+            # updates original item with correct information
+            # sets the user_id = null for the item so it appears for all users
+            item.process_update_form(original_item_id, request.form, request.files)
+            # finds other reports that reported the original item
+            duplicate_reports = item_report.get_duplicate_reports(original_item_id, "id")
+            for personal_item_id, user_id in duplicate_reports:
+                # replaces the personal item the user made with the now corrected item
+                inv.correct_personal_item(original_item_id, personal_item_id)
+                # removes the users personal item as it is no longer needed
+                item.remove_item(personal_item_id)
+                #####################################################
+                            ### NOTIFY USER OF CHANGE ###
+                #####################################################
+                print(user_id)
+        # if error was a missing item
+        else:
+            # updates the missing item incase it needs additional changes
+            # sets the user_id = null for the item so it appears for all users
+            item.process_update_form(new_item_id, request.form, request.files)
+            # find other reports that reported the missing item
+            duplicate_reports = item_report.get_duplicate_reports(barcode, "barcode")
+            for personal_item_id, user_id in duplicate_reports:
+                # the missing item uses the users personal item id but removes the user id from the item
+                # this means the personal item from the report does not need updating or removing
+                if personal_item_id != new_item_id:
+                    # replaces the personal item the user made with the now corrected item
+                    inv.correct_personal_item(new_item_id, personal_item_id)
+                    # removes the users personal item as it is no longer needed
+                    item.remove_item(personal_item_id)
+                # all users that reported should still be notified no matter if the item id was originally theirs or not
+                #####################################################
+                            ### NOTIFY USER OF CHANGE ###
+                #####################################################
+                print(user_id)
+    # if item is denied
+    else:
+        # if the error was misinformation but the original wasnt incorrect
+        if original_item_id:
+            duplicate_reports = item_report.get_duplicate_reports(original_item_id, "id")
+            for personal_item_id, user_id in duplicate_reports:
+                # replaces the personal item the user made with the original 
+                inv.correct_personal_item(original_item_id, personal_item_id)
+                # removes the users personal item as it is no longer needed
+                item.remove_item(personal_item_id)
+                #####################################################
+                            ### NOTIFY USER TO DOUBLE CHECK BEFORE REPORTING ###
+                #####################################################
+                print(user_id)
+        # item is missing but not approved to be accessible to all users
+        else:
+            # gets the user_id that added the missing item
+            user_id = item.get_user_id_item(new_item_id)
+            print(user_id)
+            #####################################################
+                            ### NOTIFY USER ITEM IS NOT CURRENTLY ELLIGABLE FOR ADDITION (or something like that) ###
+            #####################################################
+
+
 
 if __name__ == '__main__':
     # Classes for handling sql expressions

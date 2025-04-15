@@ -1,7 +1,7 @@
 async function get_reports() {
 
     // Sends update command and waits for response
-    const response = await fetch('/items/get_reports');
+    const response = await fetch('/items/reports/get');
 
     //Waits until result is recieved
     const result = await response.json();

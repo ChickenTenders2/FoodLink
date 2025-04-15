@@ -18,9 +18,7 @@ class item_error(database):
     def remove_reports(self, identifier, type):
         cursor = self.connection.cursor()
         query = "DELETE error FROM item_error error JOIN item i ON (error.new_item_id = i.id) WHERE "
-        if type == "name":
-            query += "i.name = %s;"
-        elif type == "barcode":
+        if type == "barcode":
             query += "i.barcode = %s;"
         elif type == "id":
             query += "error.item_id = %s;"
@@ -30,20 +28,18 @@ class item_error(database):
         cursor.close()
 
     # gets each user_id from reports where the item is the same
-    def get_reports_user_id(self, identifier, type):
+    def get_duplicate_reports(self, identifier, type):
         cursor = self.connection.cursor()
-        query = "SELECT error.user_id from FoodLink.item_error error JOIN item i ON (error.new_item_id = i.id) WHERE "
-        if type == "name":
-            query += "i.name = %s;"
-        elif type == "barcode":
+        query = "SELECT error.new_item_id, error.user_id from FoodLink.item_error error JOIN item i ON (error.new_item_id = i.id) WHERE "
+        if type == "barcode":
             query += "i.barcode = %s;"
         elif type == "id":
             query += "error.item_id = %s;"
         data = (identifier,)
         cursor.execute(query, data)
-        items = cursor.fetchall()
+        reports = cursor.fetchall()
         cursor.close()
-        return items
+        return reports
 
     def get_reports(self):
         cursor = self.connection.cursor()

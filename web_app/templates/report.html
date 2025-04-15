@@ -11,9 +11,46 @@
     <h1>Item report</h1>
     <!-- displays each users items-->
     <div class="report-container">
+        <div id="original_item">
 
+        </div>
+        <div id="new_item">
+            <h2>New Item Information</h2>
+            <img class="item_img" id="image_preview" src="/static/images/null.jpg" alt="">
+            <form id="update-form" method="POST" onsubmit="update_item(event)">
+                <label>Upload Image:</label>
+                <!-- only accepts image files -->
+                <input type="file" id="item_image" name="item_image" accept="image/jpeg" onchange="update_image_preview(event)">
+                <br>
+                <label>Barcode:</label>
+                <input type="text" id="barcode" name="barcode">
+                <br>
+                <label>Item Name:</label>
+                <input type="text" id="name" name="name" required>
+                <br>
+                <label>Brand:</label>
+                <input type="text" id="brand" name="brand">
+                <br>
+                <label>Expiry Time:</label>
+                <input type="number" id="expiry_day" class="date_field" name="expiry_day" min="0" max="30" placeholder="DD" required>
+                <label>/</label>
+                <input type="number" id="expiry_month" class="date_field" name="expiry_month" min="0" max="11" placeholder="MM" required>
+                <label>/</label>
+                <input type="number" id="expiry_year" class="date_field" name="expiry_year" min="0" max="99" placeholder="YY" required>
+                <br>
+                <label>Quantity:</label>
+                <input type="number" id="default_quantity" name="default_quantity" required>
+                <br>
+                <label>Unit:</label>
+                <input type="text" id="unit" name="unit" required>
+                <br>
+                <input type="hidden" id="new_item_id" name="item_id" value="{{new_item_id}}">
+                <button type="submit">Update Item</button>
+            </form>
+        </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/item_handling.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/report.js') }}"></script>
 </body>
 </html>

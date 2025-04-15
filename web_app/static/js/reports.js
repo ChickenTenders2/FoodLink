@@ -44,7 +44,6 @@ function sort_filter_reports() {
             return date_value(b) - date_value(a);
         });
     }
-    console.log(reports);
     fill_table(reports);
 }
 
@@ -52,10 +51,10 @@ function fill_table(reports) {
     const table_body = document.getElementById("table_body");
     table_body.innerHTML = "";
     for (let report of reports) {
-        const [new_item_id, item_id, error_type, date_created, username] = report;
+        const [new_item_id, item_id, error_type, date_created, username, new_item_name] = report;
         const row = document.createElement("tr");
-        row.innerHTML = `<td>${new_item_id}</td><td>${item_id}</td><td>${error_type}</td><td>${date_created}</td><td>${username}</td>`;
-        row.onclick = () => window.location.href = "/items/reports/" + new_item_id;
+        row.innerHTML = `<td>${new_item_id}</td><td>${new_item_name}</td><td>${error_type}</td><td>${date_created}</td><td>${username}</td>`;
+        row.onclick = () => window.location.href = "/items/reports/" + new_item_id + "/" + item_id;
         table_body.appendChild(row);
     }
 }

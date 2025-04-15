@@ -47,24 +47,11 @@ class item_error(database):
 
     def get_reports(self):
         cursor = self.connection.cursor()
-        query = """SELECT new_item_id, item_id, error_type, date_created, admin.username 
+        query = """SELECT new_item_id, item_id, error_type, date_created, admin.username, i.name 
                     FROM FoodLink.item_error error 
-                    LEFT JOIN FoodLink.admin admin ON (error.admin_id = admin.id);"""
+                    LEFT JOIN FoodLink.admin admin ON (error.admin_id = admin.id)
+                    JOIN item i ON (error.new_item_id = i.id);""" 
         cursor.execute(query)
         reports = cursor.fetchall()
         cursor.close()
         return reports
-
-    def get_report(self, new_item_id):
-        cursor = self.connection.cursor()
-        query = """SELECT i.id, i.barcode, i.name, i.brand, i.expiry_time, i.default_quantity, i.unit, 
-                    i2.id, i2.barcode, i2.name, i2.brand, i2.expiry_time, i2.default_quantity, i2.unit 
-                    from FoodLink.item_error error 
-                    JOIN item i ON (error.new_item_id = i.id) 
-                    LEFT JOIN item i2 on (error.item_id = i2.id)
-                    WHERE new_item_id = %s;"""
-        data = (new_item_id,)
-        cursor.execute(query, data)
-        report = cursor.fetchall()
-        cursor.close()
-        return report

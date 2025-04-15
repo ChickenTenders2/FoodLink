@@ -59,3 +59,19 @@ async function submit_update(event) {
         alert('There was an error updating the item.');
     }
 }
+
+
+// returns the image path for an item or the placeholder image if it doesnt have one
+async function get_image_path(id) {
+    let image_name = "null";
+    try {
+        const response = await fetch("/find_image/" + id);
+        const result = await response.json();
+        if (result.success) {
+            image_name = id;
+        }
+    } catch (e) {
+        console.log(e);
+    }
+    return "/static/images/" + image_name + ".jpg";
+}

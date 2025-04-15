@@ -26,6 +26,15 @@ class item_table(database):
         cursor.close()
         return items
     
+    def get_item(self, item_id):
+        cursor = self.connection.cursor()
+        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE id = %s;"
+        data = (item_id,)
+        cursor.execute(query, data)
+        item = cursor.fetchall()
+        cursor.close()
+        return item[0]
+    
     def add_item(self, barcode, name, brand, expiry_time, default_quantity, unit, user_id = None):
         cursor = self.connection.cursor()
         query = "INSERT INTO FoodLink.item (barcode, name, brand, expiry_time, default_quantity, unit, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s);"

@@ -137,17 +137,24 @@ def text_search():
         return jsonify({"success": False, "error": str(e)})
 
 # Get item by barcode search         ###############              ####### MAKE SURE WHEN ADDING TO ITEM TABLE THERE IS ONLY 1 BARCODE FOR EACH USER_ID IN ITEM TABLE
-@app.route("/items/barcode_search", methods = ["POST"])
-def get_item_by_barcode():
+@app.route("/items/barcode_search/<barcode>")
+def get_item_by_barcode(barcode):
     user_id = 2
     try:
-        barcode_number = request.form["barcode"]
-        item_info = item.barcode_search(user_id, barcode_number)
+        item_info = item.barcode_search(user_id, barcode)
         if item_info:
             # returns the first item in the list as barcodes are unique
             return jsonify({"success": True, "item": item_info[0]})
         else:
             return jsonify({"success": False, "error": "Item not found."})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+    
+@app.route("/items/get_item/<item_id>")
+def get_item(item_id):
+    try:
+        item_info = item.get_item(item_id)
+        return jsonify({"success": True, "item": item_info})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
@@ -195,10 +202,9 @@ def display_reports():
 def get_reports():
     return jsonify({"success": True, "reports": item_report.get_reports()})
 
-@app.route("/items/reports/<new_item_id>")
-def display_report(new_item_id):
-    report = item_report.get_report(new_item_id)
-    return render_template("report.html", report = report)
+@app.route("/items/reports/<new_item_id>/<item_id>")
+def display_report(new_item_id, item_id):
+    return render_template("report.html", new_item_id = new_item_id, item_id = item_id)
 
 if __name__ == '__main__':
     # Classes for handling sql expressions

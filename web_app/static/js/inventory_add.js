@@ -198,16 +198,6 @@ function toggle_inventory_fields() {
     inputs_container.style.display = "block";
 }
 
-function update_image_preview(event) {
-    if (event.target.files && event.target.files[0]) {
-        image = document.getElementById("image_preview");
-        image.src = URL.createObjectURL(event.target.files[0]);
-        image.onload = function() {
-            URL.revokeObjectURL(image.src); //Frees up memory after image is changed
-        }
-    }
-}
-
 async function text_search_item(event) {
     // Prevent the form from submitting normally
     event.preventDefault(); 
@@ -268,15 +258,9 @@ function process_barcode(barcode) {
 // Checks if barcode is in item table
 async function barcode_search_item(barcode_number) {
     try {
-        // Creates form with barcode number
-        const formData = new FormData();
-        formData.append("barcode", barcode_number);
-        
+
         // Searches for item by barcode and awaits result
-        const result = await fetch('/items/barcode_search', {
-            method: 'POST',
-            body: formData
-        });                 
+        const result = await fetch('/items/barcode_search/'+barcode_number)               
         let response = await result.json();
 
         // If an item is found
@@ -365,12 +349,6 @@ async function send_report(original_item_id, item_id) {
                             "Error reporting item: " + result.error + ". Please try again later.";
 }
 
-
-function estimate_expiry_from_string(expiry_time) {
-    const [days, months, years] = get_expiry_values(expiry_time);
-    return estimate_expiry_date(days, months, years);
-}
-
 // Calculate an estimate of the expiry date
 function estimate_expiry_date(days, months, years) {
     // Todays date
@@ -385,22 +363,3 @@ function estimate_expiry_date(days, months, years) {
     return estimated_expiry.toISOString().split('T')[0];
 }
 
-function get_expiry_values(expiry_time) {
-    // Gets each part of the expiry string and maps it to a number
-    return expiry_time.split('/').map(Number);
-}
-
-// returns the image path for an item or the placeholder image if it doesnt have one
-async function get_image_path(id) {
-    let image_name = "null";
-    try {
-        const response = await fetch("/find_image/" + id);
-        const result = await response.json();
-        if (result.success) {
-            image_name = id;
-        }
-    } catch (e) {
-        console.log(e);
-    }
-    return "/static/images/" + image_name + ".jpg";
-}

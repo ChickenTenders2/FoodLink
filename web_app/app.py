@@ -218,14 +218,14 @@ def resolve_report():
             # removes the report
             item_report.remove_report(new_item_id)
             # gets the user_id that added the missing item
-            user_id = item.get_user_id_item(new_item_id)
+            _, personal_item_name, user_id = item_report.get_reports_by(new_item_id)
 
             message = """Thank you for reporting a missing item. 
                         Unfortunately, your item is not currently elligible to be added at this time.
                         However, you can still use your personal item. 
                         """
 
-            print(user_id, message)
+            print(user_id, personal_item_name, message)
             #####################################################
                             ### NOTIFY USER ITEM IS NOT CURRENTLY ELLIGIBLE FOR ADDITION (or something like that) ###
             #####################################################
@@ -249,7 +249,7 @@ def resolve_report():
                         Your personal item has been successfully replaced."""
 
             # finds reports that report the original item
-            duplicate_reports = item_report.get_duplicate_reports(original_item_id, "id")
+            duplicate_reports = item_report.get_reports_by(new_item_id, original_item_id, "id")
         # if the error was a missing item and it got approved
         else:
             # adds the missing item to the table
@@ -265,10 +265,10 @@ def resolve_report():
             # find other reports that reported the missing item
             # finds by same barcode as their is no original item for missing items
             # also gets the current report for processing
-            duplicate_reports = item_report.get_duplicate_reports(new_item_id, barcode, "barcode")
+            duplicate_reports = item_report.get_reports_by(new_item_id, barcode, "barcode")
 
         # for each report of an item
-        for personal_item_id, user_id in duplicate_reports:
+        for personal_item_id, personal_item_name, user_id in duplicate_reports:
             # replace the personal item the user made with the now corrected / new item
             inv.correct_personal_item(personal_item_id, replace_id)
             # removes the users personal item as it is no longer needed
@@ -279,7 +279,7 @@ def resolve_report():
             #####################################################
                         ### NOTIFY USER OF CHANGE ###
             #####################################################
-            print(user_id, message)
+            print(user_id, personal_item_name, message)
 
         return jsonify({"success": True, "message": message})
     

@@ -140,7 +140,7 @@ function close_not_found_popup() {
 
 function open_report_popup(original_item_id, item_id) { 
     if (original_item_id) {
-        document.getElementById("report_message").innerHTML = "Report item error?";
+        document.getElementById("report_message").innerHTML = "Send request to fix item error?";
     }
     document.getElementById("report_popup").style.display = "block";
     const button = document.getElementById("report_button");
@@ -155,7 +155,8 @@ function open_report_popup(original_item_id, item_id) {
 }
 
 function close_report_popup() {
-    document.getElementById("report_message").innerHTML = "Report missing item?"
+    document.getElementById("report_message").innerHTML = "Send request for missing item to be available for all?";
+    document.getElementById("report_message_2").innerHTML = "If successful, your personal item will be replaced.";
     document.getElementById("report_button").innerHTML = "Send Report";
     document.getElementById("report_popup").style.display = "none";
     document.getElementById("report_button").onclick = null;
@@ -345,9 +346,10 @@ async function send_report(original_item_id, item_id) {
 
     //Waits until result is recieved
     const result = await response.json();
-
-    document.getElementById("report_message").innerHTML = result.success ? "Item reported." : 
+    
+    document.getElementById("report_message").innerHTML = result.success ? "Item successfully reported." : 
                             "Error reporting item: " + result.error + ". Please try again later.";
+    document.getElementById("report_message_2").innerHTML = "";
 }
 
 // Calculate an estimate of the expiry date

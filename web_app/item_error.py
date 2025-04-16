@@ -24,10 +24,10 @@ class item_error(database):
         cursor.close()
 
     # gets each report where the original item id or barcode is the same (as these are unique identifiers)
-    # also gets the report by new_item_id incase item is missing and barcode is null
-    def get_duplicate_reports(self, new_item_id, identifier, type):
+    # also gets the report by new_item_id incase item was missing and barcode is null
+    def get_reports_by(self, new_item_id, identifier = None, type = None):
         cursor = self.connection.cursor()
-        query = """SELECT error.new_item_id, error.user_id from FoodLink.item_error error 
+        query = """SELECT error.new_item_id, i.name, error.user_id from FoodLink.item_error error 
                     JOIN item i ON (error.new_item_id = i.id) 
                     WHERE new_item_id = %s OR """
         if type == "barcode":

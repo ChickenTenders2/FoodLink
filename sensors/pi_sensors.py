@@ -152,13 +152,8 @@ if __name__=="__main__":
         
           data = get_telemetry(token, device_id)
           distance = grovepi.ultrasonicRead(ultrasonic_ranger)
-          
-          # Triggers the alarm if the door is left open for two minutes.
-          if distance > door_to_wall and (time.time() - start_time >= delay):
-            alarm()
-            start_time = time.time()
-          
-          # If a new message (new timestamp) is recieved from ThingsBoard 
+
+                    # If a new message (new timestamp) is recieved from ThingsBoard 
           # then the display is updated for 5 seconds (when an item is added
           # on the website.
           if data and 'message' in data:
@@ -175,6 +170,11 @@ if __name__=="__main__":
             setText(x)
 
            last_time = time_stamp
+          
+          # Triggers the alarm if the door is left open for two minutes.
+          if distance > door_to_wall and (time.time() - start_time >= delay):
+            alarm()
+            start_time = time.time()
                 
         except KeyboardInterrupt:
                 print ("Terminated.")

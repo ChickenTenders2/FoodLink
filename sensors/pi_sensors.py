@@ -154,7 +154,7 @@ if __name__=="__main__":
           distance = grovepi.ultrasonicRead(ultrasonic_ranger)
           
           # Triggers the alarm if the door is left open for two minutes.
-          if distance > 1 and (time.time() - start_time >= delay):
+          if distance > door_to_wall and (time.time() - start_time >= delay):
             alarm()
             start_time = time.time()
           

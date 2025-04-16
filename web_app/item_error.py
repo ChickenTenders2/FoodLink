@@ -15,27 +15,26 @@ class item_error(database):
         cursor.close()
 
     # removes an error and any duplicate reports once it has been solved
-    def remove_reports(self, identifier, type):
+    def remove_report(self, new_item_id):
         cursor = self.connection.cursor()
-        query = "DELETE error FROM item_error error JOIN item i ON (error.new_item_id = i.id) WHERE "
-        if type == "barcode":
-            query += "i.barcode = %s;"
-        elif type == "id":
-            query += "error.item_id = %s;"
-        data = (identifier,)
+        query = "DELETE FROM item_error WHERE new_item_id = %s;"
+        data = (new_item_id,)
         cursor.execute(query, data)
         self.connection.commit()
         cursor.close()
 
-    # gets each user_id from reports where the item is the same
-    def get_duplicate_reports(self, identifier, type):
+    # gets each report where the original item id or barcode is the same (as these are unique identifiers)
+    # also gets the report by new_item_id incase item is missing and barcode is null
+    def get_duplicate_reports(self, new_item_id, identifier, type):
         cursor = self.connection.cursor()
-        query = "SELECT error.new_item_id, error.user_id from FoodLink.item_error error JOIN item i ON (error.new_item_id = i.id) WHERE "
+        query = """SELECT error.new_item_id, error.user_id from FoodLink.item_error error 
+                    JOIN item i ON (error.new_item_id = i.id) 
+                    WHERE new_item_id = %s OR """
         if type == "barcode":
             query += "i.barcode = %s;"
         elif type == "id":
             query += "error.item_id = %s;"
-        data = (identifier,)
+        data = (new_item_id, identifier)
         cursor.execute(query, data)
         reports = cursor.fetchall()
         cursor.close()

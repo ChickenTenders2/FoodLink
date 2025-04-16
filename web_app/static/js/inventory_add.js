@@ -110,6 +110,7 @@ function close_add_popup(to_scanner) {
     document.getElementById("barcode_edit").value = null;
     document.getElementById("brand_edit").value = null;
     document.getElementById("default_quantity").value = null;
+    document.getElementById("unit_edit").value = null;
     document.getElementById("quantity2").max = null;
     document.getElementById("quantity2").value = null;
     document.getElementById("expiry_date2").value = null;

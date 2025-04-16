@@ -65,14 +65,14 @@ class inventory(database):
         except Exception as e:
             return {"success": False, "error": str(e)}
         
-    def correct_personal_item(self, item_id, personal_item_id):
+    def correct_personal_item(self, personal_item_id, item_id):
         cursor = self.connection.cursor()
         # Replaces the users peronsal item with the item they reported once its been corrected/added to the table
         # item_id = the item id of the now added item if missing, or the item id of the item that has now been corrected
         # personal_item_id = the users personal item id that they added before reporting
         query = """UPDATE FoodLink.inventory SET 
 	                item_id = %s
-                WHERE item_id = %s"""
+                WHERE item_id = %s;"""
         data = (item_id, personal_item_id)
         cursor.execute(query, data)
         self.connection.commit()

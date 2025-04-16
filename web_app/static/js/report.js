@@ -37,7 +37,10 @@ async function get_item(id, original = false) {
 function set_missing_report() {
     document.getElementById("original_item").style.display = "none";
     document.getElementById("new_item_heading").innerHTML = "Missing Item Information";
-    document.getElementById("modify_type").value = "add";
+}
+
+function set_action(action) {
+    document.getElementById("report_action").value = action;
 }
 
 window.onload = async function() {
@@ -68,7 +71,7 @@ async function resolve_report(event) {
     //Waits until result is recieved
     const result = await response.json();
     if (result.success) {
-        alert("report resolved.")
+        alert("report resolved. "+ result.message)
         window.location.href = "/items/reports"
     } else {
         alert('There was an error resolving the report. Error: ' + result.error);

@@ -33,5 +33,5 @@ class Success():
         else:
             logging.error("Failed to send telemetry.")
 
-        # Disconnect to prevent connection issues when the next message is sent.
+        # Disconnect to prevent connection conflicts when the next message is sent.
         self.client.disconnect()

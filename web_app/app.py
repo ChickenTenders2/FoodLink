@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, render_template, request, redirect, url_for, session
 import os
-import paho.mqtt.client as mqtt
 import json
 import time
 import requests
@@ -26,9 +25,9 @@ def get_jwt_token():
     response = requests.post(login_url, json=data, headers=headers)
 
     if response.status_code == 200:
-        print('Login successful')
+        # print('Login successful')
         token = response.json()['token']
-        print("JET token:", token)
+        # print("JET token:", token)
         return token
     else:
         print("Login failed: ", response.json())
@@ -45,7 +44,7 @@ def get_telemetry(token, device_id):
     response = requests.get(url, headers=headers)
 
     if response.status_code == 401:
-        print("Token expired, refreshing...")
+        # print("Token expired, refreshing...")
         new_token = get_jwt_token()
         if new_token:
             return get_telemetry(new_token, device_id)
@@ -55,12 +54,12 @@ def get_telemetry(token, device_id):
         data = response.json()
         return data
     else:
-        print("Error: ", response.status_code, response.text)
+        # print("Error: ", response.status_code, response.text)
         return None
 
 
 # Dashboard Route
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
 
@@ -78,10 +77,20 @@ def index():
     humid_url = "https://thingsboard.cs.cf.ac.uk/dashboard/74d87180-0dbc-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2"
 
     notif.temperature_humidity_notification(user_id, temperature, humidity)
+    notif.expiry_notification(user_id)
 
     notifications = notif.get_notifications(user_id)
+    unread_count = sum(1 for n in notifications if n[4] == 0)
 
-    return render_template('index.html', temp_url=temp_url, humid_url = humid_url, notifications=notifications)
+    if request.method == 'POST' and request.json.get('mark_read'): 
+        try: 
+            notif_id = request.json.get('mark_read') 
+            notif.mark_read(notif_id) 
+            return jsonify({'success': True})
+        except Exception as e: 
+            return jsonify({'success': False, 'error': str(e)})
+
+    return render_template('index.html', temp_url=temp_url, humid_url = humid_url, notifications=notifications, unread_count=unread_count)
 # Login Route
 
 # Register Route

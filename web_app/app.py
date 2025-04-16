@@ -215,10 +215,12 @@ def resolve_report():
         original_item_id = None if request.form.get("item_id") == "null" else request.form.get("item_id")
         # if the missing item reported isnt elligible for being added 
         if action == "deny" and original_item_id is None:
+            # gets the reports
+            reports = item_report.get_reports_by(new_item_id)
+            # report will be singular
+            _, personal_item_name, user_id = reports[0]
             # removes the report
             item_report.remove_report(new_item_id)
-            # gets the user_id that added the missing item
-            _, personal_item_name, user_id = item_report.get_reports_by(new_item_id)
 
             message = """Thank you for reporting a missing item. 
                         Unfortunately, your item is not currently elligible to be added at this time.

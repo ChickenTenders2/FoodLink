@@ -27,14 +27,17 @@ class item_error(database):
     # also gets the report by new_item_id incase item was missing and barcode is null
     def get_reports_by(self, new_item_id, identifier = None, type = None):
         cursor = self.connection.cursor()
+        data = (new_item_id, identifier)
         query = """SELECT error.new_item_id, i.name, error.user_id from FoodLink.item_error error 
                     JOIN item i ON (error.new_item_id = i.id) 
-                    WHERE new_item_id = %s OR """
+                    WHERE new_item_id = %s"""
         if type == "barcode":
-            query += "i.barcode = %s;"
+            query += " OR i.barcode = %s;"
         elif type == "id":
-            query += "error.item_id = %s;"
-        data = (new_item_id, identifier)
+            query += " OR error.item_id = %s;"
+        else:
+            query += ";"
+            data = (new_item_id,)
         cursor.execute(query, data)
         reports = cursor.fetchall()
         cursor.close()

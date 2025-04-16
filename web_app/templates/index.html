@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<link rel="stylesheet" href="{{ url_for('static', filename='style_sheets/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,17 +12,19 @@
             <h1>FoodLink</h1>
         </div>
         <div class="nav-right">
-            <img src="{{ url_for('static', filename='images/notification_bell.png') }}" alt="Notifications" width="20px" height="20px" class="notification-icon" onclick="notificationPopupToggle()" />
-            <span id="notif-badge" class="notif-badge" style="display: none;">●</span>
+            <img id="notification-icon" src="{{ url_for('static', filename='images/notification_bell.png') }}" alt="Notifications" width="20px" height="20px" class="notification-icon" onclick="notificationPopupToggle()" />
+            {% if unread_count > 0 %} 
+                <span id="notification-badge" class="notification-badge">{{ unread_count }}</span> 
+            {% endif %}
         </div>
     </div>
 
-    <div id="notificationPopup" class="notification-popup">
+    <div id="notification-popup" class="notification-popup">
         <h3>Notifications</h3>
-        <ul>
+        <ul id="notification-list">
             {% for n in notifications %}
-                <li class="{{ 'unread' if n[4] == 0 else 'read' }}">
-                    <strong>{{ n[5] | capitalize }}</strong> : {{ n[2] }}
+                <li class="{{ 'unread' if n[4] == 0 else 'read' }}" data-severity="{{ n[5] }}" data-id="{{ n[0] }}" onclick="markRead(this)">
+                    <strong>{{ n[5].capitalize() }}</strong> : {{ n[2] }}
                     <small>{{ n[3].strftime('%Y-%m-%d %H:%M') }}</small>
                 </li>
             {% endfor %}
@@ -38,10 +40,45 @@
 </html>
 
 <script>
-document.querySelector('.tb-powered-by-footer').style.display = 'none';
+    document.querySelector('.tb-powered-by-footer').style.display = 'none';
 
-function notificationPopupToggle() {
-    const popup = document.getElementById('notificationPopup');
-    popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
-  }
+    function notificationPopupToggle() {
+        const popup = document.getElementById('notification-popup');
+        popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
+    }
+
+    window.addEventListener('click', function(e) {
+        const popup = document.getElementById("notification-popup");
+        const icon = document.getElementById("notification-icon");
+        if (!popup.contains(e.target) && !icon.contains(e.target)) {
+            popup.style.display = "none";
+        }
+    });
+
+    function markRead(elem) {
+        const notifId = elem.getAttribute('data-id');
+        fetch('/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ mark_read: notifId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                elem.classList.remove('unread');
+                elem.classList.add('read');
+                const badge = document.getElementById('notification-badge');
+                if (badge) {
+                    let count = parseInt(badge.textContent);
+                    if (count > 1) {
+                        badge.textContent = count - 1;
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            }
+        });
+    }
 </script>

@@ -111,16 +111,10 @@ class notification(database):
             is_exists = self.notification_exists(user_id, notif_type, message)
             if is_exists == 0:
                 self.insert_notification(user_id, notif_type, message, severity)
-
-            # duplicate_query = "SELECT COUNT(*) FROM notification WHERE user_id = %s AND message = %s;"
-            # cursor.execute(duplicate_query, (user_id, message))
-            # if cursor.fetchone()[0] == 0:
-            #     insert_query = "INSERT INTO notification (user_id, type, message, date_created, is_read, severity) VALUES (%s, 'expiry', %s, NOW(), 0, %s)"
-            #     insert_data = (user_id, message, severity)
-            #     cursor.execute(insert_query, insert_data)
-            
-            # self.connection.commit()
         cursor.close()
+
+    def support_notification(self, user_id, message):
+        insert_notification(user_id, 'support', message, 'info')
 
     def notification_exists(self, user_id, notif_type, message):
         cursor = self.connection.cursor()

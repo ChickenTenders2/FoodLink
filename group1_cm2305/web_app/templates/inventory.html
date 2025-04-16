@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Fridge Inventory</title>
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+</head>
+<body>
+    <!-- search and sort form -->
+    <form method="GET" action="/inventory" class="filter-form">
+        <input type="text" name="search" placeholder="Search inventory..." value="{{request.args.get('search', '')}}">
+        <select name="sort_by">
+            <!-- if statments make sure the current sort is shown as the default option-->
+            <option value="relevance" {% if sort_by == "relevance" %} selected {% endif %}>Sort by Relevance</option>
+            <option value="name" {% if sort_by == "name" %} selected {% endif %}>Sort by Name</option>
+            <option value="expiry" {% if sort_by == "expiry" %} selected {% endif %}>Sort by Expiry</option>
+        </select>
+    <button type="submit">Apply</button>
+    </form>
+
+    <!-- displays each users items-->
+    <div class="inventory-container">
+        {% for item in items %}
+            <div class="inventory-tile" onclick="open_popup('{{ item[2] }}', '{{ item[4] }}', '{{item[7]}}', '{{ item[6] }}', '{{ item[0]}}')">
+                <img src="{{ url_for('static', filename='images/' + item[1]|string + '.jpg') }}" alt="{{ item[2] }}">
+                <span class="item-name">{{ item[2] }} </span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pop-Up for Editing Quantity & Expiration Date -->
+    <div id="popup" class="popup">
+        <h2 id="popup-title"></h2>
+        <form id="update-form" method="POST" onsubmit="submit_update(event)">
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name ="quantity" min ="1">
+            <br>
+            <label for="expiry">Expiration Date:</label>
+            <input type="date" id="expiry" name="expiry_date">
+            <br>
+            <!-- hidden inputs used so js code has variables needed to update-->
+            <input type="hidden" id="inventory-id" name="inventory_id">
+            <input type="hidden" id="original-quantity" name="original_quantity">
+            <input type="hidden" id="original-expiry" name="original_expiry">
+            <button type="submit">Save</button>
+        </form>
+    </div>
+
+    <script>
+        function open_popup(itemName, quantity, default_quantity, expiry_date, inventory_id) {
+            // Sets values in popup to those of the item
+            document.getElementById('popup-title').innerText = `Edit ${itemName}`;
+            document.getElementById('quantity').value = quantity;
+            document.getElementById('original-quantity').value = quantity;
+            document.getElementById('quantity').max = default_quantity;
+            document.getElementById('expiry').value = expiry_date;
+            document.getElementById('original-expiry').value = expiry_date;
+            document.getElementById('inventory-id').value = inventory_id;
+            document.getElementById('popup').style.display = 'block';
+        }
+
+        function close_popup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+
+
+        async function submit_update(event) {
+            // Prevent the form from submitting normally
+            event.preventDefault(); 
+
+            // Gets original values
+            const originalQuantity = document.getElementById('original-quantity').value;
+            const originalExpiry = document.getElementById('original-expiry').value;
+
+            // Gets new values
+            const newQuantity = document.getElementById('quantity').value;
+            const newExpiry = document.getElementById('expiry').value;
+
+            // Checks if values have not been edited
+            if (newQuantity == originalQuantity && newExpiry == originalExpiry) {
+                // Prevent sending the update request
+                close_popup();
+                return;  
+            }
+
+            // Recreates form
+            const form = event.target;
+            const formData = new FormData(form);
+
+            // Sends update command and waits for response
+            const response = await fetch('/update_item', {
+                method: 'POST',
+                body: formData,
+            });
+
+            //Waits until result is recieved
+            const result = await response.json();
+
+            if (result.success) {
+                // Updates page
+                location.reload();
+            } else {
+                alert('There was an error updating the item.');
+            }
+        }
+    </script>
+</body>
+</html>

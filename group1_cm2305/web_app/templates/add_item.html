@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Scanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> 
+</head>
+<body>
+    <div class="video-window">
+        <button onclick="open_popup(null)">Manually enter barcode</button>
+        <br>
+        <img src="{{ url_for('barcode_scanner') }}" alt="Barcode Scanner">
+    </div>
+
+    <!-- added popup from inventory.html for inputting data of new item-->
+    <div id="popup" class="popup">
+        <h2 id="popup-title">Add Item</h2>
+        <button onclick="close_popup()">X</button>
+        <form id="update-form" method="POST" onsubmit="submit_item(event)">
+            <!-- all fields must be filled to add item (using required tag)-->
+            <label>Barcode:</label>
+            <input type="text" id="barcode" name="barcode" required>
+            <br>
+            <label>Item Name:</label>
+            <input type="text" id="name" name="name" required>
+            <br>
+            <label>Brand:</label>
+            <input type="text" id="brand" name="brand" required>
+            <br>
+            <label>Expiry Time:</label>
+            <input type="number" id="expiry_day" class="date_field" name="expiry_day" min="0" max="30" placeholder="DD" required>
+            <label>/</label>
+            <input type="number" id="expiry_month" class="date_field" name="expiry_month" min="0" max="11" placeholder="MM" required>
+            <label>/</label>
+            <input type="number" id="expiry_year" class="date_field" name="expiry_year" min="0" max="99" placeholder="YY" required>
+            <br>
+            <label>Quantity:</label>
+            <input type="number" id="default_quantity" name="default_quantity" required>
+            <br>
+            <label>Unit:</label>
+            <input type="text" id="unit" name="unit" required>
+            <br>
+            <label>Upload Image:</label>
+            <!-- only accepts image files -->
+            <input type="file" id="item_image" name="item_image" accept="image/jpeg">
+
+            <button type="submit">Add Item</button>
+        </form>
+    </div>
+
+    <script>
+        function open_popup(barcode_number) {
+            stop_check();
+            document.getElementById('barcode').value = barcode_number;
+            document.getElementById('popup').style.display = 'block';
+        }
+
+        function close_popup() {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById("name").value = null;
+            document.getElementById("brand").value = null;
+            document.getElementById("expiry_day").value = null;
+            document.getElementById("expiry_month").value = null;
+            document.getElementById("expiry_year").value = null;
+            document.getElementById("default_quantity").value = null;
+            document.getElementById("unit").value = null;
+            document.getElementById("item_image").value = null;
+
+            fetch("/clear_barcode");
+            start_check();
+        }
+
+        window.onbeforeunload = function(){
+            fetch("/close_capture");
+        }   
+
+        window.onload = function(){
+            start_check();
+        }
+
+        async function check_barcode() {
+            try {
+                let response = await fetch("/check_barcode");
+                let data = await response.json();
+
+                if (data.barcode) {
+                    console.log(data.barcode);
+                    open_popup(data.barcode);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        
+        function start_check() {
+            window.interval_id = setInterval(check_barcode, 1000);
+        }
+
+        function stop_check() {
+            clearInterval(window.interval_id);
+        }
+
+        async function submit_item(event) {
+            // Prevent the form from submitting normally
+            event.preventDefault(); 
+            if (!valid_expiry()) {
+                alert("Expiry time must be at least one day.")
+                return;
+            }
+
+            // Recreates form
+            const form = event.target;
+            const formData = new FormData(form);
+
+            // Sends update command and waits for response
+            const response = await fetch('/add_item/add', {
+                method: 'POST',
+                body: formData,
+            });
+
+            //Waits until result is recieved
+            const result = await response.json();
+
+            if (result.success) {
+                alert("Item added succesfully.");
+                close_popup();
+            } else {
+                alert('There was an error adding the item. Error: ' + result.error);
+            }
+        }
+
+        function valid_expiry() {
+            const day = parseInt(document.getElementById("expiry_day").value);
+            const month = parseInt(document.getElementById("expiry_month").value);
+            const year = parseInt(document.getElementById("expiry_year").value);
+            return !(day == 0 && month == 0 && year == 0);
+
+        }
+    </script>
+</body>
+</html>

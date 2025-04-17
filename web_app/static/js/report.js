@@ -47,7 +47,7 @@ window.onload = async function() {
     const new_item_id = document.getElementById("new_item_id").value;
     await get_item(new_item_id);
     const original_item_id = document.getElementById("original_item_id").value;
-    if (original_item_id != "null") {
+    if (original_item_id) {
         await get_item(original_item_id, true);
     } else {
         set_missing_report();

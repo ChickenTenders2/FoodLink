@@ -56,7 +56,7 @@ def add_to_inventory():
 def append_inventory():
     
     item_id = request.form.get("item_id")
-    response = inv.process_add_form(user_id, item_id, request.form)
+    response = inv.process_add_form(user_id, item_id, request.form)    
     return jsonify(response)
 
 # Update quantity and expiry of item in inventory
@@ -84,6 +84,12 @@ def new_item():
     # if the item was not succesffuly added to the item table
     if not response["success"]:
         return jsonify(response)
+    else:
+        # gets image if uploaded otherwise equals none
+        image = request.form.get("item_image", None)
+        original_item_id = request.form.get("item_id") or None
+        # adds image if uploaded or uses cloned image if possible
+        item.add_item_image(image, item_id, original_item_id)
     
     if not request.form.get("add_to_inventory"):
         return jsonify({"success": True, "item_id": item_id, "message": "Item added to personal items."})
@@ -166,8 +172,14 @@ def add_item():
 # Add item to item table
 @app.route('/items/add_item/add', methods=["POST"])
 def append_item_db():
-    response = item.process_add_form(request.form, request.files)
+    response = item.process_add_form(request.form)
     if response["success"]:
+        item_id = response["item_id"]
+        # gets image if uploaded otherwise equals none
+        image = request.form.get("item_image", None)
+        # adds image if uploaded
+        item.add_item_image(image, item_id)
+    
         # item id does not need to be returned
         return jsonify({"success": True})
     else:
@@ -212,7 +224,9 @@ def resolve_report():
         action = request.form.get("action")
         barcode = request.form.get("barcode") or None
         new_item_id = request.form.get("new_item_id")
-        original_item_id = None if request.form.get("item_id") == "null" else request.form.get("item_id")
+        original_item_id = request.form.get("item_id") or None
+        # gets image if uploaded otherwise equals none
+        image = request.form.get("item_image", None)
         # if the missing item reported isnt elligible for being added 
         if action == "deny" and original_item_id is None:
             # gets the reports
@@ -240,7 +254,10 @@ def resolve_report():
             if action == "approve":
                 # updates original item with correct information if approved
                 # sets the user_id = null for the item so it appears for all users
-                item.process_update_form(original_item_id, request.form, request.files)
+                item.process_update_form(original_item_id, request.form)
+                # updates image if uploaded
+                item.add_item_image(image, original_item_id)
+            
                 message = """Thank you for reporting an item error. 
                             Your personal item has been successfully replaced."""
             # if original item was already correct
@@ -256,9 +273,13 @@ def resolve_report():
         else:
             # adds the missing item to the table
             # sets the user_id = null for the item so it appears for all users
-            response = item.process_add_form(request.form, request.files)
+            response = item.process_add_form(request.form)
             # gets the id to replace the personal items with
             replace_id = response["item_id"]
+
+            # adds image if uploaded or uses users personal item image if possible
+            item.add_item_image(image, replace_id, new_item_id)
+    
 
             message = """Thank you for reporting a missing item.
                         Your request has been approved!

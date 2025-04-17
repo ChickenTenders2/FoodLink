@@ -1,6 +1,7 @@
 from database import database
 from os.path import isfile as file_exists
-from shutil import copyfile
+from os import remove as remove_file
+from shutil import copyfile as copy_file
 
 class item_table(database):
     def __init__(self):
@@ -55,7 +56,7 @@ class item_table(database):
         cursor.close()
         return item_id
 
-    def process_add_form(self, form, files, user_id = None):
+    def process_add_form(self, form, user_id = None):
         try:
             # gets item information
             barcode = form.get("barcode") or None
@@ -81,23 +82,6 @@ class item_table(database):
             # adds item to db and gets item id
             item_id = self.add_item(barcode, name, brand, expiry_time, default_quantity, unit, user_id)
 
-            # gets image if uploaded otherwise equals none
-            image = files.get("item_image", None)
-            original_item_id = form.get("item_id")
-            # if an image is uploaded
-            if image:
-                # store image in server with name item id
-                path = f"static/images/{item_id}.jpg"
-                image.save(path)
-            # if a cloned item uses the original item image
-            elif original_item_id:
-                old_path = f"static/images/{original_item_id}.jpg"
-                # makes sure original item has an image
-                if file_exists(old_path):
-                    path = f"static/images/{item_id}.jpg"
-                    # clone the image as well
-                    copyfile(old_path, path)
-            
             return {"success": True, "item_id": item_id}
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -117,7 +101,7 @@ class item_table(database):
         cursor.execute(query, data)
         self.connection.commit()
 
-    def process_update_form(self, id, form, files, user_id = None):
+    def process_update_form(self, id, form, user_id = None):
         try:
             # gets item information
             barcode = form.get("barcode") or None
@@ -143,19 +127,11 @@ class item_table(database):
             # updates item with id
             self.update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, user_id)
 
-            # gets image if uploaded otherwise equals none
-            image = files.get("item_image", None)
-            # if an image is uploaded
-            if image:
-                # store image in server with name item id
-                path = f"static/images/{id}.jpg"
-                image.save(path)
-            
             return {"success": True}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def remove_item(self, id):
+    def remove_item_sql(self, id):
         cursor = self.connection.cursor()
         query = "DELETE FROM item WHERE id = %s;"
         # one item tuple
@@ -163,4 +139,27 @@ class item_table(database):
         cursor.execute(query, data)
         self.connection.commit()
         cursor.close()
+
+    def remove_item_image(self, id):
+        path = f"static/images/{id}.jpg"
+        if file_exists(path):
+            remove_file(path)
+
+    def add_item_image(self, image, new_item_id, original_item_id = None):
+        if image:
+                # store image in server with name item id
+                path = f"static/images/{new_item_id}.jpg"
+                image.save(path)
+        # if a cloned item uses the original item image
+        elif original_item_id:
+            old_path = f"static/images/{original_item_id}.jpg"
+            # makes sure original item has an image
+            if file_exists(old_path):
+                path = f"static/images/{new_item_id}.jpg"
+                # clone the image as well
+                copy_file(old_path, path)
+
+    def remove_item(self, id):
+        self.remove_item_image(id)
+        self.remove_item_sql(id)
 

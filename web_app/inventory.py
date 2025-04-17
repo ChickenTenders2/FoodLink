@@ -1,18 +1,4 @@
-import mariadb
-from datetime import date
-
-class database():
-    def __init__(self):
-        self.connection = self.connect()
-
-    # returns db connection
-    def connect(self):
-        return mariadb.connect(
-            host = "80.0.43.124",
-            user = "FoodLink",
-            password = "Pianoconclusiontown229!",
-            database = "FoodLink"
-        )
+from database import database
 
 class inventory(database):
     def __init__(self):
@@ -51,14 +37,6 @@ class inventory(database):
         cursor.execute(query, data)
         self.connection.commit()
         cursor.close()
-    
-    # def update_expiry(self, inventory_id, expiry_date):    
-    #     cursor = self.connection.cursor()
-    #     query = "UPDATE inventory SET expiry_date = %s WHERE id = %s;"
-    #     data = [expiry_date, inventory_id]
-    #     cursor.execute(query, data)
-    #     self.connection.commit()
-    #     cursor.close()
 
     def update_item(self, inventory_id, quantity, expiry_date):
         cursor = self.connection.cursor()
@@ -67,11 +45,9 @@ class inventory(database):
         cursor.execute(query, data)
         self.connection.commit()
         cursor.close()
-    
+
     def search_items(self, user_id, search_term):
         cursor = self.connection.cursor()
-        #query = "SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity FROM FoodLink.inventory inv JOIN FoodLink.item i ON (inv.item_id = i.id) WHERE inv.user_id = ? AND i.name LIKE ?"
-
         # search query uses full text for relevance based searching of items
         query = "SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity FROM FoodLink.inventory inv JOIN FoodLink.item i ON inv.item_id = i.id WHERE (inv.user_id = %s AND MATCH(i.name) AGAINST (%s IN NATURAL LANGUAGE MODE));"
         data = (user_id, search_term)
@@ -79,16 +55,41 @@ class inventory(database):
         items = cursor.fetchall()
         cursor.close()
         return items
+    
+    def process_add_form(self, user_id, item_id, form):
+        try:
+            quantity = form["quantity"]
+            expiry = form["expiry_date"]
+            self.add_item(user_id, item_id, quantity, expiry)
+            return {"success": True}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+        
+    # Replaces the users peronsal item with the item they reported once its been corrected/added to the table
+    # also makes sure the quantity set by the user do not exceed the corrected item max quantity
+    def correct_personal_item(self, personal_item_id, item_id, default_quantity):
+        # item_id = the item id of the now added item if missing, or the item id of the item that has now been corrected
+        # personal_item_id = the users personal item id that they added before reporting
 
-    # def sort_items(self, user_id, sort_by):
-    #     cursor = self.connection.cursor()
-    #     query = "SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity FROM FoodLink.inventory inv JOIN FoodLink.item i ON (inv.item_id = i.id) WHERE inv.user_id = ?"
-    #     if sort_by == 'name':
-    #         query += " ORDER BY i.name ASC"
-    #     elif sort_by == 'expiry':
-    #         query += " ORDER BY expiry_date ASC"
-    #     cursor.execute(query, [user_id])
-    #     items = cursor.fetchall()
-    #     cursor.close()
-    #     items = [list(i) for i in items]
-    #     return items
+        # if default quantity is 1 then there is not a limit on the quantity
+        if default_quantity == 1:
+            query = """UPDATE FoodLink.inventory SET 
+	                item_id = %s
+                WHERE item_id = %s;"""
+            data = (item_id, personal_item_id)
+        # otherwise the users item should not exceed the default quantity (max amount) of the item
+        else:
+            # sets quantity to max if it exceeds limit
+            query = """UPDATE FoodLink.inventory SET 
+	                item_id = %s
+                    quantity = CASE
+                        WHEN quantity > %s THEN %s
+                        ELSE quantity
+                    END
+                WHERE item_id = %s;"""
+            data = (item_id, default_quantity, default_quantity, personal_item_id)
+
+        cursor = self.connection.cursor()
+        cursor.execute(query, data)
+        self.connection.commit()
+

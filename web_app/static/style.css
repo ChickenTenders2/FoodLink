@@ -479,3 +479,51 @@ a.tile-link {
 .filter-form button:hover {
     background-color: #8fca6c;
 }
+
+/* centres barcode scanner window*/
+.video-window {
+    margin-top: 20px;
+    text-align: center;
+}
+
+/* shortens date boxes for adding item expiry time */
+.date_field {
+    text-align: center;
+    width: calc(1ch*3);
+    padding: 1px;
+}
+
+/* hide spinboxes for expiry time date boxes */
+.date_field::-webkit-outer-spin-button,
+.date_field::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+.search_result_item {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.search_result_item:hover {
+    background-color: #f0f0f0;
+}
+
+.item_img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.item_info {
+    flex-grow: 1;
+}
+
+#inventory_fields {
+    display: none;
+    padding-bottom: 0;
+}

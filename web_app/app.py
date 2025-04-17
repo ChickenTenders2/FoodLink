@@ -365,7 +365,6 @@ def get_shoppingList():
                 item_id = request.form['mark_bought']
                 bought_str = request.form.get('bought', 0)
                 bought = int(bought_str)
-                print("Updating bought field:", item_id, bought)
                 shop.item_bought(item_id, bought)
                 return jsonify({"success": True, "action": "mark_bought"})
         except Exception as e:
@@ -376,8 +375,6 @@ def get_shoppingList():
     bought_items = [item for item in items if item[3] == 1]
 
     low_stock = shop.low_stock_items(user_id)
-    print("low stock items:", low_stock)
-    print('items:', items)
     return render_template("shoppinglist.html", items=items, unbought_items=unbought_items, bought_items=bought_items, low_stock=low_stock)
 
 @app.route('/add-shopping-item', methods=['POST'])
@@ -389,7 +386,6 @@ def add_shopping_item():
         return jsonify({"success": True, "action": "add", "item": item_name})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
-    # return redirect(url_for('get_shoppingList'))
 
 @app.route('/update-shopping-item', methods=['POST'])
 def update_shopping_item():

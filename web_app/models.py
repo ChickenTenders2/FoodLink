@@ -45,14 +45,13 @@ class Device(db.Model):
     last_used = db.Column(db.DateTime, default=datetime.now(pytz.utc))
     is_current = db.Column(db.Boolean, default=False)
 
-class Notification(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+class Settings(db.Model):
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True, nullable=False)
     
     # Email notification preference
     email_notifications = db.Column(db.Boolean, default=True)
     
-    # Notification types
+    # Settings types
     fridge_open = db.Column(db.Boolean, default=True)
     expiring_food = db.Column(db.Boolean, default=True)
     recipe_suggestions = db.Column(db.Boolean, default=True)

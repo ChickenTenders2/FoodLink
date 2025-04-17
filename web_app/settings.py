@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask.views import MethodView
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, Device, Notification
+from models import User, Device, Settings
 from extensions import db
 
 # Create blueprint
@@ -25,9 +25,9 @@ class SettingsView(BaseSettingsView):
         devices = Device.query.filter_by(user_id=user.id).all()
         
         # Get or create notification preferences
-        notification_prefs = Notification.query.filter_by(user_id=user.id).first()
+        notification_prefs = Settings.query.filter_by(user_id=user.id).first()
         if not notification_prefs:
-            notification_prefs = Notification(user_id=user.id)
+            notification_prefs = Settings(user_id=user.id)
             db.session.add(notification_prefs)
             db.session.commit()
             
@@ -126,7 +126,7 @@ class DeviceRemoveView(BaseSettingsView):
             
         return redirect(url_for('settings.settings_page'))
 
-# Notification Settings View
+# Settings Settings View
 class NotificationUpdateView(BaseSettingsView):
     def post(self):
         # Get form data
@@ -142,9 +142,9 @@ class NotificationUpdateView(BaseSettingsView):
         max_humidity = request.form.get('max_humidity', type=float)
         
         # Get or create notification preferences
-        notification_prefs = Notification.query.filter_by(user_id=current_user.id).first()
+        notification_prefs = Settings.query.filter_by(user_id=current_user.id).first()
         if not notification_prefs:
-            notification_prefs = Notification(user_id=current_user.id)
+            notification_prefs = Settings(user_id=current_user.id)
             db.session.add(notification_prefs)
         
         # Update preferences
@@ -163,7 +163,7 @@ class NotificationUpdateView(BaseSettingsView):
             notification_prefs.max_humidity = max_humidity
             
         db.session.commit()
-        flash('Notification preferences updated', 'success')
+        flash('Settings preferences updated', 'success')
         return redirect(url_for('settings.settings_page'))
 
 # Appearance Settings View

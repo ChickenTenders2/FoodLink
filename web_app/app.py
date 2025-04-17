@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from extensions import db, login_manager
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates")
 
 # Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_key_for_testing')
@@ -47,10 +47,10 @@ with app.app_context():
     test_user = get_or_create_test_user()
     
     # Create mock notification preferences if needed
-    from models import Notification
-    notification_prefs = Notification.query.filter_by(user_id=test_user.id).first()
+    from models import Settings
+    notification_prefs = Settings.query.filter_by(user_id=test_user.id).first()
     if not notification_prefs:
-        notification_prefs = Notification(user_id=test_user.id)
+        notification_prefs = Settings(user_id=test_user.id)
         db.session.add(notification_prefs)
         db.session.commit()
 

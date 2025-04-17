@@ -142,7 +142,7 @@ def text_search():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-# Get item by barcode search         ###############              ####### MAKE SURE WHEN ADDING TO ITEM TABLE THERE IS ONLY 1 BARCODE FOR EACH USER_ID IN ITEM TABLE
+# Get item by barcode search
 @app.route("/items/barcode_search/<barcode>")
 def get_item_by_barcode(barcode):
     
@@ -150,7 +150,7 @@ def get_item_by_barcode(barcode):
         item_info = item.barcode_search(user_id, barcode)
         if item_info:
             # returns the first item in the list as barcodes are unique
-            return jsonify({"success": True, "item": item_info[0]})
+            return jsonify({"success": True, "item": item_info})
         else:
             return jsonify({"success": False, "error": "Item not found."})
     except Exception as e:
@@ -246,10 +246,8 @@ def resolve_report():
                             ### NOTIFY USER ITEM IS NOT CURRENTLY ELLIGIBLE FOR ADDITION (or something like that) ###
             #####################################################
             return jsonify({"success": True, "message": message})
-        # if the error was misinformation 
+        # if the proposed error was with an item having incorrect information (misinformation)
         if original_item_id:
-            # id of item to replace personal items with
-            replace_id = original_item_id
             # if the original item had an error
             if action == "approve":
                 # updates original item with correct information if approved
@@ -267,8 +265,12 @@ def resolve_report():
                         Please be careful to double check before reporting an item.
                         Your personal item has been successfully replaced."""
 
+            # id of item to replace personal items with
+            replace_id = original_item_id
+
             # finds reports that report the original item
             duplicate_reports = item_report.get_reports_by(new_item_id, original_item_id, "id")
+
         # if the error was a missing item and it got approved
         else:
             # adds the missing item to the table
@@ -280,20 +282,21 @@ def resolve_report():
             # adds image if uploaded or uses users personal item image if possible
             item.add_item_image(image, replace_id, new_item_id)
     
-
             message = """Thank you for reporting a missing item.
                         Your request has been approved!
                         Your personal item has been successfully replaced."""
 
             # find other reports that reported the missing item
             # finds by same barcode as their is no original item for missing items
-            # also gets the current report for processing
+            # also searches using the new_item_id incase the item has no barcode
             duplicate_reports = item_report.get_reports_by(new_item_id, barcode, "barcode")
 
+        # gets the limit that a users item can have for quantity
+        default_quantity = item.get_default_quantity(replace_id)
         # for each report of an item
         for personal_item_id, personal_item_name, user_id in duplicate_reports:
             # replace the personal item the user made with the now corrected / new item
-            inv.correct_personal_item(personal_item_id, replace_id)
+            inv.correct_personal_item(personal_item_id, replace_id, default_quantity)
             # removes the users personal item as it is no longer needed
             item.remove_item(personal_item_id)
             # removes the report

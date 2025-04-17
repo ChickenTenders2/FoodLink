@@ -13,7 +13,7 @@ class item_table(database):
         query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE barcode = %s AND (user_id IS NULL OR user_id = %s);"
         data = (barcode_number, user_id)
         cursor.execute(query, data)
-        item = cursor.fetchall()
+        item = cursor.fetchone()
         cursor.close()
         return item
 
@@ -32,18 +32,20 @@ class item_table(database):
         query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE id = %s;"
         data = (item_id,)
         cursor.execute(query, data)
-        item = cursor.fetchall()
+        # gets first (and only) row
+        item = cursor.fetchone()
         cursor.close()
-        return item[0]
+        return item
     
-    def get_user_id_item(self, item_id):
+    def get_default_quantity(self, item_id):
         cursor = self.connection.cursor()
-        query = "SELECT user_id FROM FoodLink.item WHERE id = %s;"
+        query = "SELECT default_quantity FROM FoodLink.item WHERE id = %s;"
         data = (item_id,)
         cursor.execute(query, data)
-        user_id = cursor.fetchall()
+        # gets first (and only) row
+        quantity = cursor.fetchone()
         cursor.close()
-        return user_id[0]
+        return quantity
     
     def add_item(self, barcode, name, brand, expiry_time, default_quantity, unit, user_id = None):
         cursor = self.connection.cursor()
@@ -55,6 +57,20 @@ class item_table(database):
         item_id = cursor.lastrowid
         cursor.close()
         return item_id
+    
+    def add_item_image(self, image, new_item_id, original_item_id = None):
+        if image:
+                # store image in server with name item id
+                path = f"static/images/{new_item_id}.jpg"
+                image.save(path)
+        # if a cloned item uses the original item image
+        elif original_item_id:
+            old_path = f"static/images/{original_item_id}.jpg"
+            # makes sure original item has an image
+            if file_exists(old_path):
+                path = f"static/images/{new_item_id}.jpg"
+                # clone the image as well
+                copy_file(old_path, path)
 
     def process_add_form(self, form, user_id = None):
         try:
@@ -131,6 +147,10 @@ class item_table(database):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+    def remove_item(self, id):
+        self.remove_item_image(id)
+        self.remove_item_sql(id)
+
     def remove_item_sql(self, id):
         cursor = self.connection.cursor()
         query = "DELETE FROM item WHERE id = %s;"
@@ -145,21 +165,4 @@ class item_table(database):
         if file_exists(path):
             remove_file(path)
 
-    def add_item_image(self, image, new_item_id, original_item_id = None):
-        if image:
-                # store image in server with name item id
-                path = f"static/images/{new_item_id}.jpg"
-                image.save(path)
-        # if a cloned item uses the original item image
-        elif original_item_id:
-            old_path = f"static/images/{original_item_id}.jpg"
-            # makes sure original item has an image
-            if file_exists(old_path):
-                path = f"static/images/{new_item_id}.jpg"
-                # clone the image as well
-                copy_file(old_path, path)
-
-    def remove_item(self, id):
-        self.remove_item_image(id)
-        self.remove_item_sql(id)
 

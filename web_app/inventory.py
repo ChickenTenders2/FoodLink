@@ -65,15 +65,31 @@ class inventory(database):
         except Exception as e:
             return {"success": False, "error": str(e)}
         
-    def correct_personal_item(self, personal_item_id, item_id):
-        cursor = self.connection.cursor()
-        # Replaces the users peronsal item with the item they reported once its been corrected/added to the table
+    # Replaces the users peronsal item with the item they reported once its been corrected/added to the table
+    # also makes sure the quantity set by the user do not exceed the corrected item max quantity
+    def correct_personal_item(self, personal_item_id, item_id, default_quantity):
         # item_id = the item id of the now added item if missing, or the item id of the item that has now been corrected
         # personal_item_id = the users personal item id that they added before reporting
-        query = """UPDATE FoodLink.inventory SET 
+
+        # if default quantity is 1 then there is not a limit on the quantity
+        if default_quantity == 1:
+            query = """UPDATE FoodLink.inventory SET 
 	                item_id = %s
                 WHERE item_id = %s;"""
-        data = (item_id, personal_item_id)
+            data = (item_id, personal_item_id)
+        # otherwise the users item should not exceed the default quantity (max amount) of the item
+        else:
+            # sets quantity to max if it exceeds limit
+            query = """UPDATE FoodLink.inventory SET 
+	                item_id = %s
+                    quantity = CASE
+                        WHEN quantity > %s THEN %s
+                        ELSE quantity
+                    END
+                WHERE item_id = %s;"""
+            data = (item_id, default_quantity, default_quantity, personal_item_id)
+
+        cursor = self.connection.cursor()
         cursor.execute(query, data)
         self.connection.commit()
 

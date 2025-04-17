@@ -68,7 +68,7 @@
   <div class="shopping-list-container">
     <h3>Shopping List</h3>
     {% for item in unbought_items %}
-    <div class="shopping-item" onclick="editItem({{ item[0] }}, '{{ item[1] }}', {{ item[2] }})">
+    <div class="shopping-item" onclick="editItem('{{ item[0] }}', '{{ item[1] }}', '{{ item[2] }}')">
       {{ item[1] }}
       <div class="item-actions">
         <button type="button" disabled>{{ item[2] }}</button>

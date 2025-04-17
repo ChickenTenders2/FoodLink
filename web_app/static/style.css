@@ -611,3 +611,125 @@ input[type="submit"]:hover {
     background-color: #8fca6c;
 }
   
+
+/* Notification Styles */
+.notification-icon {
+    position: relative;
+    cursor: pointer;
+}
+  
+.notification-icon img {
+    width: 24px;
+    height: 24px;
+}
+  
+.notification-badge {
+    /* position: absolute; */
+    top: -5px;
+    right: -5px;
+    background: red;
+    color: white;
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 50%;
+}
+  
+.notification-popup {
+    position: absolute;
+    top: 55px;
+    right: 10px;
+    width: 320px;
+    max-height: 400px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    padding: 15px;
+    z-index: 1000;
+    display: none;
+    overflow-y: auto;
+    font-family: Arial, sans-serif;
+}
+  
+.notification-popup h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: #4a4a4a;
+}
+  
+.notification-popup ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+  
+.notification-popup li {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background-color: #f6f6f6;
+    transition: background-color 0.3s ease;
+}
+  
+.notification-popup li.unread {
+    background-color: #eaf5e0; /* soft green */
+    font-weight: bold;
+}
+  
+.notification-popup li.read {
+    opacity: 0.85;
+}
+  
+.notification-popup li:hover {
+    background-color: #d4edc9;
+}
+  
+.notification-popup small {
+    display: block;
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+}
+  
+/* Optional: Severity colors */
+.notification-popup li[data-severity="info"] { border-left: 4px solid #42a5f5; }
+.notification-popup li[data-severity="warning"] { border-left: 4px solid #ff9800; }
+.notification-popup li[data-severity="critical"] { border-left: 4px solid #f44336; }
+
+/* Navbar */ 
+
+.navbar { 
+    position: fixed; 
+    top: 0; left: 0; 
+    width: 100%; 
+    background-color: #d4edc9; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 10px 20px; 
+    border-bottom: 2px solid #b3d8a2; 
+    z-index: 1000; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+}
+
+.feature-badge { 
+    background-color: #c9eec4; 
+    color: #2e7d32; 
+    padding: 3px 12px; 
+    border-radius: 20px; 
+    font-size: 12px; 
+    font-weight: 500; 
+}
+
+.nav-left h1 {
+    margin: 0; 
+    font-size: 24px; 
+    color: #2e7d32; /* darker green */ }
+
+.nav-right { 
+    position: relative; 
+    display: flex; 
+    align-items: center; 
+}
+
+  

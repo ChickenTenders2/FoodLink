@@ -6,6 +6,7 @@ class inventory(database):
 
     def get_items(self, user_id):
         cursor = self.connection.cursor()
+        # SQL query for retrieving relevant item details
         query = "SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity FROM FoodLink.inventory inv JOIN FoodLink.item i ON (inv.item_id = i.id) WHERE inv.user_id = %s;"
         data = (user_id,)
         cursor.execute(query, data)
@@ -15,6 +16,7 @@ class inventory(database):
 
     def add_item(self, user_id, item_id, quantity, expiry_date):
         cursor = self.connection.cursor()
+        # SQL query for adding the item item to the inventory table
         query = "INSERT INTO inventory (user_id, item_id, quantity, expiry_date) VALUES (%s, %s, %s, %s);"
         data = (user_id, item_id, quantity, expiry_date)
         cursor.execute(query, data)
@@ -32,6 +34,7 @@ class inventory(database):
 
     def update_quantity(self, inventory_id, quantity):    
         cursor = self.connection.cursor()
+        # SQL query for updating the item quantity in the inventory table
         query = "UPDATE inventory SET quantity = %s WHERE id = %s;"
         data = [quantity, inventory_id]
         cursor.execute(query, data)
@@ -40,6 +43,7 @@ class inventory(database):
 
     def update_item(self, inventory_id, quantity, expiry_date):
         cursor = self.connection.cursor()
+        # SQL query for updating the item in the inventory table
         query = "UPDATE inventory SET quantity = %s, expiry_date = %s WHERE id = %s;"
         data = [quantity, expiry_date, inventory_id]
         cursor.execute(query, data)

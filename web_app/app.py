@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, render_template, request, url_for, Response
+from flask import Flask, jsonify, render_template, request, url_for, Response
 from inventory import inventory
 from barcode import barcode
 from item import item_table
@@ -18,6 +19,19 @@ def index():
 # Register Route
 
 # Logout Route
+
+
+@app.route('/success')
+def added_successfully():
+  try:
+    # Triggers the success alert function when the route is fetched
+    # so that the Raspberry Pi LCD updates with the message 'Added!'.
+    complete = Success()
+    complete.alert()
+    return jsonify({"success": True})
+  except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+  
 
 user_id = 2
 ### INVENTORY ROUTES ###
@@ -311,6 +325,7 @@ def resolve_report():
     
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
+
 
 if __name__ == '__main__':
     # Classes for handling sql expressions

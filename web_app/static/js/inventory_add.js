@@ -34,9 +34,9 @@ function close_item_popup(to_scanner) {
 }
 
 function open_search_popup() {
+    close_not_found_popup();
     stop_check();
     document.getElementById('search_popup').style.display = 'block';
-    close_not_found_popup();
 }
 
 function close_search_popup() {
@@ -55,7 +55,6 @@ function select_item(item, from_scanner) {
 
 function open_add_popup(where_from, object = null) {
     if (where_from == "clone") {
-        console.log("cloning");
         add_clone_info();
     } 
     else if (where_from == "barcode") {
@@ -271,7 +270,6 @@ function process_barcode(object) {
     const checkbox = document.getElementById("scan_mode").checked;
     // If in AI object recognition mode
     if (checkbox) {
-        console.log(object);
         single_search_item(object)
     } else {
         barcode_search_item(object);

@@ -305,6 +305,28 @@ a.tile-link {
     display: none; /* Initially hidden */
 }
 
+.popup-button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  
+  .popup-button-group button {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    background-color: #aed581;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .popup-button-group button:hover {
+    background-color: #9ccc65;
+  }
+
+
 /* Responsive Styling */
 @media (max-width: 768px) {
     .inventory-container {
@@ -526,4 +548,36 @@ a.tile-link {
 #inventory_fields {
     display: none;
     padding-bottom: 0;
+}
+
+/* Toast Styling */
+.toast {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: #4caf50; /* Medium green */
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1001;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    font-size: 17px;
+}
+
+.toast.show {
+    visibility: visible;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
 }

@@ -23,7 +23,7 @@
     <!-- displays each users items-->
     <div class="inventory-container">
         {% for item in items %}
-            <div class="inventory-tile" onclick="open_popup('{{ item[2] }}', '{{ item[4] }}', '{{item[7]}}', '{{ item[6] }}', '{{ item[0]}}')">
+            <div class="inventory-tile" data-id="{{ item[0] }}" onclick="open_popup('{{ item[2] }}', '{{ item[4] }}', '{{item[7]}}', '{{ item[6] }}', '{{ item[0]}}')">
                 <img src="{{ url_for('static', filename='images/' + item[1]|string + '.jpg') }}" alt="{{ item[2] }}" onerror="this.src='/static/images/null.jpg'">
                 <span class="item-name">{{ item[2] }} </span>
             </div>
@@ -44,9 +44,17 @@
             <input type="hidden" id="inventory-id" name="inventory_id">
             <input type="hidden" id="original-quantity" name="original_quantity">
             <input type="hidden" id="original-expiry" name="original_expiry">
-            <button type="submit">Save</button>
+            <!-- popup buttons -->
+            <div class="popup-button-group">
+                <button type="submit">Save</button>
+                <button type="button" onclick="removeItem()">Remove</button>
+                <button type="button" onclick="close_popup()">Cancel</button>
+             </div>
         </form>
     </div>
+
+    <div id="toast" class="toast"></div>
+
     <script src="{{ url_for('static', filename='js/inventory.js') }}"></script> 
 </body>
 </html>

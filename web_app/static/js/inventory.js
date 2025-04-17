@@ -27,6 +27,7 @@ async function submit_update(event) {
     // Gets original values
     const originalQuantity = document.getElementById('original-quantity').value;
     const originalExpiry = document.getElementById('original-expiry').value;
+    const inventoryId = document.getElementById('inventory-id').value;
 
     // Gets new values
     const newQuantity = document.getElementById('quantity').value;
@@ -54,8 +55,42 @@ async function submit_update(event) {
 
     if (result.success) {
         // Updates page
-        location.reload();
+        const item = result.item;
+        const tile = document.querySelector(`.inventory-tile[data-id="${item[0]}"]`);
+        tile.querySelector('.item-name').textContent = item[2];
+        tile.querySelector('img').src = `/static/images/${item[1]}.jpg`;
+        close_popup();
+        showToast('Item updated successfully');
     } else {
         alert('There was an error updating the item.');
     }
 }
+
+async function removeItem() {
+    const inventoryId = document.getElementById('inventory-id').value;
+    const formData = new FormData();
+    formData.append('inventory_id', inventoryId);
+
+    const response = await fetch('/remove_item', {
+        method: 'POST',
+        body: formData
+    });
+
+    const result = await response.json();
+    if (result.success){
+        const tile = document.querySelector(`.inventory-tile[data-id="${inventoryId}"]`);
+    if (tile) tile.remove(); 
+    close_popup(); 
+    showToast('Item deleted successfully');
+    } else { 
+        alert('Delete failed: ' + data.error);
+    }
+}
+
+
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+    toast.className = "toast show";
+    setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+  }

@@ -70,11 +70,22 @@ def update_item():
     try:
         # Update the database with new quantity and expiry date
         inv.update_item(inventory_id, quantity, expiry_date)
+        updated_item = inv.get_item_by_id(inventory_id)
         # returns response to js code
-        return jsonify({'success': True})
+        return jsonify({'success': True, 'item': updated_item})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
     
+@app.route('/remove_item', methods=['POST'])
+def remove_item():
+    try:
+        inventory_id = request.form['inventory_id']
+        inv.remove_item(inventory_id)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
 @app.route("/inventory/add_item/new", methods = ["POST"])
 def new_item():
     

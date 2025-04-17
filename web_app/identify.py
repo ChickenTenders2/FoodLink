@@ -10,11 +10,10 @@ class identify():
         # identify. In this application it is loose fridge items.
         self.model.set_classes([
         "apple", "banana", "orange", "grapes", "strawberry", "blueberry", "lemon", "lime",
-        "lettuce", "bell pepper", "carrot", "broccoli", "cucumber", "tomato", "spinach", 
-        "cheese", "egg", "milk carton", "butter", "cake", "muffin", "donut", 
-        "chicken breast", "steak", "jar", "can", "yogurt", "bottle"
+        "lettuce", "bell pepper", "carrot", "broccoli", "cucumber", "tomato",
+        "potato", "onion", "garlic", "courgette", "celery", "corn", "pear", "peach", "plum",
+        "nectarine", "avocado", "mango", "watermelon", "cantaloupe", "pineapple"
         ])
-
 
     def get_item(self):
         return self.item 

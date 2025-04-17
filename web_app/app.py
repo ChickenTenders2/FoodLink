@@ -1,9 +1,9 @@
 from flask import Flask, jsonify, render_template, request, url_for, Response
-from flask import Flask, jsonify, render_template, request, url_for, Response
-from inventory import inventory
-from barcode import barcode
-from item import item_table
-from item_error import item_error
+from inventory import Inventory
+from scanner import Scanner
+from item import Item
+#from success import Success
+from report import Report
 from os.path import isfile as file_exists
 app = Flask(__name__, template_folder = "templates")
 
@@ -21,16 +21,15 @@ def index():
 # Logout Route
 
 
-@app.route('/success')
-def added_successfully():
-  try:
-    # Triggers the success alert function when the route is fetched
-    # so that the Raspberry Pi LCD updates with the message 'Added!'.
-    complete = Success()
-    complete.alert()
-    return jsonify({"success": True})
-  except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+# @app.route('/success')
+# def added_successfully():
+#   try:
+#     # Triggers the success alert function when the route is fetched
+#     # so that the Raspberry Pi LCD updates with the message 'Added!'.
+#     success.alert()
+#     return jsonify({"success": True})
+#   except Exception as e:
+#         return jsonify({"success": False, "error": str(e)})
   
 
 user_id = 2
@@ -44,9 +43,9 @@ def get_inventory():
     sort_by = request.args.get('sort_by')
     # searches for an item if query is provided otherwise gets all items
     if search_query:
-        items = inv.search_items(user_id, search_query)
+        items = inventory.search_items(user_id, search_query)
     else:
-        items = inv.get_items(user_id)
+        items = inventory.get_items(user_id)
     
     if sort_by in ['name', 'expiry']:
         # sorts by name or expiry
@@ -70,20 +69,20 @@ def add_to_inventory():
 def append_inventory():
     
     item_id = request.form.get("item_id")
-    response = inv.process_add_form(user_id, item_id, request.form)    
+    response = inventory.process_add_form(user_id, item_id, request.form)    
     return jsonify(response)
 
 # Update quantity and expiry of item in inventory
 @app.route('/inventory/update_item', methods = ['POST'])
 def update_item(): 
-    # gets variables needed to update item
-    inventory_id = request.form['inventory_id']
-    quantity = request.form['quantity']
-    expiry_date = request.form['expiry_date']
-    
     try:
+        # gets variables needed to update item
+        inventory_id = request.form['inventory_id']
+        quantity = request.form['quantity']
+        expiry_date = request.form['expiry_date']
+        
         # Update the database with new quantity and expiry date
-        inv.update_item(inventory_id, quantity, expiry_date)
+        inventory.update_item(inventory_id, quantity, expiry_date)
         # returns response to js code
         return jsonify({'success': True})
     except Exception as e:
@@ -91,8 +90,7 @@ def update_item():
     
 @app.route("/inventory/add_item/new", methods = ["POST"])
 def new_item():
-    
-    response = item.process_add_form(request.form, request.files, user_id)
+    response = item.process_add_form(request.form, user_id)
     item_id = response["item_id"]
 
     # if the item was not succesffuly added to the item table
@@ -108,7 +106,7 @@ def new_item():
     if not request.form.get("add_to_inventory"):
         return jsonify({"success": True, "item_id": item_id, "message": "Item added to personal items."})
     
-    response = inv.process_add_form(user_id, item_id, request.form)
+    response = inventory.process_add_form(user_id, item_id, request.form)
     if response["success"]:
         return jsonify({"success": True, "item_id": item_id, "message": "Item added to inventory and personal items."})
     else:
@@ -118,23 +116,23 @@ def new_item():
 ### BARCODE SCANNING ROUTES ###
 
 # Opens camera module and returns feed
-@app.route('/get_scanner')
+@app.route('/scanner/get')
 def get_scanner():
-    return Response(scanner.decode_barcode(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # Closes camera module
-@app.route('/close_scanner')
+@app.route('/scanner/close')
 def close_scanner():
     scanner.release_capture()
     return jsonify({"success":True})
 
 # Returns the barcode number if one is found
-@app.route('/get_barcode')
-def get_barcode():
-    barcode = scanner.get_barcode()
-    if (barcode):
-        scanner.clear_barcode()
-        return jsonify({"success": True, "barcode": barcode})
+@app.route('/scanner/get_object')
+def get_object():
+    object = scanner.get_scanned()
+    if (object):
+        scanner.clear_scanned()
+        return jsonify({"success": True, "object": object})
     else:
         return jsonify({"success": False})
 
@@ -143,12 +141,32 @@ def unpause_scanner():
     scanner.unpause_scanner()
     return jsonify({"success":True})
 
+@app.route("/scanner/toggle_mode/<value>")
+def toggle_scan_mode(value):
+    if value == "true":
+        scanner.toggle_mode(True)
+        return jsonify({"success":True})
+    elif value =="false":
+        scanner.toggle_mode(False)
+        return jsonify({"success":True})
+    else:
+        return jsonify({"success":False})
+
+
 ### ITEM ROUTES ###
+
+@app.route("/items/single_text_search/<item_name>")
+def single_item_search(item_name):
+    try:
+        items = item.text_search(user_id, item_name)
+        item_info = items[0]
+        return jsonify({"success": True, "item": item_info})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
 
 # Get items by text search
 @app.route("/items/text_search", methods=["POST"])
 def text_search():
-    
     try:
         search_term = request.form["search_term"]
         items = item.text_search(user_id, search_term)
@@ -215,7 +233,7 @@ def report_item():
         
         new_item_id = request.form.get("new_item_id")
         item_id = request.form.get("item_id") or None
-        item_report.add_report(new_item_id, item_id, user_id)
+        report.add_report(new_item_id, item_id, user_id)
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error":str(e)})
@@ -226,7 +244,7 @@ def display_reports():
 
 @app.route("/items/reports/get")
 def get_reports():
-    return jsonify({"success": True, "reports": item_report.get_reports()})
+    return jsonify({"success": True, "reports": report.get_reports()})
 
 @app.route("/items/reports/<new_item_id>/<item_id>")
 def display_report(new_item_id, item_id):
@@ -244,11 +262,11 @@ def resolve_report():
         # if the missing item reported isnt elligible for being added 
         if action == "deny" and original_item_id is None:
             # gets the reports
-            reports = item_report.get_reports_by(new_item_id)
+            reports = report.get_reports_by(new_item_id)
             # report will be singular
             _, personal_item_name, user_id = reports[0]
             # removes the report
-            item_report.remove_report(new_item_id)
+            report.remove_report(new_item_id)
 
             message = """Thank you for reporting a missing item. 
                         Unfortunately, your item is not currently elligible to be added at this time.
@@ -283,7 +301,7 @@ def resolve_report():
             replace_id = original_item_id
 
             # finds reports that report the original item
-            duplicate_reports = item_report.get_reports_by(new_item_id, original_item_id, "id")
+            duplicate_reports = report.get_reports_by(new_item_id, original_item_id, "id")
 
         # if the error was a missing item and it got approved
         else:
@@ -303,18 +321,18 @@ def resolve_report():
             # find other reports that reported the missing item
             # finds by same barcode as their is no original item for missing items
             # also searches using the new_item_id incase the item has no barcode
-            duplicate_reports = item_report.get_reports_by(new_item_id, barcode, "barcode")
+            duplicate_reports = report.get_reports_by(new_item_id, barcode, "barcode")
 
         # gets the limit that a users item can have for quantity
         default_quantity = item.get_default_quantity(replace_id)
         # for each report of an item
         for personal_item_id, personal_item_name, user_id in duplicate_reports:
             # replace the personal item the user made with the now corrected / new item
-            inv.correct_personal_item(personal_item_id, replace_id, default_quantity)
+            inventory.correct_personal_item(personal_item_id, replace_id, default_quantity)
             # removes the users personal item as it is no longer needed
             item.remove_item(personal_item_id)
             # removes the report
-            item_report.remove_report(personal_item_id)
+            report.remove_report(personal_item_id)
 
             #####################################################
                         ### NOTIFY USER OF CHANGE ###
@@ -329,10 +347,14 @@ def resolve_report():
 
 if __name__ == '__main__':
     # Classes for handling sql expressions
-    inv = inventory()
-    item = item_table()
-    item_report = item_error()
+    inventory = Inventory()
+    item = Item()
+    report = Report()
     # Class for handling barcode scanning
-    scanner = barcode()
+    scanner = Scanner()
+
+    #success = Success()
+
+
     # Runs the app
     app.run(debug=True)

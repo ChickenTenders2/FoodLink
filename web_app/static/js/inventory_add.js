@@ -53,17 +53,24 @@ function select_item(item, from_scanner) {
     open_item_popup(item, estimated_expiry, from_scanner)
 }
 
-function open_add_popup(from_clone, barcode = null) {
-    if (from_clone) {
+function open_add_popup(where_from, object = null) {
+    if (where_from == "clone") {
+        console.log("cloning");
         add_clone_info();
     } 
-    else if (barcode) {
+    else if (where_from == "barcode") {
         stop_check();
-        document.getElementById('barcode_edit').value = barcode;
+        document.getElementById('barcode_edit').value = object;
         // Barcode scanning should only start if the popup leads back to the main window
         document.getElementById("close-add-popup").onclick = () => close_add_popup(true);
     }
-    else {
+    else if (where_from == "ai") {
+        stop_check();
+        document.getElementById('name_edit').value = object;
+        // Barcode scanning should only start if the popup leads back to the main window
+        document.getElementById("close-add-popup").onclick = () => close_add_popup(true);
+    }
+    else if (where_from == "search") {
         const search_term = document.getElementById("search_term").value;
         document.getElementById("name_edit").value = search_term;
     }
@@ -121,14 +128,20 @@ function close_add_popup(to_scanner) {
     document.getElementById("add-popup").style.display = "none";
 }
 
-function open_not_found_popup(barcode) {
+function open_not_found_popup(scan_mode, object) {
     stop_check();
     document.getElementById("not_found_popup").style.display = "block";
     const button = document.getElementById("open_not_found_button")
     // runs functions when button is pressed
     button.onclick = () => {
         close_not_found_popup();
-        open_add_popup(false, barcode);
+        // if object identified not in db replace name with name of identified item
+        if (scan_mode) {
+            open_add_popup("ai", object);
+        // if barcode missing from db replace barcode
+        } else {
+            open_add_popup("barcode", object);
+        }
     }
 }
 
@@ -253,8 +266,34 @@ async function display_search_results(items) {
 }
 
 // Redirects to correct function once barcode is found
-function process_barcode(barcode) {
-    barcode_search_item(barcode);
+function process_barcode(object) {
+    // Gets mode
+    const checkbox = document.getElementById("scan_mode").checked;
+    // If in AI object recognition mode
+    if (checkbox) {
+        console.log(object);
+        single_search_item(object)
+    } else {
+        barcode_search_item(object);
+    }
+}
+
+async function single_search_item(item_name) {
+    try {
+
+        // Searches for an item by name and awaits result
+        const response = await fetch('/items/single_text_search/'+item_name)               
+        let result = await response.json();
+
+        // If an item is found
+        if (result.success) {
+            select_item(result.item, true);
+        } else {
+            open_not_found_popup(true, item_name);
+        }
+    } catch (e) {
+        alert(e);
+    }
 }
 
 // Checks if barcode is in item table
@@ -269,7 +308,7 @@ async function barcode_search_item(barcode_number) {
         if (response.success) {
             select_item(response.item, true);
         } else {
-            open_not_found_popup(barcode_number);
+            open_not_found_popup(false, barcode_number);
         }
     } catch (e) {
         alert(e);

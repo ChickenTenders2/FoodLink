@@ -3,7 +3,7 @@ from os.path import isfile as file_exists
 from os import remove as remove_file
 from shutil import copyfile as copy_file
 
-class item_table(database):
+class Item(database):
     def __init__(self):
         super().__init__()
 

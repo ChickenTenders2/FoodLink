@@ -1,6 +1,6 @@
 from database import database
 
-class inventory(database):
+class Inventory(database):
     def __init__(self):
         super().__init__()
 

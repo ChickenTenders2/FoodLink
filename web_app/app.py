@@ -39,10 +39,6 @@ def api_inventory(search_query = None):
         else:
             items = inv.get_items(user_id)
 
-        # formats expiry date for front end
-        for item in items:
-            item[6] = item[6].strftime('%Y-%m-%d')
-
         return jsonify({"success": True, 'items': items})
     except Exception as e:
         return jsonify({"success": False, "error":str(e)})

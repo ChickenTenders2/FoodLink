@@ -13,6 +13,9 @@ class inventory(database):
         items = cursor.fetchall()
         cursor.close()
         items = [list(i) for i in items]
+        # formats expiry date to string for front end
+        for item in items:
+            item[6] = item[6].strftime('%Y-%m-%d')
         return items
 
     def get_item_by_id(self, inventory_id):
@@ -67,6 +70,9 @@ class inventory(database):
         items = cursor.fetchall()
         cursor.close()
         items = [list(i) for i in items]
+        # formats expiry date to string for front end
+        for item in items:
+            item[6] = item[6].strftime('%Y-%m-%d')
         return items
     
     def process_add_form(self, user_id, item_id, form):

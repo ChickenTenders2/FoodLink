@@ -9,9 +9,9 @@
 </head>
 <body>
     <!-- search and sort form -->
-    <form method="GET" action="/inventory" class="filter-form">
-        <input type="text" name="search" placeholder="Search inventory..." value="{{request.args.get('search', '')}}">
-        <select name="sort_by">
+    <form method="GET" action="/inventory" class="filter-form" id="filter-form">
+        <input type="text" id="search-input" name="search" placeholder="Search inventory..." value="{{request.args.get('search', '')}}">
+        <select id="sort-select" name="sort_by">
             <!-- if statments make sure the current sort is shown as the default option-->
             <option value="relevance" {% if sort_by == "relevance" %} selected {% endif %}>Sort by Relevance</option>
             <option value="name" {% if sort_by == "name" %} selected {% endif %}>Sort by Name</option>
@@ -19,6 +19,25 @@
         </select>
     <button type="submit">Apply</button>
     </form>
+
+    <div class="legend-container">
+        <div class="legend-item">
+          <span class="legend-box expired"></span> Expired
+        </div>
+        <div class="legend-item">
+          <span class="legend-box expires-today"></span> Expires Today
+        </div>
+        <div class="legend-item">
+          <span class="legend-box expires-1-day"></span> 1 Day Left
+        </div>
+        <div class="legend-item">
+          <span class="legend-box expires-2-days"></span> 2 Days Left
+        </div>
+        <div class="legend-item">
+            <span class="legend-box expires-days"></span> 3+ Days Left
+        </div>
+    </div>
+      
 
     <!-- displays each users items-->
     <div class="inventory-container">

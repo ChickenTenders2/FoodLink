@@ -80,38 +80,86 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-function refreshInventory() {
-    fetch('/api/inventory')
-      .then(response => response.json())
+  document.getElementById('filter-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const search = document.getElementById('search-input').value;
+    const sort = document.getElementById('sort-select').value;
+    fetchInventory(search, sort);
+  });
+  
+  function fetchInventory(search, sort) {
+    // Use empty string or default value if undefined or null
+    const searchParam = search || '';
+    const sortParam = sort || 'relevance';
+  
+    const url = `/api/inventory?search=${encodeURIComponent(searchParam)}&sort_by=${encodeURIComponent(sortParam)}`;
+    
+    fetch(url)
+      .then(res => res.json())
       .then(data => {
+        const container = document.querySelector('.inventory-container');
+        container.innerHTML = '';
+  
         data.items.forEach(item => {
-          const tile = document.querySelector(`.inventory-tile[data-id="${item[0]}"]`);
-          if (tile) {
-            // Update image and name
-            tile.querySelector('.item-name').textContent = item[2];
-            tile.querySelector('img').src = `/static/images/${item[1]}.jpg`;
+          const tile = document.createElement('div');
+          tile.className = 'inventory-tile';
+          tile.setAttribute('data-id', item[0]);
+          tile.setAttribute('data-days-left', item[8]);
   
-            // Update expiration class
-            const daysLeft = item[8];
+          if (item[8] < 0) tile.classList.add('expired');
+          else if (item[8] === 0) tile.classList.add('expires-today');
+          else if (item[8] === 1) tile.classList.add('expires-1-day');
+          else if (item[8] === 2) tile.classList.add('expires-2-days');
   
-            tile.classList.remove('expired', 'expires-today', 'expires-1-day', 'expires-2-days');
+          tile.innerHTML = `
+            <img src="/static/images/${item[1]}.jpg" alt="${item[2]}" onerror="this.onerror=null; this.src='/static/images/null.jpg';">
+            <span class="item-name">${item[2]}</span>
+          `;
+
   
-            if (daysLeft < 0) {
-              tile.classList.add('expired');
-            } else if (daysLeft === 0) {
-              tile.classList.add('expires-today');
-            } else if (daysLeft === 1) {
-              tile.classList.add('expires-1-day');
-            } else if (daysLeft === 2) {
-              tile.classList.add('expires-2-days');
-            } 
-          }
+          tile.onclick = () => {
+            open_popup(item[2], item[4], item[7], item[6], item[0]);
+          };
+  
+          container.appendChild(tile);
         });
       });
   }
   
+  
+
+// function refreshInventory() {
+//     fetch('/api/inventory')
+//       .then(response => response.json())
+//       .then(data => {
+//         data.items.forEach(item => {
+//           const tile = document.querySelector(`.inventory-tile[data-id="${item[0]}"]`);
+//           if (tile) {
+//             // Update image and name
+//             tile.querySelector('.item-name').textContent = item[2];
+//             tile.querySelector('img').src = `/static/images/${item[1]}.jpg`;
+  
+//             // Update expiration class
+//             const daysLeft = item[8];
+  
+//             tile.classList.remove('expired', 'expires-today', 'expires-1-day', 'expires-2-days');
+  
+//             if (daysLeft < 0) {
+//               tile.classList.add('expired');
+//             } else if (daysLeft === 0) {
+//               tile.classList.add('expires-today');
+//             } else if (daysLeft === 1) {
+//               tile.classList.add('expires-1-day');
+//             } else if (daysLeft === 2) {
+//               tile.classList.add('expires-2-days');
+//             } 
+//           }
+//         });
+//       });
+//   }
+  
   // Refresh every 30 seconds
-  setInterval(refreshInventory, 30000); // or adjust to your desired interval
+  setInterval(fetchInventory, 30000); // or adjust to your desired interval
 
 async function removeItem() {
     const inventoryId = document.getElementById('inventory-id').value;

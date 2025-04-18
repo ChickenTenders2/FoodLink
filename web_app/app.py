@@ -51,7 +51,18 @@ def get_inventory():
 # Dynamically refresh inventory page
 @app.route('/api/inventory')
 def api_inventory():
-    items = inv.get_items(user_id)
+    search_query = request.args.get('search')
+    sort_by = request.args.get('sort_by')
+    # searches for an item if query is provided otherwise gets all items
+    if search_query:
+        items = inv.search_items(user_id, search_query)
+    else:
+        items = inv.get_items(user_id)
+    
+    if sort_by in ['name', 'expiry']:
+        # sorts by name or expiry
+        items = sorted(items, key = lambda x: x[2] if sort_by == 'name' else x[6])
+        
     # formats each item as list for easier modification of date format
     items = [list(i) for i in items]
     # formats date for front end
@@ -102,6 +113,7 @@ def update_item():
 def remove_item():
     try:
         inventory_id = request.form['inventory_id']
+        print("Inventory ID received:", request.form['inventory_id'])
         inv.remove_item(inventory_id)
         return jsonify({'success': True})
     except Exception as e:

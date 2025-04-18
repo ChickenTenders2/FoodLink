@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, url_for, Response
+from flask import Flask, jsonify, render_template, request, url_for, Response, redirect
 from inventory import Inventory
 from scanner import Scanner
 from item import Item
@@ -8,10 +8,12 @@ from shoppingList import shoppingList
 from os.path import isfile as file_exists
 from notification import notification
 from thingsboard import thingsboard
+from tool import Tool
 
 app = Flask(__name__, template_folder = "templates")
 
 user_id = 2
+
 
 # Dashboard Route
 @app.route('/', methods=['GET', 'POST'])
@@ -427,6 +429,24 @@ def update_shopping_item():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
+
+### UTENSILS AND APPLIANCE SELECTION ROUTES
+    
+@app.route('/tools/select')
+def select_tools():
+    utensils = tool_sql.get_utensils()
+    appliances = tool_sql.get_appliances()
+    tool_ids = tool_sql.get_user_tool_ids(user_id)
+    return render_template('select_utensils.html', utensils=utensils, appliances=appliances, selected_ids=tool_ids)
+
+@app.route('/tools/save', methods=['POST'])
+def save_tools():
+    selected_tools = request.form.getlist('tool')
+    tool_sql.save_user_tools(user_id, selected_tools)
+    return redirect(url_for('select_tools'))
+    # change to main page once merged
+    # return redirect(url_for('index'))
+
 if __name__ == '__main__':
     # Classes for handling sql expressions
     inventory = Inventory()
@@ -445,5 +465,6 @@ if __name__ == '__main__':
     # thingsboard class instance
     tb = thingsboard()
 
+    tool_sql = tool()
     # Runs the app
     app.run(debug=True)

@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <form class="add-item-form" action="/inventory/add_item">
+        <button type="submit">Add Item</button>
+    </form>
+      
     <!-- search and sort form -->
     <form method="GET" action="/inventory" class="filter-form" id="filter-form">
         <input type="text" id="search-input" name="search" placeholder="Search inventory..." value="{{request.args.get('search', '')}}">

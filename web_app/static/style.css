@@ -566,25 +566,41 @@ a.tile-link {
     background-color: #8fca6c;
 }
 
-/* centres barcode scanner window*/
-.video-window {
-    margin-top: 20px;
-    text-align: center;
+.add-item-form button {
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    width: 200px;
+    font-size: 16px;
+    border: none;
+    border-radius: 30px;
+    background-color: #a6d785;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
+.add-item-form button:hover {
+    background-color: #8fca6c;
+}
+
+/* centres barcode scanner window*/
+/* .video-window {
+    margin-top: 20px;
+    text-align: center;
+} */
+
 /* shortens date boxes for adding item expiry time */
-.date_field {
+/* .date_field {
     text-align: center;
     width: calc(1ch*3);
     padding: 1px;
-}
+} */
 
 /* hide spinboxes for expiry time date boxes */
-.date_field::-webkit-outer-spin-button,
+/* .date_field::-webkit-outer-spin-button,
 .date_field::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
-}
+} */
 
 
 .search_result_item {
@@ -644,4 +660,162 @@ a.tile-link {
 @keyframes fadeout {
     from {bottom: 30px; opacity: 1;}
     to {bottom: 0; opacity: 0;}
+}
+
+/* Inventory_add styling */
+/* Barcode Scanner Styling Enhancements */
+.video-window {
+    background-color: #f4f4f4;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+    text-align: center;
+    margin-top: 20px;
+}
+
+.video-window button {
+    background-color: #a6d785;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px auto;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.video-window button:hover {
+    background-color: #8dc46c;
+}
+
+/* Search and Not Found Popups */
+#not_found_popup,
+#search_popup,
+#report_popup,
+#popup,
+#add-popup {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 400px;
+    margin: auto;
+    max-height: 80vh;
+    overflow: auto;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -20%);
+    z-index: 1000;
+    display: none;
+}
+
+#not_found_popup h2,
+#search_popup h2,
+#popup h2,
+#add-popup h2,
+#report_popup h2 {
+    text-align: center;
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+#not_found_popup p,
+#search_popup p {
+    text-align: center;
+    font-size: 14px;
+}
+
+#popup form input,
+#add-popup form input,
+#search_popup form input {
+    width: 95%;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.expiry-time-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+  
+  .expiry-time-group input.date_field {
+    width: 50px;
+    padding: 5px;
+    text-align: center;
+  }
+  
+
+#popup button,
+#add-popup button,
+#search_popup button,
+#not_found_popup button,
+#report_popup button {
+    background-color: #aed581;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 5px 0;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+#popup button:hover,
+#add-popup button:hover,
+#search_popup button:hover,
+#not_found_popup button:hover,
+#report_popup button:hover {
+    background-color: #9ccc65;
+}
+
+#close-popup,
+#close-add-popup,
+#close_report_popup,
+#close_search_popup,
+#close_not_found_popup {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent !important;
+    border: none;
+    font-size: 25px;
+    font-weight: bold;
+    color: #444;
+    cursor: pointer;
+    padding: 2px 6px;
+    line-height: 1;
+    width: auto !important;
+}
+
+#close-popup:hover,
+#close-add-popup:hover,
+#close_report_popup:hover,
+#close_search_popup:hover,
+#close_not_found_popup:hover {
+    color: #f44336;
+}
+
+
+#search_results {
+    margin-top: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    border-top: 1px solid #ddd;
+}
+
+#item_image, #image_preview {
+    display: block;
+    margin: 10px auto;
+    width: 80px;
+    height: auto;
+    border-radius: 8px;
+}
+
+#inventory_fields {
+    margin-top: 10px;
 }

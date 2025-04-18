@@ -2,7 +2,7 @@ import requests
 import json
 
 class thingsboard():
-    def get_jwt_token():
+    def get_jwt_token(self):
         login_url = "https://thingsboard.cs.cf.ac.uk/api/auth/login"
         headers = {
             "Content-Type": "application/json"
@@ -22,7 +22,7 @@ class thingsboard():
         else:
             print("Login failed: ", response.json())
 
-    def get_telemetry(token, device_id):
+    def get_telemetry(self, token, device_id):
         headers = {
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"

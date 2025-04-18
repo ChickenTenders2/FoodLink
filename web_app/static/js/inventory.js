@@ -68,6 +68,16 @@ window.addEventListener('DOMContentLoaded', () => {
   fetchInventory();
 });
 
+// fixes error were adding an item and then pressing back doesnt reflect update
+// everytime page is shown
+window.addEventListener('pageshow', (event) => {
+  // if page was loaded from cache instead of properly reloaded
+  if (event.persisted) {
+    // refresh inventory
+    fetchInventory();
+  }
+});
+
 // fetches inventory after search term is applied
 document.getElementById('filter-form').addEventListener('submit', function (e) {
   e.preventDefault();

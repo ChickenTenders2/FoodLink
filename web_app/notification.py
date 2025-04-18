@@ -53,13 +53,13 @@ class notification(database):
                 if temperature < min_temperature:
                     message = f"Low temperature detected: {temperature}°C"
                     is_exists = self.notification_exists(user_id, notif_type, message)
-                    if is_exists == 0:
-                        self.insert_notification(user_id, notif_type, message, severity)
+                    if not self.cooldown_check(user_id, notif_type):
+                        self.insert_notification(user_id, notif_type, message, 'warning')
                 elif temperature > max_temperature:
                     message = f"High temperature detected: {temperature}°C"
                     is_exists = self.notification_exists(user_id, notif_type, message)
-                    if is_exists == 0:
-                        self.insert_notification(user_id, notif_type, message, severity)
+                    if self.cooldown_check(user_id, notif_type) == False:
+                        self.insert_notification(user_id, notif_type, message, 'critical')
                 
             if humidity is not None:
                 humidity = round(humidity, 2)
@@ -67,8 +67,8 @@ class notification(database):
                     notif_type = 'humidity'
                     message = f"High humidity detected: {humidity}%"
                     is_exists = self.notification_exists(user_id, notif_type, message)
-                    if is_exists == 0:
-                        self.insert_notification(user_id, notif_type, message, severity)
+                    if not self.cooldown_check(user_id, notif_type):
+                        self.insert_notification(user_id, notif_type, message, 'warning')
         cursor.close()
 
     def expiry_notification(self, user_id):
@@ -121,8 +121,9 @@ class notification(database):
         query = "SELECT COUNT(*) FROM notification WHERE user_id = %s AND type = %s AND message = %s;"
         data = (user_id, notif_type, message)
         cursor.execute(query, data)
-        is_exists = cursor.fetchone()[0]
-        return is_exists
+        exact_exists = cursor.fetchone()[0]
+        cursor.close()
+        return exact_exists
 
     def insert_notification(self, user_id, notif_type, message, severity):
         cursor = self.connection.cursor()
@@ -139,3 +140,39 @@ class notification(database):
         cursor.execute(query, data)
         self.connection.commit()
         cursor.close()
+
+    def cooldown_check(self, user_id, notif_type, cooldown_minutes=5):
+        # """
+        # Returns True if a notification of the given type was sent within cooldown_minutes.
+        # Otherwise returns False, meaning it's okay to send a new one.
+        # """
+        cursor = self.connection.cursor()
+        query = """
+            SELECT date_created FROM notification 
+            WHERE user_id = %s AND type = %s 
+            ORDER BY date_created DESC; 
+        """
+        cursor.execute(query, (user_id, notif_type))
+        result = cursor.fetchone()
+        print(result)
+        cursor.close()
+
+        print(result)
+
+        if result:
+            last_time = result[0]
+
+            if isinstance(last_time, str):  # If stored as string
+                last_time = datetime.strptime(last_time, "%Y-%m-%d %H:%M:%S")
+
+            now = datetime.now()
+            diff_in_seconds = (now - last_time).total_seconds()
+
+            print(f"[DEBUG] Last notification at: {last_time}")
+            print(f"[DEBUG] Current time: {now}")
+            print(f"[DEBUG] Seconds since last: {diff_in_seconds}")
+
+            if diff_in_seconds < cooldown_minutes * 60:
+                return True  # Cooldown active
+
+        return False

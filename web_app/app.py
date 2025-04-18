@@ -3,7 +3,6 @@ import os
 import json
 import time
 import requests
-from inventory import inventory
 from notification import notification
 from thingsboard import thingsboard
 
@@ -49,6 +48,42 @@ def index():
             return jsonify({'success': False, 'error': str(e)})
 
     return render_template('index.html', temp_url=temp_url, humid_url = humid_url, notifications=notifications, unread_count=unread_count)
+
+# Dynamtically update notification bar
+@app.route('/get_notifications', methods=['GET'])
+def get_notifications():
+    user_id = 2
+
+    device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
+    token = tb.get_jwt_token()
+    data = tb.get_telemetry(token, device_id)
+
+    temperature = humidity = None
+    if data:
+        temperature = float(data['temperature'][0]['value'])
+        humidity = float(data['humidity'][0]['value'])
+
+    notif.temperature_humidity_notification(user_id, temperature, humidity)
+    notif.expiry_notification(user_id)
+
+    notifications = notif.get_notifications(user_id)
+    unread_count = sum(1 for n in notifications if n[4] == 0)
+
+    return jsonify({
+        'notifications': [
+            {
+                'id': n[0],
+                'message': n[2],
+                'timestamp': n[3].strftime('%Y-%m-%d %H:%M'),
+                'severity': n[5],
+                'read': n[4] == 1
+            }
+            for n in notifications
+        ],
+        'unread_count': unread_count
+    })
+
+
 # Login Route
 
 # Register Route

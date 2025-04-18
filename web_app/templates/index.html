@@ -12,7 +12,7 @@
             <h1>FoodLink</h1>
         </div>
         <div class="nav-right">
-            <img id="notification-icon" src="{{ url_for('static', filename='images/notification_bell.png') }}" alt="Notifications" width="20px" height="20px" class="notification-icon" onclick="notificationPopupToggle()" />
+            <img id="notification-icon" src="{{ url_for('static', filename='images/notification_bell.png') }}" alt="Notifications" width="20px" height="20px" class="notification-icon"/>
             {% if unread_count > 0 %} 
                 <span id="notification-badge" class="notification-badge">{{ unread_count }}</span> 
             {% endif %}
@@ -40,20 +40,78 @@
 </html>
 
 <script>
-    document.querySelector('.tb-powered-by-footer').style.display = 'none';
+    // document.querySelector('.tb-powered-by-footer').style.display = 'none';
 
-    function notificationPopupToggle() {
-        const popup = document.getElementById('notification-popup');
-        popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
+    function fetchNotifications() {
+        fetch('/get_notifications')
+            .then(response => response.json())
+            .then(data => {
+                const list = document.getElementById('notification-list');
+                const badge = document.getElementById('notification-badge');
+
+                list.innerHTML = '';
+
+                data.notifications.forEach(n => {
+                    const li = document.createElement('li');
+                    li.className = n.read ? 'read' : 'unread';
+                    li.setAttribute('data-id', n.id);
+                    li.setAttribute('data-severity', n.severity);
+                    li.onclick = function () { markRead(this); };
+
+                    li.innerHTML = `<strong>${n.severity.charAt(0).toUpperCase() + n.severity.slice(1)}</strong> : ${n.message}
+                                    <small>${n.timestamp}</small>`;
+                    list.appendChild(li);
+                });
+
+                if (data.unread_count > 0) {
+                    if (!badge) {
+                        const newBadge = document.createElement('span');
+                        newBadge.id = 'notification-badge';
+                        newBadge.className = 'notification-badge';
+                        newBadge.textContent = data.unread_count;
+                        document.querySelector('.nav-right').appendChild(newBadge);
+                    } else {
+                        badge.textContent = data.unread_count;
+                        badge.style.display = 'inline';
+                    }
+                } else {
+                    if (badge) badge.style.display = 'none';
+                }
+            });
     }
 
-    window.addEventListener('click', function(e) {
-        const popup = document.getElementById("notification-popup");
-        const icon = document.getElementById("notification-icon");
-        if (!popup.contains(e.target) && !icon.contains(e.target)) {
-            popup.style.display = "none";
-        }
+    document.addEventListener("DOMContentLoaded", function () {
+        const popup = document.getElementById('notification-popup');
+        const icon = document.getElementById('notification-icon');
+
+        // Toggle popup on icon click
+        icon.addEventListener('click', function (e) {
+            e.stopPropagation(); // Prevent window click from firing
+            // Toggle visibility
+            if (popup.style.display === 'block') {
+                popup.style.display = 'none';
+            } else {
+                popup.style.display = 'block';
+            }
+        });
+
+        // Prevent click inside the popup from closing it
+        popup.addEventListener('click', function (e) {
+            e.stopPropagation();
+        });
+
+        // Click anywhere else closes the popup
+        window.addEventListener('click', function () {
+            popup.style.display = 'none';
+        });
+
+        const tbFooter = document.querySelector('.tb-powered-by-footer');
+        if (tbFooter) tbFooter.style.display = 'none';
+
+        setInterval(fetchNotifications, 300000); // auto-refresh every 5 minutes
+        fetchNotifications(); // run once on page load
     });
+
 
     function markRead(elem) {
         const notifId = elem.getAttribute('data-id');

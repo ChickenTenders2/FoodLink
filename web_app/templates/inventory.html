@@ -8,10 +8,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <form class="add-item-form" action="/inventory/add_item">
+        <button type="submit">Add Item</button>
+    </form>
+      
     <!-- search and sort form -->
-    <form method="GET" action="/inventory" class="filter-form">
-        <input type="text" name="search" placeholder="Search inventory..." value="{{request.args.get('search', '')}}">
-        <select name="sort_by">
+    <form method="GET" action="/inventory" class="filter-form" id="filter-form">
+        <input type="text" id="search-input" name="search" placeholder="Search inventory..." value="{{request.args.get('search_query', '')}}">
+        <select id="sort-select" name="sort_by">
             <!-- if statments make sure the current sort is shown as the default option-->
             <option value="relevance" {% if sort_by == "relevance" %} selected {% endif %}>Sort by Relevance</option>
             <option value="name" {% if sort_by == "name" %} selected {% endif %}>Sort by Name</option>
@@ -20,14 +24,27 @@
     <button type="submit">Apply</button>
     </form>
 
-    <!-- displays each users items-->
+    <div class="legend-container">
+        <div class="legend-item">
+          <span class="legend-box expired"></span> Expired
+        </div>
+        <div class="legend-item">
+          <span class="legend-box expires-today"></span> Expires Today
+        </div>
+        <div class="legend-item">
+          <span class="legend-box expires-1-day"></span> 1 Day Left
+        </div>
+        <div class="legend-item">
+          <span class="legend-box expires-2-days"></span> 2 Days Left
+        </div>
+        <div class="legend-item">
+            <span class="legend-box expires-days"></span> 3+ Days Left
+        </div>
+    </div>
+      
+
+    <!-- displays each users items after inventory fetched-->
     <div class="inventory-container">
-        {% for item in items %}
-            <div class="inventory-tile" onclick="open_popup('{{ item[2] }}', '{{ item[4] }}', '{{item[7]}}', '{{ item[6] }}', '{{ item[0]}}')">
-                <img src="{{ url_for('static', filename='images/' + item[1]|string + '.jpg') }}" alt="{{ item[2] }}" onerror="this.src='/static/images/null.jpg'">
-                <span class="item-name">{{ item[2] }} </span>
-            </div>
-        {% endfor %}
     </div>
 
     <!-- Pop-Up for Editing Quantity & Expiration Date -->
@@ -44,9 +61,18 @@
             <input type="hidden" id="inventory-id" name="inventory_id">
             <input type="hidden" id="original-quantity" name="original_quantity">
             <input type="hidden" id="original-expiry" name="original_expiry">
-            <button type="submit">Save</button>
+            <!-- popup buttons -->
+            <div class="popup-button-group">
+                <button type="submit">Save</button>
+                <button type="button" onclick="removeItem()">Remove</button>
+                <button type="button" onclick="close_popup()">Cancel</button>
+             </div>
         </form>
     </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="{{ url_for('static', filename='js/item_handling.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/inventory.js') }}"></script> 
 </body>
 </html>

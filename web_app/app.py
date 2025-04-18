@@ -68,26 +68,23 @@ def index():
 # Inventory interface
 @app.route('/inventory/')
 def get_inventory():
-    
-    search_query = request.args.get('search')
-    sort_by = request.args.get('sort_by')
-    # searches for an item if query is provided otherwise gets all items
-    if search_query:
-        items = inventory.search_items(user_id, search_query)
-    else:
-        items = inventory.get_items(user_id)
-    
-    if sort_by in ['name', 'expiry']:
-        # sorts by name or expiry
-        items = sorted(items, key = lambda x: x[2] if sort_by == 'name' else x[6])
+    return render_template("inventory.html")
 
-    # formats each item as list for easier modification of date format
-    items = [list(i) for i in items]
-    # formats date for front end
-    for item in items:
-        item[6] = item[6].strftime('%Y-%m-%d')
+# allows for no search query to be entered
+@app.route('/inventory/get/', defaults={'search_query': None})
+@app.route('/inventory/get/<search_query>')
+# used to dynamically get inventory
+def api_inventory(search_query = None):
+    try:
+        # searches for an item if query is provided otherwise gets all items
+        if search_query:
+            items = inventory.search_items(user_id, search_query)
+        else:
+            items = inventory.get_items(user_id)
 
-    return render_template("inventory.html", items = items, sort_by = sort_by)
+        return jsonify({"success": True, 'items': items})
+    except Exception as e:
+        return jsonify({"success": False, "error":str(e)})
 
 # Add item to inventory interface
 @app.route("/inventory/add_item/")
@@ -97,7 +94,6 @@ def add_to_inventory():
 # Add item to inventory
 @app.route("/inventory/add_item/add", methods=["POST"])
 def append_inventory():
-    
     item_id = request.form.get("item_id")
     response = inventory.process_add_form(user_id, item_id, request.form)    
     return jsonify(response)
@@ -118,6 +114,17 @@ def update_item():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
     
+@app.route('/remove_item', methods=['POST'])
+def remove_item():
+    try:
+        inventory_id = request.form['inventory_id']
+        print("Inventory ID received:", request.form['inventory_id'])
+        inventory.remove_item(inventory_id)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
 @app.route("/inventory/add_item/new", methods = ["POST"])
 def new_item():
     response = item.process_add_form(request.form, user_id)
@@ -217,7 +224,8 @@ def get_item_by_barcode(barcode):
             return jsonify({"success": False, "error": "Item not found."})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
-    
+
+# Get item by id
 @app.route("/items/get_item/<item_id>")
 def get_item(item_id):
     try:
@@ -247,7 +255,7 @@ def append_item_db():
     else:
         return jsonify(response)
 
-
+# Get item image
 @app.route("/find_image/<item_id>")
 def find_image(item_id):
     path = f"static/images/{item_id}.jpg"
@@ -374,8 +382,6 @@ def resolve_report():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-
-# Inventory Interface Route
 
 # Shopping List Interface Route
 

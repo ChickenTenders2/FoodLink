@@ -1,4 +1,5 @@
 from database import database
+from datetime import datetime
 
 class Inventory(database):
     def __init__(self):
@@ -12,7 +13,20 @@ class Inventory(database):
         cursor.execute(query, data)
         items = cursor.fetchall()
         cursor.close()
+        items = [list(i) for i in items]
+        # formats expiry date to string for front end
+        for item in items:
+            item[6] = item[6].strftime('%Y-%m-%d')
         return items
+
+    def get_item_by_id(self, inventory_id):
+        cursor = self.connection.cursor()
+        query = "SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity FROM FoodLink.inventory inv JOIN FoodLink.item i ON (inv.item_id = i.id) WHERE inv.id = %s;"
+        data = (inventory_id,)
+        cursor.execute(query, data)
+        item = cursor.fetchone()
+        cursor.close()
+        return list(item)
 
     def add_item(self, user_id, item_id, quantity, expiry_date):
         cursor = self.connection.cursor()
@@ -31,6 +45,7 @@ class Inventory(database):
         cursor.execute(query, data)
         self.connection.commit()
         cursor.close()
+        print(f"Deleted inventory item with ID: {inventory_id}")
 
     def update_quantity(self, inventory_id, quantity):    
         cursor = self.connection.cursor()
@@ -58,6 +73,10 @@ class Inventory(database):
         cursor.execute(query, data)
         items = cursor.fetchall()
         cursor.close()
+        items = [list(i) for i in items]
+        # formats expiry date to string for front end
+        for item in items:
+            item[6] = item[6].strftime('%Y-%m-%d')
         return items
     
     def process_add_form(self, user_id, item_id, form):

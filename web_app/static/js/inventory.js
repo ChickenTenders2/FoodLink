@@ -58,6 +58,7 @@ async function submit_update(event) {
         const tile = document.querySelector(`.inventory-tile[data-id="${item[0]}"]`);
         tile.querySelector('.item-name').textContent = item[2];
         tile.querySelector('img').src = `/static/images/${item[1]}.jpg`;
+        fetchInventory()
         close_popup();
         showToast('Item updated successfully');
 

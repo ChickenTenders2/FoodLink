@@ -4,6 +4,8 @@ from flask_mail import Mail
 import os
 from sqlalchemy import inspect, text
 
+# qyng zxwv thhh ofow
+
 # Import db from models
 from models import db, User
 

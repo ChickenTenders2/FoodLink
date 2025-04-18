@@ -46,6 +46,22 @@ def get_inventory():
 
     return render_template("inventory.html", items = items, sort_by = sort_by)
 
+# Item table interface
+@app.route('/admin/item_view')
+def get_items():
+    items = item.get_all()
+    return render_template("item_view.html", items = items)
+
+@app.route('/admin/item_view/delete', methods = ['POST'])
+def delete_item():
+    try:
+        id = request.data.decode('utf-8')
+        print(id)
+        item.remove_item(id)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
 # Add item to inventory interface
 @app.route("/inventory/add_item/")
 def add_to_inventory():
@@ -58,6 +74,40 @@ def append_inventory():
     item_id = request.form.get("item_id")
     response = inv.process_add_form(user_id, item_id, request.form)    
     return jsonify(response)
+
+@app.route('/admin/item_view/update_item', methods = ['POST'])
+def update_item_admin():
+    inventory_id = request.form['inventory_id']
+    name = request.form['name']
+    brand = request.form['brand']
+    quantity = request.form['quantity']
+    expiry_date = request.form['expiry']
+    unit = request.form['unit']
+    barcode = request.form['barcode']
+    if barcode == "None":
+        barcode = None
+    try:
+        item.update_item(inventory_id, barcode, name, brand, expiry_date, quantity, unit)
+        return jsonify({'success': True})
+    except Exception as e:
+        print(e)
+        return jsonify({'success': False, 'error': str(e)})
+    
+@app.route('/admin/item_view/add_item', methods = ['POST'])
+def add_item_admin():
+    barcode = request.form['barcode']
+    name = request.form['name']
+    brand = request.form['brand']
+    quantity = request.form['quantity']
+    expiry_date = request.form['expiry']
+    unit = request.form['unit']
+    if barcode.strip() == "":
+        barcode = None
+    try:
+        item.add_item(barcode, name, brand, expiry_date, quantity, unit)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 # Update quantity and expiry of item in inventory
 @app.route('/inventory/update_item', methods = ['POST'])

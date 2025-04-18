@@ -5,6 +5,60 @@
 
 /* General Styles */
 
+.add {
+    margin-left: 1034px;
+    margin-top: 30px;
+    background-color: #27941d5e;
+    padding: 5px;
+    cursor: pointer;
+    border: none;
+}
+
+.add:hover {
+    background-color: #053b0585;
+    margin-left: 1034px;
+    margin-top: 30px;
+    padding: 5px;
+    cursor: pointer;
+    border: none;
+    scale: 1.1;
+}
+
+tr:nth-child(odd) {
+    background-color: #27941d5e;
+}
+
+tr:nth-child(even) {
+    background-color: #1c64166b;
+}
+
+.item_view_title {
+    padding: 50px;
+}
+
+.item_button {
+    border: none;
+    background-color: #49f33900;
+    cursor: pointer;
+    color: rgb(0, 0, 0);
+}
+
+.item_button:hover {
+    border: none;
+    cursor: pointer;
+    scale: 1.5;
+}
+
+td {
+    padding: 5px;
+    cursor: pointer;
+}
+
+th {
+    padding: 5px;
+    cursor: default;
+}
+
 .modal {
     display: none;
     position: fixed;

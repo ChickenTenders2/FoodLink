@@ -7,6 +7,14 @@ class item_table(database):
     def __init__(self):
         super().__init__()
 
+    def get_all(self):
+        cursor = self.connection.cursor()
+        query = "SELECT * FROM FoodLink.item;"
+        cursor.execute(query)
+        items = cursor.fetchall()
+        cursor.close()
+        return items
+    
     def barcode_search(self, user_id, barcode_number):
         cursor = self.connection.cursor()
         # searches for an item by barcode

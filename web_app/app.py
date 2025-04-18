@@ -67,11 +67,10 @@ def api_inventory():
     items = [list(i) for i in items]
     # formats date for front end
     for item in items:
-        expiry_date = item[6]
-        if isinstance(expiry_date, datetime):
-            days_left = (expiry_date.date() - date.today()).days
-        else:
-            days_left = 999
+        item[6] = item[6].strftime('%Y-%m-%d')
+        expiry_date = datetime.strptime(item[6], "%Y-%m-%d").date()  # adjust format if needed
+        days_left = (expiry_date - date.today()).days
+
         item.append(days_left)
     return jsonify({'items': items})
 

@@ -10,7 +10,6 @@
     Smart Fridge
 {% endblock %}
 
-
 {% block navbar %}
 <!--<div class="header" id="myHeader">-->
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -30,26 +29,11 @@
                         <a href="{{ url_for('login') }}">login</a>
                     {% endif %}
                 </li>
-                <li>
-		    <a class="opinionA" 
-		        {% if current_user.is_authenticated %}
-				onclick="opinionShow()" href="#"
-			{% else %}
-				onclick="" href="{{ url_for('login') }}"
-   	                {% endif %}
-		    >Opinion<span class="opinionAtext">Please log in first</span></a>
-                </li>
-
             </ul>
-
         </div>
-	
-
     </nav>
 </div>
 {% endblock %}
-
-
 
 {% block content %}
     <div class="container">
@@ -66,7 +50,5 @@
 
         {% block page_content %}{% endblock %}
     </div>
-
-
 
 {% endblock %}

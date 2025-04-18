@@ -1,18 +1,14 @@
-from flask import Flask, jsonify, render_template, request, redirect, url_for, session, flash
-from flask_login import LoginManager, login_required, current_user, login_user, logout_user, UserMixin
-from flask_mail import Mail, Message
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, BooleanField
-from wtforms.validators import Length, InputRequired, Email, DataRequired
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask_login import LoginManager, login_required, current_user, login_user, logout_user
+from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
-import os
-import random
-from datetime import datetime
-import pytz
 
 # Import database and user model
 from models import db, User
+
+# Import utility functions and forms
+from utils import LoginForm, CreateAccountForm, send_verification_code, verification_codes
 
 # Initialize Flask application
 app = Flask(__name__)
@@ -39,84 +35,15 @@ mail = Mail(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# Define forms from applogin.py
-class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(1, 16)])
-    password = PasswordField('Password', validators=[DataRequired()])
-    remember_me = BooleanField('Remember me')
-    submit = SubmitField('Continue')
-
-class CreateAccountForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(1, 16)])
-    email = StringField('Email', validators=[DataRequired(), Length(1, 64)])               
-    password = PasswordField('Password', validators=[DataRequired()])
-    passwordConfirm = PasswordField('Password(ReType)', validators=[DataRequired()])
-    submit = SubmitField('Continue')
-
-# Store verification codes, temporary?
-verification_codes = {}
-
 # User loader function for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Generate a 6-digit verification code
-def generate_verification_code():
-    return str(random.randint(100000, 999999))
-
-# Send verification email with code
-def send_verification_code(user):
-    # Generate a new code
-    code = generate_verification_code()
-    # Store the code
-    verification_codes[user.email] = code
-    
-    # Create the email message
-    msg = Message(
-        'FoodLink - Verify Your Email',
-        recipients=[user.email],
-        sender=app.config['MAIL_DEFAULT_SENDER']
-    )
-    
-    # Email content
-    msg.body = f"""
-Hello {user.username},
-
-Your email verification code for FoodLink is: {code}
-
-Enter this code on the verification page to verify your email address.
-
-This code will expire in 1 hour.
-
-If you did not create an account, please ignore this email.
-
-Regards,
-The FoodLink Team
-"""
-    
-    msg.html = f"""
-<p>Hello {user.username},</p>
-<p>Your email verification code for FoodLink is:</p>
-<h2 style="background-color: #f5f5f5; padding: 10px; text-align: center; font-family: monospace;">{code}</h2>
-<p>Enter this code on the verification page to verify your email address.</p>
-<p>This code will expire in 1 hour.</p>
-<p>If you did not create an account, please ignore this email.</p>
-<p>Regards,<br>The FoodLink Team</p>
-"""
-    
-    # Send the email
-    mail.send(msg)
-    
-    # For testing/debugging - print the code to console as well
-    print(f"\n----- VERIFICATION CODE for {user.email}: {code} -----\n")
-
-# ----Routes----
-
 # Index route
 @app.route('/')
 def index():
-    return redirect(url_for('login'))
+    return render_template('index.html')
 
 # Login route
 @app.route('/login', methods=['GET', 'POST'])
@@ -135,7 +62,7 @@ def login():
             
             # Check if email is verified
             if not user.email_verified:
-                flash("Please verify your email address to access all features.")
+                flash("Please verify your email address to access all features.", "warning")
                 return redirect(url_for('email_verification_page'))
             
             return redirect(url_for('index'))
@@ -153,9 +80,9 @@ def createAccount():
         
         if existing_user is not None:
             if existing_user.username == form.username.data:
-                flash("Username already exists.")
+                flash("Username already exists.", "danger")
             if existing_user.email == form.email.data:
-                flash("Email already exists.")
+                flash("Email already exists.", "danger")
         else:    
             if form.password.data == form.passwordConfirm.data:
                 # Create new user
@@ -173,7 +100,7 @@ def createAccount():
                 login_user(user)
                 
                 # Redirect to email verification
-                flash("Account created successfully! Please verify your email.")
+                flash("Account created successfully! Please verify your email.", "success")
                 return redirect(url_for('email_verification_page'))
             else:
                 msg = "Passwords mismatched." 
@@ -204,7 +131,7 @@ def send_verification_code_route():
         return redirect(url_for('email_verification_page'))
     
     # Send verification code
-    send_verification_code(current_user)
+    send_verification_code(current_user, mail)
     flash('A verification code has been sent to your email address.', 'success')
     return redirect(url_for('email_verification_page'))
 
@@ -239,19 +166,6 @@ def verify_code():
         flash('Invalid verification code. Please try again.', 'danger')
     
     return redirect(url_for('email_verification_page'))
-
-# ----Extra----
-# Auto Login, for testing (remove in production)
-@app.route('/auto-login')
-def auto_login():
-    # Get test user
-    test_user = User.query.filter_by(email='test@example.com').first()
-    if test_user:
-        login_user(test_user)
-        return redirect(url_for('email_verification_page'))
-    else:
-        flash("Test user not found", "danger")
-        return "Test user not found."
 
 if __name__ == '__main__':
     with app.app_context():

@@ -34,17 +34,6 @@
     margin-right: 10px;
 }
 
-body {
-    font-family: Arial, sans-serif;
-    background-color: #eaf5e0; /* Light green background */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-
 /* General Styles */
 body {
     font-family: Arial, sans-serif;
@@ -53,7 +42,7 @@ body {
     flex-direction: column;
     align-items: center;
     height: 100vh;
-    margin: 0;
+    margin: 10px;
 }
 
 h1 {

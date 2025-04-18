@@ -11,6 +11,8 @@ from thingsboard import thingsboard
 
 app = Flask(__name__, template_folder = "templates")
 
+user_id = 2
+
 # Dashboard Route
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -23,8 +25,6 @@ def index():
     if data:
        temperature = float(data['temperature'][0]['value'])
        humidity = float(data['humidity'][0]['value'])
-
-    user_id = 2
 
     temp_url = "https://thingsboard.cs.cf.ac.uk/dashboard/9c597b10-0b04-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2" 
     humid_url = "https://thingsboard.cs.cf.ac.uk/dashboard/74d87180-0dbc-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2"
@@ -44,6 +44,7 @@ def index():
             return jsonify({'success': False, 'error': str(e)})
 
     return render_template('index.html', temp_url=temp_url, humid_url = humid_url, notifications=notifications, unread_count=unread_count)
+
 # Login Route
 
 # Register Route
@@ -62,7 +63,6 @@ def index():
 #         return jsonify({"success": False, "error": str(e)})
   
 
-user_id = 2
 ### INVENTORY ROUTES ###
 
 # Inventory interface
@@ -379,7 +379,7 @@ def resolve_report():
 
 # Shopping List Interface Route
 
-@app.route('/shopping-list', methods=['GET', 'POST'])
+@app.route('/shopping_list', methods=['GET', 'POST'])
 def get_shoppingList():
     if request.method == 'POST':
         try:
@@ -406,7 +406,7 @@ def get_shoppingList():
     low_stock = shop.low_stock_items(user_id)
     return render_template("shoppinglist.html", items=items, unbought_items=unbought_items, bought_items=bought_items, low_stock=low_stock)
 
-@app.route('/add-shopping-item', methods=['POST'])
+@app.route('/shopping_list/add', methods=['POST'])
 def add_shopping_item():
     try:
         item_name = request.form['item_name']
@@ -416,7 +416,7 @@ def add_shopping_item():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-@app.route('/update-shopping-item', methods=['POST'])
+@app.route('/shopping_list/update', methods=['POST'])
 def update_shopping_item():
     try:
         item_id = request.form['item_id']

@@ -1,5 +1,4 @@
 import requests
-import json
 
 class thingsboard():
     def get_jwt_token():
@@ -30,14 +29,13 @@ class thingsboard():
 
         url = f"https://thingsboard.cs.cf.ac.uk/api/plugins/telemetry/DEVICE/{device_id}/values/timeseries?keys=temperature,humidity"
 
-        # s = requests.Session()
         response = requests.get(url, headers=headers)
 
         if response.status_code == 401:
             # print("Token expired, refreshing...")
-            new_token = get_jwt_token()
+            new_token = thingsboard.get_jwt_token()
             if new_token:
-                return get_telemetry(new_token, device_id)
+                return thingsboard.get_telemetry(new_token, device_id)
             else:
                 return None
         elif response.ok:

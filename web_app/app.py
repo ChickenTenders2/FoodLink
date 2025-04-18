@@ -4,7 +4,6 @@ from barcode import barcode
 from item import item_table
 from item_error import item_error
 from os.path import isfile as file_exists
-from datetime import datetime, date
 app = Flask(__name__, template_folder = "templates")
 
 # Dashboard Route
@@ -26,53 +25,27 @@ user_id = 2
 # Inventory interface
 @app.route('/inventory/')
 def get_inventory():
-    
-    search_query = request.args.get('search')
-    sort_by = request.args.get('sort_by')
-    # searches for an item if query is provided otherwise gets all items
-    if search_query:
-        items = inv.search_items(user_id, search_query)
-    else:
-        items = inv.get_items(user_id)
-    
-    if sort_by in ['name', 'expiry']:
-        # sorts by name or expiry
-        items = sorted(items, key = lambda x: x[2] if sort_by == 'name' else x[6])
+    return render_template("inventory.html")
 
-    # formats each item as list for easier modification of date format
-    items = [list(i) for i in items]
-    # formats date for front end
-    for item in items:
-        item[6] = item[6].strftime('%Y-%m-%d')
-        item.append((datetime.strptime(item[6], '%Y-%m-%d').date() - datetime.today().date()).days)  # item[8] : for css styling
+# allows for no search query to be entered
+@app.route('/inventory/get/', defaults={'search_query': None})
+@app.route('/inventory/get/<search_query>')
+# used to dynamically get inventory
+def api_inventory(search_query = None):
+    try:
+        # searches for an item if query is provided otherwise gets all items
+        if search_query:
+            items = inv.search_items(user_id, search_query)
+        else:
+            items = inv.get_items(user_id)
 
-    return render_template("inventory.html", items = items, sort_by = sort_by)
+        # formats expiry date for front end
+        for item in items:
+            item[6] = item[6].strftime('%Y-%m-%d')
 
-# Dynamically refresh inventory page
-@app.route('/api/inventory')
-def api_inventory():
-    search_query = request.args.get('search')
-    sort_by = request.args.get('sort_by')
-    # searches for an item if query is provided otherwise gets all items
-    if search_query:
-        items = inv.search_items(user_id, search_query)
-    else:
-        items = inv.get_items(user_id)
-    
-    if sort_by in ['name', 'expiry']:
-        # sorts by name or expiry
-        items = sorted(items, key = lambda x: x[2] if sort_by == 'name' else x[6])
-        
-    # formats each item as list for easier modification of date format
-    items = [list(i) for i in items]
-    # formats date for front end
-    for item in items:
-        item[6] = item[6].strftime('%Y-%m-%d')
-        expiry_date = datetime.strptime(item[6], "%Y-%m-%d").date()  # adjust format if needed
-        days_left = (expiry_date - date.today()).days
-
-        item.append(days_left)
-    return jsonify({'items': items})
+        return jsonify({"success": True, 'items': items})
+    except Exception as e:
+        return jsonify({"success": False, "error":str(e)})
 
 # Add item to inventory interface
 @app.route("/inventory/add_item/")
@@ -82,7 +55,6 @@ def add_to_inventory():
 # Add item to inventory
 @app.route("/inventory/add_item/add", methods=["POST"])
 def append_inventory():
-    
     item_id = request.form.get("item_id")
     response = inv.process_add_form(user_id, item_id, request.form)    
     return jsonify(response)
@@ -90,21 +62,14 @@ def append_inventory():
 # Update quantity and expiry of item in inventory
 @app.route('/inventory/update_item', methods = ['POST'])
 def update_item(): 
-    # gets variables needed to update item
-    inventory_id = request.form['inventory_id']
-    quantity = request.form['quantity']
-    expiry_date = request.form['expiry_date']
-    
     try:
-        # Convert to datetime
-        expiry_datetime = datetime.strptime(expiry_date, '%Y-%m-%d')
-        expiry_str = expiry_datetime.strftime('%Y-%m-%d')
+        # gets variables needed to update item
+        inventory_id = request.form['inventory_id']
+        quantity = request.form['quantity']
+        expiry_date = request.form['expiry_date']
         # Update the database with new quantity and expiry date
         inv.update_item(inventory_id, quantity, expiry_date)
-        updated_item = inv.get_item_by_id(inventory_id)
-        updated_item[6] = expiry_str
-        # returns response to js code
-        return jsonify({'success': True, 'item': updated_item})
+        return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
     

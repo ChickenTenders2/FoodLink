@@ -12,6 +12,7 @@ class inventory(database):
         cursor.execute(query, data)
         items = cursor.fetchall()
         cursor.close()
+        items = [list(i) for i in items]
         return items
 
     def get_item_by_id(self, inventory_id):
@@ -65,6 +66,7 @@ class inventory(database):
         cursor.execute(query, data)
         items = cursor.fetchall()
         cursor.close()
+        items = [list(i) for i in items]
         return items
     
     def process_add_form(self, user_id, item_id, form):

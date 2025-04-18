@@ -14,7 +14,7 @@
       
     <!-- search and sort form -->
     <form method="GET" action="/inventory" class="filter-form" id="filter-form">
-        <input type="text" id="search-input" name="search" placeholder="Search inventory..." value="{{request.args.get('search', '')}}">
+        <input type="text" id="search-input" name="search" placeholder="Search inventory..." value="{{request.args.get('search_query', '')}}">
         <select id="sort-select" name="sort_by">
             <!-- if statments make sure the current sort is shown as the default option-->
             <option value="relevance" {% if sort_by == "relevance" %} selected {% endif %}>Sort by Relevance</option>
@@ -43,14 +43,8 @@
     </div>
       
 
-    <!-- displays each users items-->
+    <!-- displays each users items after inventory fetched-->
     <div class="inventory-container">
-        {% for item in items %}
-            <div class="inventory-tile" data-id="{{ item[0] }}" data-days-left="{{ item[8] }}" onclick="open_popup('{{ item[2] }}', '{{ item[4] }}', '{{item[7]}}', '{{ item[6] }}', '{{ item[0]}}')">
-                <img src="{{ url_for('static', filename='images/' + item[1]|string + '.jpg') }}" alt="{{ item[2] }}" onerror="this.src='/static/images/null.jpg'">
-                <span class="item-name">{{ item[2] }} </span>
-            </div>
-        {% endfor %}
     </div>
 
     <!-- Pop-Up for Editing Quantity & Expiration Date -->
@@ -78,6 +72,7 @@
 
     <div id="toast" class="toast"></div>
 
+    <script src="{{ url_for('static', filename='js/item_handling.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/inventory.js') }}"></script> 
 </body>
 </html>

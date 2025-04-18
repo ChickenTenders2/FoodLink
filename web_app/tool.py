@@ -1,6 +1,6 @@
 from database import database
 
-class tool(database):
+class Tool(database):
     def __init__(self):
         super().__init__()
     
@@ -14,7 +14,7 @@ class tool(database):
 
     def get_utensils(self):
         cursor = self.connection.cursor()
-        query = "SELECT id, name FROM tool2 WHERE type = 'utensil';"
+        query = "SELECT id, name FROM tool WHERE type = 'utensil';"
         cursor.execute(query)
         utensils = cursor.fetchall()
         cursor.close()
@@ -22,12 +22,12 @@ class tool(database):
 
     def get_appliances(self):
         cursor = self.connection.cursor()
-        query = "SELECT id, name FROM tool2 WHERE type = 'appliance';"
+        query = "SELECT id, name FROM tool WHERE type = 'appliance';"
         cursor.execute(query)
         appliances = cursor.fetchall()
         cursor.close()
         return appliances
-    
+
     def get_user_tool_ids(self, user_id):
         cursor = self.connection.cursor()
         # gets the tool_id for each tool a user has selected previously

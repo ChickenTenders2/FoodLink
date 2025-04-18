@@ -465,6 +465,6 @@ if __name__ == '__main__':
     # thingsboard class instance
     tb = thingsboard()
 
-    tool_sql = tool()
+    tool_sql = Tool()
     # Runs the app
     app.run(debug=True)

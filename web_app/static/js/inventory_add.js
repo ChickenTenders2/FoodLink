@@ -376,7 +376,7 @@ async function send_report(original_item_id, item_id) {
     formData.append("item_id", original_item_id);
 
     // Sends update command and waits for response
-    const response = await fetch('/items/report_item', {
+    const response = await fetch('/items/reports/new', {
         method: 'POST',
         body: formData,
     });

@@ -255,7 +255,7 @@ def append_item_db():
     else:
         return jsonify(response)
 
-# Get item image
+# Check if item has an image
 @app.route("/find_image/<item_id>")
 def find_image(item_id):
     path = f"static/images/{item_id}.jpg"
@@ -265,10 +265,9 @@ def find_image(item_id):
 
 ### ITEM REPORT ROUTES
 
-@app.route("/items/report_item", methods=["POST"])
+@app.route("/items/reports/new", methods=["POST"])
 def report_item():
     try:
-        
         new_item_id = request.form.get("new_item_id")
         item_id = request.form.get("item_id") or None
         report.add_report(new_item_id, item_id, user_id)

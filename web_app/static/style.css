@@ -256,6 +256,20 @@ h1 {
     transition: transform 0.2s ease-in-out;
 }
 
+.inventory-tile.expires-2-days {
+    background-color: #ffecb3; /* light yellow */
+}
+.inventory-tile.expires-1-day {
+    background-color: #ffd54f; /* amber */
+}
+.inventory-tile.expires-today {
+    background-color: #ff9800; /* orange */
+}
+.inventory-tile.expired {
+    background-color: #f44336; /* red */
+    color: white;
+}
+
 a.tile-link {
     text-decoration: none;
     color: inherit;

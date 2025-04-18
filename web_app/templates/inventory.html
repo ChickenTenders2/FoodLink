@@ -23,7 +23,7 @@
     <!-- displays each users items-->
     <div class="inventory-container">
         {% for item in items %}
-            <div class="inventory-tile" data-id="{{ item[0] }}" onclick="open_popup('{{ item[2] }}', '{{ item[4] }}', '{{item[7]}}', '{{ item[6] }}', '{{ item[0]}}')">
+            <div class="inventory-tile" data-id="{{ item[0] }}" data-days-left="{{ item[8] }}" onclick="open_popup('{{ item[2] }}', '{{ item[4] }}', '{{item[7]}}', '{{ item[6] }}', '{{ item[0]}}')">
                 <img src="{{ url_for('static', filename='images/' + item[1]|string + '.jpg') }}" alt="{{ item[2] }}" onerror="this.src='/static/images/null.jpg'">
                 <span class="item-name">{{ item[2] }} </span>
             </div>

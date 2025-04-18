@@ -4,6 +4,7 @@ from barcode import barcode
 from item import item_table
 from item_error import item_error
 from os.path import isfile as file_exists
+from datetime import datetime, date
 app = Flask(__name__, template_folder = "templates")
 
 # Dashboard Route
@@ -43,8 +44,25 @@ def get_inventory():
     # formats date for front end
     for item in items:
         item[6] = item[6].strftime('%Y-%m-%d')
+        item.append((datetime.strptime(item[6], '%Y-%m-%d').date() - datetime.today().date()).days)  # item[8] : for css styling
 
     return render_template("inventory.html", items = items, sort_by = sort_by)
+
+# Dynamically refresh inventory page
+@app.route('/api/inventory')
+def api_inventory():
+    items = inv.get_items(user_id)
+    # formats each item as list for easier modification of date format
+    items = [list(i) for i in items]
+    # formats date for front end
+    for item in items:
+        expiry_date = item[6]
+        if isinstance(expiry_date, datetime):
+            days_left = (expiry_date.date() - date.today()).days
+        else:
+            days_left = 999
+        item.append(days_left)
+    return jsonify({'items': items})
 
 # Add item to inventory interface
 @app.route("/inventory/add_item/")
@@ -68,9 +86,13 @@ def update_item():
     expiry_date = request.form['expiry_date']
     
     try:
+        # Convert to datetime
+        expiry_datetime = datetime.strptime(expiry_date, '%Y-%m-%d')
+        expiry_str = expiry_datetime.strftime('%Y-%m-%d')
         # Update the database with new quantity and expiry date
         inv.update_item(inventory_id, quantity, expiry_date)
         updated_item = inv.get_item_by_id(inventory_id)
+        updated_item[6] = expiry_str
         # returns response to js code
         return jsonify({'success': True, 'item': updated_item})
     except Exception as e:

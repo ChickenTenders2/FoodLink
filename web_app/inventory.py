@@ -1,4 +1,5 @@
 from database import database
+from datetime import datetime
 
 class inventory(database):
     def __init__(self):
@@ -11,6 +12,23 @@ class inventory(database):
         cursor.execute(query, data)
         items = cursor.fetchall()
         cursor.close()
+
+        # for styling inventory items based on expiry
+        # today = datetime.today().date()
+        # for item in items:
+        #     expiry_date = item[6].date()
+        #     days_left = (expiry_date - today).days
+        #     if days_left < 0:
+        #         item.append('expired')
+        #     elif days_left == 0:
+        #         item.append('expires-today')
+        #     elif days_left == 1:
+        #         item.append('expires-1-day')
+        #     elif days_left == 2:
+        #         item.append('expires-2-days')
+        #     else:
+        #         item.append('')
+
         return items
 
     def get_item_by_id(self, inventory_id):

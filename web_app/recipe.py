@@ -11,10 +11,11 @@ class Recipe(database):
         query = f"""SELECT id, name, servings, prep_time, cook_time, instructions, user_id FROM recipe 
                     WHERE
                         {"MATCH(name) AGAINST (? IN NATURAL LANGUAGE MODE) AND" if search_term else ""}
-                        user_id = ?
-                        {"OR user_id IS NULL" if not user_only else ""} 
+                        (user_id = ?
+                        {"OR user_id IS NULL" if not user_only else ""}) 
                         ORDER BY id DESC LIMIT ? OFFSET ?;
                 """
+        print(query)
         if search_term:
             data = (search_term, user_id, limit, offset)
         else:

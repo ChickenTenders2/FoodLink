@@ -44,7 +44,6 @@ function display_recipe_results(recipes) {
 
     for (const recipe of recipes) {
         const div = document.createElement("div");
-        div.className = "recipe-tile";
         div.innerHTML = `
             <h3>${recipe.name} ${recipe.personal ? "(Personal)" : ""}</h3>
             <p>Servings: ${recipe.servings}</p>

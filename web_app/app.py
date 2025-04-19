@@ -459,6 +459,7 @@ def get_recipes():
         search_term = request.form.get("search_term")
         page = int(request.form.get("page"))
 
+        print(search_term)
         personal_only = request.form.get("personal_only") == "on"
         allow_missing_items = request.form.get("missing_items") == "on"
         allow_insufficient_items = request.form.get("insufficient_items") == "on"

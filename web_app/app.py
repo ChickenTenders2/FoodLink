@@ -339,17 +339,16 @@ def resolve_report():
             _, personal_item_name, user_id = reports[0]
             # removes the report
             report.remove_report(new_item_id)
-
-            message = """Thank you for reporting a missing item. 
+            # notification message
+            message = lambda item_name : f"""Thank you for reporting the missing item, {item_name}. 
                         Unfortunately, your item is not currently elligible to be added at this time.
-                        However, you can still use your personal item. 
+                        However, you can still continue to use your personal item. 
                         """
 
-            print(user_id, personal_item_name, message)
-            #####################################################
-                            ### NOTIFY USER ITEM IS NOT CURRENTLY ELLIGIBLE FOR ADDITION (or something like that) ###
-            #####################################################
-            return jsonify({"success": True, "message": message})
+            # notify user of the change
+            notif.support_notification(user_id, message(personal_item_name))
+
+            return jsonify({"success": True})
         # if the proposed error was with an item having incorrect information (misinformation)
         if original_item_id:
             # if the original item had an error
@@ -359,12 +358,13 @@ def resolve_report():
                 item.process_update_form(original_item_id, request.form)
                 # updates image if uploaded
                 item.add_item_image(image, original_item_id)
-            
-                message = """Thank you for reporting an item error. 
+                # notification message
+                message = lambda item_name : f"""Thank you for reporting an error with item, {item_name}. 
                             Your personal item has been successfully replaced."""
             # if original item was already correct
             else:
-                message = """Thank you for reporting an item error. 
+                # notification message
+                message = lambda item_name : f"""Thank you for reporting an error with item, {item_name}. 
                         However the original item was already correct! 
                         Please be careful to double check before reporting an item.
                         Your personal item has been successfully replaced."""
@@ -386,7 +386,8 @@ def resolve_report():
             # adds image if uploaded or uses users personal item image if possible
             item.add_item_image(image, replace_id, new_item_id)
     
-            message = """Thank you for reporting a missing item.
+            # notification message
+            message = lambda item_name : f"""Thank you for reporting the missing item, {item_name}.
                         Your request has been approved!
                         Your personal item has been successfully replaced."""
 
@@ -405,13 +406,10 @@ def resolve_report():
             item.remove_item(personal_item_id)
             # removes the report
             report.remove_report(personal_item_id)
+            # notify user of the change
+            notif.support_notification(user_id, message(personal_item_name))
 
-            #####################################################
-                        ### NOTIFY USER OF CHANGE ###
-            #####################################################
-            print(user_id, personal_item_name, message)
-
-        return jsonify({"success": True, "message": message})
+        return jsonify({"success": True})
     
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})

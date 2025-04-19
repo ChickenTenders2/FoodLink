@@ -377,8 +377,6 @@ def resolve_report():
         return jsonify({"success": False, "error": str(e)})
 
 
-# Inventory Interface Route
-
 # Shopping List Interface Route
 
 @app.route('/shopping_list', methods=['GET', 'POST'])

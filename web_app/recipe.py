@@ -4,12 +4,15 @@ class Recipe(database):
     def __init__(self):
         super().__init__()
 
-    def get_recipes(self, user_only = False, user_id = None):
+    def get_recipes(self, page, user_id, user_only = False):
+        limit = 10
+        offset = (page - 1) * limit
         cursor = self.connection.cursor()
         query = "SELECT id, name, instructions, user_id FROM recipe WHERE user_id = %s"
         if (not user_only):
-            query += " OR user_id IS NULL;"
-        data = (user_id,)
+            query += " OR user_id IS NULL"
+        query += "ORDER BY id DESC LIMIT %s OFFSET %s;"
+        data = (user_id, limit, offset)
         cursor.execute(query, data)
         recipes = cursor.fetchall()
         cursor.close()

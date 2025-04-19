@@ -443,6 +443,13 @@ def save_tools():
     tool_sql.save_user_tools(user_id, selected_tools)
     return redirect(url_for('index'))
 
+@app.route("/recipes")
+def recipe_page():
+    return render_template("recipes.html")
+
+@app.route("/recipes/get")
+def get_recipes():
+
 
 if __name__ == '__main__':
     # Classes for handling sql expressions
@@ -463,5 +470,8 @@ if __name__ == '__main__':
     tb = thingsboard()
 
     tool_sql = Tool()
+
+    recipe = Recipe()
+
     # Runs the app
     app.run(debug=True)

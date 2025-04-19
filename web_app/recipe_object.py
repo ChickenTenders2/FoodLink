@@ -1,16 +1,16 @@
 from recipe import Recipe
 
 class recipe_object(Recipe):
-    def __init__(self, recipe_id, name, instructions, user_id):
+    def __init__(self, recipe):
         super().__init__
-        self.id = recipe_id
-        self.name = name
-        self.instructions = instructions
+        self.id = recipe[0]
+        self.name = recipe[1]
+        self.instructions = recipe[2]
         # true if the user made the recipe else false (if default)
-        self.personal = True if user_id else False
-        self.tool_ids = self.get_recipe_tools(recipe_id)
+        self.personal = True if recipe[3] else False
+        self.tool_ids = self.get_recipe_tools(self.id)
         self.missing_tool_ids = []
-        self.ingredients = self.get_recipe_items(recipe_id)
+        self.ingredients = self.get_recipe_items(self.id)
         self.matched_ingredients = []
         self.understock_ingredients = []
         self.missing_ingredients = []

@@ -114,7 +114,7 @@ class notification(database):
         cursor.close()
 
     def support_notification(self, user_id, message):
-        insert_notification(user_id, 'support', message, 'info')
+        self.insert_notification(user_id, 'support', message, 'info')
 
     def notification_exists(self, user_id, notif_type, message):
         cursor = self.connection.cursor()

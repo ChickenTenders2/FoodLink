@@ -35,9 +35,9 @@ class thingsboard():
 
         if response.status_code == 401:
             # print("Token expired, refreshing...")
-            new_token = get_jwt_token()
+            new_token = thingsboard.get_jwt_token()
             if new_token:
-                return get_telemetry(new_token, device_id)
+                return thingsboard.get_telemetry(new_token, device_id)
             else:
                 return None
         elif response.ok:

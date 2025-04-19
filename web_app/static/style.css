@@ -71,6 +71,19 @@ th {
     background-color: rgba(0,0,0,0.4);
 }
 
+.items {
+    max-height: 60vh;
+    max-width: 90%;
+    overflow: auto;   
+}
+
+table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #12a804;
+}
+
 .modal-content {
     background-color: #fff;
     margin: 10% auto;

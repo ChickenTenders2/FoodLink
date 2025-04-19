@@ -8,8 +8,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1 class="item_view_title"> Items Table</h1>
-    <table>
+    <h1 class="item_view_title">Items Table</h1>
+    <div class="items">
+    <table class="table-items">
         <tr>
             <th>ID</th>
             <th>Barcode</th>
@@ -30,6 +31,7 @@
             </tr>
         {% endfor %}
     </table>
+    </div>
     <button class="add" onclick="open_popup('New Item', '', '', '', '', '', '', '', true)">NEW ITEM</button>
        <!-- Pop-Up for Editing Quantity & Expiration Date -->
        <div id="popup" class="popup">

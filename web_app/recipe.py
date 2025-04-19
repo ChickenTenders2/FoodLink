@@ -44,6 +44,15 @@ class Recipe(database):
         tool_ids = [id[0] for id in tool_ids]
         return tool_ids
 
-    # returns a list of any tools required for a recipe that a user doesn't own
-    def get_missing_tools(self, recipe_tools, user_tools):
-        return list(set(recipe_tools) - set(user_tools))
+    # returns a list of the ids for any tools required for a recipe that a user doesn't own
+    def get_missing_tool_ids(self, recipe_tool_ids, user_tool_ids):
+        return list(set(recipe_tool_ids) - set(user_tool_ids))
+    
+    def get_recipe_items(self, recipe_id):
+        cursor = self.connection.cursor()
+        query = "SELECT item_name, unit, quantity FROM FoodLink.recipe_items WHERE recipe_id = %s;"
+        data = (recipe_id,)
+        cursor.execute(query, data)
+        items = cursor.fetchall()
+        cursor.close()
+        return items

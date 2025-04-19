@@ -40,6 +40,28 @@ class Tool(database):
         ids = [id[0] for id in ids]
         return ids
 
+    def get_user_appliance_ids(self, user_id):
+        cursor = self.connection.cursor()
+        query = "SELECT tool_id FROM FoodLink.user_tool JOIN tool ON (user_tool.tool_id = tool.id) WHERE user_id = %s AND tool.type = 'appliance';"
+        data = (user_id,)
+        cursor.execute(query, data)
+        ids = cursor.fetchall()
+        cursor.close()
+        # formats each id into a list
+        ids = [id[0] for id in ids]
+        return ids
+    
+    def get_user_utensil_ids(self, user_id):
+        cursor = self.connection.cursor()
+        query = "SELECT tool_id FROM FoodLink.user_tool JOIN tool ON (user_tool.tool_id = tool.id) WHERE user_id = %s AND tool.type = 'utensil';"
+        data = (user_id,)
+        cursor.execute(query, data)
+        ids = cursor.fetchall()
+        cursor.close()
+        # formats each id into a list
+        ids = [id[0] for id in ids]
+        return ids
+
     def save_user_tools(self, user_id, tool_ids):
         cursor = self.connection.cursor()
         

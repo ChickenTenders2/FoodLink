@@ -443,9 +443,8 @@ def select_tools():
 def save_tools():
     selected_tools = request.form.getlist('tool')
     tool_sql.save_user_tools(user_id, selected_tools)
-    return redirect(url_for('select_tools'))
-    # change to main page once merged
-    # return redirect(url_for('index'))
+    return redirect(url_for('index'))
+
 
 if __name__ == '__main__':
     # Classes for handling sql expressions

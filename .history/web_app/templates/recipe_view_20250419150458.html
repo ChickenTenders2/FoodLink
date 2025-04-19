@@ -13,26 +13,22 @@
     <table class="table-items">
         <tr>
             <th>ID</th>
-            <th>Barcode</th>
             <th>Name</th>
-            <th>Brand</th>
-            <th>Expiry Time</th>
-            <th>Default Quantity</th>
-            <th>Unit</th>
+            <th>Instructions</th>
             <th>Associated User</th>
         </tr>
-        {% for row in items %}
+        {% for row in recipes %}
             <tr onmouseover="interact(event)" onclick="options(event)" onmouseout="reset(event)">
             {% for col in row %}
                 <td>{{ col }}</td>
             {% endfor %}
                 <td style="visibility:hidden;"><button class="item_button" onclick="remove_item('{{ row[0] }}', event)"> X </button></td>
-                <td style="visibility:hidden;"><button class="item_button" onclick="open_popup('{{ row[2] }}', '{{ row[1] }}', '{{ row[2] }}', '{{ row[3] }}', '{{ row[5] }}', '{{ row[4] }}', '{{ row[6] }}', '{{ row[0] }}')"> ✐ </button></td>
+                <td style="visibility:hidden;"><button class="item_button" onclick="open_popup('{{ row[2] }}', '{{ row[1] }}', '{{ row[2] }}', '{{ row[0] }}')"> ✐ </button></td>
             </tr>
         {% endfor %}
     </table>
     </div>
-    <button class="add" onclick="open_popup('New Item', '', '', '', '', '', '', '', true)">NEW ITEM</button>
+    <button class="add" onclick="open_popup('', '', '', '', true)">NEW RECIPE</button>
        <!-- Pop-Up for Editing Quantity & Expiration Date -->
        <div id="popup" class="popup">
         <h2 id="popup-title"></h2>
@@ -43,30 +39,18 @@
             <label for="name">Name:</label>
             <input type="string" id="name" name ="name" required>
             <br><br>
-            <label for="brand">Brand:</label>
-            <input type="string" id="brand" name="brand" required>
-            <br><br>
-            <label for="quantity">Default Quantity:</label>
-            <input type="number" id="quantity" name ="quantity" min ="1" required>
-            <br><br>
-            <label for="expiry">Expiry Time:</label>
-            <input type="string" id="expiry" name="expiry" required>
-            <br><br>
-            <label for="unit">Unit:</label>
-            <input type="string" id="unit" name="unit" required>
+            <label for="brand">Instructions:</label>
+            <textarea cols="48" id="instructions" name="instructions" required>
             <br><br>
             <!-- hidden inputs used so js code has variables needed to update-->
-            <input type="hidden" id="original-expiry" name="original-expiry">
-            <input type="hidden" id="original-quantity" name="original-quantity">
-            <input type="hidden" id="original-brand" name="original-brand">
-            <input type="hidden" id="original-name" name="original-name">
-            <input type="hidden" id="original-unit" name="original-unit">
-            <input type="hidden" id="inventory-id" name="inventory_id">
-            <button type="submit">Save</button>
+            <input type="hidden" id="original-expiry" name="original-name">
+            <input type="hidden" id="original-quantity" name="original-instructions">
+            <input type="hidden" id="recipe-id" name="recipe_id">
+            <button id="sub" type="submit">Save</button>
             <button type="reset" onclick="close_popup()">Cancel</button>
         </form>
     </div>
-    <script src="{{ url_for('static', filename='js/item_view.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/table.js') }}"></script> 
+    <script src="{{ url_for('static', filename='js/recipe_view.js') }}"></script> 
 </body>
 </html>

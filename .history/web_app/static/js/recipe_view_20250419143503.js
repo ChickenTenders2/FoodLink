@@ -3,7 +3,7 @@ async function remove_item(id, event) {
     event.stopPropagation();
 
     // Sends update command and waits for response
-    const response = await fetch('/admin/item_view/delete', {
+    const response = await fetch('/admin/recipe_view/delete', {
         method: 'POST',
         body: id,
     })
@@ -20,31 +20,20 @@ async function remove_item(id, event) {
 }
 
 // Opens item information popup
-function open_popup(itemName, barcode, name, brand, quantity, expiry_date, unit, inventory_id, add=false) {
+function open_popup(recipeName, name, instructions, recipe_id, add=false) {
     // Sets values in popup to those of the item
     if (add == true) {
-        document.getElementById('popup-title').innerText = `Add ${itemName}`;
-        document.getElementById('barcode-label').hidden = false;
-        document.getElementById('barcode').type = "text";
+        document.getElementById('popup-title').innerText = `Add ${recipeName}`;
         document.getElementById('update-form').addEventListener('submit', submit_add);
     } else{
-        document.getElementById('popup-title').innerText = `Edit ${itemName}`;
-        document.getElementById('barcode-label').hidden = true;
-        document.getElementById('barcode').type = "hidden";
+        document.getElementById('popup-title').innerText = `Edit ${recipeName}`;
         document.getElementById('update-form').addEventListener('submit', submit_update);
     }
     document.getElementById('name').value = name;
-    document.getElementById('barcode').value = barcode;
-    document.getElementById('brand').value = brand;
-    document.getElementById('quantity').value = quantity;
-    document.getElementById('expiry').value = expiry_date;
-    document.getElementById('unit').value = unit;
-    document.getElementById('inventory-id').value = inventory_id;
-    document.getElementById('original-expiry').value = expiry_date;
-    document.getElementById('original-quantity').value = quantity;
-    document.getElementById('original-brand').value = brand;
+    document.getElementById('instructions').value = instructions;
+    document.getElementById('original-instructions').value = instructions;
     document.getElementById('original-name').value = name;
-    document.getElementById('original-unit').value = unit;
+    document.getElementById('recipe_id').value = recipe_id;
     document.getElementById('popup').style.display = 'block';
 }
 
@@ -59,23 +48,14 @@ async function submit_update(event) {
     event.preventDefault(); 
 
     // Gets original values
-    const originalQuantity = document.getElementById('original-quantity').value;
-    const originalExpiry = document.getElementById('original-expiry').value;
-    const originalUnit = document.getElementById('original-unit').value;
-    const originalBrand = document.getElementById('original-brand').value;
+    const originalInstructions = document.getElementById('original-instructions').value;
     const originalName = document.getElementById('original-name').value;
-    
     // Gets new values
-    const newQuantity = document.getElementById('quantity').value;
-    const newExpiry = document.getElementById('expiry').value;
-    const newUnit = document.getElementById('unit').value;
-    const newBrand = document.getElementById('brand').value;
+    const newInstructions = document.getElementById('instructions').value;
     const newName = document.getElementById('name').value;
     
     // Checks if values have not been edited
-    if (newQuantity == originalQuantity && newExpiry == originalExpiry 
-        && newUnit == originalUnit && newBrand == originalBrand
-        && newName == originalName) {
+    if (newName == originalName && newInstructions == originalInstructions) {
         // Prevent sending the update request
         close_popup();
         return;  
@@ -86,7 +66,7 @@ async function submit_update(event) {
     const formData = new FormData(form);
 
     // Sends update command and waits for response
-    const response = await fetch('/admin/item_view/update_item', {
+    const response = await fetch('/admin/item_view/update_recipe', {
         method: 'POST',
         body: formData,
     });
@@ -111,7 +91,7 @@ async function submit_add(event) {
     const formData = new FormData(form);
  
     // Sends update command and waits for response
-    const response = await fetch('/admin/item_view/add_item', {
+    const response = await fetch('/admin/recipe_view/add_item', {
          method: 'POST',
          body: formData,
      });

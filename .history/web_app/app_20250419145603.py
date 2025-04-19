@@ -60,7 +60,7 @@ def update_item_admin():
     
 @app.route('/admin/item_view/update_recipe', methods = ['POST'])
 def update_recipe_admin():
-    recipe_id = request.form['recipe-id']
+    recipe_id = request.form['recipe_id']
     name = request.form['name']
     instructions = request.form['instructions']
     try:

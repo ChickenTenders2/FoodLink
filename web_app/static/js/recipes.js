@@ -53,3 +53,11 @@ function display_recipe_results(recipes) {
         container.appendChild(div);
     }
 }
+
+async function get_tools() {
+    const response = await fetch("/tools/get")
+    const result = await response.json();
+    if (result.success) {
+        window.tools = result.tools
+    } 
+}

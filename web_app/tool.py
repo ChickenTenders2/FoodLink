@@ -12,18 +12,15 @@ class Tool(database):
         self.connection.commit()
         cursor.close()
 
-    def get_utensils(self):
+    def get_tools(self, type = None):
         cursor = self.connection.cursor()
-        query = "SELECT id, name FROM tool WHERE type = 'utensil';"
-        cursor.execute(query)
-        utensils = cursor.fetchall()
-        cursor.close()
-        return utensils
-
-    def get_appliances(self):
-        cursor = self.connection.cursor()
-        query = "SELECT id, name FROM tool WHERE type = 'appliance';"
-        cursor.execute(query)
+        if type:
+            query = "SELECT id, name FROM tool WHERE type = %s;"
+            data = (type,)
+            cursor.execute(query, data)
+        else:
+            query = "SELECT id, name FROM tool"
+            cursor.execute(query)
         appliances = cursor.fetchall()
         cursor.close()
         return appliances

@@ -434,8 +434,8 @@ def update_shopping_item():
     
 @app.route('/tools/select')
 def select_tools():
-    utensils = tool.get_utensils()
-    appliances = tool.get_appliances()
+    utensils = tool.get_tools("utensil")
+    appliances = tool.get_tools("appliance")
     tool_ids = tool.get_user_tool_ids(user_id)
     return render_template('select_utensils.html', utensils=utensils, appliances=appliances, selected_ids=tool_ids)
 
@@ -444,6 +444,11 @@ def save_tools():
     selected_tools = request.form.getlist('tool')
     tool.save_user_tools(user_id, selected_tools)
     return redirect(url_for('index'))
+
+@app.route("/tools/get")
+def get_tools():
+    tools = tool.get_tools()
+    return jsonify({"success": True, "tools": tools})
 
 @app.route("/recipes")
 def recipe_page():

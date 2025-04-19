@@ -15,9 +15,15 @@ class recipe_object(Recipe):
         self.understock_ingredients = []
         self.missing_ingredients = []
 
+    def set_tools_ids(self, tool_ids):
+        self.tool_ids = tool_ids
+
     # sets the list of the ids for any tools required for a recipe that a user doesn't own
     def calculate_missing_tools(self, user_tool_ids):
         self.missing_tool_ids = list(set(self.tool_ids) - set(user_tool_ids))
+    
+    def set_ingredients(self, ingredients):
+        self.ingredients = ingredients
     
     def find_items_in_inventory(self, user_id):
         for ingredient in self.ingredients:

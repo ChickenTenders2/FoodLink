@@ -18,6 +18,22 @@ class Recipe(database):
         cursor.close()
         return recipes
     
+    def search_recipes(self, search_term, page, user_id, user_only = False):
+        limit = 10
+        offset = (page - 1) * limit
+        cursor = self.connection.cursor()
+        query = """SELECT id, name, instructions, user_id FROM recipe
+                    WHERE MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE)
+                    AND user_id = %s"""
+        if (not user_only):
+            query += " OR user_id IS NULL"
+        query += "ORDER BY id DESC LIMIT %s OFFSET %s;"
+        data = (search_term, user_id, limit, offset)
+        cursor.execute(query, data)
+        recipes = cursor.fetchall()
+        cursor.close()
+        return recipes
+    
     def remove_recipe(self, recipe_id):
         cursor = self.connection.cursor()
         query = "DELETE FROM recipe WHERE id = %s;"

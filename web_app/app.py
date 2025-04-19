@@ -9,6 +9,8 @@ from os.path import isfile as file_exists
 from notification import notification
 from thingsboard import thingsboard
 from tool import Tool
+from recipe import Recipe
+from recipe_object import recipe_object
 
 app = Flask(__name__, template_folder = "templates")
 
@@ -449,7 +451,7 @@ def recipe_page():
 
 @app.route("/recipes/get")
 def get_recipes():
-
+    pass
 
 if __name__ == '__main__':
     # Classes for handling sql expressions

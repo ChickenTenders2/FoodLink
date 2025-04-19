@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Scanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div>
+        <h2>Search Recipes</h2>
+        <form id="recipe-search-form" onsubmit="search_recipes(event)">
+            <input type="text" id="recipe_search_term" name="search_term" placeholder="Enter recipe name..." required>
+            <br>
+            <label>Only show personal recipes?</label>
+            <input type="checkbox" id="personal_only">
+            <br>
+            <label>Allow missing ingredients?</label>
+            <input type="checkbox" name="missing_items" id="missing_items">
+            <br>
+            <label>Allow insufficient ingredient quantities?</label>
+            <input type="checkbox" name="insufficient_items" id="insufficient_items">
+            <br>
+            <label>Allow missing utensils/appliances?</label>
+            <input type="checkbox" name="missing_tools" id="missing_tools">
+            <br>
+            <input type="hidden" id="page_number" name="page" value="1">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    <div id="recipe_results" class="results-container">
+        <!-- recipe results will appear here -->
+    </div>
+
+    <div id="pagination_controls" style="text-align:center; margin-top: 20px;">
+        <button onclick="change_page(-1)">Previous</button>
+        <span id="current_page">Page 1</span>
+        <button onclick="change_page(1)">Next</button>
+    </div>
+</body>
+</html>

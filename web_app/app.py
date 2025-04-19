@@ -103,7 +103,6 @@ def add_item_admin():
     unit = sanitised_fields[4]
     barcode = sanitised_fields[5]
     user = sanitised_fields[6]
-    print(sanitised_fields)
     # Barcodes and user ids can be empty. 
     if barcode == "":
         barcode = None

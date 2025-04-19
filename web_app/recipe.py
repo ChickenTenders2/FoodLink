@@ -4,31 +4,21 @@ class Recipe(database):
     def __init__(self):
         super().__init__()
 
-    def get_recipes(self, page, user_id, user_only = False):
+    def get_recipes(self, search_term, page, user_id, user_only):
         limit = 10
         offset = (page - 1) * limit
         cursor = self.connection.cursor()
-        query = "SELECT id, name, instructions, user_id FROM recipe WHERE user_id = %s"
-        if (not user_only):
-            query += " OR user_id IS NULL"
-        query += "ORDER BY id DESC LIMIT %s OFFSET %s;"
-        data = (user_id, limit, offset)
-        cursor.execute(query, data)
-        recipes = cursor.fetchall()
-        cursor.close()
-        return recipes
-    
-    def search_recipes(self, search_term, page, user_id, user_only = False):
-        limit = 10
-        offset = (page - 1) * limit
-        cursor = self.connection.cursor()
-        query = """SELECT id, name, instructions, user_id FROM recipe
-                    WHERE MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE)
-                    AND user_id = %s"""
-        if (not user_only):
-            query += " OR user_id IS NULL"
-        query += "ORDER BY id DESC LIMIT %s OFFSET %s;"
-        data = (search_term, user_id, limit, offset)
+        query = f"""SELECT id, name, servings, prep_time, cook_time, instructions, user_id FROM recipe 
+                    WHERE
+                        {"MATCH(name) AGAINST (? IN NATURAL LANGUAGE MODE) AND" if search_term else ""}
+                        user_id = ?
+                        {"OR user_id IS NULL" if not user_only else ""} 
+                        ORDER BY id DESC LIMIT ? OFFSET ?;
+                """
+        if search_term:
+            data = (search_term, user_id, limit, offset)
+        else:
+            data = (user_id, limit, offset)
         cursor.execute(query, data)
         recipes = cursor.fetchall()
         cursor.close()
@@ -55,7 +45,7 @@ class Recipe(database):
     
     def get_recipe_tools(self, recipe_id):
         cursor = self.connection.cursor()
-        query = "SELECT tool_id FROM recipe_tool WHERE user_id = %s"
+        query = "SELECT tool_id FROM recipe_tool WHERE recipe_id = %s"
         data = (recipe_id,)
         cursor.execute(query, data)
         tool_ids = cursor.fetchall()
@@ -93,9 +83,9 @@ class Recipe(database):
             JOIN FoodLink.item i ON inv.item_id = i.id
             WHERE inv.user_id = %s 
             AND MATCH(i.name) AGAINST (%s IN BOOLEAN MODE)
-            AND inv.expiry_date > CURRENT_DATE;
+            AND inv.expiry_date > CURRENT_DATE
             ORDER BY
-                (inv.quantity >= %s) DESC,   
+                CASE WHEN inv.quantity >= %s THEN 1 ELSE 0 END DESC,   
                 inv.expiry_date ASC,
                 inv.quantity ASC;
         """

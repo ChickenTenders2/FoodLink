@@ -147,44 +147,44 @@ def new_item():
         return jsonify(response)
 
 
-### BARCODE SCANNING ROUTES ###
+# ### BARCODE SCANNING ROUTES ###
 
-# Opens camera module and returns feed
-@app.route('/scanner/get')
-def get_scanner():
-    return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
+# # Opens camera module and returns feed
+# @app.route('/scanner/get')
+# def get_scanner():
+#     return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-# Closes camera module
-@app.route('/scanner/close')
-def close_scanner():
-    scanner.release_capture()
-    return jsonify({"success":True})
+# # Closes camera module
+# @app.route('/scanner/close')
+# def close_scanner():
+#     scanner.release_capture()
+#     return jsonify({"success":True})
 
-# Returns the barcode number if one is found
-@app.route('/scanner/get_object')
-def get_object():
-    object = scanner.get_scanned()
-    if (object):
-        scanner.clear_scanned()
-        return jsonify({"success": True, "object": object})
-    else:
-        return jsonify({"success": False})
+# # Returns the barcode number if one is found
+# @app.route('/scanner/get_object')
+# def get_object():
+#     object = scanner.get_scanned()
+#     if (object):
+#         scanner.clear_scanned()
+#         return jsonify({"success": True, "object": object})
+#     else:
+#         return jsonify({"success": False})
 
-@app.route("/unpause_scanner")
-def unpause_scanner():
-    scanner.unpause_scanner()
-    return jsonify({"success":True})
+# @app.route("/unpause_scanner")
+# def unpause_scanner():
+#     scanner.unpause_scanner()
+#     return jsonify({"success":True})
 
-@app.route("/scanner/toggle_mode/<value>")
-def toggle_scan_mode(value):
-    if value == "true":
-        scanner.toggle_mode(True)
-        return jsonify({"success":True})
-    elif value =="false":
-        scanner.toggle_mode(False)
-        return jsonify({"success":True})
-    else:
-        return jsonify({"success":False})
+# @app.route("/scanner/toggle_mode/<value>")
+# def toggle_scan_mode(value):
+#     if value == "true":
+#         scanner.toggle_mode(True)
+#         return jsonify({"success":True})
+#     elif value =="false":
+#         scanner.toggle_mode(False)
+#         return jsonify({"success":True})
+#     else:
+#         return jsonify({"success":False})
 
 
 ### ITEM ROUTES ###
@@ -434,24 +434,63 @@ def update_shopping_item():
     
 @app.route('/tools/select')
 def select_tools():
-    utensils = tool_sql.get_utensils()
-    appliances = tool_sql.get_appliances()
-    tool_ids = tool_sql.get_user_tool_ids(user_id)
+    utensils = tool.get_utensils()
+    appliances = tool.get_appliances()
+    tool_ids = tool.get_user_tool_ids(user_id)
     return render_template('select_utensils.html', utensils=utensils, appliances=appliances, selected_ids=tool_ids)
 
 @app.route('/tools/save', methods=['POST'])
 def save_tools():
     selected_tools = request.form.getlist('tool')
-    tool_sql.save_user_tools(user_id, selected_tools)
+    tool.save_user_tools(user_id, selected_tools)
     return redirect(url_for('index'))
 
 @app.route("/recipes")
 def recipe_page():
     return render_template("recipes.html")
 
-@app.route("/recipes/get")
+@app.route("/recipes/get", methods=["POST"])
 def get_recipes():
-    pass
+    try:
+        ###### CURRENTLY GET TOOL IDS EACH TIME UPDATE WHEN SESSION MADE TO CHANGEO NLY AFTER TOOLS/SAVE
+        user_tool_ids = tool.get_user_tool_ids(user_id)
+
+
+        search_term = request.form.get("search_term")
+        page = int(request.form.get("page"))
+
+        personal_only = request.form.get("personal_only") == "on"
+        allow_missing_items = request.form.get("missing_items") == "on"
+        allow_insufficient_items = request.form.get("insufficient_items") == "on"
+        allow_missing_tools = request.form.get("missing_tools") == "on"
+        recipes = recipe_sql.get_recipes(search_term, page, user_id, personal_only)
+
+        filtered = []
+        # for each recipe record returned from database
+        for record in recipes:
+            recipe = recipe_object(record)
+            recipe.calculate_missing_tools(user_tool_ids)
+            recipe.find_items_in_inventory(user_id)
+
+            # applies filters
+            # if the filter referenced is true:
+            # stops recipes with missing ingredients
+            if not allow_missing_items and recipe.missing_ingredients:
+                continue
+            # stops recipes with insufficient ingredient quantities
+            if not allow_insufficient_items and recipe.insufficient_ingredients:
+                continue
+            # stops recipes with missing tools
+            if not allow_missing_tools and recipe.missing_tool_ids:
+                continue
+
+            filtered.append(recipe.to_dict())
+
+        return jsonify({"success": True, "recipes": filtered})
+    except Exception as e:
+        print(e)
+        return jsonify({"success": False, "error": str(e)})
+
 
 if __name__ == '__main__':
     # Classes for handling sql expressions
@@ -459,7 +498,7 @@ if __name__ == '__main__':
     item = Item()
     report = Report()
     # Class for handling barcode scanning
-    scanner = Scanner()
+    #scanner = Scanner()
 
     shop = shoppingList()
 
@@ -471,9 +510,9 @@ if __name__ == '__main__':
     # thingsboard class instance
     tb = thingsboard()
 
-    tool_sql = Tool()
+    tool = Tool()
 
-    recipe = Recipe()
+    recipe_sql = Recipe()
 
     # Runs the app
     app.run(debug=True)

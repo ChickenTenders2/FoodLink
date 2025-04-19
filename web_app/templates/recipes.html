@@ -9,11 +9,11 @@
 <body>
     <div>
         <h2>Search Recipes</h2>
-        <form id="recipe-search-form" onsubmit="search_recipes(event)">
-            <input type="text" id="recipe_search_term" name="search_term" placeholder="Enter recipe name..." required>
+        <form id="recipe-search-form" onsubmit="get_recipes(event)">
+            <input type="text" id="recipe_search_term" name="search_term" placeholder="Enter recipe name...">
             <br>
             <label>Only show personal recipes?</label>
-            <input type="checkbox" id="personal_only">
+            <input type="checkbox" name="personal_only" id="personal_only">
             <br>
             <label>Allow missing ingredients?</label>
             <input type="checkbox" name="missing_items" id="missing_items">
@@ -38,5 +38,7 @@
         <span id="current_page">Page 1</span>
         <button onclick="change_page(1)">Next</button>
     </div>
+
+    <script src="{{ url_for('static', filename='js/recipes.js') }}"></script> 
 </body>
 </html>

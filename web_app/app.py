@@ -3,13 +3,6 @@ from item import item_table
 from recipe import recipe_table
 app = Flask(__name__, template_folder = "templates")
 
-# Dashboard Route
-@app.route('/')
-def index():
-    temp_url = "https://thingsboard.cs.cf.ac.uk/dashboard/9c597b10-0b04-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2" 
-    humid_url = "https://thingsboard.cs.cf.ac.uk/dashboard/74d87180-0dbc-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2"
-    return render_template('index.html', temp_url = temp_url, humid_url = humid_url)
-
 # Item table interface
 @app.route('/admin/item_view')
 def get_items():

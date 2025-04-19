@@ -12,7 +12,7 @@
             <h1>FoodLink</h1>
         </div>
         <div class="nav-right">
-            <img id="notification-icon" src="{{ url_for('static', filename='images/notification_bell.png') }}" alt="Notifications" width="20px" height="20px" class="notification-icon" onclick="notificationPopupToggle()" />
+            <img id="notification-icon" src="{{ url_for('static', filename='images/notification_bell.png') }}" alt="Notifications" width="20px" height="20px" class="notification-icon"/>
             {% if unread_count > 0 %} 
                 <span id="notification-badge" class="notification-badge">{{ unread_count }}</span> 
             {% endif %}
@@ -36,49 +36,8 @@
     <iframe src="{{ temp_url }}" width="225px" height="180px" frameborder="0" ></iframe>
     <iframe src="{{ humid_url }}" width="225px" height="180px" frameborder="0" ></iframe>
     </div>
+
+    <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
+
 </body>
 </html>
-
-<script>
-    document.querySelector('.tb-powered-by-footer').style.display = 'none';
-
-    function notificationPopupToggle() {
-        const popup = document.getElementById('notification-popup');
-        popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
-    }
-
-    window.addEventListener('click', function(e) {
-        const popup = document.getElementById("notification-popup");
-        const icon = document.getElementById("notification-icon");
-        if (!popup.contains(e.target) && !icon.contains(e.target)) {
-            popup.style.display = "none";
-        }
-    });
-
-    function markRead(elem) {
-        const notifId = elem.getAttribute('data-id');
-        fetch('/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ mark_read: notifId })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                elem.classList.remove('unread');
-                elem.classList.add('read');
-                const badge = document.getElementById('notification-badge');
-                if (badge) {
-                    let count = parseInt(badge.textContent);
-                    if (count > 1) {
-                        badge.textContent = count - 1;
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                }
-            }
-        });
-    }
-</script>

@@ -369,6 +369,15 @@ a.tile-link {
     .large {
         grid-column: span 2;
     }
+    .tool-selection-container form { 
+        padding: 20px; 
+    }
+    .tool-selection-container h1 { 
+        font-size: 24px; 
+    }
+    .tool-selection-container h2 { 
+        font-size: 18px; 
+    }
 }
 
 /* Recipes Page Styles */
@@ -746,8 +755,7 @@ input[type="submit"]:hover {
     color: #888;
     margin-top: 4px;
 }
-  
-/* Optional: Severity colors */
+
 .notification-popup li[data-severity="info"] { border-left: 4px solid #42a5f5; }
 .notification-popup li[data-severity="warning"] { border-left: 4px solid #ff9800; }
 .notification-popup li[data-severity="critical"] { border-left: 4px solid #f44336; }
@@ -799,15 +807,40 @@ input[type="submit"]:hover {
 
 /* Utensils page Styling */
 
-.tool-selection-container { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 40px 0; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+.tool-selection-container { 
+    background-color: #f4f4f4; 
+    padding: 40px 0; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    min-height: 100vh; 
+}
 
-.tool-selection-container h1 { margin-bottom: 20px; color: #2d572c; font-size: 32px; }
+.tool-selection-container h1 { 
+    margin-bottom: 20px; 
+    color: #2d572c; 
+    font-size: 32px; 
+}
 
-.tool-selection-container form { background-color: #ffffff; padding: 30px 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 500px; }
+.tool-selection-container form { 
+    background-color: #ffffff; 
+    padding: 30px 40px; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    width: 90%; 
+    max-width: 500px; 
+}
 
-.tool-selection-container h2 { font-size: 22px; margin-bottom: 10px; color: #4a774d; }
+.tool-selection-container h2 { 
+    font-size: 22px; 
+    margin-bottom: 10px; 
+    color: #4a774d; 
+}
 
-.tool-selection-container input[type="checkbox"] { margin: 8px 6px 8px 0; accent-color: #aed581; }
+.tool-selection-container input[type="checkbox"] { 
+    margin: 8px 6px 8px 0; 
+    accent-color: #aed581; 
+}
 
 .button-container {
     text-align: center;
@@ -828,13 +861,6 @@ input[type="submit"]:hover {
 .button-container button:hover {
     background-color: #9ccc65;
 }
-
-
-@media (max-width: 600px) { .tool-selection-container form { padding: 20px; }
-
-.tool-selection-container h1 { font-size: 24px; }
-
-.tool-selection-container h2 { font-size: 18px; } }
 
 .tool-options-grid {
     display: grid;

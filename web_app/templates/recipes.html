@@ -16,13 +16,13 @@
             <input type="checkbox" name="personal_only" id="personal_only">
             <br>
             <label>Allow missing ingredients?</label>
-            <input type="checkbox" name="missing_items" id="missing_items">
+            <input type="checkbox" name="missing_items" id="missing_items" checked>
             <br>
             <label>Allow insufficient ingredient quantities?</label>
-            <input type="checkbox" name="insufficient_items" id="insufficient_items">
+            <input type="checkbox" name="insufficient_items" id="insufficient_items" checked>
             <br>
             <label>Allow missing utensils/appliances?</label>
-            <input type="checkbox" name="missing_tools" id="missing_tools">
+            <input type="checkbox" name="missing_tools" id="missing_tools" checked>
             <br>
             <input type="hidden" id="page_number" name="page" value="1">
             <button type="submit">Search</button>
@@ -37,6 +37,32 @@
         <button onclick="change_page(-1)">Previous</button>
         <span id="current_page">Page 1</span>
         <button onclick="change_page(1)">Next</button>
+    </div>
+
+    <div id="recipe_popup" class="popup">
+        <button onclick="close_recipe_popup()">X</button>
+        <h2 id="recipe_popup_title">Recipe Details</h2>
+    
+        <div class="recipe-popup-flex">
+            <!-- Left column -->
+            <div class="recipe-info-left">
+                <p><strong>Servings:</strong> <span id="recipe_popup_servings"></span></p>
+                <p><strong>Prep Time:</strong> <span id="recipe_popup_prep"></span> mins</p>
+                <p><strong>Cook Time:</strong> <span id="recipe_popup_cook"></span> mins</p>
+    
+                <h3>Ingredients</h3>
+                <ul id="recipe_popup_ingredients"></ul>
+    
+                <h3>Tools/Appliances</h3>
+                <ul id="recipe_popup_tools"></ul>
+            </div>
+    
+            <!-- Right column -->
+            <div class="recipe-instructions-right">
+                <h3>Instructions</h3>
+                <div id="recipe_popup_instructions" class="instructions-container"></div>
+            </div>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/recipes.js') }}"></script> 

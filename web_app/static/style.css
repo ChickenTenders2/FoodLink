@@ -732,4 +732,47 @@ input[type="submit"]:hover {
     align-items: center; 
 }
 
-  
+.recipe-popup-flex {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.recipe-info-left {
+    flex: 1;
+    min-width: 250px;
+}
+
+.recipe-instructions-right {
+    flex: 1;
+    min-width: 300px;
+}
+
+.instructions-container {
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    padding: 10px;
+    background-color: #f4f4f4;
+    border-radius: 6px;
+    line-height: 1.6;
+
+    max-height: 300px;        /* Limit the height */
+    overflow-y: auto;         /* Add vertical scroll if content overflows */
+}
+
+.missing-ingredient {
+    color: red;
+    font-weight: bold;
+}
+
+.insufficient-ingredient {
+    color: goldenrod;
+    font-weight: bold;
+}
+
+.missing-tool {
+    color: red;
+    font-weight: bold;
+}

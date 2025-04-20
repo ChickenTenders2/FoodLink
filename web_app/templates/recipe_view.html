@@ -18,7 +18,6 @@
             <th>Preperation Time</th>
             <th>Cooking Time</th>
             <th>Instructions</th>
-            <th>Associated User</th>
         </tr>
         {% for row in recipes %}
             <tr onmouseover="interact(event)" onclick="options(event)" onmouseout="reset(event)">
@@ -52,16 +51,12 @@
             <br><br>
             <textarea cols="50" class="instructions-form" id="instructions" name="instructions" required></textarea>
             <br><br>
-            <label for="unit">User ID:</label>
-            <input type="number" id="user-id" name="user-id">
-            <br><br>
             <!-- hidden inputs used so js code has variables needed to update-->
             <input type="hidden" id="original-name" name="original-name">
             <input type="hidden" id="original-servings" name="original-servings">
             <input type="hidden" id="original-prep" name="original-prep">
             <input type="hidden" id="original-cook" name="original-cook">
             <input type="hidden" id="original-instructions" name="original-instructions">
-            <input type="hidden" id="original-user-id" name="original-user-id">
             <input type="hidden" id="recipe-id" name="recipe-id">
             <button type="submit">Save</button>
             <button type="reset" onclick="close_popup()">Cancel</button>

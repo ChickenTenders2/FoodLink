@@ -1,3 +1,6 @@
+// The index is stored in local storage so that it does not get rest upon window reload.
+let index = localStorage.getItem('pageIndex');
+
 async function remove_item(id, event) {
     
     event.stopPropagation();
@@ -20,7 +23,7 @@ async function remove_item(id, event) {
 }
 
 // Opens item information popup
-function open_popup(itemName, barcode, name, brand, quantity, expiry_date, unit, inventory_id, user_id, add=false) {
+function open_popup(itemName, barcode, name, brand, quantity, expiry_date, unit, inventory_id, add=false) {
     // Sets values in popup to those of the item
     if (add == true) {
         document.getElementById('popup-title').innerText = `Add ${itemName}`;
@@ -39,14 +42,12 @@ function open_popup(itemName, barcode, name, brand, quantity, expiry_date, unit,
     document.getElementById('quantity').value = quantity;
     document.getElementById('expiry').value = expiry_date;
     document.getElementById('unit').value = unit;
-    document.getElementById('user-id').value = user_id;
     document.getElementById('inventory-id').value = inventory_id;
     document.getElementById('original-expiry').value = expiry_date;
     document.getElementById('original-quantity').value = quantity;
     document.getElementById('original-brand').value = brand;
     document.getElementById('original-name').value = name;
     document.getElementById('original-unit').value = unit;
-    document.getElementById('original-user-id').value = user_id;
     document.getElementById('popup').style.display = 'block';
 }
 
@@ -66,7 +67,6 @@ async function submit_update(event) {
     const originalUnit = document.getElementById('original-unit').value;
     const originalBrand = document.getElementById('original-brand').value;
     const originalName = document.getElementById('original-name').value;
-    const originalID = document.getElementById('original-user-id').value;
     
     // Gets new values
     const newQuantity = document.getElementById('quantity').value;
@@ -74,12 +74,11 @@ async function submit_update(event) {
     const newUnit = document.getElementById('unit').value;
     const newBrand = document.getElementById('brand').value;
     const newName = document.getElementById('name').value;
-    const newID = document.getElementById('user-id').value;
 
     // Checks if values have not been edited
     if (newQuantity == originalQuantity && newExpiry == originalExpiry 
         && newUnit == originalUnit && newBrand == originalBrand
-        && newName == originalName && originalID == newID) {
+        && newName == originalName) {
         // Prevent sending the update request
         close_popup();
         return;  
@@ -128,5 +127,61 @@ async function submit_add(event) {
          location.reload();
     } else {
          alert('There was an error updating the item.');
+    }
+}
+
+// fetches inventory after search term is applied
+document.getElementById('filter-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    search()
+});
+
+async function search() {
+    // Use default value if undefined or null
+    if (document.getElementById('search-input').value != ''){
+        const searchParam = document.getElementById('search-input').value;
+        index = 0
+        localStorage.setItem('pageIndex', index)
+        history.pushState(null, null, "/admin/item_view/get/" + searchParam);
+        fetch("/admin/item_view/get/" + searchParam);
+        location.reload();
+    }
+    else {
+        index = 0
+        localStorage.setItem('pageIndex', index)
+        history.pushState(null, null, "/admin/item_view");
+        fetch("/admin/item_view/");
+        location.reload();
+    }
+}
+
+async function next(event, max) {
+    event.preventDefault()
+    if (index < parseInt(max)) {
+        index++
+        localStorage.setItem('pageIndex', index)
+        history.pushState(null, null, "/admin/item_view/get/" + index);
+        fetch("/admin/item_view/get/" + index);
+        location.reload();
+        console.log(index)
+    }
+    else {
+        document.getElementById('button-next').style.cursor = "not-allowed";
+        document.getElementById('button-next').style.color = "grey";
+    }
+}
+
+async function previous(event) {
+    event.preventDefault()
+    if (index > 0) {
+        index--
+        localStorage.setItem('pageIndex', index)
+        history.pushState(null, null, "/admin/item_view/get/" + index);
+        fetch("/admin/item_view/get/" + index);
+        location.reload();
+    }
+    else {
+        document.getElementById('button-prev').style.cursor = "not-allowed";
+        document.getElementById('button-prev').style.color = "grey";
     }
 }

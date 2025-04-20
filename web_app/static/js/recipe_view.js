@@ -20,7 +20,7 @@ async function remove_item(id, event) {
 }
 
 // Opens item information popup
-function open_popup(recipeName, name, servings, prep, cook, instructions, recipe_id, user_id, add=false) {
+function open_popup(recipeName, name, servings, prep, cook, instructions, recipe_id, add=false) {
     // Sets values in popup to those of the item
     if (add == true) {
         document.getElementById('popup-title').innerText = `Add ${recipeName}`;
@@ -40,8 +40,6 @@ function open_popup(recipeName, name, servings, prep, cook, instructions, recipe
     document.getElementById('original-prep').value = prep;
     document.getElementById('original-cook').value = cook;
     document.getElementById('recipe-id').value = recipe_id;
-    document.getElementById('original-user-id').value = user_id;
-    document.getElementById('user-id').value = user_id;
     document.getElementById('popup').style.display = 'block';
 }
 
@@ -61,7 +59,6 @@ async function submit_update(event) {
     const originalServings = document.getElementById('original-servings').value;
     const originalCook = document.getElementById('original-cook').value;
     const originalPrep = document.getElementById('original-prep').value;
-    const originalID = document.getElementById('original-user-id').value;
 
     // Gets new values
     const newInstructions = document.getElementById('instructions').value;
@@ -69,12 +66,11 @@ async function submit_update(event) {
     const newServings = document.getElementById('servings').value;
     const newCook = document.getElementById('cook').value;
     const newPrep = document.getElementById('prep').value;
-    const newID = document.getElementById('user-id').value;
     
     // Checks if values have not been edited
     if (newName == originalName && newInstructions == originalInstructions
-        && originalID == newID && originalCook == newCook
-        && originalServings == newServings && originalPrep == newPrep)
+        && originalCook == newCook && originalServings == newServings 
+        && originalPrep == newPrep)
     {
         // Prevent sending the update request
         close_popup();

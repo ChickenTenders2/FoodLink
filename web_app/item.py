@@ -10,7 +10,7 @@ class item_table(database):
 
     def get_all(self):
         cursor = self.connection.cursor()
-        query = "SELECT * FROM FoodLink.item;"
+        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE user_id IS null;"
         cursor.execute(query)
         items = cursor.fetchall()
         cursor.close()
@@ -43,6 +43,16 @@ class item_table(database):
         cursor.execute(query, data)
         # gets first (and only) row
         item = cursor.fetchone()
+        cursor.close()
+        return item
+    
+    def get_item_from_name(self, name):
+        cursor = self.connection.cursor()
+        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE name LIKE UPPER( %s );"
+        data = (name,)
+        cursor.execute(query, data)
+        # gets first (and only) row
+        item = cursor.fetchall()
         cursor.close()
         return item
     

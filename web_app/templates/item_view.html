@@ -9,6 +9,12 @@
 </head>
 <body>
     <h1 class="item_view_title">Items Table</h1>
+    <!-- search and sort form -->
+    <form method="GET" action="/admin/item_view" class="filter-form" id="filter-form">
+        <input type="text" id="search-input" name="search" placeholder="Search items..." value="{{request.args.get('search_query', '')}}">
+    <button type="submit">Search</button>
+    </form>
+    <br>
     <div class="items">
     <table class="table-items">
         <tr>
@@ -19,7 +25,6 @@
             <th>Expiry Time</th>
             <th>Default Quantity</th>
             <th>Unit</th>
-            <th>Associated User</th>
         </tr>
         {% for row in items %}
             <tr onmouseover="interact(event)" onclick="options(event)" onmouseout="reset(event)">
@@ -32,8 +37,19 @@
         {% endfor %}
     </table>
     </div>
-    <button class="add" onclick="open_popup('a New Item', '', '', '', '', '', '', '', '', true)">NEW ITEM</button>
-       <!-- Pop-Up for Editing Quantity & Expiration Date -->
+    {% if items == [] %}
+    <br><h1>No Results</h1>
+    {% endif %}
+    <br><br>
+    <form method="GET" action="/admin/item_view" class="next-form" id="next-form" onsubmit="next(event, '{{ max }}')">
+    <button type="submit" id="button-next">NEXT</button>
+    </form>
+    <br>
+    <form method="GET" action="/admin/item_view" class="next-form" id="next-form" onsubmit="previous(event)">
+    <button type="submit" id="button-prev">PREVIOUS</button>
+    </form>
+    <button class="add" onclick="open_popup('a New Item', '', '', '', '', '', '', '', true)">NEW ITEM</button>
+       <!-- Pop-Up for Editing The Selected Item -->
        <div id="popup" class="popup">
         <h2 id="popup-title"></h2>
         <form id="update-form">
@@ -55,13 +71,9 @@
             <label for="unit">Unit:</label>
             <input type="string" id="unit" name="unit" required>
             <br><br>
-            <label for="unit">User ID:</label>
-            <input type="number" id="user-id" name="user-id">
-            <br><br>
             <!-- hidden inputs used so js code has variables needed to update-->
             <input type="hidden" id="original-expiry" name="original-expiry">
             <input type="hidden" id="original-quantity" name="original-quantity">
-            <input type="hidden" id="original-user-id" name="original-user-id">
             <input type="hidden" id="original-brand" name="original-brand">
             <input type="hidden" id="original-name" name="original-name">
             <input type="hidden" id="original-unit" name="original-unit">

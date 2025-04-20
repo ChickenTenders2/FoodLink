@@ -13,7 +13,7 @@ function interact(event) {
     }
 }
 
-function options(event) {
+function options(event, recipe = false) {
     const collection = event.currentTarget.children;
     // Switches to editing if a row is pressed.
     if (!editing) {
@@ -28,11 +28,19 @@ function options(event) {
         // If a row is clicked on, the last two buttons (edit and delete are made visible).
         collection[collection.length - 1].style.visibility = "visible";
         collection[collection.length - 2].style.visibility = "visible";
+        if (recipe) {
+            collection[collection.length - 3].style.visibility = "visible";
+        }
     }
     else {
          // If a row is clicked on a second time, the last two buttons (edit and 
          // delete are made hidden).
         collection[collection.length - 1].style.visibility = "hidden";
         collection[collection.length - 2].style.visibility = "hidden";
+        if (recipe) {
+            collection[collection.length - 3].style.visibility = "hidden";
+        }
     }
 }
+
+

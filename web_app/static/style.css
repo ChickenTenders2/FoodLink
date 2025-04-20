@@ -14,6 +14,10 @@
     border: none;
 }
 
+.recipes-container {
+    text-align: center;
+}
+
 .add:hover {
     background-color: #053b0585;
     margin-left: 1034px;
@@ -33,7 +37,7 @@ tr:nth-child(even) {
 }
 
 .item_view_title {
-    padding: 50px;
+    padding: 40px;
 }
 
 .item_button {
@@ -528,7 +532,6 @@ a.tile-link {
 .item-actions button:hover {
     background-color: #9ccc65;
 }
-
 
 .filter-form input[type="text"],
 .filter-form select {

@@ -6,7 +6,7 @@ class RecipeTable(database):
 
     def get_all(self):
         cursor = self.connection.cursor()
-        query = "SELECT * from recipe;"
+        query = "SELECT id, name, servings, prep_time, cook_time, instructions FROM FoodLink.recipe WHERE user_id IS null;"
         cursor.execute(query)
         items = cursor.fetchall()
         cursor.close()
@@ -38,5 +38,24 @@ class RecipeTable(database):
         cursor.execute(query, data)
         self.connection.commit()
         cursor.close()
+
+    def get_tools(self, id):
+        cursor = self.connection.cursor()
+        query = "SELECT rt.tool_id FROM FoodLink.recipe r JOIN FoodLink.recipe_tool rt ON rt.recipe_id = r.id WHERE r.id = %s;"
+        data = (id,)
+        cursor.execute(query, data)
+        items = cursor.fetchall()
+        cursor.close()
+        return items
+    
+    def get_recipe_items(self, id):
+        cursor = self.connection.cursor()
+        query = "SELECT ri.item_name, ri.unit, ri.quantity FROM FoodLink.recipe r JOIN FoodLink.recipe_items ri ON ri.recipe_id = r.id WHERE r.id = %s;"
+        data = (id,)
+        cursor.execute(query, data)
+        items = cursor.fetchall()
+        cursor.close()
+        return items
+    
     
 

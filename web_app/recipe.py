@@ -33,14 +33,58 @@ class Recipe(database):
         self.connection.commit()
         cursor.close()
     
-    def edit_recipe(self, recipe_id, name, instructions):
+    def edit_recipe(self, recipe_id, name, servings, prep_time, cook_time, instructions):
         cursor = self.connection.cursor()
         query = """UPDATE recipe SET 
                     name = %s,
+                    servings = %s,
+                    prep_time = %s,
+                    cook_time = %s,
                     instructions = %s
-                WHERE recipe_id = %s"""
-        data = (name, instructions, recipe_id)
+                WHERE id = %s"""
+        data = (name, servings, prep_time, cook_time, instructions, recipe_id)
         cursor.execute(query, data)
+        self.connection.commit()
+        cursor.close()
+
+    def edit_recipe_tools(self, recipe_id, tool_ids):
+        cursor = self.connection.cursor()
+        # removes all tools so any unselected options are removed
+        query = "DELETE FROM recipe_tool WHERE recipe_id = %s;"
+        data = (recipe_id,)
+        cursor.execute(query, data)
+
+        # stops inserting tools if none were selected
+        if not tool_ids:
+            return
+
+        query = "INSERT INTO recipe_tool (recipe_id, tool_id) VALUES (%s, %s);"
+        # creates list of the data needed to execute each query for storing recipe tools
+        data = [(recipe_id, tool_id) for tool_id in tool_ids]
+        # executes all queries
+        cursor.executemany(query, data)
+        self.connection.commit()
+        cursor.close()
+    
+    def edit_recipe_items(self, recipe_id, items):
+        print("edit_recipe_items")
+        cursor = self.connection.cursor()
+        # removes all items so any unselected options are removed
+        query = "DELETE FROM recipe_items WHERE recipe_id = %s;"
+        data = (recipe_id,)
+        cursor.execute(query, data)
+        print("executed delete")
+
+        # stops inserting items if none were selected
+        if not items:
+            return
+
+        query = "INSERT INTO recipe_items (recipe_id, item_name, quantity, unit) VALUES (%s, %s, %s, %s);"
+        # creates list of the data needed to execute each query for storing recipe items
+        data = [(recipe_id, item_name, quantity, unit) for item_name, quantity, unit in items]
+        print(data)
+        # executes all queries
+        cursor.executemany(query, data)
         self.connection.commit()
         cursor.close()
     

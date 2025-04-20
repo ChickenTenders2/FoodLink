@@ -11,11 +11,11 @@ from thingsboard import thingsboard
 from tool import Tool
 from recipe import Recipe
 from recipe_object import recipe_object
+import json
 
 app = Flask(__name__, template_folder = "templates")
 
 user_id = 2
-
 
 # Dashboard Route
 @app.route('/', methods=['GET', 'POST'])
@@ -497,6 +497,44 @@ def get_recipes():
         return jsonify({"success": True, "recipes": filtered})
     except Exception as e:
         print(e)
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route("/recipes/update", methods=["POST"])
+def update_recipe():
+    try:
+        recipe_id = request.form.get("recipe_id")
+        name = request.form.get("name")
+        ingredients = request.form.get("ingredients")
+        servings = request.form.get("servings")
+        prep_time = request.form.get("prep_time")
+        cook_time = request.form.get("cook_time")
+        instructions = request.form.get("instructions")
+        
+        ingredients_string = request.form.get("ingredients")
+        tool_ids_string = request.form.get("tool_ids")
+
+        if not (ingredients or tool_ids):
+            return jsonify({"success": False, "error": "ingredients or tool were empty."})
+        
+        # list variables must be stringified client side so lists transfer correctly
+        # they are so decoded to get original data type back
+        ingredients = json.loads(ingredients_string)
+        tool_ids = json.loads(tool_ids_string)
+
+        print(ingredients)
+        print(tool_ids)
+
+        # performs update functions
+        #### WHEN REMOVING OOP MAKE SURE TO USE SINGLE CURSOR AND COMMIT FOR THESE FUNCTIONS
+        recipe_sql.edit_recipe(recipe_id, name, servings, prep_time, cook_time, instructions)
+        print("updated recipe")
+        recipe_sql.edit_recipe_items(recipe_id, ingredients)
+        print("updated recipe_items")
+        recipe_sql.edit_recipe_tools(recipe_id, tool_ids)
+        print("updated recipe_tools")
+
+        return jsonify({"success": True})
+    except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
 

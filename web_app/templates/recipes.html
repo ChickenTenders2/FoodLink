@@ -41,19 +41,21 @@
 
     <div id="recipe_popup" class="popup">
         <button onclick="close_recipe_popup()">X</button>
-        <h2 id="recipe_popup_title">Recipe Details</h2>
+        <h2>
+            <input id="recipe_popup_title" class="recipe-title-input" readonly>
+        </h2>
     
         <div class="recipe-popup-flex">
             <!-- Left column -->
             <div class="recipe-info-left">
-                <p><strong>Servings:</strong> <span id="recipe_popup_servings"></span></p>
-                <p><strong>Prep Time:</strong> <span id="recipe_popup_prep"></span> mins</p>
-                <p><strong>Cook Time:</strong> <span id="recipe_popup_cook"></span> mins</p>
+                <p><strong>Servings:</strong> <input class="recipe-input" name="servings" id="recipe_popup_servings" readonly></input></p>
+                <p><strong>Prep Time:</strong> <input class="recipe-input" name="prep_time" id="recipe_popup_prep" readonly></input> mins</p>
+                <p><strong>Cook Time:</strong> <input class="recipe-input" name="cook_time" id="recipe_popup_cook" readonly></input> mins</p>
     
                 <h3>Ingredients</h3>
                 <ul id="recipe_popup_ingredients"></ul>
     
-                <h3>Tools/Appliances</h3>
+                <h3>Untesils/Appliances</h3>
                 <ul id="recipe_popup_tools"></ul>
             </div>
     
@@ -63,6 +65,30 @@
                 <div id="recipe_popup_instructions" class="instructions-container"></div>
             </div>
         </div>
+        <button class="hidden-button" id="toggle_edit" value="false">Edit Recipe</button>
+        <button class="hidden-button" id="edit_ingredients">Edit Ingredients</button>
+        <button class="hidden-button" id="edit_tools">Edit Tools</button>
+        <button class="hidden-button" id="delete_recipe">Delete Recipe</button>
+        <button class="hidden-button" id="save_recipe">Save Recipe</button>
+
+
+    </div>
+
+    <div id="edit_ingredients_popup" class="popup">
+        <h3>Edit Ingredients</h3>
+        <button onclick="close_edit_ingredients_popup()">X</button>
+        <div id="ingredients_list_container"></div>
+        <button type="button" onclick="add_ingredient_row()">+ Add Ingredient</button>
+        <br><br>
+        <button onclick="update_ingredients()">Save Changes</button>
+    </div>
+
+    <div id="edit_tools_popup" class="popup">
+        <h3>Edit Tools</h3>
+        <button onclick="close_edit_tools_popup()">X</button>
+        <div id="tools_list_container"></div>
+        <div id="tool_add_controls"></div>
+        <button id="save_tools" onclick="update_tools()">Save Tools</button>
     </div>
 
     <script src="{{ url_for('static', filename='js/recipes.js') }}"></script> 

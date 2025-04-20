@@ -33,6 +33,22 @@ class Recipe(database):
         self.connection.commit()
         cursor.close()
     
+    def remove_recipe_tools(self, recipe_id):
+        cursor = self.connection.cursor()
+        query = "DELETE FROM recipe_tool WHERE recipe_id = %s;"
+        data = (recipe_id,)
+        cursor.execute(query, data)
+        self.connection.commit()
+        cursor.close()
+    
+    def remove_recipe_items(self, recipe_id):
+        cursor = self.connection.cursor()
+        query = "DELETE FROM recipe_items WHERE recipe_id = %s;"
+        data = (recipe_id,)
+        cursor.execute(query, data)
+        self.connection.commit()
+        cursor.close()
+    
     def edit_recipe(self, recipe_id, name, servings, prep_time, cook_time, instructions):
         cursor = self.connection.cursor()
         query = """UPDATE recipe SET 

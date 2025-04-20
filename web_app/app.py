@@ -537,6 +537,16 @@ def update_recipe():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
+@app.route("/recipes/delete/<recipe_id>")
+def remove_recipe(recipe_id):
+    try:
+        ### MERGE FUNCTIONS WHEM REMOVING OOP
+        recipe_sql.remove_recipe(recipe_id)
+        recipe_sql.remove_recipe_items(recipe_id)
+        recipe_sql.remove_recipe_tools(recipe_id)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
 
 if __name__ == '__main__':
     # Classes for handling sql expressions

@@ -465,3 +465,15 @@ async function save_full_recipe(recipe_id) {
         alert("Error saving recipe: " + result.error);
     }
 }
+
+async function delete_recipe(recipe_id) {
+    const response = await fetch("/recipes/delete/" + recipe_id)
+    const result = await response.json();
+    if (result.success) {
+        alert("Recipe deleted.");
+        close_recipe_popup();
+        get_recipes();
+    } else {
+        alert("Error deleting recipe:" + result.error);
+    }
+}

@@ -166,9 +166,9 @@ def createAccount():
         
         if existing_user is not None:
             if existing_user.username == form.username.data:
-                flash("Username already exists.")
+                msg = "Username already exists."
             if existing_user.email == form.email.data:
-                flash("Email already exists.")
+                msg = "Email already exists."
         else:    
             if form.password.data == form.passwordConfirm.data:
                 # Create new user
@@ -205,6 +205,7 @@ def resetByEmail():
         if user:
             send_verification_code(user)
             flash("Verification code sent to your email.")
+            error = "Verification code sent to your email."
         else:
             error = "Invalid email address."
 

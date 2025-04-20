@@ -859,3 +859,34 @@ input[type="submit"]:hover {
     accent-color: #aed581;
   }
   
+.ingredient-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.ingredient-row input {
+    flex: 1;
+}
+
+.hidden-button {
+    display: none;
+}
+
+.recipe-title-input {
+    font-size: 1.5em;
+    font-weight: bold;
+    border: none;
+    background-color: transparent;
+    width: 100%;
+    text-align: center;
+}
+
+.recipe-input {
+    font-size: 1em;
+    border: none;
+    background-color: transparent;
+    width: 25px;
+    text-align: right;
+}

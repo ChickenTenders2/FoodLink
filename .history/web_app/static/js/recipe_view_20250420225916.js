@@ -144,9 +144,6 @@ async function get_ingredients(recipe_id) {
         // add row
         add_ingredient_row(ingredient[0], ingredient[1], ingredient[2], recipe_id);
     }
-    document.getElementById('save_ing').addEventListener('click', (event) => {
-        update_ingredients(recipe_id);
-    });    
     document.getElementById("edit_ingredients_popup").style.display = "block";
     } catch (error) {
         // Log any errors to the console (e.g., 404 or JSON parsing errors)
@@ -154,7 +151,7 @@ async function get_ingredients(recipe_id) {
     }
 }
 
-function add_ingredient_row(name = "", quantity = "", unit = "") {
+function add_ingredient_row(name = "", quantity = "", unit = "", recipe_id) {
     const row = document.createElement("div");
     row.className = "ingredient-row";
 
@@ -167,6 +164,13 @@ function add_ingredient_row(name = "", quantity = "", unit = "") {
     `;
 
     document.getElementById("ingredients_list_container").appendChild(row);
+
+    // Only add this listener ONCE
+    const form = document.getElementById('ingredients_form');
+    form.onsubmit = function(event) {
+        event.preventDefault();
+        update_ingredients(recipe_id);
+    };
 }
 
 function close_edit_ingredients_popup() {
@@ -175,6 +179,7 @@ function close_edit_ingredients_popup() {
 
 function update_ingredients(recipe_id) {
     close_edit_ingredients_popup();
+    console.log(recipe_id);
     get_tools(recipe_id);
 }
 
@@ -191,18 +196,14 @@ async function get_tools(recipe_id) {
         }
 
         // Parse the JSON response
-        let tools = await response.json();
+        let ingredients = await response.json();
         
-            // creates the selection dropdown
-        const dropdown = document.createElement("select");
-        dropdown.id = "tool_selector";
-        console.log(tools)
-        // for each ingredient from list
-        for (let tool of tools) {
+            // for each ingredient from list
+    for (let ingredient of ingredients) {
         // add row
-        add_tool_display_row(tool[0], dropdown);
-        }
-        document.getElementById("edit_ingredients_popup").style.display = "block";
+        add_ingredient_row(ingredient[0], ingredient[1], ingredient[2]);
+    }
+    document.getElementById("edit_ingredients_popup").style.display = "block";
     } catch (error) {
         // Log any errors to the console (e.g., 404 or JSON parsing errors)
         console.error('Error fetching ingredients:', error);
@@ -253,6 +254,7 @@ function add_tool_display_row(tool_id, dropdown) {
     const container = document.getElementById("tools_list_container");
     const row = document.createElement("div");
     row.className = "tool-row";
+
     // adds tool name to row
     const tool_name = window.tools[tool_id];
     const label = document.createElement("span");

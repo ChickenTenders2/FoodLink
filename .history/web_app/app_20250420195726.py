@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, render_template, request, url_for, Response
 from item import item_table
-from recipe import Recipe
+from recipe import RecipeTable
 from input_handling import InputHandling
 from flask_session import Session
 app = Flask(__name__, template_folder = "templates")
@@ -62,18 +62,6 @@ def search_items(search_query = None):
 def get_recipes():
     recipes = recipe.get_all()
     return render_template("recipe_view.html", recipes = recipes)
-
-@app.route('/admin/recipe_view/add_item/<int:recipe_id>', methods=['GET'])
-def get_ingredients(recipe_id):
-    ingredients = recipe.get_recipe_items(recipe_id)
-    print(ingredients)
-    return jsonify(ingredients)
-
-@app.route('/admin/recipe_view/add_tools/<int:recipe_id>', methods=['GET'])
-def get_tools(recipe_id):
-    tools = recipe.get_recipe_tools(recipe_id)
-    print(tools)
-    return jsonify(tools)
 
 # Recipe table interface
 @app.route('/admin/recipe_view/edit', defaults={'id': None})
@@ -189,5 +177,5 @@ if __name__ == '__main__':
     # Classes for handling sql expressions
     input_check = InputHandling()
     item = item_table()
-    recipe = Recipe()
+    recipe = RecipeTable()
     app.run(debug=True)

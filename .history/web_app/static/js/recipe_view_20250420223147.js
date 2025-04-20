@@ -25,10 +25,12 @@ function open_popup(recipeName, name, servings, prep, cook, instructions, recipe
     if (add == true) {
         document.getElementById('popup-title').innerText = `Add ${recipeName}`;
         document.getElementById('update-form').addEventListener('submit', function(event) {
+            const recipe_id = 1;
             submit_next(event, recipe_id);});
     } else {
         document.getElementById('popup-title').innerText = `Edit ${recipeName}`;
         document.getElementById('update-form').addEventListener('submit', function(event) {
+            const recipe_id = 1;
             submit_next(event, recipe_id);});
     }
     document.getElementById('name').value = name;
@@ -117,7 +119,6 @@ async function submit_next(event, recipe_id) {
     const result = await response.json();
  
     if (result.success) {
-        close_popup()
         get_ingredients(recipe_id)
     } else {
          alert('There was an error updating the item.');
@@ -137,16 +138,13 @@ async function get_ingredients(recipe_id) {
         }
 
         // Parse the JSON response
-        let ingredients = await response.json();
+        const ingredients = await response.json();
         
             // for each ingredient from list
     for (let ingredient of ingredients) {
         // add row
-        add_ingredient_row(ingredient[0], ingredient[1], ingredient[2], recipe_id);
+        add_ingredient_row(ingredient[0], ingredient[1], ingredient[2]);
     }
-    document.getElementById('save_ing').addEventListener('click', (event) => {
-        update_ingredients(recipe_id);
-    });    
     document.getElementById("edit_ingredients_popup").style.display = "block";
     } catch (error) {
         // Log any errors to the console (e.g., 404 or JSON parsing errors)
@@ -167,118 +165,4 @@ function add_ingredient_row(name = "", quantity = "", unit = "") {
     `;
 
     document.getElementById("ingredients_list_container").appendChild(row);
-}
-
-function close_edit_ingredients_popup() {
-    document.getElementById("edit_ingredients_popup").style.display = "none";
-}
-
-function update_ingredients(recipe_id) {
-    close_edit_ingredients_popup();
-    get_tools(recipe_id);
-}
-
-async function get_tools(recipe_id) {
-    try {
-        const response = await fetch('/admin/recipe_view/add_tools/' + recipe_id, {
-            method: 'GET', // No body needed for GET request
-        });
-        
-        // Check if the request was successful (status 200)
-        if (!response.ok) {
-            // If response is not OK, throw an error with the response status
-            throw new Error(`Failed to fetch ingredients. Status: ${response.status}`);
-        }
-
-        // Parse the JSON response
-        let tools = await response.json();
-        
-            // creates the selection dropdown
-        const dropdown = document.createElement("select");
-        dropdown.id = "tool_selector";
-        console.log(tools)
-        // for each ingredient from list
-        for (let tool of tools) {
-        // add row
-        add_tool_display_row(tool[0], dropdown);
-        }
-        document.getElementById("edit_ingredients_popup").style.display = "block";
-    } catch (error) {
-        // Log any errors to the console (e.g., 404 or JSON parsing errors)
-        console.error('Error fetching ingredients:', error);
-    }
-}
-
-function open_edit_tools_popup(tool_ids) {
-    const container = document.getElementById("tools_list_container");
-    container.innerHTML = "";
-
-    const addContainer = document.getElementById("tool_add_controls");
-    addContainer.innerHTML = "";
-
-    // creates the selection dropdown
-    const dropdown = document.createElement("select");
-    dropdown.id = "tool_selector";
-
-    // adds options that are not in tool_ids (tool_ids are unique and shouldnt be added twice)
-    for (let [tool_id, tool_name] of Object.entries(window.tools)) {
-        if (!tool_ids.includes(parseInt(tool_id))) {
-            const option = document.createElement("option");
-            option.value = tool_id;
-            option.innerText = tool_name;
-            dropdown.appendChild(option);
-        }
-    }
-
-    // adds button to add selected from dropdown 
-    const addButton = document.createElement("button");
-    addButton.innerText = "+ Add Tool";
-    addButton.onclick = () => {
-        const selected_id = parseInt(dropdown.value);
-        add_tool_display_row(selected_id, dropdown);
-    };
-
-    addContainer.appendChild(dropdown);
-    addContainer.appendChild(addButton);
-
-    // displays initial tools for recipe
-    for (let id of tool_ids) {
-        add_tool_display_row(id, dropdown);
-    }
-
-    document.getElementById("edit_tools_popup").style.display = "block";
-}
-
-function add_tool_display_row(tool_id, dropdown) {
-    const container = document.getElementById("tools_list_container");
-    const row = document.createElement("div");
-    row.className = "tool-row";
-    // adds tool name to row
-    const tool_name = window.tools[tool_id];
-    const label = document.createElement("span");
-    label.innerText = tool_name;
-    label.value = tool_id;
-    row.appendChild(label);
-
-    // adds remove button to row
-    const remove_button = document.createElement("button");
-    remove_button.innerText = "X";
-    remove_button.onclick = () => {
-        // removes row on click and
-        row.remove();
-        // adds option back to dropdown
-        const option = document.createElement("option");
-        option.value = tool_id;
-        option.innerText = tool_name;
-        dropdown.appendChild(option);
-    };
-
-    row.appendChild(remove_button);
-    container.appendChild(row);
-
-    // removes selected option from dropdown (if not already removed)
-    const optionToRemove = dropdown.querySelector(`option[value="${tool_id}"]`);
-    if (optionToRemove) {
-        optionToRemove.remove();
-    }
 }

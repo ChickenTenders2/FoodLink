@@ -62,22 +62,36 @@
             <button type="reset">Cancel</button>
         </form>
     </div>
-    <div id="edit_ingredients_popup" class="popup">
-        <h3>Edit Ingredients</h3>
-        <button onclick="close_edit_ingredients_popup()">X</button>
-        <input type="hidden" name="recipe_id" id="hidden_recipe_id">
-        <div id="ingredients_list_container"></div>
-        <br><br>
-        <button type="button" onclick="add_ingredient_row()">+ Add Ingredient</button>
-        <br>
-        <button id="save_ing">Next</button>
-    </div>
-    <div id="edit_tools_popup" class="popup">
-        <h3>Edit Tools</h3>
-        <button onclick="close_edit_tools_popup()">X</button>
-        <div id="tools_list_container"></div>
-        <div id="tool_add_controls"></div>
-        <button id="save_tools" onclick="update_tools()">Save Tools</button>
+      <!-- Pop-Up for Editing Quantity & Expiration Date -->
+      <div id="popup" class="popup">
+        <h2 id="popup-title"></h2>
+        <form id="update-form">
+            <label for="name">Name:</label>
+            <input type="string" id="name" name ="name" required>
+            <br><br>
+            <label for="servings">Servings:</label>
+            <input type="number" id="servings" name ="servings" required>
+            <br><br>
+            <label for="prep">Perperation Time:</label>
+            <input type="number" id="prep" name ="prep" required>
+            <br><br>
+            <label for="cook">Cooking Time:</label>
+            <input type="number" id="cook" name ="cook" required>
+            <br><br>
+            <label for="instructions">Instructions:</label>
+            <br><br>
+            <textarea cols="50" class="instructions-form" id="instructions" name="instructions" required></textarea>
+            <br><br>
+            <!-- hidden inputs used so js code has variables needed to update-->
+            <input type="hidden" id="original-name" name="original-name">
+            <input type="hidden" id="original-servings" name="original-servings">
+            <input type="hidden" id="original-prep" name="original-prep">c:\Users\corey\Documents\group1_cm2305-recipe_system\group1_cm2305-recipe_system\web_app\templates\recipes.html
+            <input type="hidden" id="original-cook" name="original-cook">
+            <input type="hidden" id="original-instructions" name="original-instructions">
+            <input type="hidden" id="recipe-id" name="recipe-id">
+            <button type="submit">Next</button>
+            <button type="reset" onclick="close_popup()">Cancel</button>
+        </form>
     </div>
     <script src="{{ url_for('static', filename='js/recipe_view.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/table.js') }}"></script>  

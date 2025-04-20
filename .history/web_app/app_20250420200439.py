@@ -60,20 +60,8 @@ def search_items(search_query = None):
 # Recipe table interface
 @app.route('/admin/recipe_view')
 def get_recipes():
-    recipes = recipe.get_all()
+    recipes = recipe.get_recipes()
     return render_template("recipe_view.html", recipes = recipes)
-
-@app.route('/admin/recipe_view/add_item/<int:recipe_id>', methods=['GET'])
-def get_ingredients(recipe_id):
-    ingredients = recipe.get_recipe_items(recipe_id)
-    print(ingredients)
-    return jsonify(ingredients)
-
-@app.route('/admin/recipe_view/add_tools/<int:recipe_id>', methods=['GET'])
-def get_tools(recipe_id):
-    tools = recipe.get_recipe_tools(recipe_id)
-    print(tools)
-    return jsonify(tools)
 
 # Recipe table interface
 @app.route('/admin/recipe_view/edit', defaults={'id': None})

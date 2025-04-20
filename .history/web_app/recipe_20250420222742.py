@@ -164,7 +164,7 @@ class Recipe(database):
         cursor.close()
         return item
 
-    def update_recipe(self, recipe_id, name, serv, prep, cook, instructions, user_id = None):
+def update_recipe(self, recipe_id, name, serv, prep, cook, instructions, user_id = None):
         cursor = self.connection.cursor()
         query = "UPDATE FoodLink.recipe SET name = %s, servings = %s, prep_time = %s, cook_time = %s, instructions = %s, user_id = %s WHERE id = %s;"
         data = [name, serv, prep, cook, instructions, user_id, recipe_id]

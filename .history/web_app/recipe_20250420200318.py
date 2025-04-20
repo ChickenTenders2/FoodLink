@@ -4,14 +4,6 @@ class Recipe(database):
     def __init__(self):
         super().__init__()
 
-    def get_all(self):
-        cursor = self.connection.cursor()
-        query = "SELECT id, name, servings, prep_time, cook_time, instructions FROM FoodLink.recipe WHERE user_id IS null;"
-        cursor.execute(query)
-        items = cursor.fetchall()
-        cursor.close()
-        return items
-
     def get_recipes(self, search_term, page, user_id, user_only):
         limit = 10
         offset = (page - 1) * limit
@@ -164,11 +156,5 @@ class Recipe(database):
         cursor.close()
         return item
 
-    def update_recipe(self, recipe_id, name, serv, prep, cook, instructions, user_id = None):
-        cursor = self.connection.cursor()
-        query = "UPDATE FoodLink.recipe SET name = %s, servings = %s, prep_time = %s, cook_time = %s, instructions = %s, user_id = %s WHERE id = %s;"
-        data = [name, serv, prep, cook, instructions, user_id, recipe_id]
-        cursor.execute(query, data)
-        self.connection.commit()
-        cursor.close()
+    
 

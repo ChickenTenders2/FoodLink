@@ -69,12 +69,6 @@ def get_ingredients(recipe_id):
     print(ingredients)
     return jsonify(ingredients)
 
-@app.route('/admin/recipe_view/add_tools/<int:recipe_id>', methods=['GET'])
-def get_tools(recipe_id):
-    tools = recipe.get_recipe_tools(recipe_id)
-    print(tools)
-    return jsonify(tools)
-
 # Recipe table interface
 @app.route('/admin/recipe_view/edit', defaults={'id': None})
 @app.route('/admin/recipe_view/edit/<id>', methods = ['GET', 'POST'])

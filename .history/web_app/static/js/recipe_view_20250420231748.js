@@ -253,6 +253,7 @@ function add_tool_display_row(tool_id, dropdown) {
     const container = document.getElementById("tools_list_container");
     const row = document.createElement("div");
     row.className = "tool-row";
+    console.log(tool_id)
     // adds tool name to row
     const tool_name = window.tools[tool_id];
     const label = document.createElement("span");

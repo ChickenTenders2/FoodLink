@@ -58,26 +58,9 @@
             <input type="hidden" id="original-cook" name="original-cook">
             <input type="hidden" id="original-instructions" name="original-instructions">
             <input type="hidden" id="recipe-id" name="recipe-id">
-            <button type="submit">Next</button>
-            <button type="reset">Cancel</button>
+            <button type="submit">Save</button>
+            <button type="reset" onclick="close_popup()">Cancel</button>
         </form>
-    </div>
-    <div id="edit_ingredients_popup" class="popup">
-        <h3>Edit Ingredients</h3>
-        <button onclick="close_edit_ingredients_popup()">X</button>
-        <input type="hidden" name="recipe_id" id="hidden_recipe_id">
-        <div id="ingredients_list_container"></div>
-        <br><br>
-        <button type="button" onclick="add_ingredient_row()">+ Add Ingredient</button>
-        <br>
-        <button id="save_ing">Next</button>
-    </div>
-    <div id="edit_tools_popup" class="popup">
-        <h3>Edit Tools</h3>
-        <button onclick="close_edit_tools_popup()">X</button>
-        <div id="tools_list_container"></div>
-        <div id="tool_add_controls"></div>
-        <button id="save_tools" onclick="update_tools()">Save Tools</button>
     </div>
     <script src="{{ url_for('static', filename='js/recipe_view.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/table.js') }}"></script>  

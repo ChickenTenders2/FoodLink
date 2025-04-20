@@ -441,9 +441,12 @@ def select_tools():
 
 @app.route('/tools/save', methods=['POST'])
 def save_tools():
-    selected_tools = request.form.getlist('tool')
-    tool.save_user_tools(user_id, selected_tools)
-    return redirect(url_for('index'))
+    try:
+        selected_tools = request.form.getlist('tool')
+        tool.save_user_tools(user_id, selected_tools)
+        return jsonify({"success": True, "message": "Tools saved successfully!"})
+    except Exception as e:
+        return jsonify({"success": False, "message": "Failed to save tools."})
 
 @app.route("/tools/get")
 def get_tools():

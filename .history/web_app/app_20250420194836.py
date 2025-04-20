@@ -10,9 +10,6 @@ app.config["SESSION_TYPE"] = "filesystem"
 # Initialize Flask-Session
 Session(app)
 
-# session["user"] = (get the user id)
-# session["user"] = (get the user type (admin or client))
-
 # Item table interface
 @app.route('/admin/item_view')
 def get_items():

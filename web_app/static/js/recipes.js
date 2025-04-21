@@ -409,11 +409,14 @@ function display_recipe_results(recipes) {
     // for each recipe add a element with the information
     for (const recipe of recipes) {
         const div = document.createElement("div");
+        div.classList.add("recipe-card");
         div.innerHTML = `
             <h3>${recipe.name} ${recipe.personal ? "(Personal)" : ""}</h3>
-            <p>Servings: ${recipe.servings}</p>
-            <p>Prep Time: ${recipe.prep_time} mins</p>
-            <p>Cook Time: ${recipe.cook_time} mins</p>
+            <div class="recipe-meta">
+            <p><span class="icon">🍽️</span><strong>Servings:</strong> ${recipe.servings}</p>
+            <p><span class="icon">🕑</span><strong>Prep Time:</strong> ${recipe.prep_time} mins</p>
+            <p><span class="icon">🔥</span><strong>Cook Time:</strong> ${recipe.cook_time} mins</p>
+            </div>
         `;
         div.onclick = () => open_recipe_popup(recipe);
         container.appendChild(div);
@@ -447,6 +450,20 @@ function get_tool_ids_from_list() {
     }
     return tool_ids;
 }
+
+// toggles the visibility of the recipe search filters via the Filter button
+document.getElementById('filter-toggle').addEventListener('click', () => {
+    const filters = document.getElementById('filter-options');
+    const toggleBtn = document.getElementById('filter-toggle');
+
+    if (filters.style.display === 'none' || filters.style.display === '') {
+      filters.style.display = 'block';
+      toggleBtn.textContent = 'Hide Filters';
+    } else {
+      filters.style.display = 'none';
+      toggleBtn.textContent = 'Show Filters';
+    }
+  });
 
 async function save_full_recipe(recipe_id) {
     const name = document.getElementById("recipe_popup_title").value.trim();
@@ -501,3 +518,24 @@ async function delete_recipe(recipe_id) {
         alert("Error deleting recipe:" + result.error);
     }
 }
+
+// preserves checked boxes on page reload
+document.addEventListener("DOMContentLoaded", () => {
+    const checkboxes = ["personal_only", "missing_items", "insufficient_items", "missing_tools"];
+
+    checkboxes.forEach(id => {
+        const box = document.getElementById(id);
+        if (box) {
+            // Restore saved state
+            const saved = localStorage.getItem(id);
+            if (saved !== null) {
+                box.checked = saved === "true";
+            }
+
+            // Save on change
+            box.addEventListener("change", () => {
+                localStorage.setItem(id, box.checked);
+            });
+        }
+    });
+});

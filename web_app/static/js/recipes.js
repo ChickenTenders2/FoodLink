@@ -11,6 +11,7 @@ function open_recipe_popup(recipe) {
         const delete_button = document.getElementById("delete_recipe");
         delete_button.style.display = "inline-block";
         delete_button.onclick = () => delete_recipe(recipe.id);
+        save_recipe.onclick = () => save_full_recipe(recipe.id);
     
         edit_button.onclick = () => {
             //gets editing value
@@ -28,7 +29,7 @@ function open_recipe_popup(recipe) {
             const servings = document.getElementById("recipe_popup_servings");
             const prep_time = document.getElementById("recipe_popup_prep");
             const cook_time = document.getElementById("recipe_popup_cook");
-    
+            
             // switches to cancel edit button if edit mode is entered (edit recipe is pressed)
             if (is_editing) {
                 edit_button.innerText = "Cancel Edit";
@@ -88,7 +89,6 @@ function open_recipe_popup(recipe) {
                 cook_time.style.backgroundColor = "";
             }
         };
-        save_recipe.onclick = () => save_full_recipe(recipe.id);
     }
     
     document.getElementById("recipe_popup").style.display = "block";
@@ -100,6 +100,10 @@ function close_recipe_popup() {
     if (edit_button.value == "true") {
         edit_button.click();
     }
+    // makes sure buttons are hidden again
+    edit_button.style.display = "none";
+    const delete_button = document.getElementById("delete_recipe");
+    delete_button.style.display = "none";
 
     document.getElementById("recipe_popup").style.display = "none";
 }
@@ -166,7 +170,7 @@ function display_tools(tool_ids, missing_tool_ids) {
         // create list element
         const li = document.createElement("li");
         // get the tool name from the tools dictionary
-        tool_name = window.tools[parseInt(tool_id)];
+        tool_name = window.tools_dict[parseInt(tool_id)];
         li.innerText = tool_name;
         li.value = tool_id;
         // highlights tool red if missing
@@ -244,13 +248,11 @@ function open_edit_tools_popup(tool_ids) {
     dropdown.id = "tool_selector";
 
     // adds options that are not in tool_ids (tool_ids are unique and shouldnt be added twice)
-    for (let [tool_id, tool_name] of Object.entries(window.tools)) {
-        if (!tool_ids.includes(parseInt(tool_id))) {
-            const option = document.createElement("option");
-            option.value = tool_id;
-            option.innerText = tool_name;
-            dropdown.appendChild(option);
-        }
+    for (let [tool_id, tool_name] of window.tools) {
+        const option = document.createElement("option");
+        option.value = tool_id;
+        option.innerText = tool_name;
+        dropdown.appendChild(option);
     }
 
     // adds button to add selected from dropdown 
@@ -259,6 +261,7 @@ function open_edit_tools_popup(tool_ids) {
     addButton.onclick = () => {
         const selected_id = parseInt(dropdown.value);
         add_tool_display_row(selected_id, dropdown);
+        dropdown.value = "";
     };
 
     addContainer.appendChild(dropdown);
@@ -268,6 +271,7 @@ function open_edit_tools_popup(tool_ids) {
     for (let id of tool_ids) {
         add_tool_display_row(id, dropdown);
     }
+    dropdown.value = "";
 
     document.getElementById("edit_tools_popup").style.display = "block";
 }
@@ -282,7 +286,7 @@ function add_tool_display_row(tool_id, dropdown) {
     row.className = "tool-row";
 
     // adds tool name to row
-    const tool_name = window.tools[tool_id];
+    const tool_name = window.tools_dict[tool_id];
     const label = document.createElement("span");
     label.innerText = tool_name;
     label.value = tool_id;
@@ -294,21 +298,19 @@ function add_tool_display_row(tool_id, dropdown) {
     remove_button.onclick = () => {
         // removes row on click and
         row.remove();
-        // adds option back to dropdown
-        const option = document.createElement("option");
-        option.value = tool_id;
-        option.innerText = tool_name;
-        dropdown.appendChild(option);
+        // unhides option in dropdown
+        const option = dropdown.querySelector(`option[value="${tool_id}"]`);
+        if (option) {
+            option.hidden = false;
+        }
     };
 
     row.appendChild(remove_button);
     container.appendChild(row);
 
-    // removes selected option from dropdown (if not already removed)
-    const optionToRemove = dropdown.querySelector(`option[value="${tool_id}"]`);
-    if (optionToRemove) {
-        optionToRemove.remove();
-    }
+    // hides option from dropdown
+    const option_to_hide = dropdown.querySelector(`option[value="${tool_id}"]`);
+    option_to_hide.hidden = true;
 }
 
 function update_tools() {
@@ -325,9 +327,17 @@ function update_tools() {
 }
 
 
-// gets tool dictionary with (key = id, value = tool name)
 window.onload = async function() {
+    // gets tools with ordering by type, name
+    // so appliances are shown a > z with utensils below also shown a > z
     window.tools = await get_tools();
+    // makes tool dictionary with (key = id, value = tool name)
+    // used to find name of tool_id
+    window.tools_dict = {};
+    for (const [id, name] of window.tools) {
+        window.tools_dict[id] = name;
+    }
+    console.log(window.tools_dict)
 }
 
 async function get_tools() {

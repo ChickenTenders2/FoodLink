@@ -22,6 +22,7 @@ class recipe_object(Recipe):
         self.missing_ingredients = []
 
     # sets the list of the ids for any tools required for a recipe that a user doesn't own
+    # only passes tool_ids to front end as sets are used to calculate, which has a faster time complexity
     def calculate_missing_tools(self, user_tool_ids):
         self.missing_tool_ids = list(set(self.tool_ids) - set(user_tool_ids))
     

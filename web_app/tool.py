@@ -15,11 +15,11 @@ class Tool(database):
     def get_tools(self, type = None):
         cursor = self.connection.cursor()
         if type:
-            query = "SELECT id, name FROM tool WHERE type = %s;"
+            query = "SELECT id, name FROM tool WHERE type = %s ORDER BY name;"
             data = (type,)
             cursor.execute(query, data)
         else:
-            query = "SELECT id, name FROM tool"
+            query = "SELECT id, name FROM tool ORDER BY type, name;"
             cursor.execute(query)
         appliances = cursor.fetchall()
         cursor.close()

@@ -8,31 +8,28 @@ from extensions import db
 # Create blueprint
 settings_bp = Blueprint('settings', __name__, url_prefix='/settings')
 
-def get_test_user():
-    if current_user and current_user.is_authenticated:
-        return current_user
-    return User.query.filter_by(email='testuser@example.com').first()
-
 # Base class for settings views
 class BaseSettingsView(MethodView):
-    pass
+    decorators = [login_required]
 
 # Main settings page
 class SettingsView(BaseSettingsView):
     def get(self):
-        user = get_test_user()
+        # login_required ensures a user is authenticated
+        user_id = current_user.id
+        
         # Get user devices
-        devices = Device.query.filter_by(user_id=user.id).all()
+        devices = Device.query.filter_by(user_id=user_id).all()
         
         # Get or create notification preferences
-        notification_prefs = Notification.query.filter_by(user_id=user.id).first()
+        notification_prefs = Notification.query.filter_by(user_id=user_id).first()
         if not notification_prefs:
-            notification_prefs = Notification(user_id=user.id)
+            notification_prefs = Notification(user_id=user_id)
             db.session.add(notification_prefs)
             db.session.commit()
             
         return render_template('settings.html', 
-                              user=user, 
+                              user=current_user, 
                               devices=devices,
                               notification_prefs=notification_prefs)
     

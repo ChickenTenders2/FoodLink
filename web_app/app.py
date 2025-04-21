@@ -13,69 +13,30 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize extensions
 db.init_app(app)
 login_manager.init_app(app)
+login_manager.login_view = 'login'  # This ensures users are redirected to login when needed
 
-# Import and register blueprints
-# ----------Could be affected by other app.py files----------
+# Import and register the settings blueprint
 from settings import settings_bp
 app.register_blueprint(settings_bp)
 
-# Get or create a test user with a shorter password hash
-def get_or_create_test_user():
-    from models import User
-    
-    test_user = User.query.filter_by(email='test@example.com').first()
-    if not test_user:
-        # Use a simpler hash method or a fixed string for testing
-        simple_hash = 'test_password_hash'  # Use a fixed value for testing
-        
-        test_user = User(
-            username='testuser',
-            name='Test User',
-            email='testuser@example.com',
-            password=simple_hash
-        )
-        db.session.add(test_user)
-        db.session.commit()
-    
-    return test_user
-
-# Create database tables and test user
 with app.app_context():
     db.create_all()
-    
-    # Create test user
-    test_user = get_or_create_test_user()
-    
-    # Create mock notification preferences if needed
-    from models import Notification
-    notification_prefs = Notification.query.filter_by(user_id=test_user.id).first()
-    if not notification_prefs:
-        notification_prefs = Notification(user_id=test_user.id)
-        db.session.add(notification_prefs)
-        db.session.commit()
 
-# Add this to your app.py
-@app.route('/dashboard')
-def dashboard():
-    return "Dashboard will be implemented later"
-
-# Then update the blueprint registration to include this route
-app.add_url_rule('/dashboard', 'main.dashboard', dashboard)
-
-# Add a route to automatically log in the test user
+# Main routes
 @app.route('/')
-def auto_login():
-    from flask_login import login_user
-    user = get_or_create_test_user()
-    login_user(user)
-    # Store theme in session for template access
-    session['theme'] = user.theme
-    return redirect(url_for('settings.settings_page'))
+def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('settings.settings_page'))
+    return redirect(url_for('login'))
+
+@app.route('/index')
+@login_required
+def main_index():
+    return render_template('index.html', user=current_user)
 
 @app.route('/utensils')
 @login_required
 def utensils_page():
-    # Temporary placeholder page for the utensils feature
     return render_template('utensils.html', user=current_user)
     
 if __name__ == '__main__':

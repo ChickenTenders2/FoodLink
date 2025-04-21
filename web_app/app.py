@@ -451,7 +451,6 @@ def save_tools():
 @app.route("/tools/get")
 def get_tools():
     tools = tool.get_tools()
-    #tools = dict(tools)
     print(tools)
     return jsonify({"success": True, "tools": tools})
 

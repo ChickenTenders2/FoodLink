@@ -108,7 +108,6 @@ function close_recipe_popup() {
     // makes sure edit button is hidden aswell
     edit_button.style.display = "none";
 
-
     document.getElementById("recipe_popup").style.display = "none";
 }
 

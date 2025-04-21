@@ -49,6 +49,18 @@ class Recipe(database):
         self.connection.commit()
         cursor.close()
     
+    def add_recipe(self, name, servings, prep_time, cook_time, instructions, user_id):
+        cursor = self.connection.cursor()
+        query = """INSERT INTO recipe (name, servings, prep_time, cook_time, instructions, user_id) 
+                    VALUES (%s, %s, %s, %s, %s, %s);"""
+        data = (name, servings, prep_time, cook_time, instructions, user_id)
+        cursor.execute(query, data)
+        self.connection.commit()
+        # gets id of the recipe inserted
+        recipe_id = cursor.lastrowid
+        cursor.close()
+        return recipe_id
+
     def edit_recipe(self, recipe_id, name, servings, prep_time, cook_time, instructions):
         cursor = self.connection.cursor()
         query = """UPDATE recipe SET 

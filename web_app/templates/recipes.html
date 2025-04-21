@@ -8,6 +8,9 @@
 </head>
 <body>
     <div>
+        <button onclick="open_create_recipe_popup()">+ Create New Recipe</button>
+    </div>
+    <div>
         <h2>Search Recipes</h2>
         <form id="recipe-search-form" onsubmit="get_recipes(event)">
             <input type="text" id="recipe_search_term" name="search_term" placeholder="Enter recipe name...">
@@ -40,9 +43,9 @@
     </div>
 
     <div id="recipe_popup" class="popup">
-        <button onclick="close_recipe_popup()">X</button>
+        <button id= "close_recipe_popup" onclick="close_recipe_popup()">X</button>
         <h2>
-            <input id="recipe_popup_title" class="recipe-title-input" readonly>
+            <input id="recipe_popup_title" class="recipe-title-input" placeholder="Enter name..." readonly>
         </h2>
     
         <div class="recipe-popup-flex">

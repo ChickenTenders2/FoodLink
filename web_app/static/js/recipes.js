@@ -8,10 +8,6 @@ function open_recipe_popup(recipe) {
         const title_input = document.getElementById("recipe_popup_title");
         const edit_button = document.getElementById("toggle_edit");
         edit_button.style.display = "inline-block";
-        const delete_button = document.getElementById("delete_recipe");
-        delete_button.style.display = "inline-block";
-        delete_button.onclick = () => delete_recipe(recipe.id);
-        save_recipe.onclick = () => save_full_recipe(recipe.id);
     
         edit_button.onclick = () => {
             //gets editing value
@@ -24,6 +20,7 @@ function open_recipe_popup(recipe) {
             // gets hidden buttons
             const edit_ingredients = document.getElementById("edit_ingredients");
             const edit_tools = document.getElementById("edit_tools");
+            const delete_button = document.getElementById("delete_recipe");
             const save_recipe = document.getElementById("save_recipe");
             const instructions_box = document.getElementById("recipe_popup_instructions");
             const servings = document.getElementById("recipe_popup_servings");
@@ -37,6 +34,7 @@ function open_recipe_popup(recipe) {
                 //shows edit buttons
                 edit_ingredients.style.display = "inline-block";
                 edit_tools.style.display = "inline-block";
+                delete_button.style.display = "inline-block";
                 save_recipe.style.display = "inline-block";
                 
                 // makes information editable
@@ -61,11 +59,15 @@ function open_recipe_popup(recipe) {
             } else {
                 // if cancel button is pressed, reload the original information
                 display_information(recipe);
+                // make sure edit popups are closed
+                close_edit_ingredients_popup();
+                close_edit_tools_popup();
 
                 edit_button.innerText = "Edit Recipe";
     
                 edit_ingredients.style.display = "none";
                 edit_tools.style.display = "none";
+                delete_button.style.display = "none";
                 save_recipe.style.display = "none";
                 
                 // stops information being editable
@@ -88,6 +90,8 @@ function open_recipe_popup(recipe) {
                 prep_time.style.backgroundColor = "";
                 cook_time.style.backgroundColor = "";
             }
+            delete_button.onclick = () => delete_recipe(recipe.id);
+            save_recipe.onclick = () => save_full_recipe(recipe.id);
         };
     }
     
@@ -95,15 +99,15 @@ function open_recipe_popup(recipe) {
 }
 
 function close_recipe_popup() {
-    // if still in edit mode simulate click, to cancel changes when closing recipe
+    // if still in edit mode, simulate click to cancel changes when closing recipe
+    // this hides modify buttons and closes popups, plus makes inputs readonly
     const edit_button = document.getElementById("toggle_edit");
     if (edit_button.value == "true") {
         edit_button.click();
     }
-    // makes sure buttons are hidden again
+    // makes sure edit button is hidden aswell
     edit_button.style.display = "none";
-    const delete_button = document.getElementById("delete_recipe");
-    delete_button.style.display = "none";
+
 
     document.getElementById("recipe_popup").style.display = "none";
 }
@@ -185,6 +189,9 @@ function display_tools(tool_ids, missing_tool_ids) {
 //       EDIT INGREDIENTS FUNCTIONS
 
 function open_edit_ingredients_popup(ingredients) {
+    // make sure other popup closed
+    close_edit_tools_popup();
+
     const container = document.getElementById("ingredients_list_container");
     container.innerHTML = "";
     // for each ingredient from list
@@ -237,6 +244,9 @@ function update_ingredients() {
 //          EDIT TOOLS FUNCTIONS
 
 function open_edit_tools_popup(tool_ids) {
+    // make sure other popup closed
+    close_edit_ingredients_popup();
+
     const container = document.getElementById("tools_list_container");
     container.innerHTML = "";
 
@@ -477,6 +487,10 @@ async function save_full_recipe(recipe_id) {
 }
 
 async function delete_recipe(recipe_id) {
+    const confirm_delete = confirm("Are you sure you want to delete this recipe?");
+    if (!confirm_delete) {
+        return;
+    }
     const response = await fetch("/recipes/delete/" + recipe_id)
     const result = await response.json();
     if (result.success) {

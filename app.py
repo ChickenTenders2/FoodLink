@@ -12,7 +12,7 @@ from datetime import datetime
 import pytz
 
 # Import database and user model
-from models import db, User
+from models import db, User, Admin
 
 # Initialize Flask application
 app = Flask(__name__)
@@ -72,7 +72,13 @@ verification_codes = {}
 # User loader function for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    #new code
+    user_type = session.get("user_type")
+    if user_type == "admin":
+        return Admin.query.get(int(user_id))
+    else:
+        return User.query.get(int(user_id))
+
 
 # Generate a 6-digit verification code
 def generate_verification_code():
@@ -138,6 +144,16 @@ def login():
     error = None
     
     if form.validate_on_submit():
+        #new code
+        admin = Admin.query.filter_by(username=form.username.data).first()   
+        if admin and check_password_hash(admin.password, form.password.data):
+            login_user(admin,form.remember_me.data)
+            session["username"] = admin.username
+            session["user_type"] = "admin"
+            flash("logged in", "success")
+            return redirect(url_for("AdminDashboard"))
+
+
         user = User.query.filter_by(username=form.username.data).first()
         
         if user is None or not check_password_hash(user.password, form.password.data):
@@ -145,6 +161,7 @@ def login():
         else:
             login_user(user, form.remember_me.data)
             session["username"] = form.username.data
+            session["user_type"] = "user"
             
             # Check if email is verified
             if not user.email_verified:
@@ -152,8 +169,54 @@ def login():
                 return redirect(url_for('email_verification_page'))
             
             return redirect(url_for('index'))
+        
     
     return render_template('login.html', form=form, error=error)
+
+
+#new code
+@app.route("/admin/dashboard", methods=["GET","POST"])
+@login_required
+def AdminDashboard():
+    if not current_user.is_authenticated or not isinstance(current_user._get_current_object(), Admin):
+        flash("Unauthorized access.", "danger")
+        return redirect(url_for('login'))
+
+    
+    class AdminCreateForm(FlaskForm):
+        username = StringField('Username', validators=[DataRequired(), Length(1, 16)])
+        name = StringField("Name",validators=[DataRequired(), Length(1, 16)])
+        email = StringField('Email', validators=[DataRequired(), Email()])
+        password = PasswordField('Password', validators=[DataRequired()])
+        submit = SubmitField('Add Admin')
+
+    form = AdminCreateForm()
+    message = None
+
+    if form.validate_on_submit():
+       existing_admin = Admin.query.filter(
+            (Admin.username == form.username.data) | 
+            (Admin.email == form.email.data)
+        ).first()
+       
+       if existing_admin:
+            message = "Admin already exists."
+       else:
+            new_admin = Admin(
+                name = form.name.data,
+                username=form.username.data,
+                email=form.email.data,
+                password=generate_password_hash(form.password.data)
+            )
+            db.session.add(new_admin)
+            db.session.commit()
+            flash("New admin added successfully!")
+            return redirect(url_for('AdminDashboard'))  # or redirect back to dashboard
+
+    return render_template("admin_dashboard.html", form=form, message=message)
+
+    
+
 
 # Create account route
 @app.route('/createAccount', methods=['GET', 'POST'])
@@ -265,6 +328,7 @@ def resetPassword():
 def logout():
     logout_user()
     session.pop('username', None)
+    session.pop('uuser_type', None)
     return redirect(url_for('index'))
 
 # Email verification page

@@ -5,7 +5,6 @@ function open_recipe_popup(recipe) {
 
     // allow editing options if recipe is a users
     if (recipe.personal) {
-        const title_input = document.getElementById("recipe_popup_title");
         const edit_button = document.getElementById("toggle_edit");
         edit_button.style.display = "inline-block";
     
@@ -18,43 +17,18 @@ function open_recipe_popup(recipe) {
             edit_button.value = is_editing;
     
             // gets hidden buttons
-            const edit_ingredients = document.getElementById("edit_ingredients");
-            const edit_tools = document.getElementById("edit_tools");
             const delete_button = document.getElementById("delete_recipe");
-            const save_recipe = document.getElementById("save_recipe");
-            const instructions_box = document.getElementById("recipe_popup_instructions");
-            const servings = document.getElementById("recipe_popup_servings");
-            const prep_time = document.getElementById("recipe_popup_prep");
-            const cook_time = document.getElementById("recipe_popup_cook");
             
             // switches to cancel edit button if edit mode is entered (edit recipe is pressed)
             if (is_editing) {
                 edit_button.innerText = "Cancel Edit";
+
+                //lets content be editable and shows buttons
+                toggle_edit_features(true);
                 
-                //shows edit buttons
-                edit_ingredients.style.display = "inline-block";
-                edit_tools.style.display = "inline-block";
+                //shows delete button
                 delete_button.style.display = "inline-block";
-                save_recipe.style.display = "inline-block";
-                
-                // makes information editable
-                instructions_box.contentEditable = true;
-                servings.readOnly = false;
-                prep_time.readOnly = false;
-                cook_time.readOnly = false;
-                title_input.readOnly = false;
-                
-                // css styling to show now now editable
-                title_input.style.backgroundColor = "#fff9db";
-                title_input.style.border = "1px dashed #ccc";
-                instructions_box.style.border = "1px dashed #ccc";
-                instructions_box.style.backgroundColor = "#fff9db";
-                servings.style.border = "1px dashed #ccc";
-                prep_time.style.border = "1px dashed #ccc";
-                cook_time.style.border = "1px dashed #ccc";
-                servings.style.backgroundColor = "#fff9db";
-                prep_time.style.backgroundColor = "#fff9db";
-                cook_time.style.backgroundColor = "#fff9db";
+
             // cancels edits and switches buttons back to be hidden
             } else {
                 // if cancel button is pressed, reload the original information
@@ -63,39 +37,108 @@ function open_recipe_popup(recipe) {
                 close_edit_ingredients_popup();
                 close_edit_tools_popup();
 
+                //stops content being editable and hides buttons
+                toggle_edit_features(false);
+                
                 edit_button.innerText = "Edit Recipe";
     
-                edit_ingredients.style.display = "none";
-                edit_tools.style.display = "none";
+                //hides delete button
                 delete_button.style.display = "none";
-                save_recipe.style.display = "none";
-                
-                // stops information being editable
-                instructions_box.contentEditable = false;
-                servings.readOnly = true;
-                prep_time.readOnly = true;
-                cook_time.readOnly = true;
-                title_input.readOnly = true;
-                title_input.value = recipe.name; // reset if cancel
-
-                // resets styling
-                title_input.style.border = "";
-                title_input.style.backgroundColor = "";
-                instructions_box.style.border = "";
-                instructions_box.style.backgroundColor = "";
-                servings.style.border = "";
-                prep_time.style.border = "";
-                cook_time.style.border = "";
-                servings.style.backgroundColor = "";
-                prep_time.style.backgroundColor = "";
-                cook_time.style.backgroundColor = "";
             }
             delete_button.onclick = () => delete_recipe(recipe.id);
-            save_recipe.onclick = () => save_full_recipe(recipe.id);
+            // sets save recipe button to update recipe with id
+            document.getElementById("save_recipe").onclick = () => update_recipe(recipe.id);
         };
     }
     
     document.getElementById("recipe_popup").style.display = "block";
+}
+
+function open_create_recipe_popup() {
+    // creates empty recipe and displays it
+    const recipe = {
+        "name": "",
+        "instructions": "",
+        "servings": "",
+        "prep_time": "",
+        "cook_time": "",
+        "tool_ids": [],
+        "missing_tool_ids": [],
+        "ingredients": []
+    }
+    display_information(recipe);
+    // shows edit buttons
+    toggle_edit_features(true);
+    // sets save button to add recipe
+    document.getElementById("save_recipe").onclick = () => add_recipe();
+    document.getElementById("recipe_popup").style.display = "block";
+
+    // change close button to functionality for closing add popup
+    const close_button = document.getElementById("close_recipe_popup");
+    close_button.onclick = () => {
+        toggle_edit_features(false);
+        document.getElementById("recipe_popup").style.display = "none";
+        // changes it back to orginal function after closing
+        close_button.onclick = () => close_recipe_popup();
+    }
+}
+
+function toggle_edit_features(show) {
+    const title_input = document.getElementById("recipe_popup_title");
+    const edit_ingredients = document.getElementById("edit_ingredients");
+    const edit_tools = document.getElementById("edit_tools");
+    const save_recipe = document.getElementById("save_recipe");
+    const instructions_box = document.getElementById("recipe_popup_instructions");
+    const servings = document.getElementById("recipe_popup_servings");
+    const prep_time = document.getElementById("recipe_popup_prep");
+    const cook_time = document.getElementById("recipe_popup_cook");
+    if (show) {
+        edit_ingredients.style.display = "inline-block";
+        edit_tools.style.display = "inline-block";
+        save_recipe.style.display = "inline-block";
+        
+        // makes information editable
+        instructions_box.contentEditable = true;
+        servings.readOnly = false;
+        prep_time.readOnly = false;
+        cook_time.readOnly = false;
+        title_input.readOnly = false;
+        
+        // css styling to show now now editable
+        title_input.style.backgroundColor = "#fff9db";
+        title_input.style.border = "1px dashed #ccc";
+        instructions_box.style.border = "1px dashed #ccc";
+        instructions_box.style.backgroundColor = "#fff9db";
+        servings.style.border = "1px dashed #ccc";
+        prep_time.style.border = "1px dashed #ccc";
+        cook_time.style.border = "1px dashed #ccc";
+        servings.style.backgroundColor = "#fff9db";
+        prep_time.style.backgroundColor = "#fff9db";
+        cook_time.style.backgroundColor = "#fff9db";
+    } else {
+        edit_ingredients.style.display = "none";
+        edit_tools.style.display = "none";
+        save_recipe.style.display = "none";
+        
+        // stops information being editable
+        instructions_box.contentEditable = false;
+        servings.readOnly = true;
+        prep_time.readOnly = true;
+        cook_time.readOnly = true;
+        title_input.readOnly = true;
+
+        // resets styling
+        title_input.style.border = "";
+        title_input.style.backgroundColor = "";
+        instructions_box.style.border = "";
+        instructions_box.style.backgroundColor = "";
+        servings.style.border = "";
+        prep_time.style.border = "";
+        cook_time.style.border = "";
+        servings.style.backgroundColor = "";
+        prep_time.style.backgroundColor = "";
+        cook_time.style.backgroundColor = "";
+    }
 }
 
 function close_recipe_popup() {
@@ -107,7 +150,6 @@ function close_recipe_popup() {
     }
     // makes sure edit button is hidden aswell
     edit_button.style.display = "none";
-
 
     document.getElementById("recipe_popup").style.display = "none";
 }
@@ -269,9 +311,13 @@ function open_edit_tools_popup(tool_ids) {
     const addButton = document.createElement("button");
     addButton.innerText = "+ Add Tool";
     addButton.onclick = () => {
-        const selected_id = parseInt(dropdown.value);
-        add_tool_display_row(selected_id, dropdown);
-        dropdown.value = "";
+        // stops null values from being added to tools
+        if (dropdown.value) {
+            const selected_id = parseInt(dropdown.value);
+            add_tool_display_row(selected_id, dropdown);
+            // makes sure the now hidden tool is not selected still
+            dropdown.value = null;
+        }
     };
 
     addContainer.appendChild(dropdown);
@@ -281,7 +327,8 @@ function open_edit_tools_popup(tool_ids) {
     for (let id of tool_ids) {
         add_tool_display_row(id, dropdown);
     }
-    dropdown.value = "";
+    // deselects so a hidden tool cant accidentally be added
+    dropdown.value = null;
 
     document.getElementById("edit_tools_popup").style.display = "block";
 }
@@ -347,7 +394,6 @@ window.onload = async function() {
     for (const [id, name] of window.tools) {
         window.tools_dict[id] = name;
     }
-    console.log(window.tools_dict)
 }
 
 async function get_tools() {
@@ -424,8 +470,32 @@ function display_recipe_results(recipes) {
 }
 
 
-// UPDATE PERSONAL RECIPE FUNCTIONS
+// STORING PERSONAL RECIPE FUNCTIONS
 
+// gets all data needed to update/add recipe
+function get_recipe_form() {
+    const name = document.getElementById("recipe_popup_title").value.trim();
+    const instructions = document.getElementById("recipe_popup_instructions").innerText.trim();
+    const servings = document.getElementById("recipe_popup_servings").value;
+    const prep_time = document.getElementById("recipe_popup_prep").value;
+    const cook_time = document.getElementById("recipe_popup_cook").value;
+
+    // gets values from the list elements
+    const ingredients = get_ingredients_from_list();
+    const tool_ids = get_tool_ids_from_list();
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("servings", servings);
+    formData.append("prep_time", prep_time);
+    formData.append("cook_time", cook_time);
+    formData.append("instructions", instructions);
+    // formdata converts to list to string so stringify so it can be loaded server side
+    formData.append("ingredients", JSON.stringify(ingredients));
+    formData.append("tool_ids", JSON.stringify(tool_ids));
+
+    return formData;
+}
 
 // gets the ingredient list elements and extracts the values into a list
 function get_ingredients_from_list() {
@@ -451,20 +521,6 @@ function get_tool_ids_from_list() {
     return tool_ids;
 }
 
-// toggles the visibility of the recipe search filters via the Filter button
-document.getElementById('filter-toggle').addEventListener('click', () => {
-    const filters = document.getElementById('filter-options');
-    const toggleBtn = document.getElementById('filter-toggle');
-
-    if (filters.style.display === 'none' || filters.style.display === '') {
-      filters.style.display = 'block';
-      toggleBtn.textContent = 'Hide Filters';
-    } else {
-      filters.style.display = 'none';
-      toggleBtn.textContent = 'Show Filters';
-    }
-  });
-
 async function save_full_recipe(recipe_id) {
     const name = document.getElementById("recipe_popup_title").value.trim();
     const instructions = document.getElementById("recipe_popup_instructions").innerText.trim();
@@ -479,13 +535,6 @@ async function save_full_recipe(recipe_id) {
     const formData = new FormData();
     formData.append("name", name);
     formData.append("recipe_id", recipe_id);
-    formData.append("servings", servings);
-    formData.append("prep_time", prep_time);
-    formData.append("cook_time", cook_time);
-    formData.append("instructions", instructions);
-    // formdata converts to list to string so stringify so it can be loaded server side
-    formData.append("ingredients", JSON.stringify(ingredients));
-    formData.append("tool_ids", JSON.stringify(tool_ids));
 
     const response = await fetch("/recipes/update", {
         method: "POST",

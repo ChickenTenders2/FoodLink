@@ -38,6 +38,6 @@ def main_index():
 @login_required
 def utensils_page():
     return render_template('utensils.html', user=current_user)
-    
-if __name__ == '__main__':
+
+if __name__ == 'main':
     app.run(debug=True)

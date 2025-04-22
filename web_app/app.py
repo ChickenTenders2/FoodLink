@@ -150,7 +150,11 @@ The FoodLink Team
 # Index route
 @app.route('/')
 def index():
-    return redirect(url_for('login'))
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard"))
+    else:
+        # user is not logged in
+        return redirect(url_for('login'))
 
 # Login route
 @app.route('/login', methods=['GET', 'POST'])
@@ -353,6 +357,7 @@ def verify_code():
 
 # Dashboard Route
 @app.route('/dashboard', methods=['GET', 'POST'])
+@login_required
 def dashboard():
     device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
 

@@ -82,7 +82,7 @@
             if (result.success) {
                 showToast(result.message, true);
                 setTimeout(() => {
-                    window.location.href = "/";
+                    window.location.href = "/dashboard";
                 }, 2000); // delay before redirect
             } else {
                 showToast(result.message, false);

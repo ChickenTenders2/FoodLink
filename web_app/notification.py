@@ -1,9 +1,10 @@
 from database import database
 from datetime import datetime
 import smtplib
-from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.header import Header
+from email import charset
 
 class notification(database):
     def get_notifications(self, user_id):
@@ -224,11 +225,16 @@ class notification(database):
         })
 
         if email_enabled:
+            charset.add_charset('utf-8', charset.SHORTEST, None, 'utf-8')
             # Set up the email
             msg = MIMEMultipart("alternative")
-            msg['Subject'] = notif["title"]
+            # encoding for header
+            msg['Subject'] = Header(notif["title"], 'utf-8')
             msg['From'] = "foodlink2305@gmail.com"
             msg['To'] = recipient_email
+            ## encoding for message
+            msg.set_charset("utf-8")
+
 
             html = f"""
             <html>
@@ -283,4 +289,4 @@ class notification(database):
             # Connect to Gmail SMTP
             with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
                 server.login("foodlink2305@gmail.com", "fimz txhp fhwk qwbk")
-                server.sendmail("foodlink2305@gmail.com", recipient_email, msg.as_string())
+                server.sendmail("foodlink2305@gmail.com", recipient_email, msg.as_bytes())

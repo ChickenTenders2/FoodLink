@@ -174,14 +174,26 @@ h2 {
 
 /*Login/Register Styles*/
 
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
 .auth-container {
     background-color: rgba(255, 255, 255, 0.85);
     padding: 40px;
     border-radius: 20px;
     width: 90%;
-    max-width: 400px;
+    max-width: 50vw;
     box-shadow: 0 8px 16px rgba(0,0,0,0.3);
     text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
 }
 
 .auth-container h2 {
@@ -191,12 +203,13 @@ h2 {
 }
 
 .input-group {
+    width: 100%;
+    margin-bottom: 20px;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    margin-bottom: 20px;
-    width: 100%;
+    align-items: center;
 }
+
 
 .name-group {
     display: flex;
@@ -215,14 +228,27 @@ h2 {
 }
 
 .input-group input {
-    padding: 12px;
-    font-size: 16px;
+    width: 100%;
+    padding: 12px 20px; /* ensures even left and right padding */
+    font-size: 14px;
     border: none;
     border-radius: 30px;
     background-color: #f3f3f3;
-    width: 100%;
     box-sizing: border-box;
+    margin: 0;
 }
+
+input.form-control {
+    width: 40vw !important;
+    padding: 12px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 30px;
+    background-color: #f3f3f3;
+    box-sizing: border-box;
+    margin: 0;
+}
+
 
 .auth-button {
     padding: 12px 24px;

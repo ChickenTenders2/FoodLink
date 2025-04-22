@@ -2,8 +2,8 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block page_content %}
-
-    <div class="loginDiv">
+<div class="auth-wrapper">
+    <div class="auth-container">
         {% if error %}
             <p class="error"><strong></strong> {{ error }}</p>
         {% endif %}
@@ -25,21 +25,17 @@
                     </div>
                 
                     <div class="form-group">
-                        {{ form.submit_email(class="btn btn-primary") }}
-                        {{ form.submit_otp(class="btn btn-secondary") }}
+                        {{ form.submit_email(class="button", style="width:45%") }}
+                        {{ form.submit_otp(class="button", style="width:45%") }}
                     </div>
                 </form>
             </div>
         </div>
 
-    	<div class="loginDownDiv">    
- 
-
-        </div>
     </div>
     
     </div>
     
 
-
+</div>
 {% endblock %}

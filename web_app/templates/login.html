@@ -2,35 +2,24 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block page_content %}
+<div class="auth-wrapper">
 
-    <div class="loginDiv">
+    <div class="auth-container">
         {% if error %}
-            <p class="error"><strong></strong> {{ error }}</p>
+            <p class="error text-danger"><strong></strong> {{ error }}</p>
         {% endif %}
 
-        <h1>Sign In</h1>
-        <div class="row">
-            <div class="col-md-3">
-                {{ wtf.quick_form(form) }}
+        <h2>Sign In</h2>
 
+        {{ wtf.quick_form(form) }}
+        <button class="button" type="button" style="margin-top: 10px;" onclick="window.location.href='{{ url_for('resetByEmail') }}'"> Forget password?</button> 
+
+    	<div class="mt-4">    
+            <h4>-----New User-----</h4>
+            <div class="d-flex justify-content-between">
+	            <button class="button" type="button" onclick="window.location.href='{{ url_for('createAccount') }}'"> Create Account </button>
             </div>
         </div>
-
-    	<div class="loginDownDiv">    
-            <p>-----New User-----</p>
-	    <button class="btn" type="button" onclick="window.location.href='{{ url_for('createAccount') }}'"> Create Account </button>
-
-        <div>
-            <button class="btn" type="button" onclick="window.location.href='{{ url_for('resetByEmail') }}'"> Forget password</button> 
-        </div>
-
-        </div>
-    </div>
-    
-    </div>
-    <div class="footing">    
-
-    </div>    
-
-
+    </div>   
+</div>
 {% endblock %}

@@ -47,14 +47,25 @@ class Inventory(database):
         cursor.close()
         print(f"Deleted inventory item with ID: {inventory_id}")
 
-    def update_quantity(self, inventory_id, quantity):    
+    def update_quantities(self, items_used):    
         cursor = self.connection.cursor()
         # SQL query for updating the item quantity in the inventory table
-        query = "UPDATE inventory SET quantity = %s WHERE id = %s;"
-        data = [quantity, inventory_id]
-        cursor.execute(query, data)
-        self.connection.commit()
-        cursor.close()
+        cursor = self.connection.cursor()
+        try:
+            for inventory_id, quantity in items_used:
+                if quantity <= 0:
+                    # Delete item if quantity is zero or less
+                    cursor.execute("DELETE FROM inventory WHERE id = %s;", (inventory_id,))
+                else:
+                    # Otherwise, update the quantity
+                    cursor.execute(
+                        "UPDATE inventory SET quantity = %s WHERE id = %s;",
+                        (quantity, inventory_id)
+                    )
+
+            self.connection.commit()
+        finally:
+            cursor.close()
 
     def update_item(self, inventory_id, quantity, expiry_date):
         cursor = self.connection.cursor()

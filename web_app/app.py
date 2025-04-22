@@ -152,6 +152,26 @@ def new_item():
         return jsonify({"success": True, "item_id": item_id, "message": "Item added to inventory and personal items."})
     else:
         return jsonify(response)
+    
+@app.route("/inventory/update_items_quantity", methods=["POST"])
+def update_quantities():
+    try:  
+        items_used_string = request.form.get("items_used")
+
+        # list variables must be stringified client side so lists transfer correctly
+        # they are so decoded to get original data type back
+        items_used = json.loads(items_used_string)
+
+        if not (items_used):
+            return jsonify({"success": False, "error": "no items added."})
+
+        # performs updates function (set to amount or removes if quantity <= 0)
+        inventory.update_quantities(items_used)
+
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
 
 
 # ### BARCODE SCANNING ROUTES ###

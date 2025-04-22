@@ -452,18 +452,20 @@ async function open_ingredients_overview(recipe) {
 async function add_inventory_ingredient(i, additional = false) {
     let inventory_item = await create_item_tile(window.inventory_ingredients[i]);
     inventory_item.className = "inventory-match";
+
+    // creates input to enter quantity used of each item
     const invQty = window.inventory_ingredients[i][4];
     const usedQty = document.createElement("input");
     usedQty.type = "number";
     usedQty.min = 1;
     usedQty.max = invQty;
+    usedQty.id = `input_for_i=${i}`;
     if (!additional) {
         usedQty.value = Math.min(invQty, parseFloat(window.recipe_ingredients[i][1])); // default to ingredient quantity
     } else {
         usedQty.value = invQty;
     }
     usedQty.className = "used-quantity-input";
-    usedQty.title = "Quantity to use from inventory";
 
     inventory_item.appendChild(usedQty);
 
@@ -593,6 +595,53 @@ function close_inventory_selector() {
 function close_ingredient_overview() {
     document.getElementById("ingredient_overview_popup").style.display = "none";
 }
+
+// UPDATING INVENTORY (MAKING RECIPE) 
+
+async function update_inventory_quantites() {
+    const items_used = [];
+
+    // gets the inventory item and quantity used for each ingredient
+
+    // for each ingredient stored (added to list of used ingredients)
+    for (let i = 0; i < window.inventory_ingredients; i++) {
+        item = window.inventory_ingredients[i];
+        // if the item wasnt removed
+        if (item) {
+            // gets the inv_id
+            const inv_id = item[0];
+            const quantity = item[4];
+            // find the input of the amount used where the index is used in the id
+            const amount_used = parseInt(document.getElementById(`input_for_i=${i}`).value);
+            // set quantity (the amount the quantity will end up at in the db)
+            const set_quantity = quantity - amount_used;
+            // adds inv_id and quantity together for processing server side
+            items_used.push([inv_id, set_quantity]);
+        }
+    }
+
+    const formData = new FormData();
+    // formdata converts to list to string so stringify so it can be loaded server side
+    formData.append("item_used", JSON.stringify(items_used));
+
+    const response = await fetch("/recipes/update", {
+        method: "POST",
+        body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+        alert("Recipe updated successfully.");
+        close_recipe_popup();
+        get_recipes(); // Refresh list
+    } else {
+        alert("Error saving recipe: " + result.error);
+    }
+
+
+}
+
 
 // MAIN RECIPE LIST FUNCTIONS
 
@@ -794,3 +843,4 @@ document.getElementById('filter-toggle').addEventListener('click', () => {
       toggleBtn.textContent = 'Show Filters';
     }
 })
+

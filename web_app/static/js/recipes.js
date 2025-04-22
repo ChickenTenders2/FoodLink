@@ -539,6 +539,26 @@ async function inventory_selector(i, tile) {
             // for filtering
             item_tile.dataset.name = item[2];
             item_tile.onclick = async () => {
+                const inv_id = item[0];
+                const expiry = new Date(item[6]);
+                const now = new Date();
+
+                // makes sure item is not expired
+                if (expiry < now) {
+                    alert("This item is expired and cannot be added.");
+                    return;
+                }
+
+                // makes sure item is not already added
+                const is_duplicate = window.inventory_ingredients.some(
+                    (existing) => existing[0] === inv_id
+                );
+
+                if (is_duplicate) {
+                    alert("This inventory item has already been added.");
+                    return;
+                }
+
                 if (i == null) {
                     // appends additional item
                     window.inventory_ingredients.push(item);

@@ -31,13 +31,28 @@
         </ul>
     </div>
 
-    <div class="widget">
-    <!-- Embed the ThingsBoard Dashboard -->
-    <iframe src="{{ temp_url }}" width="225px" height="180px" frameborder="0" ></iframe>
-    <iframe src="{{ humid_url }}" width="225px" height="180px" frameborder="0" ></iframe>
-    </div>
+    <div class="dashboard-grid">
+        <!-- Column 1 -->
+        <div class="column1">
+          <div class="tile large-tile"><h2>Inventory</h2></div>        
+        </div>
+      
+        <!-- Column 2 -->
+        <div class="column2">
+          <div class="tile-pair">
+            <!-- Embed the ThingsBoard Dashboard -->
+            <div class="tile">
+                <iframe src="{{ temp_url }}" width="225px" height="180px" frameborder="0" ></iframe>
+            </div>
+            <div class="tile">
+                <iframe src="{{ humid_url }}" width="225px" height="180px" frameborder="0" ></iframe>
+            </div>
+          </div>
+          <div class="tile row-2"><h2>Shopping List</h2></div>
+          <div class="tile row-2"><h2>Recipes</h2></div>
+        </div>
+      </div>      
 
-    <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
-
+      <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
 </body>
 </html>

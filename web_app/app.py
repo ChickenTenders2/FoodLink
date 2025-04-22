@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, url_for, Response
+from flask import Flask, jsonify, render_template, request, url_for, Response, redirect
 from inventory import Inventory
 from scanner import Scanner
 from item import Item
@@ -8,6 +8,10 @@ from shoppingList import shoppingList
 from os.path import isfile as file_exists
 from notification import notification
 from thingsboard import thingsboard
+from tool import Tool
+from recipe import Recipe
+from recipe_object import recipe_object
+import json
 
 app = Flask(__name__, template_folder = "templates")
 
@@ -183,46 +187,66 @@ def new_item():
         return jsonify({"success": True, "item_id": item_id, "message": "Item added to inventory and personal items."})
     else:
         return jsonify(response)
+    
+@app.route("/inventory/update_items_quantity", methods=["POST"])
+def update_quantities():
+    try:  
+        items_used_string = request.form.get("items_used")
+
+        # list variables must be stringified client side so lists transfer correctly
+        # they are so decoded to get original data type back
+        items_used = json.loads(items_used_string)
+
+        if not (items_used):
+            return jsonify({"success": False, "error": "no items added."})
+
+        # performs updates function (set to amount or removes if quantity <= 0)
+        inventory.update_quantities(items_used)
+
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
 
 
-### BARCODE SCANNING ROUTES ###
 
-# Opens camera module and returns feed
-@app.route('/scanner/get')
-def get_scanner():
-    return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
+# ### BARCODE SCANNING ROUTES ###
 
-# Closes camera module
-@app.route('/scanner/close')
-def close_scanner():
-    scanner.release_capture()
-    return jsonify({"success":True})
+# # Opens camera module and returns feed
+# @app.route('/scanner/get')
+# def get_scanner():
+#     return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-# Returns the barcode number if one is found
-@app.route('/scanner/get_object')
-def get_object():
-    object = scanner.get_scanned()
-    if (object):
-        scanner.clear_scanned()
-        return jsonify({"success": True, "object": object})
-    else:
-        return jsonify({"success": False})
+# # Closes camera module
+# @app.route('/scanner/close')
+# def close_scanner():
+#     scanner.release_capture()
+#     return jsonify({"success":True})
 
-@app.route("/unpause_scanner")
-def unpause_scanner():
-    scanner.unpause_scanner()
-    return jsonify({"success":True})
+# # Returns the barcode number if one is found
+# @app.route('/scanner/get_object')
+# def get_object():
+#     object = scanner.get_scanned()
+#     if (object):
+#         scanner.clear_scanned()
+#         return jsonify({"success": True, "object": object})
+#     else:
+#         return jsonify({"success": False})
 
-@app.route("/scanner/toggle_mode/<value>")
-def toggle_scan_mode(value):
-    if value == "true":
-        scanner.toggle_mode(True)
-        return jsonify({"success":True})
-    elif value =="false":
-        scanner.toggle_mode(False)
-        return jsonify({"success":True})
-    else:
-        return jsonify({"success":False})
+# @app.route("/unpause_scanner")
+# def unpause_scanner():
+#     scanner.unpause_scanner()
+#     return jsonify({"success":True})
+
+# @app.route("/scanner/toggle_mode/<value>")
+# def toggle_scan_mode(value):
+#     if value == "true":
+#         scanner.toggle_mode(True)
+#         return jsonify({"success":True})
+#     elif value =="false":
+#         scanner.toggle_mode(False)
+#         return jsonify({"success":True})
+#     else:
+#         return jsonify({"success":False})
 
 
 ### ITEM ROUTES ###
@@ -465,13 +489,196 @@ def update_shopping_item():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
+@app.route("/shopping_list/add_multi", methods=["POST"])
+def add_shopping_items():
+    try:
+        items_string = request.form.get("items")
+        items = json.loads(items_string)
+        if not (items):
+            return jsonify({"success": False, "error": "No items selected."})
+        
+        shop.add_items(user_id, items)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+
+### UTENSILS AND APPLIANCE SELECTION ROUTES
+    
+@app.route('/tools/select')
+def select_tools():
+    utensils = tool.get_tools("utensil")
+    appliances = tool.get_tools("appliance")
+    tool_ids = tool.get_user_tool_ids(user_id)
+    return render_template('select_utensils.html', utensils=utensils, appliances=appliances, selected_ids=tool_ids)
+
+@app.route('/tools/save', methods=['POST'])
+def save_tools():
+    try:
+        selected_tools = request.form.getlist('tool')
+        tool.save_user_tools(user_id, selected_tools)
+        return jsonify({"success": True, "message": "Tools saved successfully!"})
+    except Exception as e:
+        return jsonify({"success": False, "message": "Failed to save tools."})
+
+@app.route("/tools/get")
+def get_tools():
+    tools = tool.get_tools()
+    print(tools)
+    return jsonify({"success": True, "tools": tools})
+
+@app.route("/recipes")
+def recipe_page():
+    return render_template("recipes.html")
+
+@app.route("/recipes/get", methods=["POST"])
+def get_recipes():
+    try:
+        ###### CURRENTLY GET TOOL IDS EACH TIME UPDATE WHEN SESSION MADE TO CHANGEO NLY AFTER TOOLS/SAVE
+        user_tool_ids = tool.get_user_tool_ids(user_id)
+
+
+        search_term = request.form.get("search_term")
+        page = int(request.form.get("page"))
+
+        print(search_term)
+        personal_only = request.form.get("personal_only") == "on"
+        allow_missing_items = request.form.get("missing_items") == "on"
+        allow_insufficient_items = request.form.get("insufficient_items") == "on"
+        allow_missing_tools = request.form.get("missing_tools") == "on"
+        recipes = recipe_sql.get_recipes(search_term, page, user_id, personal_only)
+
+        filtered = []
+        # for each recipe record returned from database
+        for record in recipes:
+            recipe = recipe_object(record)
+            recipe.calculate_missing_tools(user_tool_ids)
+            recipe.find_items_in_inventory(user_id)
+
+            # applies filters
+            # if the filter referenced is true:
+            # stops recipes with missing ingredients
+            if not allow_missing_items and recipe.missing_ingredients:
+                continue
+            # stops recipes with insufficient ingredient quantities
+            if not allow_insufficient_items and recipe.insufficient_ingredients:
+                continue
+            # stops recipes with missing tools
+            if not allow_missing_tools and recipe.missing_tool_ids:
+                continue
+
+            filtered.append(recipe.to_dict())
+
+        return jsonify({"success": True, "recipes": filtered})
+    except Exception as e:
+        print(e)
+        return jsonify({"success": False, "error": str(e)})
+    
+@app.route("/recipes/get/<recipe_id>")
+def get_recipe(recipe_id):
+    try:
+        record = recipe_sql.get_recipe(recipe_id)
+        recipe = recipe_object(record)
+        user_tool_ids = tool.get_user_tool_ids(user_id)
+        recipe.calculate_missing_tools(user_tool_ids)
+        recipe.find_items_in_inventory(user_id)
+        recipe_dict = recipe.to_dict()
+        return jsonify({"success": True, "recipe": recipe_dict})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route("/recipes/add", methods=["POST"])
+def add_recipe():
+    try:
+        name = request.form.get("name")
+        servings = request.form.get("servings")
+        prep_time = request.form.get("prep_time")
+        cook_time = request.form.get("cook_time")
+        instructions = request.form.get("instructions")
+        
+        ingredients_string = request.form.get("ingredients")
+        tool_ids_string = request.form.get("tool_ids")
+
+        # list variables must be stringified client side so lists transfer correctly
+        # they are so decoded to get original data type back
+        ingredients = json.loads(ingredients_string)
+        tool_ids = json.loads(tool_ids_string)
+
+        if not (ingredients or tool_ids):
+            return jsonify({"success": False, "error": "ingredients or tool were empty."})
+        
+        print(ingredients)
+        print(tool_ids)
+
+        # performs update functions
+        #### WHEN REMOVING OOP MAKE SURE TO USE SINGLE CURSOR AND COMMIT FOR THESE FUNCTIONS
+        recipe_id = recipe_sql.add_recipe(name, servings, prep_time, cook_time, instructions, user_id)
+        print("added recipe")
+        recipe_sql.edit_recipe_items(recipe_id, ingredients)
+        print("updated recipe_items")
+        recipe_sql.edit_recipe_tools(recipe_id, tool_ids)
+        print("updated recipe_tools")
+
+        return jsonify({"success": True, "recipe_id": recipe_id})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route("/recipes/update", methods=["POST"])
+def update_recipe():
+    try:
+        recipe_id = request.form.get("recipe_id")
+        name = request.form.get("name")
+        servings = request.form.get("servings")
+        prep_time = request.form.get("prep_time")
+        cook_time = request.form.get("cook_time")
+        instructions = request.form.get("instructions")
+        
+        ingredients_string = request.form.get("ingredients")
+        tool_ids_string = request.form.get("tool_ids")
+
+        
+        # list variables must be stringified client side so lists transfer correctly
+        # they are so decoded to get original data type back
+        ingredients = json.loads(ingredients_string)
+        tool_ids = json.loads(tool_ids_string)
+
+        if not (ingredients or tool_ids):
+            return jsonify({"success": False, "error": "ingredients or tool were empty."})
+        
+        print(ingredients)
+        print(tool_ids)
+
+        # performs update functions
+        #### WHEN REMOVING OOP MAKE SURE TO USE SINGLE CURSOR AND COMMIT FOR THESE FUNCTIONS
+        recipe_sql.edit_recipe(recipe_id, name, servings, prep_time, cook_time, instructions)
+        print("updated recipe")
+        recipe_sql.edit_recipe_items(recipe_id, ingredients)
+        print("updated recipe_items")
+        recipe_sql.edit_recipe_tools(recipe_id, tool_ids)
+        print("updated recipe_tools")
+
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+@app.route("/recipes/delete/<recipe_id>")
+def remove_recipe(recipe_id):
+    try:
+        ### MERGE FUNCTIONS WHEM REMOVING OOP
+        recipe_sql.remove_recipe(recipe_id)
+        recipe_sql.remove_recipe_items(recipe_id)
+        recipe_sql.remove_recipe_tools(recipe_id)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
 if __name__ == '__main__':
     # Classes for handling sql expressions
     inventory = Inventory()
     item = Item()
     report = Report()
     # Class for handling barcode scanning
-    scanner = Scanner()
+    #scanner = Scanner()
 
     shop = shoppingList()
 
@@ -482,6 +689,10 @@ if __name__ == '__main__':
 
     # thingsboard class instance
     tb = thingsboard()
+
+    tool = Tool()
+
+    recipe_sql = Recipe()
 
     # Runs the app
     app.run(debug=True)

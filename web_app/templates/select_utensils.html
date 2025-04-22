@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Tools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="tool-selection container">
+        <h1>Select Your Tools</h1>
+        <!-- multi stage form for better design-->
+        <form id="tool-form" action="{{ url_for('save_tools') }}" method="POST">
+            <div id="utensils" class="tool-grid">
+                <h2>Utensils</h2>
+                <div class="tool-options-grid">
+                    <!-- generates a checkbox for each utensil in db-->
+                    {% for utensil in utensils %}
+                        <div class="tool-option">
+                            <!-- if statement checks if user has selected the option before and pre selects it if so-->
+                            <input type="checkbox" id="utensil-{{ utensil[0] }}" name="tool" value="{{ utensil[0] }}" {% if utensil[0] in selected_ids %}checked{% endif %}>
+                            <label for="utensil-{{ utensil[0] }}">{{ utensil[1] }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- generates a checkbox for each appliance in db-->
+            <div id="appliances" class="tool-grid" style="display: none;">
+                <h2>Appliances</h2>
+                <div class="tool-options-grid">
+                    {% for appliance in appliances %}
+                        <div class="tool-option">
+                            <!-- if appliance has been selected before precheck box-->
+                            <input type="checkbox" id="appliance-{{ appliance[0] }}" name="tool" value="{{ appliance[0] }}" {% if appliance[0] in selected_ids %}checked{% endif %}>
+                            <label for="appliance-{{ appliance[0] }}">{{ appliance[1] }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="button-container">
+                <button type="button" id="nextButton" onclick="showAppliances()">Next</button>
+                <!-- MOVE STYLING TO EXTERNAL FILE WHEN MERGED-->
+                <button type="button" id="backButton" onclick="showUtensils()" style="display: none;">Back</button>
+                <button type="submit" id="saveButton" style="display: none;">Save Selection</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // hides the utensils checkboxes and shows appliances
+        function showAppliances() {
+            document.getElementById("utensils").style.display = "none";
+            document.getElementById("appliances").style.display = "block";
+            document.getElementById("nextButton").style.display = "none";
+            document.getElementById("backButton").style.display = "inline";
+            document.getElementById("saveButton").style.display = "inline";
+        }
+        // hides the appliances checkboxes and shows utensils
+        function showUtensils() {
+            document.getElementById("appliances").style.display = "none";
+            document.getElementById("utensils").style.display = "block";
+            document.getElementById("nextButton").style.display = "inline";
+            document.getElementById("backButton").style.display = "none";
+            document.getElementById("saveButton").style.display = "none";
+        }
+        document.getElementById("tool-form").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            const response = await fetch("/tools/save", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                showToast(result.message, true);
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 2000); // delay before redirect
+            } else {
+                showToast(result.message, false);
+            }
+        });
+
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.style.backgroundColor = isSuccess ? "#4caf50" : "#f44336";
+            toast.className = "toast show";
+            setTimeout(() => {
+                toast.className = toast.className.replace("show", "");
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

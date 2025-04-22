@@ -25,6 +25,15 @@ class Recipe(database):
         cursor.close()
         return recipes
     
+    def get_recipe(self, recipe_id):
+        cursor = self.connection.cursor()
+        query = "SELECT id, name, servings, prep_time, cook_time, instructions, user_id FROM recipe WHERE id = %s"
+        data = (recipe_id,)
+        cursor.execute(query, data)
+        recipe = cursor.fetchone()
+        cursor.close()
+        return recipe
+    
     def remove_recipe(self, recipe_id):
         cursor = self.connection.cursor()
         query = "DELETE FROM recipe WHERE id = %s;"

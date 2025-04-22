@@ -75,7 +75,7 @@ function open_create_recipe_popup(recipe) {
             "missing_tool_ids": [],
             "ingredients": []
         }
-    // if from clone hide button
+    // if from clone, hide clone button button
     } else {
         document.getElementById("clone_recipe").style.display = "none";
     }
@@ -735,7 +735,7 @@ function display_recipe_results(recipes) {
 }
 
 
-// STORING PERSONAL RECIPE FUNCTIONS
+// RECIPE POST AND FETCH FUNCTIONS
 
 // gets all data needed to update/add recipe
 function get_recipe_form() {
@@ -786,19 +786,32 @@ function get_tool_ids_from_list() {
     return tool_ids;
 }
 
-async function save_full_recipe(recipe_id) {
-    const name = document.getElementById("recipe_popup_title").value.trim();
-    const instructions = document.getElementById("recipe_popup_instructions").innerText.trim();
-    const servings = document.getElementById("recipe_popup_servings").value;
-    const prep_time = document.getElementById("recipe_popup_prep").value;
-    const cook_time = document.getElementById("recipe_popup_cook").value;
+async function add_recipe() {
+    let formData = get_recipe_form();
 
-    // gets values from the list elements
-    const ingredients = get_ingredients_from_list();
-    const tool_ids = get_tool_ids_from_list();
+    const response = await fetch("/recipes/add", {
+        method: "POST",
+        body: formData
+    });
+    const result = await response.json();
 
-    const formData = new FormData();
-    formData.append("name", name);
+    if (result.success) {
+        alert("Recipe added successfully.");
+        // dynamically gets the recipe and displays it in default recipe popup window
+        const new_recipe = await fetch_recipe_by_id(result.recipe_id);
+        toggle_edit_features(false);
+        if (new_recipe) {
+            open_recipe_popup(new_recipe);
+        } else {
+            close_recipe_popup();
+        }
+    } else {
+        alert("Error adding recipe: " + result.error);
+    }
+}
+
+async function update_recipe(recipe_id) {
+    let formData = get_recipe_form();
     formData.append("recipe_id", recipe_id);
 
     const response = await fetch("/recipes/update", {
@@ -810,7 +823,13 @@ async function save_full_recipe(recipe_id) {
 
     if (result.success) {
         alert("Recipe updated successfully.");
-        close_recipe_popup();
+        const updated = await fetch_recipe_by_id(recipe_id);
+        if (updated) {
+            close_recipe_popup();
+            open_recipe_popup(updated); // dynamically opens updated version
+        } else {
+            close_recipe_popup();
+        }
         get_recipes(); // Refresh list
     } else {
         alert("Error saving recipe: " + result.error);
@@ -830,6 +849,18 @@ async function delete_recipe(recipe_id) {
         get_recipes();
     } else {
         alert("Error deleting recipe:" + result.error);
+    }
+}
+
+async function fetch_recipe_by_id(recipe_id) {
+    const response = await fetch(`/recipes/get/${recipe_id}`);
+    const result = await response.json();
+
+    if (result.success) {
+        return result.recipe;
+    } else {
+        alert("Failed to fetch updated recipe: " + result.error);
+        return null;
     }
 }
 

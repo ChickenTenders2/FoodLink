@@ -528,6 +528,19 @@ def get_recipes():
         print(e)
         return jsonify({"success": False, "error": str(e)})
     
+@app.route("/recipes/get/<recipe_id>")
+def get_recipe(recipe_id):
+    try:
+        record = recipe_sql.get_recipe(recipe_id)
+        recipe = recipe_object(record)
+        user_tool_ids = tool.get_user_tool_ids(user_id)
+        recipe.calculate_missing_tools(user_tool_ids)
+        recipe.find_items_in_inventory(user_id)
+        recipe_dict = recipe.to_dict()
+        return jsonify({"success": True, "recipe": recipe_dict})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
 @app.route("/recipes/add", methods=["POST"])
 def add_recipe():
     try:
@@ -560,7 +573,7 @@ def add_recipe():
         recipe_sql.edit_recipe_tools(recipe_id, tool_ids)
         print("updated recipe_tools")
 
-        return jsonify({"success": True})
+        return jsonify({"success": True, "recipe_id": recipe_id})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 

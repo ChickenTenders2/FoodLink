@@ -15,11 +15,9 @@ class recipe_object(Recipe):
         self.missing_tool_ids = []
         self.ingredients = self.get_recipe_items(self.id)
         # ingredients that are in the users inventory
-        self.found_ingredients = []
-        # ingredients that have insufficient quantity but are in users inventory
-        self.insufficient_ingredients = []
-        # ingredients that are not in the users inventory
-        self.missing_ingredients = []
+        self.inventory_ingredients = []
+        # ingredients that have insufficient quantity or are missing from inventory
+        self.shopping_list = []
 
     # sets the list of the ids for any tools required for a recipe that a user doesn't own
     # only passes tool_ids to front end as sets are used to calculate, which has a faster time complexity
@@ -33,17 +31,18 @@ class recipe_object(Recipe):
             quantity_threshold = ingredient[1] * 0.95
             inv_item = self.strict_search(user_id, ingredient_name, quantity_threshold)
             if not inv_item:
-                self.missing_ingredients.append(ingredient)
+                self.shopping_list.append(ingredient)
                 # adds attribute to each ingredient so it can be highlighted
                 # a different colour based on how good the match to the inventory was
                 ingredient.append("missing")
             # if quantity bigger than threshold
-            elif inv_item[3] >= quantity_threshold:
-                self.found_ingredients.append(inv_item)
+            elif inv_item[4] >= quantity_threshold:
+                self.inventory_ingredients.append(inv_item)
                 ingredient.append("matched")
             else:
                 # not high enough quantity to use in recipe
-                self.insufficient_ingredients.append(inv_item)
+                self.inventory_ingredients.append(inv_item)
+                self.shopping_list.append(ingredient)
                 ingredient.append("insufficient")
 
     def to_dict(self):
@@ -58,7 +57,6 @@ class recipe_object(Recipe):
             "tool_ids": self.tool_ids,
             "missing_tool_ids": self.missing_tool_ids,
             "ingredients": self.ingredients,
-            "matched_ingredients": self.found_ingredients,
-            "understock_ingredients": self.insufficient_ingredients,
-            "missing_ingredients": self.missing_ingredients
+            "inventory_ingredients": self.inventory_ingredients,
+            "shopping_list": self.shopping_list
         }

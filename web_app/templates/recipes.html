@@ -34,7 +34,7 @@
             </div>
             <input type="hidden" id="page_number" name="page" value="1">
             <div class="button-group">
-                <button type="button" id="filter-toggle" onclick="toggleFilters()">Show Filters</button>
+                <button type="button" id="filter-toggle" onclick="">Show Filters</button>
                 <button type="submit">Search</button>
             </div>
         </form>
@@ -51,7 +51,7 @@
     </div>
 
     <div id="recipe_popup" class="popup">
-        <button onclick="close_recipe_popup()">X</button>
+        <button id="close_recipe_popup" onclick="close_recipe_popup()">X</button>
         <h2>
             <input id="recipe_popup_title" class="recipe-title-input" placeholder="Enter name..." readonly>
         </h2>
@@ -82,9 +82,7 @@
         <button class="hidden-button" id="edit_tools">Edit Tools</button>
         <button class="hidden-button" id="delete_recipe">Delete Recipe</button>
         <button class="hidden-button" id="save_recipe">Save Recipe</button>
-
-
-
+        <button id="create_recipe">Create Recipe</button>
     </div>
 
     <div id="edit_ingredients_popup" class="popup">
@@ -102,6 +100,12 @@
         <div id="tools_list_container"></div>
         <div id="tool_add_controls"></div>
         <button id="save_tools" onclick="update_tools()">Save Tools</button>
+    </div>
+
+    <div id="ingredient_overview_popup" class="popup">
+        <h3>Ingredient Overview</h3>
+        <button onclick="close_ingredient_overview()">X</button>
+        <div id="ingredient_scroll_container"></div>
     </div>
 
     <script src="{{ url_for('static', filename='js/recipes.js') }}"></script> 

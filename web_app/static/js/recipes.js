@@ -3,6 +3,9 @@
 function open_recipe_popup(recipe) {
     display_information(recipe);
 
+    // sets recipe to be used if user creates recipe
+    document.getElementById("create_recipe").onclick = () => open_ingredients_overview(recipe);
+
     // allow editing options if recipe is a users
     if (recipe.personal) {
         const edit_button = document.getElementById("toggle_edit");
@@ -404,12 +407,50 @@ async function get_tools() {
     } 
 }
 
+// INGREDIENT OVERVIEW FUNCTIONS
+
+function open_ingredients_overview(recipe) {
+    const popup = document.getElementById("ingredient_overview_popup");
+    const container = document.getElementById("ingredient_scroll_container");
+    container.innerHTML = "";
+
+    let i = 0;
+
+    for (let ingredient of recipe.ingredients) {
+        const [name, quantity, unit, status] = ingredient;
+
+        const block = document.createElement("div");
+        block.className = "ingredient-block";
+
+        const ingredient_info = document.createElement("div");
+        ingredient_info.innerHTML = `${name} - ${quantity} ${unit}`;
+        block.appendChild(ingredient_info);
+
+        console.log(status);
+        if (!(status == "missing")) {
+            console.log(recipe.inventory_ingredient[i])
+            i++;
+        }
+
+        container.appendChild(block);
+    }
+
+    popup.style.display = "block";
+}
+
+function inv_ingredient_block(item) {
+}
+
+function close_ingredient_overview() {
+    document.getElementById("ingredient_overview_popup").style.display = "none";
+}
+
 // MAIN RECIPE LIST FUNCTIONS
 
 function change_page(amount) {
     const page = parseInt(document.getElementById("page_number").value);
     const new_page = page + amount;
-
+    
     // page cant go below 1
     if (new_page < 1) {
         return;
@@ -568,6 +609,8 @@ async function delete_recipe(recipe_id) {
     }
 }
 
+// SEARCH FORM HANDLING
+
 // preserves checked boxes on page reload
 document.addEventListener("DOMContentLoaded", () => {
     const checkboxes = ["personal_only", "missing_items", "insufficient_items", "missing_tools"];
@@ -588,3 +631,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+// toggles the visibility of the recipe search filters via the Filter button
+document.getElementById('filter-toggle').addEventListener('click', () => {
+    const filters = document.getElementById('filter-options');
+    const toggleBtn = document.getElementById('filter-toggle');
+
+    if (filters.style.display == 'none') {
+      filters.style.display = 'block';
+      toggleBtn.textContent = 'Hide Filters';
+    } else {
+      filters.style.display = 'none';
+      toggleBtn.textContent = 'Show Filters';
+    }
+})

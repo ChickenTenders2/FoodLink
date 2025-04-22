@@ -151,7 +151,7 @@ class Recipe(database):
         #   then prioritising soon to expire items, which makes sure they get used first, reducing food waste
         #   then prioritising smaller quantities, to make sure an item with less quantity gets used up first
         query = """
-            SELECT inv.id, i.name, i.brand, quantity, i.unit, expiry_date
+            SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date
             FROM FoodLink.inventory inv
             JOIN FoodLink.item i ON inv.item_id = i.id
             WHERE inv.user_id = %s 

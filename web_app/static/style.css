@@ -824,10 +824,6 @@ input[type="submit"]:hover {
     display: none; 
 }
 
-#id_toggle {
-
-}
-
 .popup.recipe_popup {
     max-width: 600px;
     background-color: #fff;
@@ -955,3 +951,11 @@ input[type="submit"]:hover {
 .recipe-meta { display: flex; gap: 20px; margin-bottom: 10px; align-items: center; font-size: 14px; }
 
 .recipe-meta .icon { margin-right: 4px; }
+
+
+
+/* Scrollable container for ingredients */
+#ingredient_scroll_container {
+    max-height: 400px;
+    overflow-y: auto;
+}

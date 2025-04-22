@@ -52,22 +52,32 @@ function open_recipe_popup(recipe) {
             // sets save recipe button to update recipe with id
             document.getElementById("save_recipe").onclick = () => update_recipe(recipe.id);
         };
+    // allow for cloning
+    } else {
+        const clone_recipe = document.getElementById("clone_recipe");
+        clone_recipe.style.display = "inline-block";
+        clone_recipe.onclick = () => open_create_recipe_popup(recipe);
     }
     
     document.getElementById("recipe_popup").style.display = "block";
 }
 
-function open_create_recipe_popup() {
+function open_create_recipe_popup(recipe) {
     // creates empty recipe and displays it
-    const recipe = {
-        "name": "",
-        "instructions": "",
-        "servings": "",
-        "prep_time": "",
-        "cook_time": "",
-        "tool_ids": [],
-        "missing_tool_ids": [],
-        "ingredients": []
+    if (!recipe) {
+        recipe = {
+            "name": "",
+            "instructions": "",
+            "servings": "",
+            "prep_time": "",
+            "cook_time": "",
+            "tool_ids": [],
+            "missing_tool_ids": [],
+            "ingredients": []
+        }
+    // if from clone hide button
+    } else {
+        document.getElementById("clone_recipe").style.display = "none";
     }
     display_information(recipe);
     // shows edit buttons
@@ -97,6 +107,7 @@ function toggle_edit_features(show) {
     const cook_time = document.getElementById("recipe_popup_cook");
     // create recipe should be hidden when editting
     const create_recipe = document.getElementById("create_recipe");
+    
     if (show) {
         edit_ingredients.style.display = "inline-block";
         edit_tools.style.display = "inline-block";
@@ -157,6 +168,8 @@ function close_recipe_popup() {
     }
     // makes sure edit button is hidden aswell
     edit_button.style.display = "none";
+    // hides clone button
+    document.getElementById("clone_recipe").style.display = "none";
     close_ingredient_overview();
 
     document.getElementById("recipe_popup").style.display = "none";

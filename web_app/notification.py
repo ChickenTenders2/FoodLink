@@ -37,39 +37,45 @@ class notification(database):
         max_humidity = float(max_humidity)
         
         if alerts_enabled:
+            # compare temperature against temperature thresholds and send notification to user if it exceeds
             if temperature is not None:
                 temperature = round(temperature, 2)
                 notif_type = 'temperature'
                 if temperature < min_temperature:
                     message = f"Low temperature detected: {temperature}°C"
-                    # is_exists = self.notification_exists(user_id, notif_type, message)
                     if not self.cooldown_check(user_id, notif_type):
                         self.insert_notification(user_id, notif_type, message, 'warning')
+                        self.send_email(
+                            user_id=user_id,
+                            subject_type=notif_type,
+                            message_text=f"Warning: Your fridge temperature is BELOW the maximum threshold {min_temperature}°C. TEMPERATURE DETECTED: {temperature}°C"
+                        )
                 elif temperature > max_temperature:
                     message = f"High temperature detected: {temperature}°C"
-                    # is_exists = self.notification_exists(user_id, notif_type, message)
                     if self.cooldown_check(user_id, notif_type) == False:
                         self.insert_notification(user_id, notif_type, message, 'critical')
-                        self.send_notification_email(
-                            to_email="mariam12769309@gmail.com",
+                        self.send_email(
+                            user_id=user_id,
                             subject_type=notif_type,
-                            message_text=f"Warning: Your fridge temperature is above the maximum threshold {temperature}."
+                            message_text=f"Warning: Your fridge temperature is above the maximum threshold {max_temperature}°C. TEMPERATURE DETECTED: {temperature}°C"
                         )
-
-                
+            # compare humdity against humidity threshold and send notification to user if it exceeds threshold  
             if humidity is not None:
                 humidity = round(humidity, 2)
                 if humidity > max_humidity:
                     notif_type = 'humidity'
                     message = f"High humidity detected: {humidity}%"
-                    # is_exists = self.notification_exists(user_id, notif_type, message)
                     if not self.cooldown_check(user_id, notif_type):
                         self.insert_notification(user_id, notif_type, message, 'warning')
+                        self.send_email(
+                            user_id=user_id,
+                            subject_type=notif_type,
+                            message_text=f"Warning: Your fridge humidity is above the maximum threshold {max_humidity}%. HUMIDITY DETECTED: {humidity}%"
+                        )
         cursor.close()
 
     def expiry_notification(self, user_id):
         cursor = self.connection.cursor()
-        # query = "SELECT expiry_date FROM inventory WHERE user_id = %s"
         query = "SELECT inv.id, i.id, i.name, expiry_date FROM FoodLink.inventory inv JOIN FoodLink.item i ON (inv.item_id = i.id) WHERE inv.user_id = %s;"
         data = (user_id,)
         cursor.execute(query, data)
@@ -89,6 +95,7 @@ class notification(database):
             
             daysLeft = (expiry_date - today).days
 
+            # handling alert severity based on days left to expiration
             if daysLeft == 2:
                 message = f"{item_name} will expire in 2 days."
                 severity = 'info'
@@ -105,6 +112,7 @@ class notification(database):
             #     continue
             
             is_exists = self.notification_exists(user_id, notif_type, message)
+            # the notification will be sent only if it doesn;t already exist
             if is_exists == 0:
                 self.insert_notification(user_id, notif_type, message, severity)
         cursor.close()
@@ -112,6 +120,7 @@ class notification(database):
     def support_notification(self, user_id, message):
         self.insert_notification(user_id, 'support', message, 'info')
 
+    # checks for duplicate notification
     def notification_exists(self, user_id, notif_type, message):
         cursor = self.connection.cursor()
         query = "SELECT COUNT(*) FROM notification WHERE user_id = %s AND type = %s AND message = %s;"
@@ -121,6 +130,7 @@ class notification(database):
         cursor.close()
         return exact_exists
 
+    # add notifications into the notification table
     def insert_notification(self, user_id, notif_type, message, severity):
         cursor = self.connection.cursor()
         query = "INSERT INTO notification (user_id, type, message, date_created, is_read, severity) VALUES (%s, %s, %s, NOW(), 0, %s)"
@@ -129,6 +139,7 @@ class notification(database):
         self.connection.commit()
         cursor.close()
 
+    # chnages the is_read value from 0 to 1 when user reads the notification and clicks it to confirm read
     def mark_read(self, notif_id):
         cursor = self.connection.cursor()
         query = "UPDATE notification SET is_read = 1 WHERE id = %s"
@@ -174,7 +185,19 @@ class notification(database):
         return False
 
 
-    def send_email(self, to_email, subject_type, message_text):
+    def send_email(self, user_id, subject_type, message_text):
+        cursor = self.connection.cursor()
+        query = "SELECT email_notifications FROM FoodLink.settings WHERE user_id = %s;"
+        data = (user_id,)
+        cursor.execute(query, data)
+        email_enabled = cursor.fetchone()
+
+        email_query = "SELECT email FROM FoodLink.user WHERE id = %s;"
+        email_data = (user_id,)
+        cursor.execute(email_query, email_data)
+        recipient_email = cursor.fetchone()[0]
+        cursor.close()
+
         # Define subject labels and styles per type
         subjects = {
             "temperature": {
@@ -200,63 +223,64 @@ class notification(database):
         "color": "#90caf9"  # default blue
         })
 
-        # Set up the email
-        msg = MIMEMultipart("alternative")
-        msg['Subject'] = notif["title"]
-        msg['From'] = "foodlink2305@gmail.com"
-        msg['To'] = to_email
+        if email_enabled:
+            # Set up the email
+            msg = MIMEMultipart("alternative")
+            msg['Subject'] = notif["title"]
+            msg['From'] = "foodlink2305@gmail.com"
+            msg['To'] = recipient_email
 
-        html = f"""
-        <html>
-        <head>
-            <style>
-                .container {{
-                    font-family: Arial, sans-serif;
-                    background-color: #f9f9f9;
-                    padding: 20px;
-                }}
-                .card {{
-                    background-color: white;
-                    padding: 20px;
-                    border-radius: 10px;
-                    border-left: 6px solid {notif['color']};
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-                    max-width: 500px;
-                    margin: auto;
-                }}
-                .title {{
-                    font-size: 20px;
-                    font-weight: bold;
-                    color: {notif['color']};
-                    margin-bottom: 10px;
-                }}
-                .message {{
-                    font-size: 16px;
-                    color: #444;
-                }}
-                .footer {{
-                    margin-top: 20px;
-                    font-size: 12px;
-                    color: #999;
-                    text-align: center;
-                }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="card">
-                    <div class="title">{notif['title']}</div>
-                    <div class="message">{message_text}</div>
-                    <div class="footer">FoodLink • Smart Fridge Assistant</div>
+            html = f"""
+            <html>
+            <head>
+                <style>
+                    .container {{
+                        font-family: Arial, sans-serif;
+                        background-color: #f9f9f9;
+                        padding: 20px;
+                    }}
+                    .card {{
+                        background-color: white;
+                        padding: 20px;
+                        border-radius: 10px;
+                        border-left: 6px solid {notif['color']};
+                        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                        max-width: 500px;
+                        margin: auto;
+                    }}
+                    .title {{
+                        font-size: 20px;
+                        font-weight: bold;
+                        color: {notif['color']};
+                        margin-bottom: 10px;
+                    }}
+                    .message {{
+                        font-size: 16px;
+                        color: #444;
+                    }}
+                    .footer {{
+                        margin-top: 20px;
+                        font-size: 12px;
+                        color: #999;
+                        text-align: center;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="card">
+                        <div class="title">{notif['title']}</div>
+                        <div class="message">{message_text}</div>
+                        <div class="footer">FoodLink • Smart Fridge Assistant</div>
+                    </div>
                 </div>
-            </div>
-        </body>
-        </html>
-        """
+            </body>
+            </html>
+            """
 
-        msg.attach(MIMEText(html, "html"))
+            msg.attach(MIMEText(html, "html"))
 
-        # Connect to Gmail SMTP
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login("foodlink2305@gmail.com", "fimz txhp fhwk qwbk")
-            server.sendmail("foodlink2305@gmail.com", to_email, msg.as_string())
+            # Connect to Gmail SMTP
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+                server.login("foodlink2305@gmail.com", "fimz txhp fhwk qwbk")
+                server.sendmail("foodlink2305@gmail.com", recipient_email, msg.as_string())

@@ -112,7 +112,8 @@
         <h3>Select an Inventory Item</h3>
         <button onclick="close_inventory_selector()">X</button>
         <input type="text" id="inventory_search_input" placeholder="Search inventory..." oninput="filter_inventory_items()">
-        <div id="inventory_items_scroll" class="inventory-scroll-list"></div>
+        <div id="inventory_items_scroll" class="inventory-scroll-list">
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/recipes.js') }}"></script> 

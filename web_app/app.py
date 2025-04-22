@@ -82,9 +82,9 @@ def api_inventory(search_query = None):
     try:
         # searches for an item if query is provided otherwise gets all items
         if search_query:
-            items = inv.search_items(user_id, search_query)
+            items = inventory.search_items(user_id, search_query)
         else:
-            items = inv.get_items(user_id)
+            items = inventory.get_items(user_id)
 
         return jsonify({"success": True, 'items': items})
     except Exception as e:
@@ -123,7 +123,7 @@ def remove_item():
     try:
         inventory_id = request.form['inventory_id']
         print("Inventory ID received:", request.form['inventory_id'])
-        inv.remove_item(inventory_id)
+        inventory.remove_item(inventory_id)
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})

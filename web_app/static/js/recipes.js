@@ -409,7 +409,7 @@ async function get_tools() {
 
 // INGREDIENT OVERVIEW FUNCTIONS
 
-function open_ingredients_overview(recipe) {
+async function open_ingredients_overview(recipe) {
     const popup = document.getElementById("ingredient_overview_popup");
     const container = document.getElementById("ingredient_scroll_container");
     container.innerHTML = "";
@@ -425,10 +425,10 @@ function open_ingredients_overview(recipe) {
         block.appendChild(ingredient_info);
 
         if (!(status == "missing")) {
-            add_inventory_ingredient(recipe.inventory_ingredients, i);
+            const inventory_item = await add_inventory_ingredient(recipe.inventory_ingredients, i);
             block.appendChild(inventory_item);
         } else {
-            block.appendChild(createAddButton());
+            block.appendChild(createAddButton(recipe.inventory_ingredients, i));
         }
 
         container.appendChild(block);
@@ -437,44 +437,90 @@ function open_ingredients_overview(recipe) {
     popup.style.display = "block";
 }
 
-async function add_inventory_ingredient(ingredient_list, i) {
-    const [ , item_id, name, brand, quantity, unit, expiry_date] = ingredient_list[i];
-            // only items in inventory are stored in list, so only increments if not missing
-            const inventory_item = document.createElement("div");
-            inventory_item.className = "inventory-match";
-            const image_path = await get_image_path(item_id);
-            let brand_text = "";
-            if (brand) {
-                brand_text = `(${brand})`;
-            }
-            inventory_item.innerHTML = `
-            <img src="${image_path}" alt="${name}" class="item_img">
-            <div class="item_info">
-                ${name} ${brand_text} - ${quantity} ${unit}
-                <br>
-                (${expiry_date})
-            </div>`;
+async function add_inventory_ingredient(ingredients_list, i) {
+    let inventory_item = await create_item_tile(ingredients_list[i]);
+    inventory_item.className = "inventory-match";
 
-            const remove_button = document.createElement("button");
-            remove_button.innerText = "X";
-            remove_button.onclick = () => {
-                // clear item from list
-                ingredient_list[i] = [];
-                // remove from screen
-                inventory_item.remove();
-                block.appendChild(createAddButton());
-            };
-
-            inventory_item.appendChild(remove_button);
+    const remove_button = document.createElement("button");
+    remove_button.innerText = "X";
+    remove_button.onclick = () => {
+        // clear item from list
+        ingredients_list[i] = [];
+        // replaces the item with an add button
+        const add_button = createAddButton(ingredients_list, i);
+        inventory_item.parentElement.replaceChild(add_button, inventory_item);
+    };
+    inventory_item.appendChild(remove_button);
+    return inventory_item;
 }
 
-function createAddButton(ingredient_list, i) {
+async function create_item_tile(item) {
+    const [ , item_id, name, brand, quantity, unit, expiry_date] = item;
+    // only items in inventory are stored in list, so only increments if not missing
+    const item_tile = document.createElement("div");
+    const image_path = await get_image_path(item_id);
+    let brand_text = "";
+    if (brand) {
+        brand_text = `(${brand})`;
+    }
+    item_tile.innerHTML = `
+    <img src="${image_path}" alt="${name}" class="item_img">
+    <div class="item_info">
+        ${name} ${brand_text} - ${quantity} ${unit}
+        <br>
+        (${expiry_date})
+    </div>`;
+    return item_tile;
+}
+
+function createAddButton(ingredients_list, i) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "inventory-placeholder";
+
     const addBtn = document.createElement("button");
     addBtn.innerText = "+ Add from Inventory";
     addBtn.onclick = () => {
-        
+        inventory_selector(ingredients_list, i, wrapper);
     };
-    return addBtn;
+
+    wrapper.appendChild(addBtn);
+    return wrapper;
+}
+
+async function inventory_selector(ingredients_list, i, tile) {
+    //const searchParam = document.getElementById("selector-search-input").value || "";
+    const searchParam = "";
+
+    const response = await fetch("/inventory/get/" + searchParam);
+    const result = await response.json();
+
+    if (result.success) {
+        document.getElementById("select_inventory_popup").style.display = "block";
+        const container = document.getElementById("inventory_items_scroll");
+        container.innerHTML = "";
+        //console.log(result.items)
+        for (let item of result.items) {
+            const item_tile = await create_item_tile(item);
+            item_tile.className = "inventory-tile";
+            // for filtering
+            item_tile.dataset.name = item[2];
+            item_tile.onclick = async () => {
+                // updates list
+                ingredients_list[i] = item;
+                // replaces the add button with the item
+                const inventory_item = await add_inventory_ingredient(ingredients_list, i);
+                tile.parentElement.replaceChild(inventory_item, tile);
+                close_inventory_selector();
+            }
+            container.appendChild(item_tile);
+        }
+    } else {
+      alert(result.error);
+    }
+}
+
+function close_inventory_selector() {
+    document.getElementById("select_inventory_popup").style.display = "none";
 }
 
 function close_ingredient_overview() {

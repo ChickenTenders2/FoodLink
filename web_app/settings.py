@@ -22,9 +22,9 @@ class SettingsView(BaseSettingsView):
         devices = Device.query.filter_by(user_id=user_id).all()
         
         # Get or create notification preferences
-        notification_prefs = Notification.query.filter_by(user_id=user_id).first()
+        notification_prefs = Settings.query.filter_by(user_id=user_id).first()
         if not notification_prefs:
-            notification_prefs = Notification(user_id=user_id)
+            notification_prefs = Settings(user_id=user_id)
             db.session.add(notification_prefs)
             db.session.commit()
             
@@ -123,7 +123,7 @@ class DeviceRemoveView(BaseSettingsView):
             
         return redirect(url_for('settings.settings_page'))
 
-# Settings Settings View
+# Notification Settings View
 class NotificationUpdateView(BaseSettingsView):
     def post(self):
         # Get form data
@@ -160,7 +160,7 @@ class NotificationUpdateView(BaseSettingsView):
             notification_prefs.max_humidity = max_humidity
             
         db.session.commit()
-        flash('Settings preferences updated', 'success')
+        flash('Notification preferences updated', 'success')
         return redirect(url_for('settings.settings_page'))
 
 # Appearance Settings View

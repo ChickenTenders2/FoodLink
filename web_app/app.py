@@ -456,6 +456,19 @@ def update_shopping_item():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
+@app.route("/shopping_list/add_multi", methods=["POST"])
+def add_shopping_items():
+    try:
+        items_string = request.form.get("items")
+        items = json.loads(items_string)
+        if not (items):
+            return jsonify({"success": False, "error": "No items selected."})
+        
+        shop.add_items(user_id, items)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
 
 ### UTENSILS AND APPLIANCE SELECTION ROUTES
     

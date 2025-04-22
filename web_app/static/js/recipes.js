@@ -5,6 +5,7 @@ function open_recipe_popup(recipe) {
 
     // sets recipe to be used if user creates recipe
     document.getElementById("create_recipe").onclick = () => open_ingredients_overview(recipe);
+    document.getElementById("add_to_shopping_list_button").onclick = () => open_add_to_shopping_popup(recipe.ingredients);
 
     // allow editing options if recipe is a users
     if (recipe.personal) {
@@ -105,14 +106,16 @@ function toggle_edit_features(show) {
     const servings = document.getElementById("recipe_popup_servings");
     const prep_time = document.getElementById("recipe_popup_prep");
     const cook_time = document.getElementById("recipe_popup_cook");
-    // create recipe should be hidden when editting
+    // create recipe & shopping list buttons should be hidden when editting
     const create_recipe = document.getElementById("create_recipe");
+    const shop_list_button = document.getElementById("add_to_shopping_list_button");
     
     if (show) {
         edit_ingredients.style.display = "inline-block";
         edit_tools.style.display = "inline-block";
         save_recipe.style.display = "inline-block";
         create_recipe.style.display = "none";
+        shop_list_button.style.display = "none";
         
         // makes information editable
         instructions_box.contentEditable = true;
@@ -137,6 +140,7 @@ function toggle_edit_features(show) {
         edit_tools.style.display = "none";
         save_recipe.style.display = "none";
         create_recipe.style.display = "inline-block";
+        shop_list_button.style.display = "inline-block";
         
         // stops information being editable
         instructions_box.contentEditable = false;
@@ -246,6 +250,93 @@ function display_tools(tool_ids, missing_tool_ids) {
         }
         tools_list.appendChild(li);
     }
+}
+
+
+//          ADD INSUFFICIENT TO SHOPPING LIST FUNCTIONS
+
+
+function open_add_to_shopping_popup(ingredients) {
+    const container = document.getElementById("shopping_list_ingredient_container");
+    container.innerHTML = "";
+
+    for (let [name, quantity, unit, status] of ingredients) {
+        if (status === "missing" || status === "insufficient") {
+            const div = document.createElement("div");
+            div.className = "shopping-list-entry";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = true;
+
+            const label = document.createElement("label");
+            label.innerText = `${name} (${unit})`;
+
+            const qtyInput = document.createElement("input");
+            qtyInput.type = "number";
+            qtyInput.min = 1;
+            qtyInput.value = quantity;
+            qtyInput.className = "qty-input";
+
+            div.dataset.shop_list_name = `${name} (${unit})`;
+
+            div.appendChild(checkbox);
+            div.appendChild(label);
+            div.appendChild(qtyInput);
+
+            container.appendChild(div);
+        }
+    }
+
+    document.getElementById("add_to_shopping_popup").style.display = "block";
+}
+
+function close_add_to_shopping_popup() {
+    document.getElementById("add_to_shopping_popup").style.display = "none";
+}
+
+async function submit_to_shopping_list() {
+    const selected = [];
+
+    const container = document.getElementById("shopping_list_ingredient_container");
+    const children = container.children;
+
+    // for each ingredient
+    for (let div of children) {
+        const checkbox = div.querySelector("input[type='checkbox']");
+        const qtyInput = div.querySelector("input[type='number']");
+        // if checked and quantity bigger than 1
+        if (checkbox && checkbox.checked && qtyInput && parseFloat(qtyInput.value) > 0) {
+            // add to selected
+            selected.push([
+                div.dataset.shop_list_name,
+                qtyInput.value
+            ]);
+        }
+    }
+
+    if (selected.length == 0) {
+        alert("No ingredients selected.");
+        return;
+    }
+
+    const form = new FormData();
+    form.append("items", JSON.stringify(selected));
+
+    const response = await fetch("/shopping_list/add_multi", {
+        method: "POST",
+        body: form
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+        alert("Items added to shopping list.");
+        close_add_to_shopping_popup();
+    } else {
+        alert("Error adding items to shopping list: " + result.error);
+    }
+
 }
 
 

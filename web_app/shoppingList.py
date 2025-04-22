@@ -19,6 +19,14 @@ class shoppingList(database):
         self.connection.commit()
         cursor.close()
     
+    def add_items(self, user_id, items):
+        cursor = self.connection.cursor()
+        data = [(user_id, item[0], item[1]) for item in items]
+        query = "INSERT INTO shopping_list (user_id, item_name, quantity) VALUES (?, ?, ?)"
+        cursor.executemany(query, data)
+        self.connection.commit()
+        cursor.close()
+    
     def update_item(self, item_id, item_name, quantity):
         cursor = self.connection.cursor()
         query = "UPDATE shopping_list SET item_name = %s, quantity = %s WHERE id = %s"

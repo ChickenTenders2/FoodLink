@@ -83,8 +83,16 @@
         <button class="hidden-button" id="delete_recipe">Delete Recipe</button>
         <button class="hidden-button" id="save_recipe">Save Recipe</button>
         <button id="create_recipe">Create Recipe</button>
+        <button id="add_to_shopping_list_button" onclick="open_add_to_shopping_popup()">Shop Insufficient Items</button>
         <button class="hidden-button" id="clone_recipe">Clone recipe</button>
     </div>
+
+    <div id="add_to_shopping_popup" class="popup">
+        <h3>Add to Shopping List</h3>
+        <button onclick="close_add_to_shopping_popup()">×</button>
+        <div id="shopping_list_ingredient_container"></div>
+        <button onclick="submit_to_shopping_list()">Add Selected</button>
+      </div>
 
     <div id="edit_ingredients_popup" class="popup">
         <h3>Edit Ingredients</h3>

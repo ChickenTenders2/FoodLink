@@ -1,5 +1,9 @@
 from database import database
 from datetime import datetime
+import smtplib
+from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 class notification(database):
     def get_notifications(self, user_id):
@@ -38,21 +42,27 @@ class notification(database):
                 notif_type = 'temperature'
                 if temperature < min_temperature:
                     message = f"Low temperature detected: {temperature}°C"
-                    is_exists = self.notification_exists(user_id, notif_type, message)
+                    # is_exists = self.notification_exists(user_id, notif_type, message)
                     if not self.cooldown_check(user_id, notif_type):
                         self.insert_notification(user_id, notif_type, message, 'warning')
                 elif temperature > max_temperature:
                     message = f"High temperature detected: {temperature}°C"
-                    is_exists = self.notification_exists(user_id, notif_type, message)
+                    # is_exists = self.notification_exists(user_id, notif_type, message)
                     if self.cooldown_check(user_id, notif_type) == False:
                         self.insert_notification(user_id, notif_type, message, 'critical')
+                        self.send_notification_email(
+                            to_email="mariam12769309@gmail.com",
+                            subject_type=notif_type,
+                            message_text=f"Warning: Your fridge temperature is above the maximum threshold {temperature}."
+                        )
+
                 
             if humidity is not None:
                 humidity = round(humidity, 2)
                 if humidity > max_humidity:
                     notif_type = 'humidity'
                     message = f"High humidity detected: {humidity}%"
-                    is_exists = self.notification_exists(user_id, notif_type, message)
+                    # is_exists = self.notification_exists(user_id, notif_type, message)
                     if not self.cooldown_check(user_id, notif_type):
                         self.insert_notification(user_id, notif_type, message, 'warning')
         cursor.close()
@@ -162,3 +172,91 @@ class notification(database):
                 return True  # Cooldown active
 
         return False
+
+
+    def send_email(self, to_email, subject_type, message_text):
+        # Define subject labels and styles per type
+        subjects = {
+            "temperature": {
+                "title": "Temperature Alert",
+                "color": "#f44336",  # red
+            },
+            "humidity": {
+                "title": "Humidity Alert",
+                "color": "#ff9800",  # orange
+            },
+            "expiry": {
+                "title": "Item Expiry Notification",
+                "color": "#ffd54f",  # yellow
+            },
+            "support": {
+                "title": "Support Message",
+                "color": "#4caf50",  # green
+            }
+        }
+
+        notif = subjects.get(subject_type, {
+        "title": "Notification",
+        "color": "#90caf9"  # default blue
+        })
+
+        # Set up the email
+        msg = MIMEMultipart("alternative")
+        msg['Subject'] = notif["title"]
+        msg['From'] = "foodlink2305@gmail.com"
+        msg['To'] = to_email
+
+        html = f"""
+        <html>
+        <head>
+            <style>
+                .container {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f9f9f9;
+                    padding: 20px;
+                }}
+                .card {{
+                    background-color: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    border-left: 6px solid {notif['color']};
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                    max-width: 500px;
+                    margin: auto;
+                }}
+                .title {{
+                    font-size: 20px;
+                    font-weight: bold;
+                    color: {notif['color']};
+                    margin-bottom: 10px;
+                }}
+                .message {{
+                    font-size: 16px;
+                    color: #444;
+                }}
+                .footer {{
+                    margin-top: 20px;
+                    font-size: 12px;
+                    color: #999;
+                    text-align: center;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="card">
+                    <div class="title">{notif['title']}</div>
+                    <div class="message">{message_text}</div>
+                    <div class="footer">FoodLink • Smart Fridge Assistant</div>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        msg.attach(MIMEText(html, "html"))
+
+        # Connect to Gmail SMTP
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login("foodlink2305@gmail.com", "fimz txhp fhwk qwbk")
+            server.sendmail("foodlink2305@gmail.com", to_email, msg.as_string())

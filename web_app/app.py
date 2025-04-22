@@ -478,7 +478,7 @@ if __name__ == '__main__':
     #success = Success()
 
     # notification class instance
-    notif = notification()  
+    notif = notification() 
 
     # thingsboard class instance
     tb = thingsboard()

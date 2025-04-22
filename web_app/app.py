@@ -211,42 +211,42 @@ def update_quantities():
 
 # ### BARCODE SCANNING ROUTES ###
 
-# # Opens camera module and returns feed
-# @app.route('/scanner/get')
-# def get_scanner():
-#     return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
+# Opens camera module and returns feed
+@app.route('/scanner/get')
+def get_scanner():
+    return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-# # Closes camera module
-# @app.route('/scanner/close')
-# def close_scanner():
-#     scanner.release_capture()
-#     return jsonify({"success":True})
+# Closes camera module
+@app.route('/scanner/close')
+def close_scanner():
+    scanner.release_capture()
+    return jsonify({"success":True})
 
-# # Returns the barcode number if one is found
-# @app.route('/scanner/get_object')
-# def get_object():
-#     object = scanner.get_scanned()
-#     if (object):
-#         scanner.clear_scanned()
-#         return jsonify({"success": True, "object": object})
-#     else:
-#         return jsonify({"success": False})
+# Returns the barcode number if one is found
+@app.route('/scanner/get_object')
+def get_object():
+    object = scanner.get_scanned()
+    if (object):
+        scanner.clear_scanned()
+        return jsonify({"success": True, "object": object})
+    else:
+        return jsonify({"success": False})
 
-# @app.route("/unpause_scanner")
-# def unpause_scanner():
-#     scanner.unpause_scanner()
-#     return jsonify({"success":True})
+@app.route("/unpause_scanner")
+def unpause_scanner():
+    scanner.unpause_scanner()
+    return jsonify({"success":True})
 
-# @app.route("/scanner/toggle_mode/<value>")
-# def toggle_scan_mode(value):
-#     if value == "true":
-#         scanner.toggle_mode(True)
-#         return jsonify({"success":True})
-#     elif value =="false":
-#         scanner.toggle_mode(False)
-#         return jsonify({"success":True})
-#     else:
-#         return jsonify({"success":False})
+@app.route("/scanner/toggle_mode/<value>")
+def toggle_scan_mode(value):
+    if value == "true":
+        scanner.toggle_mode(True)
+        return jsonify({"success":True})
+    elif value =="false":
+        scanner.toggle_mode(False)
+        return jsonify({"success":True})
+    else:
+        return jsonify({"success":False})
 
 
 ### ITEM ROUTES ###
@@ -678,7 +678,7 @@ if __name__ == '__main__':
     item = Item()
     report = Report()
     # Class for handling barcode scanning
-    #scanner = Scanner()
+    scanner = Scanner()
 
     shop = shoppingList()
 

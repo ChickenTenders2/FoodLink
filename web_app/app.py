@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, url_for, Response, redirect
+from flask import Flask, jsonify, render_template, request, url_for, Response, redirect, session, flash
 from inventory import Inventory
 from scanner import Scanner
 from item import Item
@@ -12,10 +12,19 @@ from tool import Tool
 from recipe import Recipe
 from recipe_object import recipe_object
 import json
-from flask_login import login_required, current_user
+from flask_login import LoginManager, login_required, current_user, login_user, logout_user, UserMixin
 from extensions import db, login_manager
+from flask_mail import Mail, Message
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField, PasswordField, BooleanField
+from wtforms.validators import Length, DataRequired
+from flask_bootstrap import Bootstrap
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import random
+from models import User
 
+# Import database and user model
 
 app = Flask(__name__, template_folder = "templates")
 
@@ -23,6 +32,14 @@ app = Flask(__name__, template_folder = "templates")
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_key_for_testing')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://FoodLink:Pianoconclusiontown229!@81.109.118.20/FoodLink'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Email configuration
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'foodlink2305@gmail.com'  
+app.config['MAIL_PASSWORD'] = 'fmgz nrxz mwul nqju'    
+app.config['MAIL_DEFAULT_SENDER'] = 'FoodLink <foodlink2305@gmail.com>'
 
 # Import and register the settings blueprint
 from settings import settings_bp
@@ -33,15 +50,310 @@ app.register_blueprint(settings_bp)
 #     db.create_all()
 
 # Initialize extensions
-db.init_app(app)
-login_manager.init_app(app)
-login_manager.login_view = 'login'  # This ensures users are redirected to login when needed
 
 user_id = 2
 
-# Dashboard Route
-@app.route('/', methods=['GET', 'POST'])
+# Initialize extensions
+bootstrap = Bootstrap(app)
+login_manager.init_app(app)
+login_manager.login_view = 'login'  # This ensures users are redirected to login when needed
+db.init_app(app)
+mail = Mail(app)
+
+# Initialize Flask-Login
+login_manager = LoginManager(app)
+
+# Define forms from applogin.py
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(1, 16)])
+    password = PasswordField('Password', validators=[DataRequired()])
+    remember_me = BooleanField('Remember me')
+    submit = SubmitField('Continue')
+
+class CreateAccountForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(1, 16)])
+    email = StringField('Email', validators=[DataRequired(), Length(1, 64)])               
+    password = PasswordField('Password', validators=[DataRequired()])
+    passwordConfirm = PasswordField('Password(ReType)', validators=[DataRequired()])
+    submit = SubmitField('Continue')
+
+class CombinedResetForm(FlaskForm):
+    email = StringField('Email', validators=[Length(1, 64)])
+    otp = StringField('Security code')  
+    submit_email = SubmitField('Send Code')
+    submit_otp = SubmitField('Verify Code')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField(' New password', validators=[DataRequired()])
+    passwordConfirm = PasswordField('New Password(ReType)', validators=[DataRequired(),Length(min=6,message="Password must be at least 6 characters long.")],)
+    submit = SubmitField('Continue')    
+
+# Store verification codes, temporary?
+verification_codes = {}
+
+# User loader function for Flask-Login
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+# Generate a 6-digit verification code
+def generate_verification_code():
+    return str(random.randint(100000, 999999))
+
+# Send verification email with code
+def send_verification_code(user):
+    # Generate a new code
+    code = generate_verification_code()
+    # Store the code
+    verification_codes[user.email] = code
+    
+    # Create the email message
+    msg = Message(
+        'FoodLink - Verify Your Email',
+        recipients=[user.email],
+        sender=app.config['MAIL_DEFAULT_SENDER']
+    )
+    
+    # Email content
+    msg.body = f"""
+Hello {user.username},
+
+Your email verification code for FoodLink is: {code}
+
+Enter this code on the verification page to verify your email address.
+
+This code will expire in 1 hour.
+
+If you did not create an account, please ignore this email.
+
+Regards,
+The FoodLink Team
+"""
+    
+    msg.html = f"""
+<p>Hello {user.username},</p>
+<p>Your email verification code for FoodLink is:</p>
+<h2 style="background-color: #f5f5f5; padding: 10px; text-align: center; font-family: monospace;">{code}</h2>
+<p>Enter this code on the verification page to verify your email address.</p>
+<p>This code will expire in 1 hour.</p>
+<p>If you did not create an account, please ignore this email.</p>
+<p>Regards,<br>The FoodLink Team</p>
+"""
+    
+    # Send the email
+    mail.send(msg)
+    
+    # For testing/debugging - print the code to console as well
+    print(f"\n----- VERIFICATION CODE for {user.email}: {code} -----\n")
+
+
+# Index route
+@app.route('/')
 def index():
+    return redirect(url_for('login'))
+
+# Login route
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    error = None
+    
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        
+        if user is None or not check_password_hash(user.password, form.password.data):
+            error = "Error: Invalid Credentials"
+        else:
+            login_user(user, form.remember_me.data)
+            session["username"] = form.username.data
+            
+            # Check if email is verified
+            if not user.email_verified:
+                flash("Please verify your email address to access all features.")
+                return redirect(url_for('email_verification_page'))
+            
+            return redirect(url_for('dashboard'))
+    
+    return render_template('login.html', form=form, error=error)
+
+# Create account route
+@app.route('/createAccount', methods=['GET', 'POST'])
+def createAccount():
+    form = CreateAccountForm()
+    msg = ""
+        
+    if form.validate_on_submit():
+        existing_user = User.query.filter((User.username == form.username.data) | (User.email == form.email.data)).first()
+        
+        if existing_user is not None:
+            if existing_user.username == form.username.data:
+                msg = "Username already exists."
+            if existing_user.email == form.email.data:
+                msg = "Email already exists."
+        else:    
+            if form.password.data == form.passwordConfirm.data:
+                # Create new user
+                user = User(
+                    username=form.username.data,
+                    email=form.email.data,
+                    name='null',
+                    password=generate_password_hash(form.password.data),
+                    email_verified=False
+                )
+                db.session.add(user)
+                db.session.commit()
+                
+                # Log the user in
+                login_user(user)
+                
+                # Redirect to email verification
+                flash("Account created successfully! Please verify your email.")
+                return redirect(url_for('email_verification_page'))
+            else:
+                msg = "Passwords mismatched." 
+    return render_template('createAccount.html', form=form, msg=msg)
+
+
+@app.route('/resetByEmail', methods=['GET', 'POST'])
+def resetByEmail():
+     
+    form = CombinedResetForm()
+    error = None
+
+    if form.submit_email.data and form.validate():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_verification_code(user)
+            flash("Verification code sent to your email.")
+            error = "Verification code sent to your email."
+        else:
+            error = "Invalid email address."
+
+    elif form.submit_otp.data and form.validate():
+        user = User.query.filter_by(email=form.email.data).first()
+
+        if user and verification_codes.get(user.email) == form.otp.data:
+        
+            session['reset_email'] = user.email
+            return redirect(url_for('resetPassword'))
+        else:
+            error = "Invalid verification code."
+
+    return render_template('resetByEmail.html', form=form, error=error)
+
+            
+
+@app.route('/resetPassword', methods=['GET', 'POST'])
+def resetPassword():
+   
+    form = ResetPasswordForm()
+    email = session.get('reset_email')
+    error = None
+    if not email:
+        flash("Session expired or invalid.")
+        return redirect(url_for('resetByEmail'))
+        
+   
+    user = User.query.filter_by(email=email).first()
+
+     
+    if user is None:
+        flash("Invalid session or email. Please try again.")
+        return redirect(url_for('resetByEmail'))
+
+  
+
+    if form.validate_on_submit():
+        if form.password.data == form.passwordConfirm.data:
+            print("Setting new password")
+            user.password = generate_password_hash(form.password.data)
+            db.session.commit()
+
+            session.pop('reset_email', None)
+
+            error = "Your password has been successfully reset."
+            return redirect(url_for('login'))  
+        else:
+            print("Form errors:", form.errors)
+            error = "Passwords do not match. Please try again."
+
+    return render_template('resetPassword.html', form=form, error=error)
+
+# Logout route
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    session.pop('username', None)
+    return redirect(url_for('index'))
+
+# Email verification page
+@app.route('/email/verification')
+@login_required
+def email_verification_page():
+    return render_template('email_verification.html')
+
+# Route to request verification code
+@app.route('/email/send-code', methods=['POST'])
+@login_required
+def send_verification_code_route():
+    # Check if email is already verified
+    if current_user.email_verified:
+        flash('Your email is already verified.', 'info')
+        return redirect(url_for('email_verification_page'))
+    
+    # Send verification code
+    send_verification_code(current_user)
+    flash('A verification code has been sent to your email address.', 'success')
+    return redirect(url_for('email_verification_page'))
+
+# Route to verify email with code
+@app.route('/email/verify-code', methods=['POST'])
+@login_required
+def verify_code():
+    # Get submitted code
+    entered_code = request.form.get('verification_code')
+    
+    if not entered_code:
+        flash('Please enter a verification code.', 'danger')
+        return redirect(url_for('email_verification_page'))
+    
+    # Check if code matches
+    stored_code = verification_codes.get(current_user.email)
+    
+    if not stored_code:
+        flash('No verification code found. Please request a new code.', 'danger')
+        return redirect(url_for('email_verification_page'))
+    
+    if stored_code == entered_code:
+        # Code matches, update verification status
+        current_user.email_verified = True
+        db.session.commit()
+        
+        # Clear the code
+        verification_codes.pop(current_user.email, None)
+        
+        flash('Your email has been verified successfully!', 'success')
+    else:
+        flash('Invalid verification code. Please try again.', 'danger')
+    
+    return redirect(url_for('email_verification_page'))
+
+
+# @app.route('/success')
+# def added_successfully():
+#   try:
+#     # Triggers the success alert function when the route is fetched
+#     # so that the Raspberry Pi LCD updates with the message 'Added!'.
+#     success.alert()
+#     return jsonify({"success": True})
+#   except Exception as e:
+#         return jsonify({"success": False, "error": str(e)})
+
+
+# Dashboard Route
+@app.route('/dashboard', methods=['GET', 'POST'])
+def dashboard():
     device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
 
     token = tb.get_jwt_token()
@@ -104,26 +416,7 @@ def get_notifications():
         ],
         'unread_count': unread_count
     })
-
-
-# Login Route
-
-# Register Route
-
-# Logout Route
-
-
-# @app.route('/success')
-# def added_successfully():
-#   try:
-#     # Triggers the success alert function when the route is fetched
-#     # so that the Raspberry Pi LCD updates with the message 'Added!'.
-#     success.alert()
-#     return jsonify({"success": True})
-#   except Exception as e:
-#         return jsonify({"success": False, "error": str(e)})
   
-
 ### INVENTORY ROUTES ###
 
 # Inventory interface

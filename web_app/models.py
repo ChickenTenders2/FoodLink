@@ -4,17 +4,16 @@ from datetime import datetime
 import pytz
 
 class User(db.Model, UserMixin):
+    __tablename__ = 'user'  # Explicitly set table name to match MariaDB
+    
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=True)
     password = db.Column(db.String(200), nullable=False)
-
-    # Add these as properties instead of columns
-    @property
-    def email_verified(self):
-        return True  # Default to True for simplicity
+    email_verified = db.Column(db.Boolean, default=False)
     
+    # These properties match what's in your existing code
     @property
     def two_factor_enabled(self):
         return False  # Default to False for simplicity

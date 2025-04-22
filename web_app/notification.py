@@ -278,7 +278,7 @@ class notification(database):
             </html>
             """
 
-            msg.attach(MIMEText(html, "html"))
+            msg.attach(MIMEText(html, "html", _charset="utf-8"))
 
             # Connect to Gmail SMTP
             with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:

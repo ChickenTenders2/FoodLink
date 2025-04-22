@@ -959,3 +959,21 @@ input[type="submit"]:hover {
     max-height: 400px;
     overflow-y: auto;
 }
+
+.inventory-scroll-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+.inventory-tile {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
+    cursor: pointer;
+}
+.inventory-tile img {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}

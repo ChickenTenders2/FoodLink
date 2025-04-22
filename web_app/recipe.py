@@ -166,6 +166,10 @@ class Recipe(database):
         cursor.execute(query, data)
         item = cursor.fetchone()
         cursor.close()
+        # if item is returned format date for frontend
+        if item:
+            item = list(item)
+            item[6] = item[6].strftime('%Y-%m-%d')
         return item
 
 

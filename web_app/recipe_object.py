@@ -31,6 +31,8 @@ class recipe_object(Recipe):
             quantity_threshold = ingredient[1] * 0.95
             inv_item = self.strict_search(user_id, ingredient_name, quantity_threshold)
             if not inv_item:
+                # empty item so it can be replaced if user wants to substitute ingredient in create stage
+                self.inventory_ingredients.append([])
                 self.shopping_list.append(ingredient)
                 # adds attribute to each ingredient so it can be highlighted
                 # a different colour based on how good the match to the inventory was
@@ -39,8 +41,8 @@ class recipe_object(Recipe):
             elif inv_item[4] >= quantity_threshold:
                 self.inventory_ingredients.append(inv_item)
                 ingredient.append("matched")
+            # not high enough quantity to use in recipe
             else:
-                # not high enough quantity to use in recipe
                 self.inventory_ingredients.append(inv_item)
                 self.shopping_list.append(ingredient)
                 ingredient.append("insufficient")

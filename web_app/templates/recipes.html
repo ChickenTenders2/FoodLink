@@ -108,6 +108,15 @@
         <div id="ingredient_scroll_container"></div>
     </div>
 
+    <div id="select_inventory_popup" class="popup">
+        <h3>Select an Inventory Item</h3>
+        <button onclick="close_inventory_selector()">X</button>
+        <input type="text" id="inventory_search_input" placeholder="Search inventory..." oninput="filter_inventory_items()">
+        <div id="inventory_items_scroll" class="inventory-scroll-list"></div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/recipes.js') }}"></script> 
+    <script src="{{ url_for('static', filename='js/item_handling.js') }}"></script> 
+
 </body>
 </html>

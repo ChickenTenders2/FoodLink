@@ -6,8 +6,9 @@
     <title>Admin Dashboard</title>
     <style>
         body {
+            /* giving the page a white and green layout*/
             font-family: 'Segoe UI', sans-serif;
-            background: #e8f5e9; /* Soft fridgey green */
+            background: #e8f5e9; 
             margin: 0;
             padding: 40px;
         }
@@ -103,7 +104,7 @@
             <div class="message">{{ message }}</div>
         {% endif %}
 
-        <a class="home-link" href="{{ url_for('index') }}">Skip / Go to Home</a>
+        <a class="home-link" href="{{ url_for('index') }}">Go to Home</a>
     </div>
 </body>
 </html>

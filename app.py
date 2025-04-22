@@ -72,7 +72,7 @@ verification_codes = {}
 # User loader function for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
-    #new code
+    #return User.query.get(int(user_id)) was working but adding user_type makes life easier in the future
     user_type = session.get("user_type")
     if user_type == "admin":
         return Admin.query.get(int(user_id))
@@ -144,14 +144,14 @@ def login():
     error = None
     
     if form.validate_on_submit():
-        #new code
+        #checking admin first
         admin = Admin.query.filter_by(username=form.username.data).first()   
         if admin and check_password_hash(admin.password, form.password.data):
             login_user(admin,form.remember_me.data)
             session["username"] = admin.username
             session["user_type"] = "admin"
             flash("logged in", "success")
-            return redirect(url_for("AdminDashboard"))
+            return redirect(url_for("AdminDashboard"))#giving option to add new admins
 
 
         user = User.query.filter_by(username=form.username.data).first()
@@ -180,7 +180,7 @@ def login():
 def AdminDashboard():
     if not current_user.is_authenticated or not isinstance(current_user._get_current_object(), Admin):
         flash("Unauthorized access.", "danger")
-        return redirect(url_for('login'))
+        return redirect(url_for('login'))#extra security with login required
 
     
     class AdminCreateForm(FlaskForm):
@@ -198,7 +198,7 @@ def AdminDashboard():
             (Admin.username == form.username.data) | 
             (Admin.email == form.email.data)
         ).first()
-       
+       #checking if theres already an admin with those credentials
        if existing_admin:
             message = "Admin already exists."
        else:
@@ -211,7 +211,7 @@ def AdminDashboard():
             db.session.add(new_admin)
             db.session.commit()
             flash("New admin added successfully!")
-            return redirect(url_for('AdminDashboard'))  # or redirect back to dashboard
+            return redirect(url_for('AdminDashboard'))
 
     return render_template("admin_dashboard.html", form=form, message=message)
 

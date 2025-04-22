@@ -39,5 +39,5 @@ def main_index():
 def utensils_page():
     return render_template('utensils.html', user=current_user)
 
-if __name__ == 'main':
+if __name__ == '__main__':
     app.run(debug=True)

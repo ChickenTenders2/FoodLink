@@ -414,6 +414,9 @@ async function open_ingredients_overview(recipe) {
     const container = document.getElementById("ingredient_scroll_container");
     container.innerHTML = "";
 
+    window.recipe_ingredients = recipe.ingredients;
+    window.inventory_ingredients = recipe.inventory_ingredients;
+
     for (let i = 0; i < recipe.ingredients.length; i++) {
         const [name, quantity, unit, status] = recipe.ingredients[i];
 
@@ -421,34 +424,65 @@ async function open_ingredients_overview(recipe) {
         block.className = "ingredient-block";
 
         const ingredient_info = document.createElement("div");
-        ingredient_info.innerHTML = `${name} - ${quantity} ${unit}:`;
+        ingredient_info.innerHTML = `<strong>${name} - ${quantity} ${unit}:</strong>`;
         block.appendChild(ingredient_info);
 
         if (!(status == "missing")) {
-            const inventory_item = await add_inventory_ingredient(recipe.inventory_ingredients, i);
+            const inventory_item = await add_inventory_ingredient(i);
             block.appendChild(inventory_item);
         } else {
-            block.appendChild(createAddButton(recipe.inventory_ingredients, i));
+            block.appendChild(createAddButton(i));
         }
 
         container.appendChild(block);
     }
+    // adds div to store additional ingredients
+    const additional_block = document.createElement("div");
+    additional_block.id = "additional-ingredients";
+    // adds text to show what div is for
+    const additional_add = document.createElement("div");
+    additional_add.innerHTML = `<strong>Additional ingredients:</strong>`;
+    additional_block.appendChild(additional_add);
+    container.appendChild(additional_block);
+    container.appendChild(createAddButton());
 
     popup.style.display = "block";
 }
 
-async function add_inventory_ingredient(ingredients_list, i) {
-    let inventory_item = await create_item_tile(ingredients_list[i]);
+async function add_inventory_ingredient(i, additional = false) {
+    let inventory_item = await create_item_tile(window.inventory_ingredients[i]);
     inventory_item.className = "inventory-match";
+    const invQty = window.inventory_ingredients[i][4];
+    const usedQty = document.createElement("input");
+    usedQty.type = "number";
+    usedQty.min = 1;
+    usedQty.max = invQty;
+    if (!additional) {
+        usedQty.value = Math.min(invQty, parseFloat(window.recipe_ingredients[i][1])); // default to ingredient quantity
+    } else {
+        usedQty.value = invQty;
+    }
+    usedQty.className = "used-quantity-input";
+    usedQty.title = "Quantity to use from inventory";
 
+    inventory_item.appendChild(usedQty);
+
+    // remove button, shows add button once pressed so different item can be selected
     const remove_button = document.createElement("button");
     remove_button.innerText = "X";
     remove_button.onclick = () => {
         // clear item from list
-        ingredients_list[i] = [];
-        // replaces the item with an add button
-        const add_button = createAddButton(ingredients_list, i);
-        inventory_item.parentElement.replaceChild(add_button, inventory_item);
+        if (!additional) {
+            window.inventory_ingredients[i] = [];
+            // replaces the item with an add button
+            const add_button = createAddButton(i);
+            inventory_item.parentElement.replaceChild(add_button, inventory_item);
+        } else {
+            // removes item from list
+            window.inventory_ingredients.splice(i, 1);
+            // removes item from screen
+            inventory_item.remove();
+        }
     };
     inventory_item.appendChild(remove_button);
     return inventory_item;
@@ -473,21 +507,21 @@ async function create_item_tile(item) {
     return item_tile;
 }
 
-function createAddButton(ingredients_list, i) {
+function createAddButton(i = null) {
     const wrapper = document.createElement("div");
     wrapper.className = "inventory-placeholder";
 
     const addBtn = document.createElement("button");
     addBtn.innerText = "+ Add from Inventory";
     addBtn.onclick = () => {
-        inventory_selector(ingredients_list, i, wrapper);
+        inventory_selector(i, wrapper);
     };
 
     wrapper.appendChild(addBtn);
     return wrapper;
 }
 
-async function inventory_selector(ingredients_list, i, tile) {
+async function inventory_selector(i, tile) {
     //const searchParam = document.getElementById("selector-search-input").value || "";
     const searchParam = "";
 
@@ -505,12 +539,25 @@ async function inventory_selector(ingredients_list, i, tile) {
             // for filtering
             item_tile.dataset.name = item[2];
             item_tile.onclick = async () => {
-                // updates list
-                ingredients_list[i] = item;
-                // replaces the add button with the item
-                const inventory_item = await add_inventory_ingredient(ingredients_list, i);
-                tile.parentElement.replaceChild(inventory_item, tile);
-                close_inventory_selector();
+                if (i == null) {
+                    // appends additional item
+                    window.inventory_ingredients.push(item);
+                    // gets indexed of newly appended item
+                    i = window.inventory_ingredients.length - 1;
+                    console.log(window.inventory_ingredients);
+                    console.log(i);
+                    const inventory_item = await add_inventory_ingredient(i, true);
+                    // adds item to bottom of list
+                    document.getElementById("additional-ingredients").appendChild(inventory_item);
+                    close_inventory_selector();
+                } else {
+                    // updates list
+                    window.inventory_ingredients[i] = item;
+                    // replaces the add button with the item
+                    const inventory_item = await add_inventory_ingredient(i);
+                    tile.parentElement.replaceChild(inventory_item, tile);
+                    close_inventory_selector();
+                }
             }
             container.appendChild(item_tile);
         }

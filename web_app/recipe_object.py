@@ -29,6 +29,7 @@ class recipe_object(Recipe):
             ingredient_name = ingredient[0]
             # item must have atleast 95% of the needed quantity to match
             quantity_threshold = ingredient[1] * 0.95
+            # finds the best match in inventory
             inv_item = self.strict_search(user_id, ingredient_name, quantity_threshold)
             if not inv_item:
                 # empty item so it can be replaced if user wants to substitute ingredient in create stage

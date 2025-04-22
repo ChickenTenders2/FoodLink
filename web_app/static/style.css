@@ -1133,6 +1133,12 @@ input[type="submit"]:hover {
     text-align: center; 
 }
 
+.used-quantity-input {
+    width: 60px;
+    margin-top: 5px;
+    display: block;
+}
+
 /* Instruction Block */ 
 .instructions-container { 
     white-space: normal; 

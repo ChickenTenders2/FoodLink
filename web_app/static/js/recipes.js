@@ -95,10 +95,13 @@ function toggle_edit_features(show) {
     const servings = document.getElementById("recipe_popup_servings");
     const prep_time = document.getElementById("recipe_popup_prep");
     const cook_time = document.getElementById("recipe_popup_cook");
+    // create recipe should be hidden when editting
+    const create_recipe = document.getElementById("create_recipe");
     if (show) {
         edit_ingredients.style.display = "inline-block";
         edit_tools.style.display = "inline-block";
         save_recipe.style.display = "inline-block";
+        create_recipe.style.display = "none";
         
         // makes information editable
         instructions_box.contentEditable = true;
@@ -122,6 +125,7 @@ function toggle_edit_features(show) {
         edit_ingredients.style.display = "none";
         edit_tools.style.display = "none";
         save_recipe.style.display = "none";
+        create_recipe.style.display = "inline-block";
         
         // stops information being editable
         instructions_box.contentEditable = false;
@@ -153,6 +157,7 @@ function close_recipe_popup() {
     }
     // makes sure edit button is hidden aswell
     edit_button.style.display = "none";
+    close_ingredient_overview();
 
     document.getElementById("recipe_popup").style.display = "none";
 }
@@ -415,7 +420,8 @@ async function open_ingredients_overview(recipe) {
     container.innerHTML = "";
 
     window.recipe_ingredients = recipe.ingredients;
-    window.inventory_ingredients = recipe.inventory_ingredients;
+    // slices array to shallow copy it (only shallow as ingredients are never modified)
+    window.inventory_ingredients = recipe.inventory_ingredients.slice();
 
     for (let i = 0; i < recipe.ingredients.length; i++) {
         const [name, quantity, unit, status] = recipe.ingredients[i];
@@ -447,6 +453,11 @@ async function open_ingredients_overview(recipe) {
     container.appendChild(createAddButton());
 
     popup.style.display = "block";
+}
+
+function close_ingredient_overview() {
+    document.getElementById("ingredient_overview_popup").style.display = "none";
+    close_inventory_selector();
 }
 
 async function add_inventory_ingredient(i, additional = false) {
@@ -534,12 +545,12 @@ async function inventory_selector(i, tile) {
         document.getElementById("select_inventory_popup").style.display = "block";
         const container = document.getElementById("inventory_items_scroll");
         container.innerHTML = "";
-        //console.log(result.items)
         for (let item of result.items) {
             const item_tile = await create_item_tile(item);
-            item_tile.className = "inventory-tile";
+            item_tile.className = "inventory-scroll-tile";
             // for filtering
             item_tile.dataset.name = item[2];
+            item_tile.style.display = "flex";
             item_tile.onclick = async () => {
                 const inv_id = item[0];
                 const expiry = new Date(item[6]);
@@ -566,8 +577,6 @@ async function inventory_selector(i, tile) {
                     window.inventory_ingredients.push(item);
                     // gets indexed of newly appended item
                     i = window.inventory_ingredients.length - 1;
-                    console.log(window.inventory_ingredients);
-                    console.log(i);
                     const inventory_item = await add_inventory_ingredient(i, true);
                     // adds item to bottom of list
                     document.getElementById("additional-ingredients").appendChild(inventory_item);
@@ -592,22 +601,27 @@ function close_inventory_selector() {
     document.getElementById("select_inventory_popup").style.display = "none";
 }
 
-function close_ingredient_overview() {
-    document.getElementById("ingredient_overview_popup").style.display = "none";
+function filter_inventory_items() {
+    const input = document.getElementById("inventory_search_input").value.toLowerCase();
+    const items = document.querySelectorAll("#inventory_items_scroll .inventory-scroll-tile");
+
+    for (let item of items) {
+        const name = item.dataset.name.toLowerCase();
+        item.style.display = name.includes(input) ? "flex" : "none";
+    }
 }
 
 // UPDATING INVENTORY (MAKING RECIPE) 
 
-async function update_inventory_quantites() {
+async function update_inventory_quantities() {
     const items_used = [];
 
     // gets the inventory item and quantity used for each ingredient
-
     // for each ingredient stored (added to list of used ingredients)
-    for (let i = 0; i < window.inventory_ingredients; i++) {
-        item = window.inventory_ingredients[i];
+    for (let i = 0; i < window.inventory_ingredients.length; i++) {
+        const item = window.inventory_ingredients[i];
         // if the item wasnt removed
-        if (item) {
+        if (item.length != 0) {
             // gets the inv_id
             const inv_id = item[0];
             const quantity = item[4];
@@ -616,15 +630,15 @@ async function update_inventory_quantites() {
             // set quantity (the amount the quantity will end up at in the db)
             const set_quantity = quantity - amount_used;
             // adds inv_id and quantity together for processing server side
+            console.log(inv_id, set_quantity);
             items_used.push([inv_id, set_quantity]);
         }
     }
-
     const formData = new FormData();
     // formdata converts to list to string so stringify so it can be loaded server side
-    formData.append("item_used", JSON.stringify(items_used));
+    formData.append("items_used", JSON.stringify(items_used));
 
-    const response = await fetch("/recipes/update", {
+    const response = await fetch("/inventory/update_items_quantity", {
         method: "POST",
         body: formData
     });
@@ -632,14 +646,13 @@ async function update_inventory_quantites() {
     const result = await response.json();
 
     if (result.success) {
-        alert("Recipe updated successfully.");
+        alert("Items updated successfully.");
         close_recipe_popup();
+        close_ingredient_overview();
         get_recipes(); // Refresh list
     } else {
-        alert("Error saving recipe: " + result.error);
+        alert("Error updating items: " + result.error);
     }
-
-
 }
 
 

@@ -1260,7 +1260,7 @@ input[type="submit"]:hover {
     border-bottom: 1px solid #ccc;
     cursor: pointer;
 }
-.inventory-tile img {
+.inventory-scroll-tile img {
     width: 40px;
     height: 40px;
     margin-right: 10px;

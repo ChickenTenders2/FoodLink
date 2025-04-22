@@ -12,8 +12,30 @@ from tool import Tool
 from recipe import Recipe
 from recipe_object import recipe_object
 import json
+from flask_login import login_required, current_user
+from extensions import db, login_manager
+import os
+
 
 app = Flask(__name__, template_folder = "templates")
+
+# Configuration
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_key_for_testing')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://FoodLink:Pianoconclusiontown229!@81.109.118.20/FoodLink'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Import and register the settings blueprint
+from settings import settings_bp
+app.register_blueprint(settings_bp)
+
+## CREATES TABLES BUT SHOULDNT NEED TO ANYMORE
+# with app.app_context():
+#     db.create_all()
+
+# Initialize extensions
+db.init_app(app)
+login_manager.init_app(app)
+login_manager.login_view = 'login'  # This ensures users are redirected to login when needed
 
 user_id = 2
 
@@ -672,6 +694,16 @@ def remove_recipe(recipe_id):
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
+
+### SETTINGS PAGE ROUTE
+
+@app.route('/settings')
+def settings_page():
+    if current_user.is_authenticated:
+        return redirect(url_for('settings.settings_page'))
+    return redirect(url_for('login'))
+
+
 if __name__ == '__main__':
     # Classes for handling sql expressions
     inventory = Inventory()
@@ -696,3 +728,4 @@ if __name__ == '__main__':
 
     # Runs the app
     app.run(debug=True)
+

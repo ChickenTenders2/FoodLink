@@ -18,14 +18,14 @@
 
     <div id="not_found_popup" class="popup">
         <h2>Item Not Found</h2>
-        <button onclick="close_not_found_popup()">X</button>
+        <button id="close_not_found_popup" onclick="close_not_found_popup()">X</button>
         <p>The item scanned was not found in the database.</p>
         <button id="open_not_found_button">Add Missing Item</button>
     </div>
 
     <div id="search_popup" class="popup">
         <h2 id="popup-title">Search for item</h2>
-        <button onclick="close_search_popup()">X</button>
+        <button id="close_search_popup" onclick="close_search_popup()">×</button>
         <form id="update-form" method="POST" onsubmit="text_search_item(event)">
             <input type="text" spellcheck="true" id="search_term" name="search_term" placeholder="Enter item name..." required>
             <button type="submit">Search</button>
@@ -37,7 +37,7 @@
     <!-- added popup from inventory.html for inputting data of new item-->
     <div id="popup" class="popup">
         <h2 id="popup-title">Add Item To Inventory</h2>
-        <button id="close-popup" onclick="close_item_popup(false)">X</button>
+        <button id="close-popup" onclick="close_item_popup(false)">×</button>
         <!-- on error used to set default image if there is no image for the item-->
         <img class="item_img" id="item_image" src="" alt="">
         <!-- allows user to edit incorrect item information -->
@@ -70,7 +70,7 @@
 
     <div id="add-popup" class="popup">
         <h2 id="popup-title">Add To Personal Items</h2>
-        <button id="close-add-popup" onclick="close_add_popup(false)">X</button>
+        <button id="close-add-popup" onclick="close_add_popup(false)">×</button>
         <!-- on error used to set default image if there is no image for the item-->
         <img class="item_img" id="image_preview" src="/static/images/null.jpg" alt="">
         <!-- allows user to edit incorrect item information -->
@@ -89,12 +89,14 @@
             <input type="text" id="brand_edit" name="brand">
             <br>
             <label>Expiry Time:</label>
-            <input type="number" id="expiry_day" class="date_field" name="expiry_day" min="0" max="30" placeholder="DD" required>
-            <label>/</label>
-            <input type="number" id="expiry_month" class="date_field" name="expiry_month" min="0" max="11" placeholder="MM" required>
-            <label>/</label>
-            <input type="number" id="expiry_year" class="date_field" name="expiry_year" min="0" max="99" placeholder="YY" required>
-            <br>
+            <div class="expiry-time-group">
+                <input type="number" id="expiry_day" class="date_field" name="expiry_day" min="0" max="30" placeholder="DD" required>
+                <label>/</label>
+                <input type="number" id="expiry_month" class="date_field" name="expiry_month" min="0" max="11" placeholder="MM" required>
+                <label>/</label>
+                <input type="number" id="expiry_year" class="date_field" name="expiry_year" min="0" max="99" placeholder="YY" required>
+            </div>
+            <!-- <br> -->
             <label>Default Quantity:</label>
             <input type="number" id="default_quantity" name="default_quantity" min="1" required>
             <br>
@@ -118,7 +120,7 @@
 
     <div id="report_popup" class="popup">
         <h2>Report Item</h2>
-        <button onclick="close_report_popup()">X</button>
+        <button id="close_report_popup" onclick="close_report_popup()">×</button>
         <p id="report_message">Send request for missing item to be available for all?</p>
         <p id="report_message_2">If successful, your personal item will be replaced.</p>
         <button id="report_button">Send Report</button>       

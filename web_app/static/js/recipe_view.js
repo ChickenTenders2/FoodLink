@@ -1,4 +1,7 @@
 async function remove_item(id, event) {
+    if (!confirm("Are you sure you want to delete this recipe?")) {
+        return;
+    }
     
     event.stopPropagation();
 

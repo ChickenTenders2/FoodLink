@@ -144,7 +144,7 @@ def resetByEmail():
     if form.submit_email.data and form.validate():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
-            send_verification_code(user)
+            send_verification_code(user, mail)
             flash("Verification code sent to your email.")
             error = "Verification code sent to your email."
         else:
@@ -224,7 +224,7 @@ def send_verification_code_route():
         return redirect(url_for('email_verification_page'))
     
     # Send verification code
-    send_verification_code(current_user)
+    send_verification_code(current_user, mail)
     flash('A verification code has been sent to your email address.', 'success')
     return redirect(url_for('email_verification_page'))
 

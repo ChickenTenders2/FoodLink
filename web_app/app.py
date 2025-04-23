@@ -366,6 +366,13 @@ def verify_code():
     return redirect(url_for('email_verification_page'))
 
 
+### SETTINGS PAGE ROUTE
+
+@app.route('/settings')
+@login_required
+def settings_page():
+    return redirect(url_for('settings.settings_page'))
+
 # @app.route('/success')
 # def added_successfully():
 #   try:
@@ -1089,15 +1096,6 @@ def remove_recipe(recipe_id):
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
-
-
-### SETTINGS PAGE ROUTE
-
-@app.route('/settings')
-@login_required
-def settings_page():
-    return redirect(url_for('settings.settings_page'))
-
 
 if __name__ == '__main__':
     # Classes for handling sql expressions

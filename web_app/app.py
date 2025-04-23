@@ -65,18 +65,6 @@ login_manager = LoginManager(app)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# # redirects any page that requires user to be signed in to the login page
-# @app.before_request
-# def require_login():
-#     allowed_routes = [
-#         'login', 'createAccount', 'resetByEmail', 'resetPassword',
-#         'static', 'send_verification_code_route', 'verify_code', 'email_verification_page'
-#     ]
-#     # only allows users to access login pages if they arent signed in
-#     if request.endpoint not in allowed_routes and not current_user.is_authenticated:
-#         return redirect(url_for('login'))
-
-
 @login_manager.unauthorized_handler
 def back_to_login():
     return redirect('/login')

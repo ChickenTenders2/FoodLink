@@ -20,8 +20,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_session import Session
 import os
 import random
-from models import User
-from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm
+from models import User, Admin
+from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
 from email_verification import send_verification_code, verification_codes
 
 # Import database and user model
@@ -63,11 +63,17 @@ login_manager = LoginManager(app)
 # User loader function for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    #return User.query.get(int(user_id)) was working but adding user_type makes life easier in the future
+    user_type = session.get("user_type")
+    if user_type == "admin":
+        return Admin.query.get(int(user_id))
+    else:
+        return User.query.get(int(user_id))
 
 @login_manager.unauthorized_handler
 def back_to_login():
     return redirect('/login')
+
 
 # Index route
 @app.route('/')
@@ -78,23 +84,101 @@ def index():
         # user is not logged in
         return redirect(url_for('login'))
 
-@app.context_processor 
-def inject_notifications(): 
-    if current_user.is_authenticated: 
-        try: 
-            user_id = current_user.id 
-            notif.temperature_humidity_notification(user_id, None, None) 
-            notif.expiry_notification(user_id) 
-            notifications = notif.get_notifications(user_id) 
-            unread_count = sum(1 for n in notifications if n[4] == 0) 
-            return dict(notifications=notifications, unread_count=unread_count) 
-        except Exception as e: 
-            print("[Context Processor Error]", e) 
-            return dict(notifications=[], unread_count=0)
-    else:
-        return dict(notifications=[], unread_count=0)
 
-# Login route
+### ADMIN ACCOUNT SYSTEM ROUTES
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    form = LoginForm()
+    error = None
+    
+    if form.validate_on_submit():
+        admin = Admin.query.filter_by(username=form.username.data).first()
+        if admin and check_password_hash(admin.password, form.password.data):
+            login_user(admin, remember=False)
+            session["username"] = admin.username
+            session["user_type"] = "admin"
+            flash("Logged in successfully as admin.", "success")
+            return redirect(url_for("AdminDashboard"))
+        else:
+            error = "Invalid admin credentials."
+
+    return render_template('admin_login.html', form=form, error=error)
+
+
+@app.route("/admin/add", methods=["GET", "POST"])
+@login_required
+def AddAdmin():
+    # Must be advanced admin
+    if not isinstance(current_user._get_current_object(), Admin) or not current_user.advanced_privileges:
+        flash("You are not authorized to add new admins.", "danger")
+        return redirect(url_for("AdminDashboard"))
+
+    form = AdminCreateForm()
+    message = None
+
+    if form.validate_on_submit():
+        existing_admin = Admin.query.filter(
+            (Admin.username == form.username.data) | 
+            (Admin.email == form.email.data)
+        ).first()
+
+        if existing_admin:
+            message = "Admin already exists."
+        else:
+            new_admin = Admin(
+                name=form.name.data,
+                username=form.username.data,
+                email=form.email.data,
+                password=generate_password_hash(form.password.data),
+                advanced_privileges=False
+            )
+            db.session.add(new_admin)
+            db.session.commit()
+            flash("New admin added successfully!", "success")
+            return redirect(url_for('AdminDashboard'))
+
+    return render_template("admin_add.html", form=form, message=message)
+
+@app.route("/admin/update-password", methods=["GET", "POST"])
+@login_required
+def AdminUpdatePassword():
+    if not isinstance(current_user._get_current_object(), Admin):
+        flash("Unauthorized access.", "danger")
+        return redirect(url_for("admin_login"))
+
+    form = AdminPasswordForm()
+    message = None
+
+    if form.validate_on_submit():
+        if not check_password_hash(current_user.password, form.current_password.data):
+            message = "Current password is incorrect."
+        elif form.new_password.data != form.confirm_password.data:
+            message = "New passwords do not match."
+        else:
+            current_user.password = generate_password_hash(form.new_password.data)
+            db.session.commit()
+            flash("Password updated successfully!", "success")
+            return redirect(url_for("AdminDashboard"))
+
+    return render_template("admin_update_password.html", form=form, message=message)
+
+@app.route("/admin/dashboard")
+@login_required
+def AdminDashboard():
+    return render_template("admin_dashboard.html")
+# 
+# Logout route
+@app.route('/admin/logout')
+@login_required
+def admin_logout():
+    logout_user()
+    session.clear()
+    return redirect(url_for('admin_login'))
+
+
+###  USER ACCOUNT SYSTEM ROUTES ###
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if session.get("user") is None:
@@ -197,17 +281,13 @@ def resetPassword():
     error = None
     if not email:
         flash("Session expired or invalid.")
-        return redirect(url_for('resetByEmail'))
-        
+        return redirect(url_for('resetByEmail'))   
    
     user = User.query.filter_by(email=email).first()
-
-     
+ 
     if user is None:
         flash("Invalid session or email. Please try again.")
         return redirect(url_for('resetByEmail'))
-
-  
 
     if form.validate_on_submit():
         if form.password.data == form.passwordConfirm.data:
@@ -296,8 +376,8 @@ def verify_code():
 #   except Exception as e:
 #         return jsonify({"success": False, "error": str(e)})
 
+#### USER DASHBOARD ROUTES
 
-# Dashboard Route
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
@@ -319,6 +399,22 @@ def mark_read_notification():
             return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.context_processor 
+def inject_notifications(): 
+    if current_user.is_authenticated: 
+        try: 
+            user_id = current_user.id 
+            notif.temperature_humidity_notification(user_id, None, None) 
+            notif.expiry_notification(user_id) 
+            notifications = notif.get_notifications(user_id) 
+            unread_count = sum(1 for n in notifications if n[4] == 0) 
+            return dict(notifications=notifications, unread_count=unread_count) 
+        except Exception as e: 
+            print("[Context Processor Error]", e) 
+            return dict(notifications=[], unread_count=0)
+    else:
+        return dict(notifications=[], unread_count=0)
 
 # Dynamtically update notification bar
 @app.route('/get_notifications', methods=['GET', 'POST']) 

@@ -1,3 +1,5 @@
+import re
+import time
 from flask import Flask, jsonify, render_template, request, url_for, Response, redirect, session, flash
 from inventory import Inventory
 from scanner import Scanner
@@ -178,34 +180,61 @@ def admin_logout():
 
 
 ###  USER ACCOUNT SYSTEM ROUTES ###
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if session.get("user") is None:
-        form = LoginForm()
-        error = None
-    
-        if form.validate_on_submit():
-            user = User.query.filter_by(username=form.username.data).first()
+    form = LoginForm()
+    error = None
 
-            session["type"] = "client"
-            if user is None or not check_password_hash(user.password, form.password.data):
-                error = "Error: Invalid Credentials"
+    #session["username"] = []
+    
+    if "userFailedAttempts" not in session:
+        session["userFailedAttempts"] = 0
+    if "userLockoutTime" not in session:
+        session["userLockoutTime"] = None
+
+
+    lockoutThrehold = 5  # Number of allowed failed attempts
+    lockoutDuration = 60  # Lockout time in seconds (1 minute)
+    
+    if session["userLockoutTime"] and time.time() >= session["userLockoutTime"]:
+        session["userLockoutTime"] = None
+        session["userFailedAttempts"] = 0
+
+
+    if form.validate_on_submit():
+
+        user = User.query.filter_by(username=form.username.data).first()
+
+        if user is None:
+            error = "Error: Invalid Credentials User"
+        else:
+            if session["userLockoutTime"] and time.time() < session["userLockoutTime"]:
+                error = "Account tempororily locked. Please try again later."
             else:
-                login_user(user, form.remember_me.data)
-                session["user_id"] = user.id
+                if not check_password_hash(user.password, form.password.data):
+                    session["userFailedAttempts"] += 1
+                    attempt = session["userFailedAttempts"]
+                    if session["userFailedAttempts"] >= lockoutThrehold:
+                        session["userLockoutTime"] = time.time() + lockoutDuration
+                        error = f"Account locked for {lockoutDuration} seconds due to multiple failed attempts."
+                    else:
+                        error = f"Error: Invalid Credentials PWD {attempt}"
+                else:
+                    login_user(user, form.remember_me.data)
+                    #flash("You were successfully logged in!")
 
-                # Check if email is verified
-                if not user.email_verified:
-                    flash("Please verify your email address to access all features.")
-                    return redirect(url_for('email_verification_page'))
-            
-            return redirect(url_for('dashboard'))
-    
-        return render_template('login.html', form=form, error=error)
-    else:
-        return redirect(url_for('dashboard'))
-    
+                    session["username"] = form.username.data
+                    session["userFailedAttempts"] = 0
+                    session["userLockoutTime"] = None
+                  # Check if email is verified
+                    if not user.email_verified:
+                        flash("Please verify your email address to access all features.")
+                        return redirect(url_for('email_verification_page'))
+                    return redirect(url_for('index'))
+        
+    return render_template('login.html', form=form, error=error)
+
+
 # Create account route
 @app.route('/createAccount', methods=['GET', 'POST'])
 def createAccount():
@@ -221,26 +250,30 @@ def createAccount():
             if existing_user.email == form.email.data:
                 msg = "Email already exists."
         else:    
-            if form.password.data == form.passwordConfirm.data:
-                # Create new user
-                user = User(
-                    username=form.username.data,
-                    email=form.email.data,
-                    name='null',
-                    password=generate_password_hash(form.password.data),
-                    email_verified=False
-                )
-                db.session.add(user)
-                db.session.commit()
-                
-                # Log the user in
-                login_user(user)
-                
-                # Redirect to email verification
-                flash("Account created successfully! Please verify your email.")
-                return redirect(url_for('email_verification_page'))
+            if len(form.password.data) >= 6 and sum(c.isdigit() for c in form.password.data) >= 2 and re.search(r"[!@#$%^&*(),.?\":{}|<>]", form.password.data):
+                if form.password.data == form.passwordConfirm.data:
+                    # Create new user
+                    user = User(
+                        username=form.username.data,
+                        email=form.email.data,
+                        name='null',
+                        password=generate_password_hash(form.password.data),
+                        email_verified=False
+                    )
+                    db.session.add(user)
+                    db.session.commit()
+                    
+                    # Log the user in
+                    login_user(user)
+                    
+                    # Redirect to email verification
+                    flash("Account created successfully! Please verify your email.")
+                    return redirect(url_for('email_verification_page'))
+                else:
+                    msg = "Passwords mismatched." 
             else:
-                msg = "Passwords mismatched." 
+                msg = "Password format error: Password must be at least 6 characters long, include 2 numbers, and 1 special character required"    
+
     return render_template('createAccount.html', form=form, msg=msg)
 
 
@@ -253,7 +286,7 @@ def resetByEmail():
     if form.submit_email.data and form.validate():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
-            send_verification_code(user, mail)
+            send_verification_code(user, mail, "reset")
             flash("Verification code sent to your email.")
             error = "Verification code sent to your email."
         else:
@@ -281,27 +314,35 @@ def resetPassword():
     error = None
     if not email:
         flash("Session expired or invalid.")
-        return redirect(url_for('resetByEmail'))   
+        return redirect(url_for('resetByEmail'))
+        
    
     user = User.query.filter_by(email=email).first()
- 
+
+     
     if user is None:
         flash("Invalid session or email. Please try again.")
         return redirect(url_for('resetByEmail'))
 
+  
+
     if form.validate_on_submit():
-        if form.password.data == form.passwordConfirm.data:
-            print("Setting new password")
-            user.password = generate_password_hash(form.password.data)
-            db.session.commit()
+        if len(form.password.data) >= 6 and sum(c.isdigit() for c in form.password.data) >= 2 and re.search(r"[!@#$%^&*(),.?\":{}|<>]", form.password.data):
+            if form.password.data == form.passwordConfirm.data:
+                print("Setting new password")
+                user.password = generate_password_hash(form.password.data)
+                db.session.commit()
 
-            session.pop('reset_email', None)
+                session.pop('reset_email', None)
 
-            error = "Your password has been successfully reset."
-            return redirect(url_for('login'))  
-        else:
-            print("Form errors:", form.errors)
-            error = "Passwords do not match. Please try again."
+                error = "Your password has been successfully reset."
+                return redirect(url_for('login'))  
+            else:
+                print("Form errors:", form.errors)
+                error = "Passwords do not match. Please try again."
+        else:     
+            error = "Password format error: Password must be at least 6 characters long, include 2 numbers, and 1 special character required"    
+   
 
     return render_template('resetPassword.html', form=form, error=error)
 
@@ -310,7 +351,7 @@ def resetPassword():
 @login_required
 def logout():
     logout_user()
-    session.pop("user_id", None)
+    session.pop('username', None)
     return redirect(url_for('index'))
 
 # Email verification page
@@ -329,7 +370,7 @@ def send_verification_code_route():
         return redirect(url_for('email_verification_page'))
     
     # Send verification code
-    send_verification_code(current_user, mail)
+    send_verification_code(current_user, mail, 'verify')
     flash('A verification code has been sent to your email address.', 'success')
     return redirect(url_for('email_verification_page'))
 

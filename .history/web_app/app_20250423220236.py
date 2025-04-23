@@ -131,6 +131,7 @@ def add_item_admin():
                                                 'expiry', 'unit'])
     barcode = sanitised_fields[0]
     name = sanitised_fields[1]
+    print(name)
     brand = sanitised_fields[2]
     quantity = sanitised_fields[3]
     expiry_date = sanitised_fields[4]
@@ -141,7 +142,7 @@ def add_item_admin():
     valid = input_check.validate_expiry(expiry_date)
     if valid:
         try:
-            item.add_item(barcode, name, brand, expiry_date, quantity, unit)
+            item.add_item(barcode, barcode, name, brand, expiry_date, quantity, unit)
             return jsonify({'success': True})
         except Exception as e:
             print(e)

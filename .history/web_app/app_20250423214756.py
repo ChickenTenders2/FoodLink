@@ -122,32 +122,6 @@ def update_item_admin():
             return jsonify({'success': False, 'error': str(e)})
     else:
          return jsonify({'success': False, 'error': str("Expiry formatted incorrectly")})
-    
-# Adds a new item to the database.
-@app.route('/admin/item_view/add_item', methods = ['POST'])
-def add_item_admin(): 
-    # Sanitise the input to prevent sql injection.
-    sanitised_fields = input_check.sanitise_all(['barcode', 'name', 'brand', 'quantity', 
-                                                'expiry', 'unit'])
-    barcode = sanitised_fields[0]
-    name = sanitised_fields[1]
-    brand = sanitised_fields[2]
-    quantity = sanitised_fields[3]
-    expiry_date = sanitised_fields[4]
-    unit = sanitised_fields[5]
-    if barcode == "":
-        barcode = None
-    # Checks that the format is correct for the expiry date.
-    valid = input_check.validate_expiry(expiry_date)
-    if valid:
-        try:
-            item.add_item(barcode, name, brand, expiry_date, quantity, unit)
-            return jsonify({'success': True})
-        except Exception as e:
-            print(e)
-            return jsonify({'success': False, 'error': str(e)})
-    else:
-         return jsonify({'success': False, 'error': str("Expiry formatted incorrectly")})
 
 # Updates the details of a selected recipe in the recipe table.
 @app.route('/admin/item_view/update_recipe', methods = ['POST'])

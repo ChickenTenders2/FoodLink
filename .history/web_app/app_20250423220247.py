@@ -141,7 +141,7 @@ def add_item_admin():
     valid = input_check.validate_expiry(expiry_date)
     if valid:
         try:
-            item.add_item(barcode, name, brand, expiry_date, quantity, unit)
+            item.add_item(barcode, barcode, name, brand, expiry_date, quantity, unit)
             return jsonify({'success': True})
         except Exception as e:
             print(e)

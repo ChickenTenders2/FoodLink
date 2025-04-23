@@ -129,22 +129,22 @@ def add_item_admin():
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_check.sanitise_all(['barcode', 'name', 'brand', 'quantity', 
                                                 'expiry', 'unit'])
-    barcode = sanitised_fields[0]
+    inventory_id = request.form['inventory_id']
     name = sanitised_fields[1]
     brand = sanitised_fields[2]
     quantity = sanitised_fields[3]
     expiry_date = sanitised_fields[4]
     unit = sanitised_fields[5]
-    if barcode == "":
+    barcode = request.form[0]
+    if barcode == "None":
         barcode = None
     # Checks that the format is correct for the expiry date.
     valid = input_check.validate_expiry(expiry_date)
     if valid:
         try:
-            item.add_item(barcode, name, brand, expiry_date, quantity, unit)
+            item.add_item(barcode, inventory_id, barcode, name, brand, expiry_date, quantity, unit)
             return jsonify({'success': True})
         except Exception as e:
-            print(e)
             return jsonify({'success': False, 'error': str(e)})
     else:
          return jsonify({'success': False, 'error': str("Expiry formatted incorrectly")})

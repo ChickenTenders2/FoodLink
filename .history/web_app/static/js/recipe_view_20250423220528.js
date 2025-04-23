@@ -3,7 +3,7 @@ async function remove_item(id) {
         return;
     }
 
-    // Fetches the flask route for deleting an item from the database.
+    // Sends update command and waits for response
     const response = await fetch('/admin/recipe_view/delete', {
         method: 'POST',
         body: id,

@@ -1,3 +1,5 @@
+import re
+import time
 from flask import Flask, jsonify, render_template, request, url_for, Response, redirect, session, flash
 from inventory import Inventory
 from scanner import Scanner
@@ -17,15 +19,22 @@ from extensions import db, login_manager
 from flask_mail import Mail, Message
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_session import Session
 import os
 import random
-from models import User
-from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm
+from models import User, Admin
+from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
 from email_verification import send_verification_code, verification_codes
+from input_handling import InputHandling
 
 # Import database and user model
-
 app = Flask(__name__, template_folder = "templates")
+
+app.config["SESSION_PERMANENT"] = False     
+app.config["SESSION_TYPE"] = "filesystem"
+
+# Initialize Flask-Session
+Session(app)
 
 # Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_key_for_testing')
@@ -44,9 +53,6 @@ app.config['MAIL_DEFAULT_SENDER'] = 'FoodLink <foodlink2305@gmail.com>'
 from settings import settings_bp
 app.register_blueprint(settings_bp)
 
-
-user_id = 2
-
 # Initialize extensions
 bootstrap = Bootstrap(app)
 login_manager.init_app(app)
@@ -57,11 +63,19 @@ mail = Mail(app)
 # Initialize Flask-Login
 login_manager = LoginManager(app)
 
-
 # User loader function for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    #return User.query.get(int(user_id)) was working but adding user_type makes life easier in the future
+    user_type = session.get("user_type")
+    if user_type == "admin":
+        return Admin.query.get(int(user_id))
+    else:
+        return User.query.get(int(user_id))
+
+@login_manager.unauthorized_handler
+def back_to_login():
+    return redirect('/login')
 
 
 # Index route
@@ -73,45 +87,154 @@ def index():
         # user is not logged in
         return redirect(url_for('login'))
 
-@app.context_processor 
-def inject_notifications(): 
-    if current_user.is_authenticated: 
-        try: 
-            user_id = current_user.id 
-            notif.temperature_humidity_notification(user_id, None, None) 
-            notif.expiry_notification(user_id) 
-            notifications = notif.get_notifications(user_id) 
-            unread_count = sum(1 for n in notifications if n[4] == 0) 
-            return dict(notifications=notifications, unread_count=unread_count) 
-        except Exception as e: 
-            print("[Context Processor Error]", e) 
-            return dict(notifications=[], unread_count=0)
-    else:
-        return dict(notifications=[], unread_count=0)
 
-# Login route
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+### ADMIN ACCOUNT SYSTEM ROUTES
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
     form = LoginForm()
     error = None
     
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        
-        if user is None or not check_password_hash(user.password, form.password.data):
-            error = "Error: Invalid Credentials"
+        admin = Admin.query.filter_by(username=form.username.data).first()
+        if admin and check_password_hash(admin.password, form.password.data):
+            login_user(admin, remember=False)
+            session["username"] = admin.username
+            session["user_type"] = "admin"
+            flash("Logged in successfully as admin.", "success")
+            return redirect(url_for("AdminDashboard"))
         else:
-            login_user(user, form.remember_me.data)
-            session["username"] = form.username.data
-            
-            # Check if email is verified
-            if not user.email_verified:
-                flash("Please verify your email address to access all features.")
-                return redirect(url_for('email_verification_page'))
-            
-            return redirect(url_for('dashboard'))
+            error = "Invalid admin credentials."
+
+    return render_template('admin_login.html', form=form, error=error)
+
+
+@app.route("/admin/add", methods=["GET", "POST"])
+@login_required
+def AddAdmin():
+    # Must be advanced admin
+    if not isinstance(current_user._get_current_object(), Admin) or not current_user.advanced_privileges:
+        flash("You are not authorized to add new admins.", "danger")
+        return redirect(url_for("AdminDashboard"))
+
+    form = AdminCreateForm()
+    message = None
+
+    if form.validate_on_submit():
+        existing_admin = Admin.query.filter(
+            (Admin.username == form.username.data) | 
+            (Admin.email == form.email.data)
+        ).first()
+
+        if existing_admin:
+            message = "Admin already exists."
+        else:
+            new_admin = Admin(
+                name=form.name.data,
+                username=form.username.data,
+                email=form.email.data,
+                password=generate_password_hash(form.password.data),
+                advanced_privileges=False
+            )
+            db.session.add(new_admin)
+            db.session.commit()
+            flash("New admin added successfully!", "success")
+            return redirect(url_for('AdminDashboard'))
+
+    return render_template("admin_add.html", form=form, message=message)
+
+@app.route("/admin/update-password", methods=["GET", "POST"])
+@login_required
+def AdminUpdatePassword():
+    if not isinstance(current_user._get_current_object(), Admin):
+        flash("Unauthorized access.", "danger")
+        return redirect(url_for("admin_login"))
+
+    form = AdminPasswordForm()
+    message = None
+
+    if form.validate_on_submit():
+        if not check_password_hash(current_user.password, form.current_password.data):
+            message = "Current password is incorrect."
+        elif form.new_password.data != form.confirm_password.data:
+            message = "New passwords do not match."
+        else:
+            current_user.password = generate_password_hash(form.new_password.data)
+            db.session.commit()
+            flash("Password updated successfully!", "success")
+            return redirect(url_for("AdminDashboard"))
+
+    return render_template("admin_update_password.html", form=form, message=message)
+
+@app.route("/admin/dashboard")
+@login_required
+def AdminDashboard():
+    return render_template("admin_dashboard.html")
+# 
+# Logout route
+@app.route('/admin/logout')
+@login_required
+def admin_logout():
+    logout_user()
+    session.clear()
+    return redirect(url_for('admin_login'))
+
+
+###  USER ACCOUNT SYSTEM ROUTES ###
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    error = None
+
+    #session["username"] = []
     
+    if "userFailedAttempts" not in session:
+        session["userFailedAttempts"] = 0
+    if "userLockoutTime" not in session:
+        session["userLockoutTime"] = None
+
+
+    lockoutThrehold = 5  # Number of allowed failed attempts
+    lockoutDuration = 60  # Lockout time in seconds (1 minute)
+    
+    if session["userLockoutTime"] and time.time() >= session["userLockoutTime"]:
+        session["userLockoutTime"] = None
+        session["userFailedAttempts"] = 0
+
+
+    if form.validate_on_submit():
+
+        user = User.query.filter_by(username=form.username.data).first()
+
+        if user is None:
+            error = "Error: Invalid Credentials User"
+        else:
+            if session["userLockoutTime"] and time.time() < session["userLockoutTime"]:
+                error = "Account tempororily locked. Please try again later."
+            else:
+                if not check_password_hash(user.password, form.password.data):
+                    session["userFailedAttempts"] += 1
+                    attempt = session["userFailedAttempts"]
+                    if session["userFailedAttempts"] >= lockoutThrehold:
+                        session["userLockoutTime"] = time.time() + lockoutDuration
+                        error = f"Account locked for {lockoutDuration} seconds due to multiple failed attempts."
+                    else:
+                        error = f"Error: Invalid Credentials PWD {attempt}"
+                else:
+                    login_user(user, form.remember_me.data)
+                    #flash("You were successfully logged in!")
+
+                    session["username"] = form.username.data
+                    session["userFailedAttempts"] = 0
+                    session["userLockoutTime"] = None
+                  # Check if email is verified
+                    if not user.email_verified:
+                        flash("Please verify your email address to access all features.")
+                        return redirect(url_for('email_verification_page'))
+                    return redirect(url_for('index'))
+        
     return render_template('login.html', form=form, error=error)
+
 
 # Create account route
 @app.route('/createAccount', methods=['GET', 'POST'])
@@ -128,26 +251,30 @@ def createAccount():
             if existing_user.email == form.email.data:
                 msg = "Email already exists."
         else:    
-            if form.password.data == form.passwordConfirm.data:
-                # Create new user
-                user = User(
-                    username=form.username.data,
-                    email=form.email.data,
-                    name='null',
-                    password=generate_password_hash(form.password.data),
-                    email_verified=False
-                )
-                db.session.add(user)
-                db.session.commit()
-                
-                # Log the user in
-                login_user(user)
-                
-                # Redirect to email verification
-                flash("Account created successfully! Please verify your email.")
-                return redirect(url_for('email_verification_page'))
+            if len(form.password.data) >= 6 and sum(c.isdigit() for c in form.password.data) >= 2 and re.search(r"[!@#$%^&*(),.?\":{}|<>]", form.password.data):
+                if form.password.data == form.passwordConfirm.data:
+                    # Create new user
+                    user = User(
+                        username=form.username.data,
+                        email=form.email.data,
+                        name='null',
+                        password=generate_password_hash(form.password.data),
+                        email_verified=False
+                    )
+                    db.session.add(user)
+                    db.session.commit()
+                    
+                    # Log the user in
+                    login_user(user)
+                    
+                    # Redirect to email verification
+                    flash("Account created successfully! Please verify your email.")
+                    return redirect(url_for('email_verification_page'))
+                else:
+                    msg = "Passwords mismatched." 
             else:
-                msg = "Passwords mismatched." 
+                msg = "Password format error: Password must be at least 6 characters long, include 2 numbers, and 1 special character required"    
+
     return render_template('createAccount.html', form=form, msg=msg)
 
 
@@ -160,7 +287,7 @@ def resetByEmail():
     if form.submit_email.data and form.validate():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
-            send_verification_code(user, mail)
+            send_verification_code(user, mail, "reset")
             flash("Verification code sent to your email.")
             error = "Verification code sent to your email."
         else:
@@ -201,18 +328,22 @@ def resetPassword():
   
 
     if form.validate_on_submit():
-        if form.password.data == form.passwordConfirm.data:
-            print("Setting new password")
-            user.password = generate_password_hash(form.password.data)
-            db.session.commit()
+        if len(form.password.data) >= 6 and sum(c.isdigit() for c in form.password.data) >= 2 and re.search(r"[!@#$%^&*(),.?\":{}|<>]", form.password.data):
+            if form.password.data == form.passwordConfirm.data:
+                print("Setting new password")
+                user.password = generate_password_hash(form.password.data)
+                db.session.commit()
 
-            session.pop('reset_email', None)
+                session.pop('reset_email', None)
 
-            error = "Your password has been successfully reset."
-            return redirect(url_for('login'))  
-        else:
-            print("Form errors:", form.errors)
-            error = "Passwords do not match. Please try again."
+                error = "Your password has been successfully reset."
+                return redirect(url_for('login'))  
+            else:
+                print("Form errors:", form.errors)
+                error = "Passwords do not match. Please try again."
+        else:     
+            error = "Password format error: Password must be at least 6 characters long, include 2 numbers, and 1 special character required"    
+   
 
     return render_template('resetPassword.html', form=form, error=error)
 
@@ -240,7 +371,7 @@ def send_verification_code_route():
         return redirect(url_for('email_verification_page'))
     
     # Send verification code
-    send_verification_code(current_user, mail)
+    send_verification_code(current_user, mail, 'verify')
     flash('A verification code has been sent to your email address.', 'success')
     return redirect(url_for('email_verification_page'))
 
@@ -277,6 +408,13 @@ def verify_code():
     return redirect(url_for('email_verification_page'))
 
 
+### SETTINGS PAGE ROUTE
+
+@app.route('/settings')
+@login_required
+def settings_page():
+    return redirect(url_for('settings.settings_page'))
+
 # @app.route('/success')
 # def added_successfully():
 #   try:
@@ -287,8 +425,8 @@ def verify_code():
 #   except Exception as e:
 #         return jsonify({"success": False, "error": str(e)})
 
+#### USER DASHBOARD ROUTES
 
-# Dashboard Route
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
@@ -311,6 +449,22 @@ def mark_read_notification():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.context_processor 
+def inject_notifications(): 
+    if current_user.is_authenticated: 
+        try: 
+            user_id = current_user.id 
+            notif.temperature_humidity_notification(user_id, None, None) 
+            notif.expiry_notification(user_id) 
+            notifications = notif.get_notifications(user_id) 
+            unread_count = sum(1 for n in notifications if n[4] == 0) 
+            return dict(notifications=notifications, unread_count=unread_count) 
+        except Exception as e: 
+            print("[Context Processor Error]", e) 
+            return dict(notifications=[], unread_count=0)
+    else:
+        return dict(notifications=[], unread_count=0)
+
 # Dynamtically update notification bar
 @app.route('/get_notifications', methods=['GET', 'POST']) 
 @login_required
@@ -331,6 +485,8 @@ def get_notifications():
     
     try:
         device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
+        user_id = session.get("user_id")
+
         token = tb.get_jwt_token()
         data = tb.get_telemetry(token, device_id)
 
@@ -365,6 +521,7 @@ def get_notifications():
 
 # Inventory interface
 @app.route('/inventory/')
+@login_required
 def get_inventory():
     return render_template("inventory.html")
 
@@ -372,7 +529,9 @@ def get_inventory():
 @app.route('/inventory/get/', defaults={'search_query': None})
 @app.route('/inventory/get/<search_query>')
 # used to dynamically get inventory
+@login_required
 def api_inventory(search_query = None):
+    user_id = session.get("user_id")
     try:
         # searches for an item if query is provided otherwise gets all items
         if search_query:
@@ -385,18 +544,23 @@ def api_inventory(search_query = None):
         return jsonify({"success": False, "error":str(e)})
 
 # Add item to inventory interface
+@login_required
 @app.route("/inventory/add_item/")
+@login_required
 def add_to_inventory():
     return render_template("inventory_add.html")
 
 # Add item to inventory
+@login_required
 @app.route("/inventory/add_item/add", methods=["POST"])
 def append_inventory():
+    user_id = session.get("user_id")
     item_id = request.form.get("item_id")
     response = inventory.process_add_form(user_id, item_id, request.form)    
     return jsonify(response)
 
 # Update quantity and expiry of item in inventory
+@login_required
 @app.route('/inventory/update_item', methods = ['POST'])
 def update_item(): 
     try:
@@ -411,7 +575,8 @@ def update_item():
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
-    
+
+@login_required
 @app.route('/remove_item', methods=['POST'])
 def remove_item():
     try:
@@ -422,9 +587,10 @@ def remove_item():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-
+@login_required
 @app.route("/inventory/add_item/new", methods = ["POST"])
 def new_item():
+    user_id = session.get("user_id")
     response = item.process_add_form(request.form, user_id)
     item_id = response["item_id"]
 
@@ -447,6 +613,7 @@ def new_item():
     else:
         return jsonify(response)
     
+@login_required
 @app.route("/inventory/update_items_quantity", methods=["POST"])
 def update_quantities():
     try:  
@@ -471,17 +638,20 @@ def update_quantities():
 # ### BARCODE SCANNING ROUTES ###
 
 # Opens camera module and returns feed
+@login_required
 @app.route('/scanner/get')
 def get_scanner():
     return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # Closes camera module
+@login_required
 @app.route('/scanner/close')
 def close_scanner():
     scanner.release_capture()
     return jsonify({"success":True})
 
 # Returns the barcode number if one is found
+@login_required
 @app.route('/scanner/get_object')
 def get_object():
     object = scanner.get_scanned()
@@ -492,11 +662,13 @@ def get_object():
         return jsonify({"success": False})
 
 @app.route("/unpause_scanner")
+@login_required
 def unpause_scanner():
     scanner.unpause_scanner()
     return jsonify({"success":True})
 
 @app.route("/scanner/toggle_mode/<value>")
+@login_required
 def toggle_scan_mode(value):
     if value == "true":
         scanner.toggle_mode(True)
@@ -511,7 +683,9 @@ def toggle_scan_mode(value):
 ### ITEM ROUTES ###
 
 @app.route("/items/single_text_search/<item_name>")
+@login_required
 def single_item_search(item_name):
+    user_id = session.get("user_id")
     try:
         items = item.text_search(user_id, item_name)
         item_info = items[0]
@@ -521,7 +695,9 @@ def single_item_search(item_name):
 
 # Get items by text search
 @app.route("/items/text_search", methods=["POST"])
+@login_required
 def text_search():
+    user_id = session.get("user_id")
     try:
         search_term = request.form["search_term"]
         items = item.text_search(user_id, search_term)
@@ -531,8 +707,9 @@ def text_search():
 
 # Get item by barcode search
 @app.route("/items/barcode_search/<barcode>")
+@login_required
 def get_item_by_barcode(barcode):
-    
+    user_id = session.get("user_id")
     try:
         item_info = item.barcode_search(user_id, barcode)
         if item_info:
@@ -545,6 +722,7 @@ def get_item_by_barcode(barcode):
 
 # Get item by id
 @app.route("/items/get_item/<item_id>")
+@login_required
 def get_item(item_id):
     try:
         item_info = item.get_item(item_id)
@@ -554,11 +732,13 @@ def get_item(item_id):
 
 # Add item interface
 @app.route('/items/add_item')
+@login_required
 def add_item():
     return render_template("add_item.html")
 
 # Add item to item table
 @app.route('/items/add_item/add', methods=["POST"])
+@login_required
 def append_item_db():
     response = item.process_add_form(request.form)
     if response["success"]:
@@ -575,6 +755,7 @@ def append_item_db():
 
 # Check if item has an image
 @app.route("/find_image/<item_id>")
+@login_required
 def find_image(item_id):
     path = f"static/images/{item_id}.jpg"
     exists = file_exists(path)
@@ -584,7 +765,9 @@ def find_image(item_id):
 ### ITEM REPORT ROUTES
 
 @app.route("/items/reports/new", methods=["POST"])
+@login_required
 def report_item():
+    user_id = session.get("user_id")
     try:
         new_item_id = request.form.get("new_item_id")
         item_id = request.form.get("item_id") or None
@@ -594,18 +777,22 @@ def report_item():
         return jsonify({"success": False, "error":str(e)})
 
 @app.route("/items/reports")
+@login_required
 def display_reports():
     return render_template("reports.html")
 
 @app.route("/items/reports/get")
+@login_required
 def get_reports():
     return jsonify({"success": True, "reports": report.get_reports()})
 
 @app.route("/items/reports/<new_item_id>/<item_id>")
+@login_required
 def display_report(new_item_id, item_id):
     return render_template("report.html", new_item_id = new_item_id, item_id = item_id)
 
 @app.route("/items/reports/resolve", methods=["POST"])
+@login_required
 def resolve_report():
     try:
         action = request.form.get("action")
@@ -701,7 +888,9 @@ def resolve_report():
 # Shopping List Interface Route
 
 @app.route('/shopping_list', methods=['GET', 'POST'])
+@login_required
 def get_shoppingList():
+    user_id = session.get("user_id")
     if request.method == 'POST':
         try:
             if 'clear' in request.form:
@@ -728,7 +917,9 @@ def get_shoppingList():
     return render_template("shoppinglist.html", items=items, unbought_items=unbought_items, bought_items=bought_items, low_stock=low_stock)
 
 @app.route('/shopping_list/add', methods=['POST'])
+@login_required
 def add_shopping_item():
+    user_id = session.get("user_id")
     try:
         item_name = request.form['item_name']
         quantity = request.form['quantity']
@@ -738,6 +929,7 @@ def add_shopping_item():
         return jsonify({"success": False, "error": str(e)})
 
 @app.route('/shopping_list/update', methods=['POST'])
+@login_required
 def update_shopping_item():
     try:
         item_id = request.form['item_id']
@@ -749,7 +941,9 @@ def update_shopping_item():
         return jsonify({"success": False, "error": str(e)})
 
 @app.route("/shopping_list/add_multi", methods=["POST"])
+@login_required
 def add_shopping_items():
+    user_id = session.get("user_id")
     try:
         items_string = request.form.get("items")
         items = json.loads(items_string)
@@ -765,14 +959,18 @@ def add_shopping_items():
 ### UTENSILS AND APPLIANCE SELECTION ROUTES
     
 @app.route('/tools/select')
+@login_required
 def select_tools():
+    user_id = session.get("user_id")
     utensils = tool.get_tools("utensil")
     appliances = tool.get_tools("appliance")
     tool_ids = tool.get_user_tool_ids(user_id)
     return render_template('select_utensils.html', utensils=utensils, appliances=appliances, selected_ids=tool_ids)
 
 @app.route('/tools/save', methods=['POST'])
+@login_required
 def save_tools():
+    user_id = session.get("user_id")
     try:
         selected_tools = request.form.getlist('tool')
         tool.save_user_tools(user_id, selected_tools)
@@ -781,17 +979,21 @@ def save_tools():
         return jsonify({"success": False, "message": "Failed to save tools."})
 
 @app.route("/tools/get")
+@login_required
 def get_tools():
     tools = tool.get_tools()
     print(tools)
     return jsonify({"success": True, "tools": tools})
 
 @app.route("/recipes")
+@login_required
 def recipe_page():
     return render_template("recipes.html")
 
 @app.route("/recipes/get", methods=["POST"])
+@login_required
 def get_recipes():
+    user_id = session.get("user_id")
     try:
         ###### CURRENTLY GET TOOL IDS EACH TIME UPDATE WHEN SESSION MADE TO CHANGEO NLY AFTER TOOLS/SAVE
         user_tool_ids = tool.get_user_tool_ids(user_id)
@@ -834,7 +1036,9 @@ def get_recipes():
         return jsonify({"success": False, "error": str(e)})
     
 @app.route("/recipes/get/<recipe_id>")
+@login_required
 def get_recipe(recipe_id):
+    user_id = session.get("user_id")
     try:
         record = recipe_sql.get_recipe(recipe_id)
         recipe = recipe_object(record)
@@ -847,7 +1051,9 @@ def get_recipe(recipe_id):
         return jsonify({"success": False, "error": str(e)})
 
 @app.route("/recipes/add", methods=["POST"])
+@login_required
 def add_recipe():
+    user_id = session.get("user_id")
     try:
         name = request.form.get("name")
         servings = request.form.get("servings")
@@ -883,6 +1089,7 @@ def add_recipe():
         return jsonify({"success": False, "error": str(e)})
 
 @app.route("/recipes/update", methods=["POST"])
+@login_required
 def update_recipe():
     try:
         recipe_id = request.form.get("recipe_id")
@@ -921,6 +1128,7 @@ def update_recipe():
         return jsonify({"success": False, "error": str(e)})
 
 @app.route("/recipes/delete/<recipe_id>")
+@login_required
 def remove_recipe(recipe_id):
     try:
         ### MERGE FUNCTIONS WHEM REMOVING OOP
@@ -930,16 +1138,6 @@ def remove_recipe(recipe_id):
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
-
-
-### SETTINGS PAGE ROUTE
-
-@app.route('/settings')
-def settings_page():
-    if current_user.is_authenticated:
-        return redirect(url_for('settings.settings_page'))
-    return redirect(url_for('login'))
-
 
 if __name__ == '__main__':
     # Classes for handling sql expressions
@@ -962,6 +1160,8 @@ if __name__ == '__main__':
     tool = Tool()
 
     recipe_sql = Recipe()
+
+    input_check = InputHandling()
 
     # Runs the app
     app.run(debug=True)

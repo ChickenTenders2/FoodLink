@@ -1,0 +1,27 @@
+{% extends "admin_base.html" %}
+
+{% block page_content %}
+<h2>Add New Admin</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.username.label }}<br>
+    {{ form.username() }}<br>
+
+    {{ form.name.label }}<br>
+    {{ form.name() }}<br>
+
+    {{ form.email.label }}<br>
+    {{ form.email() }}<br>
+
+    {{ form.password.label }}<br>
+    {{ form.password() }}<br>
+
+    {{ form.submit() }}
+</form>
+
+{% if message %}
+    <div class="message">{{ message }}</div>
+{% endif %}
+
+<a class="home-link" href="{{ url_for('AdminDashboard') }}">Back to Dashboard</a>
+{% endblock %}

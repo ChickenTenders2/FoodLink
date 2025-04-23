@@ -1,5 +1,4 @@
 #include <DHT.h>
-#include "Ultrasonic.h"
 #include <SoftwareSerial.h>
 
 #define RxD 8    
@@ -8,7 +7,6 @@
 #define DHTTYPE DHT11
 
 DHT dht(DHTPIN, DHTTYPE);
-Ultrasonic ultrasonic(4);
 SoftwareSerial blueToothSerial(RxD, TxD);
 
 void setup() {
@@ -39,15 +37,12 @@ void loop() {
   // Variables for sensor readings.
   float temp = dht.readTemperature();
   float humid = dht.readHumidity();
-  long range = ultrasonic.MeasureInInches();
 
   // Readings to be sent via Bluetooth in JSON format. 
   blueToothSerial.print("{\"temperature\":");
   blueToothSerial.print(temp);
   blueToothSerial.print(", \"humidity\":");
   blueToothSerial.print(humid);
-  blueToothSerial.print(", \"distance\":");
-  blueToothSerial.print(range);
   blueToothSerial.println("}");
 
   // 2 second delay between readings.

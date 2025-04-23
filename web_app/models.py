@@ -62,3 +62,17 @@ class Settings(db.Model):
     
     # Humidity range preferences (in percentage)
     max_humidity = db.Column(db.Float, default=50.0)
+    
+class Admin(db.Model, UserMixin):
+    __tablename__ = 'admin'
+    #admin doesnt need email verification
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=True)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    #admin does not need the properties an user does
+
+    # allows special privileges for advanced admins to add new admins
+    advanced_privileges = db.Column(db.Boolean, default=False)
+    

@@ -86,6 +86,8 @@ def inject_notifications():
         except Exception as e: 
             print("[Context Processor Error]", e) 
             return dict(notifications=[], unread_count=0)
+    else:
+        return dict(notifications=[], unread_count=0)
 
 # Login route
 @app.route('/login', methods=['GET', 'POST'])

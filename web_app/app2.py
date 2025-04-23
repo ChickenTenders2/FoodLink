@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, render_template, request, url_for, Response
-from item import item_table
+from item import Item
 from recipe import Recipe
 from input_handling import InputHandling
 from flask_session import Session
@@ -247,6 +247,6 @@ def add_recipe_tools():
 if __name__ == '__main__':
     # Classes for handling sql expressions
     input_check = InputHandling()
-    item = item_table()
+    item = Item()
     recipe = Recipe()
     app.run(debug=True)

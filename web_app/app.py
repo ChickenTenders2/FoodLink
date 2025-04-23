@@ -25,6 +25,7 @@ import random
 from models import User, Admin
 from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
 from email_verification import send_verification_code, verification_codes
+from input_handling import InputHandling
 
 # Import database and user model
 app = Flask(__name__, template_folder = "templates")
@@ -1159,6 +1160,8 @@ if __name__ == '__main__':
     tool = Tool()
 
     recipe_sql = Recipe()
+
+    input_check = InputHandling()
 
     # Runs the app
     app.run(debug=True)

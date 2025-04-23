@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodLink Admin</title>
+    <!-- Link to the external CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1 class="item_view_title">Recipes Table</h1>
+    <div class="items">
+    <table class="table-items">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Servings</th>
+            <th>Preperation Time</th>
+            <th>Cooking Time</th>
+            <th>Instructions</th>
+        </tr>
+        {% for row in recipes %}
+            <tr onmouseover="interact(event)" onclick="options(event)" onmouseout="reset(event)">
+            {% for col in row %}
+                <td>{{ col }}</td>
+            {% endfor %}
+                <td style="visibility:hidden;"><button class="item_button" onclick="remove_item(`{{ row[0] }}`, event)"> X </button></td>
+                <td style="visibility:hidden;"><button class="item_button" onclick="open_popup(`({{ row[1] }})`, `{{ row[1] }}`, `{{ row[2] }}`, `{{ row[3] }}`, `{{ row[4] }}`, `{{ row[5] }}`, `{{ row[0] }}`, `{{ row[6] }}`)"> ✐ </button></td>
+            </tr>
+        {% endfor %}
+    </table>
+    </div>
+    <button class="add" onclick="open_popup('New Recipe','', '', '', '', '', '', true)">NEW RECIPE</button>
+       <!-- Pop-Up for Editing Quantity & Expiration Date -->
+       <div id="popup" class="popup">
+        <h2 id="popup-title"></h2>
+        <form id="update-form">
+            <label for="name">Name:</label>
+            <input type="string" id="name" name ="name" required>
+            <br><br>
+            <label for="servings">Servings:</label>
+            <input type="number" id="servings" name ="servings" required>
+            <br><br>
+            <label for="prep">Perperation Time:</label>
+            <input type="number" id="prep" name ="prep" required>
+            <br><br>
+            <label for="cook">Cooking Time:</label>
+            <input type="number" id="cook" name ="cook" required>
+            <br><br>
+            <label for="instructions">Instructions:</label>
+            <br><br>
+            <textarea cols="50" class="instructions-form" id="instructions" name="instructions" required></textarea>
+            <br><br>
+            <!-- hidden inputs used so js code has variables needed to update-->
+            <input type="hidden" id="original-name" name="original-name">
+            <input type="hidden" id="original-servings" name="original-servings">
+            <input type="hidden" id="original-prep" name="original-prep">
+            <input type="hidden" id="original-cook" name="original-cook">
+            <input type="hidden" id="original-instructions" name="original-instructions">
+            <input type="hidden" id="recipe-id" name="recipe-id">
+            <button type="submit">Next</button>
+            <button type="button" id="exit" style="display: none"; onclick="close_popup()">Exit</button>
+        </form>
+    </div>
+    <div id="edit_ingredients_popup" class="popup">
+        <form id="update-form-items">  
+        <h3>Edit Ingredients</h3>
+        <input type="hidden" name="recipe_id" id="hidden_recipe_id">
+        <div id="ingredients_list_container"></div>
+        <br><br>
+        <button type="button" onclick="add_ingredient_row()">+ Add Ingredient</button>
+        <br><br>
+        <button type="submit">Next</button>
+        </form>
+    </div>
+    <div id="edit_tools_popup" class="popup">
+        <form id="update-form-tools"> 
+        <h3>Edit Tools</h3>
+        <div id="tools_list_container"></div>
+        <div id="tool_add_controls"></div>
+        <button type="submit">Save</button>
+        <br>
+        </form>
+    </div>
+    <script src="{{ url_for('static', filename='js/recipe_view.js') }}"></script> 
+    <script src="{{ url_for('static', filename='js/table.js') }}"></script>  
+</body>
+</html>

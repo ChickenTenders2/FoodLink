@@ -17,6 +17,7 @@ from extensions import db, login_manager
 from flask_mail import Mail, Message
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_session import Session
 import os
 import random
 from models import User
@@ -24,8 +25,13 @@ from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPassw
 from email_verification import send_verification_code, verification_codes
 
 # Import database and user model
-
 app = Flask(__name__, template_folder = "templates")
+
+app.config["SESSION_PERMANENT"] = False     
+app.config["SESSION_TYPE"] = "filesystem"
+
+# Initialize Flask-Session
+Session(app)
 
 # Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_key_for_testing')
@@ -44,9 +50,6 @@ app.config['MAIL_DEFAULT_SENDER'] = 'FoodLink <foodlink2305@gmail.com>'
 from settings import settings_bp
 app.register_blueprint(settings_bp)
 
-
-user_id = 2
-
 # Initialize extensions
 bootstrap = Bootstrap(app)
 login_manager.init_app(app)
@@ -57,12 +60,14 @@ mail = Mail(app)
 # Initialize Flask-Login
 login_manager = LoginManager(app)
 
-
 # User loader function for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+@login_manager.unauthorized_handler
+def back_to_login():
+    return redirect('/login')
 
 # Index route
 @app.route('/')
@@ -76,27 +81,31 @@ def index():
 # Login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
-    error = None
+    if session.get("user") is None:
+        form = LoginForm()
+        error = None
     
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        
-        if user is None or not check_password_hash(user.password, form.password.data):
-            error = "Error: Invalid Credentials"
-        else:
-            login_user(user, form.remember_me.data)
-            session["username"] = form.username.data
-            
-            # Check if email is verified
-            if not user.email_verified:
-                flash("Please verify your email address to access all features.")
-                return redirect(url_for('email_verification_page'))
+        if form.validate_on_submit():
+            user = User.query.filter_by(username=form.username.data).first()
+
+            session["type"] = "client"
+            if user is None or not check_password_hash(user.password, form.password.data):
+                error = "Error: Invalid Credentials"
+            else:
+                login_user(user, form.remember_me.data)
+                session["user_id"] = user.id
+
+                # Check if email is verified
+                if not user.email_verified:
+                    flash("Please verify your email address to access all features.")
+                    return redirect(url_for('email_verification_page'))
             
             return redirect(url_for('dashboard'))
     
-    return render_template('login.html', form=form, error=error)
-
+        return render_template('login.html', form=form, error=error)
+    else:
+        return redirect(url_for('dashboard'))
+    
 # Create account route
 @app.route('/createAccount', methods=['GET', 'POST'])
 def createAccount():
@@ -205,7 +214,7 @@ def resetPassword():
 @login_required
 def logout():
     logout_user()
-    session.pop('username', None)
+    session.pop("user_id", None)
     return redirect(url_for('index'))
 
 # Email verification page
@@ -278,6 +287,7 @@ def verify_code():
 def dashboard():
     try:
         device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
+        user_id = session.get("user_id")
 
         token = tb.get_jwt_token()
         data = tb.get_telemetry(token, device_id)
@@ -347,6 +357,7 @@ def get_notifications():
 
 # Inventory interface
 @app.route('/inventory/')
+@login_required
 def get_inventory():
     return render_template("inventory.html")
 
@@ -355,6 +366,7 @@ def get_inventory():
 @app.route('/inventory/get/<search_query>')
 # used to dynamically get inventory
 def api_inventory(search_query = None):
+    user_id = session.get("user_id")
     try:
         # searches for an item if query is provided otherwise gets all items
         if search_query:
@@ -368,12 +380,14 @@ def api_inventory(search_query = None):
 
 # Add item to inventory interface
 @app.route("/inventory/add_item/")
+@login_required
 def add_to_inventory():
     return render_template("inventory_add.html")
 
 # Add item to inventory
 @app.route("/inventory/add_item/add", methods=["POST"])
 def append_inventory():
+    user_id = session.get("user_id")
     item_id = request.form.get("item_id")
     response = inventory.process_add_form(user_id, item_id, request.form)    
     return jsonify(response)
@@ -407,6 +421,7 @@ def remove_item():
 
 @app.route("/inventory/add_item/new", methods = ["POST"])
 def new_item():
+    user_id = session.get("user_id")
     response = item.process_add_form(request.form, user_id)
     item_id = response["item_id"]
 
@@ -494,6 +509,7 @@ def toggle_scan_mode(value):
 
 @app.route("/items/single_text_search/<item_name>")
 def single_item_search(item_name):
+    user_id = session.get("user_id")
     try:
         items = item.text_search(user_id, item_name)
         item_info = items[0]
@@ -504,6 +520,7 @@ def single_item_search(item_name):
 # Get items by text search
 @app.route("/items/text_search", methods=["POST"])
 def text_search():
+    user_id = session.get("user_id")
     try:
         search_term = request.form["search_term"]
         items = item.text_search(user_id, search_term)
@@ -514,7 +531,7 @@ def text_search():
 # Get item by barcode search
 @app.route("/items/barcode_search/<barcode>")
 def get_item_by_barcode(barcode):
-    
+    user_id = session.get("user_id")
     try:
         item_info = item.barcode_search(user_id, barcode)
         if item_info:
@@ -567,6 +584,7 @@ def find_image(item_id):
 
 @app.route("/items/reports/new", methods=["POST"])
 def report_item():
+    user_id = session.get("user_id")
     try:
         new_item_id = request.form.get("new_item_id")
         item_id = request.form.get("item_id") or None
@@ -683,7 +701,9 @@ def resolve_report():
 # Shopping List Interface Route
 
 @app.route('/shopping_list', methods=['GET', 'POST'])
+@login_required
 def get_shoppingList():
+    user_id = session.get("user_id")
     if request.method == 'POST':
         try:
             if 'clear' in request.form:
@@ -711,6 +731,7 @@ def get_shoppingList():
 
 @app.route('/shopping_list/add', methods=['POST'])
 def add_shopping_item():
+    user_id = session.get("user_id")
     try:
         item_name = request.form['item_name']
         quantity = request.form['quantity']
@@ -732,6 +753,7 @@ def update_shopping_item():
 
 @app.route("/shopping_list/add_multi", methods=["POST"])
 def add_shopping_items():
+    user_id = session.get("user_id")
     try:
         items_string = request.form.get("items")
         items = json.loads(items_string)
@@ -747,7 +769,9 @@ def add_shopping_items():
 ### UTENSILS AND APPLIANCE SELECTION ROUTES
     
 @app.route('/tools/select')
+@login_required
 def select_tools():
+    user_id = session.get("user_id")
     utensils = tool.get_tools("utensil")
     appliances = tool.get_tools("appliance")
     tool_ids = tool.get_user_tool_ids(user_id)
@@ -755,6 +779,7 @@ def select_tools():
 
 @app.route('/tools/save', methods=['POST'])
 def save_tools():
+    user_id = session.get("user_id")
     try:
         selected_tools = request.form.getlist('tool')
         tool.save_user_tools(user_id, selected_tools)
@@ -769,11 +794,13 @@ def get_tools():
     return jsonify({"success": True, "tools": tools})
 
 @app.route("/recipes")
+@login_required
 def recipe_page():
     return render_template("recipes.html")
 
 @app.route("/recipes/get", methods=["POST"])
 def get_recipes():
+    user_id = session.get("user_id")
     try:
         ###### CURRENTLY GET TOOL IDS EACH TIME UPDATE WHEN SESSION MADE TO CHANGEO NLY AFTER TOOLS/SAVE
         user_tool_ids = tool.get_user_tool_ids(user_id)
@@ -817,6 +844,7 @@ def get_recipes():
     
 @app.route("/recipes/get/<recipe_id>")
 def get_recipe(recipe_id):
+    user_id = session.get("user_id")
     try:
         record = recipe_sql.get_recipe(recipe_id)
         recipe = recipe_object(record)
@@ -830,6 +858,7 @@ def get_recipe(recipe_id):
 
 @app.route("/recipes/add", methods=["POST"])
 def add_recipe():
+    user_id = session.get("user_id")
     try:
         name = request.form.get("name")
         servings = request.form.get("servings")
@@ -917,6 +946,7 @@ def remove_recipe(recipe_id):
 ### SETTINGS PAGE ROUTE
 
 @app.route('/settings')
+@login_required
 def settings_page():
     if current_user.is_authenticated:
         return redirect(url_for('settings.settings_page'))

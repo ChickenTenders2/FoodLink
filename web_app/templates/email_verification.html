@@ -15,7 +15,9 @@
                     <p>You now have full access to all FoodLink features.</p>
                 </div>
                 <div class="actions">
-                    <a href="{{ url_for('index') }}" class="btn">Go to Dashboard</a>
+                    <p><a href="{{ url_for('select_tools') }}" class="btn">Select the utensils/appliances in your kitchen</a>(Or access later via the settings page)</p>
+                    <a href="{{ url_for('index') }}" class="btn">Go to Dashboard</a><p></p>
+
                 </div>
             {% else %}
                 <div class="alert alert-warning">

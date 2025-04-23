@@ -12,17 +12,16 @@ from tool import Tool
 from recipe import Recipe
 from recipe_object import recipe_object
 import json
-from flask_login import LoginManager, login_required, current_user, login_user, logout_user, UserMixin
+from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 from extensions import db, login_manager
 from flask_mail import Mail, Message
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, BooleanField
-from wtforms.validators import Length, DataRequired
 from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import random
 from models import User
+from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm
+from email_verification import send_verification_code, verification_codes
 
 # Import database and user model
 
@@ -45,11 +44,6 @@ app.config['MAIL_DEFAULT_SENDER'] = 'FoodLink <foodlink2305@gmail.com>'
 from settings import settings_bp
 app.register_blueprint(settings_bp)
 
-## CREATES TABLES BUT SHOULDNT NEED TO ANYMORE
-# with app.app_context():
-#     db.create_all()
-
-# Initialize extensions
 
 user_id = 2
 
@@ -63,88 +57,11 @@ mail = Mail(app)
 # Initialize Flask-Login
 login_manager = LoginManager(app)
 
-# Define forms from applogin.py
-class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(1, 16)])
-    password = PasswordField('Password', validators=[DataRequired()])
-    remember_me = BooleanField('Remember me')
-    submit = SubmitField('Continue')
-
-class CreateAccountForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(1, 16)])
-    email = StringField('Email', validators=[DataRequired(), Length(1, 64)])               
-    password = PasswordField('Password', validators=[DataRequired()])
-    passwordConfirm = PasswordField('Password(ReType)', validators=[DataRequired()])
-    submit = SubmitField('Continue')
-
-class CombinedResetForm(FlaskForm):
-    email = StringField('Email', validators=[Length(1, 64)])
-    otp = StringField('Security code')  
-    submit_email = SubmitField('Send Code')
-    submit_otp = SubmitField('Verify Code')
-
-class ResetPasswordForm(FlaskForm):
-    password = PasswordField(' New password', validators=[DataRequired()])
-    passwordConfirm = PasswordField('New Password(ReType)', validators=[DataRequired(),Length(min=6,message="Password must be at least 6 characters long.")],)
-    submit = SubmitField('Continue')    
-
-# Store verification codes, temporary?
-verification_codes = {}
 
 # User loader function for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-# Generate a 6-digit verification code
-def generate_verification_code():
-    return str(random.randint(100000, 999999))
-
-# Send verification email with code
-def send_verification_code(user):
-    # Generate a new code
-    code = generate_verification_code()
-    # Store the code
-    verification_codes[user.email] = code
-    
-    # Create the email message
-    msg = Message(
-        'FoodLink - Verify Your Email',
-        recipients=[user.email],
-        sender=app.config['MAIL_DEFAULT_SENDER']
-    )
-    
-    # Email content
-    msg.body = f"""
-Hello {user.username},
-
-Your email verification code for FoodLink is: {code}
-
-Enter this code on the verification page to verify your email address.
-
-This code will expire in 1 hour.
-
-If you did not create an account, please ignore this email.
-
-Regards,
-The FoodLink Team
-"""
-    
-    msg.html = f"""
-<p>Hello {user.username},</p>
-<p>Your email verification code for FoodLink is:</p>
-<h2 style="background-color: #f5f5f5; padding: 10px; text-align: center; font-family: monospace;">{code}</h2>
-<p>Enter this code on the verification page to verify your email address.</p>
-<p>This code will expire in 1 hour.</p>
-<p>If you did not create an account, please ignore this email.</p>
-<p>Regards,<br>The FoodLink Team</p>
-"""
-    
-    # Send the email
-    mail.send(msg)
-    
-    # For testing/debugging - print the code to console as well
-    print(f"\n----- VERIFICATION CODE for {user.email}: {code} -----\n")
 
 
 # Index route
@@ -241,7 +158,7 @@ def resetByEmail():
     if form.submit_email.data and form.validate():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
-            send_verification_code(user)
+            send_verification_code(user, mail)
             flash("Verification code sent to your email.")
             error = "Verification code sent to your email."
         else:
@@ -321,7 +238,7 @@ def send_verification_code_route():
         return redirect(url_for('email_verification_page'))
     
     # Send verification code
-    send_verification_code(current_user)
+    send_verification_code(current_user, mail)
     flash('A verification code has been sent to your email address.', 'success')
     return redirect(url_for('email_verification_page'))
 

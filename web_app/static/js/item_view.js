@@ -2,7 +2,9 @@
 let index = localStorage.getItem('pageIndex');
 
 async function remove_item(id, event) {
-    
+    if (!confirm("Are you sure you want to delete this item?")) {
+        return;
+    }
     event.stopPropagation();
 
     // Sends update command and waits for response

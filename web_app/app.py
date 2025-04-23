@@ -156,6 +156,20 @@ def index():
         # user is not logged in
         return redirect(url_for('login'))
 
+@app.context_processor 
+def inject_notifications(): 
+    if current_user.is_authenticated: 
+        try: 
+            user_id = current_user.id 
+            notif.temperature_humidity_notification(user_id, None, None) 
+            notif.expiry_notification(user_id) 
+            notifications = notif.get_notifications(user_id) 
+            unread_count = sum(1 for n in notifications if n[4] == 0) 
+            return dict(notifications=notifications, unread_count=unread_count) 
+        except Exception as e: 
+            print("[Context Processor Error]", e) 
+            return dict(notifications=[], unread_count=0)
+
 # Login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -359,68 +373,74 @@ def verify_code():
 @app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
-    device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
-
-    token = tb.get_jwt_token()
-    data = tb.get_telemetry(token, device_id)
-    temperature = humidity = None
-
-    if data:
-       temperature = float(data['temperature'][0]['value'])
-       humidity = float(data['humidity'][0]['value'])
 
     temp_url = "https://thingsboard.cs.cf.ac.uk/dashboard/9c597b10-0b04-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2" 
     humid_url = "https://thingsboard.cs.cf.ac.uk/dashboard/74d87180-0dbc-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2"
 
-    notif.temperature_humidity_notification(user_id, temperature, humidity)
-    notif.expiry_notification(user_id)
+    return render_template('index.html', temp_url=temp_url, humid_url = humid_url) #, notifications=notifications, unread_count=unread_count)
 
-    notifications = notif.get_notifications(user_id)
-    unread_count = sum(1 for n in notifications if n[4] == 0)
-
-    if request.method == 'POST' and request.json.get('mark_read'): 
-        try: 
-            notif_id = request.json.get('mark_read') 
-            notif.mark_read(notif_id) 
+@app.route('/notification/mark_read', methods=['POST'])
+@login_required
+def mark_read_notification():
+    try:
+        notif_id = request.json.get('notif_id')
+        if not notif_id:
+            return jsonify({'success': False, 'error': 'Notification ID missing'}), 400
+        else:
+            notif.mark_read(notif_id)
             return jsonify({'success': True})
-        except Exception as e: 
-            return jsonify({'success': False, 'error': str(e)})
-
-    return render_template('index.html', temp_url=temp_url, humid_url = humid_url, notifications=notifications, unread_count=unread_count)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 # Dynamtically update notification bar
-@app.route('/get_notifications', methods=['GET'])
+@app.route('/get_notifications', methods=['GET', 'POST']) 
+@login_required
 def get_notifications():
-    user_id = 2
+    # user_id = 2
 
-    device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
-    token = tb.get_jwt_token()
-    data = tb.get_telemetry(token, device_id)
+    # if POST reques, amrk a specific notification as read
+    if request.method == 'POST' and request.is_json: 
+        try: 
+            notif_id = request.json.get('mark_read') 
+            if notif_id: 
+                notif.mark_read(notif_id) 
+                return jsonify({'success': True}) 
+            else: 
+                return jsonify({'success': False, 'error': 'Notification ID not provided.'}) 
+        except Exception as e: 
+            return jsonify({'success': False, 'error': str(e)})
+    
+    try:
+        device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
+        token = tb.get_jwt_token()
+        data = tb.get_telemetry(token, device_id)
 
-    temperature = humidity = None
-    if data:
-        temperature = float(data['temperature'][0]['value'])
-        humidity = float(data['humidity'][0]['value'])
+        temperature = humidity = None
+        if data:
+            temperature = float(data['temperature'][0]['value'])
+            humidity = float(data['humidity'][0]['value'])
 
-    notif.temperature_humidity_notification(user_id, temperature, humidity)
-    notif.expiry_notification(user_id)
+        notif.temperature_humidity_notification(user_id, temperature, humidity)
+        notif.expiry_notification(user_id)
 
-    notifications = notif.get_notifications(user_id)
-    unread_count = sum(1 for n in notifications if n[4] == 0)
+        notifications = notif.get_notifications(user_id)
+        unread_count = sum(1 for n in notifications if n[4] == 0)
 
-    return jsonify({
-        'notifications': [
-            {
-                'id': n[0],
-                'message': n[2],
-                'timestamp': n[3].strftime('%Y-%m-%d %H:%M'),
-                'severity': n[5],
-                'read': n[4] == 1
-            }
-            for n in notifications
-        ],
-        'unread_count': unread_count
-    })
+        return jsonify({
+            'notifications': [
+                {
+                    'id': n[0],
+                    'message': n[2],
+                    'timestamp': n[3].strftime('%Y-%m-%d %H:%M'),
+                    'severity': n[5],
+                    'read': n[4] == 1
+                }
+                for n in notifications
+            ],
+            'unread_count': unread_count
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
   
 ### INVENTORY ROUTES ###
 

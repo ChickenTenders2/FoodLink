@@ -11,28 +11,59 @@
 {% endblock %}
 
 {% block navbar %}
-<!--<div class="header" id="myHeader">-->
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container" >
-            <div class="navbar-header">
-                <a class="navbar-brand" href="{{ url_for('index') }}">FoodLink</a>
-            </div>
-            <ul class="nav navbar-nav">
-                <li><a href="{{ url_for('index') }}">Home</a></li>
 
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li>
-                    {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('logout') }}">logout</a>
-                    {% else %}
-                        <a href="{{ url_for('login') }}">login</a>
-                    {% endif %}
-                </li>
-            </ul>
-        </div>
-    </nav>
-</div>
+    <nav class="navbar navbar-inverse navbar-fixed-top" style="padding: 0;"> 
+        <div  style="display: flex; align-items: center; justify-content: space-between; height: 60px;"> 
+            <div class="navbar-header nav-left"> 
+                <a class="navbar-brand" href="{{ url_for('index') }}"> 
+                    <h1 style="margin: 0; font-size: 24px; line-height: 60px;">FoodLink</h1> 
+                </a> 
+            </div> 
+            <ul class="nav navbar-nav"> 
+                <li><a href="{{ url_for('index') }}">Home</a></li> 
+                <li><a href="{{ url_for('get_inventory') }}">Inventory</a></li>
+                <li><a href="{{ url_for('get_shoppingList') }}">Shopping List</a></li>
+                <li><a href="{{ url_for('recipe_page') }}">Recipes</a></li>
+            </ul> 
+            <div class="nav-right" style="display: flex; align-items: center;"> 
+                <ul class="nav navbar-nav navbar-right"> 
+                    <li> 
+                        {% if current_user.is_authenticated %} 
+                            <a href="{{ url_for('logout') }}">Sign Out</a> 
+                        {% else %} 
+                            <a href="{{ url_for('login') }}">Sign In</a> 
+                        {% endif %} 
+                    </li> 
+                    <li class="nav-item" style="position: relative;"> 
+                        <a class="nav-link" style="padding: 10px;"> 
+                            <div class="notification-wrapper"> 
+                                <span id="notification-icon" style="font-size: 20px; cursor: pointer;">🔔</span>                              
+                                {% if unread_count > 0 %} 
+                                    <span id="notification-badge" class="notification-badge">{{ unread_count }}</span> 
+                                {% endif %} 
+                            </div> 
+                        </a> 
+                        <!-- Notification Dropdown -->
+                        <div id="notification-popup" class="notification-popup" style="display: none;">
+                            <h3>Notifications</h3>
+                            <ul id="notification-list">
+                              {% for n in notifications %}
+                                <li class="{{ 'unread' if n[4] == 0 else 'read' }}"
+                                    data-severity="{{ n[5] }}"
+                                    data-id="{{ n[0] }}"
+                                    onclick="markRead(this)">
+                                  <strong>{{ n[5].capitalize() }}</strong>: {{ n[2] }}<br>
+                                  <small>{{ n[3].strftime('%Y-%m-%d %H:%M') }}</small>
+                                </li>
+                              {% endfor %}
+                            </ul>
+                        </div>
+                    </li>    
+                </ul> 
+            </div> 
+        </div> 
+    </nav> 
+    <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
 {% endblock %}
 
 {% block content %}

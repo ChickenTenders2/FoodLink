@@ -10,6 +10,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    margin-top: 50px;
 }
 
 
@@ -57,38 +58,82 @@ h2 {
     cursor: pointer;
 }
 
-/* Navbar */ 
-
-.navbar { 
-    height: 60px;
-    background-color: #d4edc9;
+/* Navigation Bar */
+.navbar {
+    background-color: #a6d785;
+    border: none;
+    border-radius: 0;
+    margin-bottom: 0;
+    height: 70px; /* Set fixed height */
+    display: flex;
+    align-items: center; /* Vertically center items */
+    padding: 0 20px;
+  }
+  
+  /* Flex layout for container inside navbar */
+  .navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    padding: 10px;
+  }
+  
+  /* Navbar brand and nav links */
+  .navbar .navbar-brand,
+  .navbar .nav > li > a {
+    height: 70px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    width: 95%;
-}
+    padding: 0 15px;
+    font-weight: bold;
+    color: #000;
+  }
+  
+  .navbar .navbar-brand {
+    font-size: 24px;
+  }
+  
+  .navbar .nav > li > a {
+    font-size: 18px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    line-height: 30px;
+  }
+  
+  /* Hover states */
+  .navbar-inverse .navbar-nav > li > a:hover {
+    background-color: #8fca6c;
+    color: white;
+  }
+  
+  .navbar-inverse .navbar-brand:hover {
+    color: white;
+  }
+  
+  /* Optional: Toggle button styles (for small screens) */
+  .navbar-inverse .navbar-toggle {
+    border-color: #ddd;
+  }
+  .navbar-inverse .navbar-toggle .icon-bar {
+    background-color: #000;
+  }
+  
 
-.feature-badge { 
-    background-color: #c9eec4; 
-    color: #2e7d32; 
-    padding: 3px 12px; 
-    border-radius: 20px; 
-    font-size: 12px; 
-    font-weight: 500; 
-}
+/* Container Padding */ .container { padding-top: 70px; padding-bottom: 30px;}
 
-.nav-left h1 {
-    margin: 0; 
-    font-size: 24px; 
-    color: #2e7d32; /* darker green */ }
+/* Flash Messages */ .flashes { list-style-type: none; padding: 0; margin: 20px 0; }
 
-.nav-right { 
-    position: relative; 
-    display: flex; 
-    align-items: center; 
-}
+.flashes li { background-color: #d4edc9; color: #2e6e3e; padding: 10px 15px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #c3e6cb; }
+
+/* Form Styling */ form { margin-top: 20px; }
+
+/* Optional: Buttons */ .btn { background-color: #a6d785; color: #000; border: none; border-radius: 30px; padding: 10px 20px; font-weight: bold; transition: background-color 0.3s ease; }
+
+.btn:hover { background-color: #8fca6c; color: #fff; }
+
+@media (max-width: 768px) { .container { padding-left: 15px; padding-right: 15px; } }
+
 
 /* Dashboard Styles */
 .dashboard-grid {
@@ -266,6 +311,41 @@ input.form-control {
 .auth-button:hover {
     background-color: #8fca6c;
 }
+
+/* Email Verification Page Styling */
+.verification-container { max-width: 500px; margin: 40px auto; padding: 30px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-family: Arial, sans-serif; color: #333; text-align: center; max-height: 100vh;}
+
+.verification-container h2 { color: #333; font-size: 24px; margin-bottom: 15px; }
+
+.alert { padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; }
+
+.alert-success { background-color: #d4edc9; color: #2d572c; border: 1px solid #c3e6cb; }
+
+.alert-warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+
+.verification-box { background-color: #f4f4f4; border-radius: 10px; padding: 20px; text-align: center; margin-top: 20px; }
+
+.verification-box h3 { font-size: 20px; margin-bottom: 10px; }
+
+.verification-box p { margin-bottom: 15px; }
+
+.code-input { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 15px; }
+
+.code-input input[type="text"] { padding: 10px; width: 120px; border-radius: 20px; border: 1px solid #ccc; text-align: center; font-size: 16px; }
+
+.instructions { font-size: 14px; color: #555; text-align: left; margin-top: 20px; }
+
+.instructions ul { padding-left: 20px; margin-top: 10px; }
+
+.actions { text-align: center; margin-top: 20px; }
+
+.btn { padding: 10px 20px; font-size: 16px; border: none; border-radius: 30px; background-color: #a6d785; color: #000; cursor: pointer; text-decoration: none; transition: background-color 0.3s ease; }
+
+.btn:hover { background-color: #8fca6c; }
+
+@media (max-width: 600px) { .code-input { flex-direction: column; }
+
+.code-input input { width: 100%; } }
 
 
 /* Inventory Grid */
@@ -761,6 +841,7 @@ input[type="submit"]:hover {
   
 
 /* Notification Styles */
+
 .notification-icon {
     position: relative;
     cursor: pointer;
@@ -771,16 +852,33 @@ input[type="submit"]:hover {
     height: 24px;
 }
   
-.notification-badge {
-    /* position: absolute; */
-    top: -5px;
-    right: -5px;
-    background: red;
+.notification-wrapper {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  
+  .notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background-color: red;
     color: white;
     font-size: 10px;
-    padding: 2px 5px;
+    padding: 2px 6px;
     border-radius: 50%;
-}
+    font-weight: bold;
+    line-height: 1;
+    z-index: 1050;
+    display: inline-block;
+  }
+  
+  .navbar-nav > li.nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+  }
   
 .notification-popup {
     position: absolute;

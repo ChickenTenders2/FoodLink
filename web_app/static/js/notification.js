@@ -71,12 +71,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function markRead(elem) {
     const notifId = elem.getAttribute('data-id');
-    fetch('/', {
+    fetch('/notification/mark_read', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ mark_read: notifId })
+        body: JSON.stringify({ notif_id: notifId })
     })
     .then(res => res.json())
     .then(data => {

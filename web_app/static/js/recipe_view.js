@@ -1,9 +1,7 @@
-async function remove_item(id, event) {
+async function remove_item(id) {
     if (!confirm("Are you sure you want to delete this recipe?")) {
         return;
     }
-    
-    event.stopPropagation();
 
     // Sends update command and waits for response
     const response = await fetch('/admin/recipe_view/delete', {

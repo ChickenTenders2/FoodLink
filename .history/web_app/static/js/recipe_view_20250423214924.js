@@ -6,6 +6,10 @@ async function remove_item(id, event) {
     event.stopPropagation();
 
     // Sends update command and waits for response
+
+async function remove_item(id) {
+    // Fetches the flask functioanlity for deleting a recipe from the database.
+
     const response = await fetch('/admin/recipe_view/delete', {
         method: 'POST',
         body: id,

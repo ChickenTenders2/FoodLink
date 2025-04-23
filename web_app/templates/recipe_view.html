@@ -30,7 +30,7 @@
         {% endfor %}
     </table>
     </div>
-    <button class="add" onclick="open_popup('a New Recipe','', '', '', '', '', '', '', true)">NEW RECIPE</button>
+    <button class="add" onclick="open_popup('New Recipe','', '', '', '', '', '', true)">NEW RECIPE</button>
        <!-- Pop-Up for Editing Quantity & Expiration Date -->
        <div id="popup" class="popup">
         <h2 id="popup-title"></h2>
@@ -59,25 +59,28 @@
             <input type="hidden" id="original-instructions" name="original-instructions">
             <input type="hidden" id="recipe-id" name="recipe-id">
             <button type="submit">Next</button>
-            <button type="reset">Cancel</button>
+            <button type="button" id="exit" style="display: none"; onclick="close_popup()">Exit</button>
         </form>
     </div>
     <div id="edit_ingredients_popup" class="popup">
+        <form id="update-form-items">  
         <h3>Edit Ingredients</h3>
-        <button onclick="close_edit_ingredients_popup()">X</button>
         <input type="hidden" name="recipe_id" id="hidden_recipe_id">
         <div id="ingredients_list_container"></div>
         <br><br>
         <button type="button" onclick="add_ingredient_row()">+ Add Ingredient</button>
-        <br>
-        <button id="save_ing">Next</button>
+        <br><br>
+        <button type="submit">Next</button>
+        </form>
     </div>
     <div id="edit_tools_popup" class="popup">
+        <form id="update-form-tools"> 
         <h3>Edit Tools</h3>
-        <button onclick="close_edit_tools_popup()">X</button>
         <div id="tools_list_container"></div>
         <div id="tool_add_controls"></div>
-        <button id="save_tools" onclick="update_tools()">Save Tools</button>
+        <button type="submit">Save</button>
+        <br>
+        </form>
     </div>
     <script src="{{ url_for('static', filename='js/recipe_view.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/table.js') }}"></script>  

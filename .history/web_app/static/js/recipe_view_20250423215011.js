@@ -1,3 +1,5 @@
+async function remove_item(id) {
+    // Fetches the flask functioanlity for deleting a recipe from the database.
 async function remove_item(id, event) {
     if (!confirm("Are you sure you want to delete this recipe?")) {
         return;

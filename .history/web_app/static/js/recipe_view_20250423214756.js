@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 async function remove_item(id, event) {
     if (!confirm("Are you sure you want to delete this recipe?")) {
         return;
@@ -6,6 +7,10 @@ async function remove_item(id, event) {
     event.stopPropagation();
 
     // Sends update command and waits for response
+=======
+async function remove_item(id) {
+    // Fetches the flask functioanlity for deleting a recipe from the database.
+>>>>>>> 9cd7f23 (Complete item and recipes pages)
     const response = await fetch('/admin/recipe_view/delete', {
         method: 'POST',
         body: id,

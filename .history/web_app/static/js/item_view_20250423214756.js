@@ -2,7 +2,9 @@
 let index = localStorage.getItem('pageIndex');
 
 async function remove_item(id, event) {
-    
+    if (!confirm("Are you sure you want to delete this item?")) {
+        return;
+    }
     event.stopPropagation();
 
     // Fetches the flask route for deleting an item from the database.
@@ -37,7 +39,6 @@ function open_popup(itemName, barcode, name, brand, quantity, expiry_date, unit,
         document.getElementById('popup-title').innerText = `Edit ${itemName}`;
         document.getElementById('barcode-label').hidden = true;
         document.getElementById('barcode').type = "hidden";
-        
         document.getElementById('update-form').addEventListener('submit', submit_update);
     }
     document.getElementById('name').value = name;

@@ -1,5 +1,4 @@
 from database import database
-from datetime import datetime
 
 class Inventory(database):
     def __init__(self):

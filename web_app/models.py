@@ -42,3 +42,7 @@ class Admin(db.Model, UserMixin):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     #admin does not need the properties an user does
+
+    # allows special privileges for advanced admins to add new admins
+    advanced_privileges = db.Column(db.Boolean, default=False)
+    

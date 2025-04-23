@@ -20,12 +20,10 @@
             <th>Instructions</th>
         </tr>
         {% for row in recipes %}
-            <tr onmouseover="interact(event)" onclick="options(event)" onmouseout="reset(event)">
-            {% for col in row %}
-                <td>{{ col }}</td>
-            {% endfor %}
-                <td style="visibility:hidden;"><button class="item_button" onclick="remove_item(`{{ row[0] }}`, event)"> X </button></td>
-                <td style="visibility:hidden;"><button class="item_button" onclick="open_popup(`({{ row[1] }})`, `{{ row[1] }}`, `{{ row[2] }}`, `{{ row[3] }}`, `{{ row[4] }}`, `{{ row[5] }}`, `{{ row[0] }}`, `{{ row[6] }}`)"> ✐ </button></td>
+            <tr onclick="open_popup(`{{ row[1] }}`, `{{ row[1] }}`, `{{ row[2] }}`, `{{ row[3] }}`, `{{ row[4] }}`, `{{ row[5] }}`, `{{ row[0] }}`)">
+                {% for col in row %}
+                    <td>{{ col }}</td>
+                {% endfor %}
             </tr>
         {% endfor %}
     </table>

@@ -52,6 +52,11 @@ function open_popup(recipeName, name, servings, prep, cook, instructions, recipe
     document.getElementById('original-cook').value = cook;
     document.getElementById('recipe-id').value = recipe_id;
     document.getElementById('popup').style.display = 'block';
+
+    // moved delete button inside popup
+    const deleteBtn = document.getElementById('delete-button');
+    deleteBtn.style.display = 'inline-block';
+    deleteBtn.onclick = () => remove_item(recipe_id);
 }
 
 // Closes the recipe information popup.

@@ -27,12 +27,10 @@
             <th>Unit</th>
         </tr>
         {% for row in items %}
-            <tr onmouseover="interact(event)" onclick="options(event)" onmouseout="reset(event)">
-            {% for col in row %}
-                <td>{{ col }}</td>
-            {% endfor %}
-                <td style="visibility:hidden;"><button class="item_button" onclick="remove_item(`{{ row[0] }}`, event)"> X </button></td>
-                <td style="visibility:hidden;"><button class="item_button" onclick="open_popup(`{{ row[2] }}`, `{{ row[1] }}`, `{{ row[2] }}`, `{{ row[3] }}`, `{{ row[5] }}`, `{{ row[4] }}`, `{{ row[6] }}`, `{{ row[0] }}`, `{{ row[7] }}`)"> ✐ </button></td>
+            <tr onclick="open_popup(`{{ row[2] }}`, `{{ row[1] }}`, `{{ row[2] }}`, `{{ row[3] }}`, `{{ row[5] }}`, `{{ row[4] }}`, `{{ row[6] }}`, `{{ row[0] }}`)">
+                {% for col in row %}
+                    <td>{{ col }}</td>
+                {% endfor %}
             </tr>
         {% endfor %}
     </table>
@@ -71,6 +69,7 @@
             <input type="hidden" id="original-unit" name="original-unit">
             <input type="hidden" id="inventory-id" name="inventory_id">
             <button type="submit">Save</button>
+            <button class="hidden-button" id="delete_button">Delete</button>
             <button type="reset" onclick="close_popup()">Cancel</button>
         </form>
     </div>

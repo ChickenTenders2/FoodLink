@@ -40,6 +40,11 @@ function open_popup(itemName, barcode, name, brand, quantity, expiry_date, unit,
         document.getElementById('barcode').type = "hidden";
 
         document.getElementById('update-form').addEventListener('submit', submit_update);
+
+        // moved delete button inside popup
+        const deleteBtn = document.getElementById('delete_button');
+        deleteBtn.style.display = 'inline-block';
+        deleteBtn.onclick = () => remove_item(inventory_id);
     }
     document.getElementById('name').value = name;
     document.getElementById('barcode').value = barcode;
@@ -54,11 +59,13 @@ function open_popup(itemName, barcode, name, brand, quantity, expiry_date, unit,
     document.getElementById('original-name').value = name;
     document.getElementById('original-unit').value = unit;
     document.getElementById('popup').style.display = 'block';
+
 }
 
 // Closes item information popup
 function close_popup() {
     document.getElementById('popup').style.display = 'none';
+    document.getElementById('delete_button').style.display = "none";
 }
 
 // Updates item in inventory

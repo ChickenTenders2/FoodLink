@@ -136,103 +136,20 @@ h2 {
 
 
 /* Dashboard Styles */
-.dashboard-grid {
-    /* display: grid;
-    grid-template-columns: 1fr 250px;
-    grid-gap: 20px;
-    padding: 20px;
-    flex: 1;
-    overflow-y: auto;
-    background-color: #f8fdf5;
-    box-sizing: border-box;
-    width: 95%; */
-    display: grid;
-    grid-template-columns: 1fr 510px;
-    grid-gap: 20px;
-    padding: 20px;
-    height: calc(100vh - 60px); /* adjust for navbar height */
-    box-sizing: border-box;
-    overflow: hidden;
-    width: 95%;
-    flex-wrap: wrap;
-    overflow-x: hidden;
-  }
-  
-  .column1 {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-  
-  .column2 {
-    /* display: grid;
-    grid-template-rows: auto auto auto;
-    gap: 20px;
-    max-width: 250px;
-    width: 100%; */
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-  
-  .tile-pair {
-    /* display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    max-height: 205px; */
-    display: flex;
-    gap: 10px;
-    max-height: 205px;
-    max-width: 510px;
-  }
+.dashboard-grid { display: flex; flex-direction: column; gap: 20px; padding: 20px; box-sizing: border-box; width: 100%; max-width: 100%; overflow-x: hidden; }
 
-.tile-pair .tile {
-    flex: 1;
-    max-height: 205px;
-    overflow: hidden;
-    display: flex;                /* Add */
-    align-items: center;         /* Vertically center */
-    justify-content: center;     /* Horizontally center */
-    padding: 10px;               /* Optional: add spacing around the iframe */
-    box-sizing: border-box;
+.dashboard-grid a {text-decoration: none; color: inherit;}
+
+.dashboard-grid a:hover .tile {
+    background-color: #8fca6c;
 }
-  
-  .row-2 {
-    flex: 1;
-    overflow: auto;
-    margin-top: 10px;
-  }
-  
-  /* Styling for tiles */
-  .tile {
-    background-color: #d4edc9;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    font-size: 18px;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-  }
 
-  .column1 .tile {
-    word-wrap: break-word;          /* Wrap long words */
-    overflow-wrap: break-word;      /* Modern equivalent for safety */
-    white-space: normal;            /* Allow line breaking */
-    max-width: 100%;                /* Prevent expanding outside the column */
-    box-sizing: border-box;         /* Include padding in width calculation */
-  }
+.tile { background-color: #d4edc9; padding: 20px; border-radius: 10px; text-align: center; overflow: hidden; width: 100%; box-sizing: border-box; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); }
+
+.tile-pair { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+
+.tile-pair .tile { flex: 1 1 200px; min-width: 200px; max-width: 100%; }
   
-  .column1 .tile h2 {
-    /* font-size: 1.5rem; */
-    word-break: break-word;
-    margin: 0;
-  }
-  
-  
-  .large-tile {
-    height: 100%;
-    min-height: 300px; /* optional */
-    min-width: 100px;
-  }
   
 
 /*Login/Register Styles*/

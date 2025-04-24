@@ -21,10 +21,9 @@ from flask_bootstrap import Bootstrap
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_session import Session
 import os
-import random
 from models import User, Admin
 from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
-from email_verification import send_verification_code, verification_codes
+from email_verification import send_verification_code
 from input_handling import InputHandling
 from admin_recipe import admin_recipe
 from input_handling import InputHandling
@@ -68,27 +67,29 @@ login_manager = LoginManager(app)
 # User loader function for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
-    # attempts to load regular user first
-    user = User.query.get(int(user_id))
-    if user:
-        return user
-    # if admin login return instead
-    return Admin.query.get(int(user_id))
+    user_type = session.get("user_type")
+
+    if user_type == "admin":
+        return Admin.query.get(int(user_id))
+    elif user_type == "user":
+        return User.query.get(int(user_id))
 
 ## for admin only pages
 def admin_required(f):
     def decorated_function(*args, **kwargs):
         ## if the admin isnt signed in
         if not current_user.is_authenticated:
-            flash("You must be logged in to access this page.", "warning")
+            flash("You must be logged in to access that page.", "warning")
             ## redirect to admin login
             return redirect(url_for("admin_login"))
         ## if the user tries to access the page
         elif not isinstance(current_user._get_current_object(), Admin):
-            flash("You do not have permission to access this page.", "danger")
+            flash("You do not have permission to access that page.", "danger")
             ## send them back to dashboard
             return redirect(url_for("dashboard"))
         return f(*args, **kwargs)
+    ## makes sure route function is unique
+    decorated_function.__name__ = f.__name__
     return decorated_function
 
 ## for user only pages
@@ -96,15 +97,38 @@ def user_required(f):
     def decorated_function(*args, **kwargs):
         ## if the user isnt logged in
         if not current_user.is_authenticated:
-            flash("You must be logged in to access this page.", "warning")
+            flash("You must be logged in to access that page.", "warning")
             ## redirect to login page
             return redirect(url_for("login"))
         ## if an admin tries to access a normal account page
         if isinstance(current_user._get_current_object(), Admin):
-            flash("Admins cannot access this page.", "danger")
+            flash("Admins cannot access that page.", "danger")
             ## redirect to dashboard
             return redirect(url_for("AdminDashboard"))
+        # stops unverified users from accessing features
+        if not current_user.email_verified:
+            flash("Please verify your email before accessing other features.", "warning")
+            return redirect(url_for("email_verification_page"))
         return f(*args, **kwargs)
+    ## makes sure route function is unique
+    decorated_function.__name__ = f.__name__
+    return decorated_function
+
+# for shared routes (user and admin) make user user email is verified
+# and account also logged in
+def verified_required(f):
+    def decorated_function(*args, **kwargs):
+        # makes sure admin or user is logged in
+        if not current_user.is_authenticated:
+            flash("You must be logged in to access this page.", "warning")
+            return redirect(url_for("login"))
+        # makes sure email is verified for user accounts
+        user_obj = current_user._get_current_object()
+        if isinstance(user_obj, User) and not user_obj.email_verified:
+            flash("Please verify your email before accessing this page.", "warning")
+            return redirect(url_for("email_verification_page"))
+        return f(*args, **kwargs)
+    decorated_function.__name__ = f.__name__
     return decorated_function
 
 # Index route
@@ -128,6 +152,7 @@ def admin_login():
         admin = Admin.query.filter_by(username=form.username.data).first()
         if admin and check_password_hash(admin.password, form.password.data):
             login_user(admin, remember=False)
+            session["user_type"] = "admin"
             flash("Logged in successfully as admin.", "success")
             return redirect(url_for("AdminDashboard"))
         else:
@@ -139,8 +164,8 @@ def admin_login():
 @app.route("/admin/add", methods=["GET", "POST"])
 @admin_required
 def AddAdmin():
-    # Must be advanced admin
-    if not isinstance(current_user._get_current_object(), Admin) or not current_user.advanced_privileges:
+    # Must be advanced admin to add new admins
+    if not current_user.advanced_privileges:
         flash("You are not authorized to add new admins.", "danger")
         return redirect(url_for("AdminDashboard"))
 
@@ -173,10 +198,6 @@ def AddAdmin():
 @app.route("/admin/update-password", methods=["GET", "POST"])
 @admin_required
 def AdminUpdatePassword():
-    if not isinstance(current_user._get_current_object(), Admin):
-        flash("Unauthorized access.", "danger")
-        return redirect(url_for("admin_login"))
-
     form = AdminPasswordForm()
     message = None
 
@@ -197,14 +218,18 @@ def AdminUpdatePassword():
 @admin_required
 def AdminDashboard():
     return render_template("admin_dashboard.html")
-# 
+
 # Logout route
-@app.route('/admin/logout')
-@admin_required
-def admin_logout():
+@app.route('/logout')
+@login_required
+def logout():
     logout_user()
-    session.clear()
-    return redirect(url_for('admin_login'))
+    if session["user_type"] == "admin":
+        url = url_for('admin_login')
+    elif session["user_type"] == "user":
+        url = url_for("login")
+    session.pop("user_type")
+    return redirect(url)
 
 
 ###  USER ACCOUNT SYSTEM ROUTES ###
@@ -248,7 +273,7 @@ def login():
                 else:
                     login_user(user, form.remember_me.data)
                     #flash("You were successfully logged in!")
-
+                    session["user_type"] = "user"
                     session["userFailedAttempts"] = 0
                     session["userLockoutTime"] = None
                   # Check if email is verified
@@ -290,6 +315,7 @@ def createAccount():
                     
                     # Log the user in
                     login_user(user)
+                    session["user_type"] = "user"
                     
                     # Redirect to email verification
                     flash("Account created successfully! Please verify your email.")
@@ -373,23 +399,15 @@ def resetPassword():
 
     return render_template('resetPassword.html', form=form, error=error)
 
-# Logout route
-@app.route('/logout')
-@user_required
-def logout():
-    logout_user()
-    session.pop('username', None)
-    return redirect(url_for('index'))
-
 # Email verification page
 @app.route('/email/verification')
-@user_required
+@login_required
 def email_verification_page():
     return render_template('email_verification.html')
 
 # Route to request verification code
 @app.route('/email/send-code', methods=['POST'])
-@user_required
+@login_required
 def send_verification_code_route():
     # Check if email is already verified
     if current_user.email_verified:
@@ -403,7 +421,7 @@ def send_verification_code_route():
 
 # Route to verify email with code
 @app.route('/email/verify-code', methods=['POST'])
-@user_required
+@login_required
 def verify_code():
     # Get submitted code
     entered_code = request.form.get('verification_code')
@@ -651,20 +669,20 @@ def update_quantities():
 
 # Opens camera module and returns feed
 @app.route('/scanner/get')
-@login_required
+@verified_required
 def get_scanner():
     return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # Closes camera module
 @app.route('/scanner/close')
-@login_required
+@verified_required
 def close_scanner():
     scanner.release_capture()
     return jsonify({"success":True})
 
 # Returns the barcode number if one is found
 @app.route('/scanner/get_object')
-@login_required
+@verified_required
 def get_object():
     object = scanner.get_scanned()
     if (object):
@@ -674,13 +692,13 @@ def get_object():
         return jsonify({"success": False})
 
 @app.route("/unpause_scanner")
-@login_required
+@verified_required
 def unpause_scanner():
     scanner.unpause_scanner()
     return jsonify({"success":True})
 
 @app.route("/scanner/toggle_mode/<value>")
-@login_required
+@verified_required
 def toggle_scan_mode(value):
     if value == "true":
         scanner.toggle_mode(True)
@@ -767,7 +785,7 @@ def append_item_db():
 
 # Check if item has an image
 @app.route("/find_image/<item_id>")
-@login_required
+@verified_required
 def find_image(item_id):
     path = f"static/images/{item_id}.jpg"
     exists = file_exists(path)

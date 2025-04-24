@@ -16,15 +16,15 @@
 	           {{ form.hidden_tag() }}
 	           {{ wtf.form_errors(form, hiddens="only") }}
                <!-- <div class="input-group"> -->
-	            {{ wtf.form_field(form.username, form="form", placeholder="max 16 characters")}}
+	            {{ wtf.form_field(form.username, form="form", placeholder="Max 16 characters")}}
                 <!-- </div> -->
                 
                 <!-- <div class="input-group"> -->
-                {{ wtf.form_field(form.email, form="form", placeholder="max 64 characters")}}
+                {{ wtf.form_field(form.email, form="form", placeholder="Max 64 characters")}}
 	           <!-- </div> -->
 
                <!-- <div class="input-group"> -->
-                {{ wtf.form_field(form.password, form="form", placeholder="at least 6 characters")}}
+                {{ wtf.form_field(form.password, form="form", placeholder="Must include at least 6 characters, 2 numbers and 1 special character")}}
 	           <!-- </div> -->
 
                <!-- <div class="input-group"> -->

@@ -12,7 +12,7 @@ class CreateAccountForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(1, 16)])
     email = StringField('Email', validators=[DataRequired(), Length(1, 64)])               
     password = PasswordField('Password', validators=[DataRequired()])
-    passwordConfirm = PasswordField('Password(ReType)', validators=[DataRequired()])
+    passwordConfirm = PasswordField('Confirm Password', validators=[DataRequired()])
     submit = SubmitField('Continue')
 
 class CombinedResetForm(FlaskForm):
@@ -23,7 +23,7 @@ class CombinedResetForm(FlaskForm):
 
 class ResetPasswordForm(FlaskForm):
     password = PasswordField(' New password', validators=[DataRequired()])
-    passwordConfirm = PasswordField('New Password(ReType)', validators=[DataRequired(),Length(min=6,message="Password must be at least 6 characters long.")],)
+    passwordConfirm = PasswordField('Confirm New Password', validators=[DataRequired(),Length(min=6,message="Password must be at least 6 characters long.")],)
     submit = SubmitField('Continue')    
 
 class AdminCreateForm(FlaskForm):

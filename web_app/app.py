@@ -1,6 +1,7 @@
 import re
 import time
 from flask import Flask, jsonify, render_template, request, url_for, Response, redirect, session, flash
+from flask_bootstrap import Bootstrap
 from inventory import Inventory
 from scanner import Scanner
 from item import Item
@@ -10,21 +11,22 @@ from shoppingList import shoppingList
 from os.path import isfile as file_exists
 from notification import notification
 from thingsboard import thingsboard
+
 from tool import Tool
 from recipe import Recipe
 from recipe_object import recipe_object
 import json
-from flask_login import LoginManager, login_required, current_user, login_user, logout_user
 from extensions import db, login_manager
-from flask_mail import Mail, Message
-from flask_bootstrap import Bootstrap
+import os
+# for login system
+from flask_login import LoginManager, login_required, current_user, login_user, logout_user
+from flask_mail import Mail
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_session import Session
-import os
 from models import User, Admin
 from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
 from email_verification import send_verification_code
-from input_handling import InputHandling
+# for admin item and recipe view
 from admin_recipe import admin_recipe
 from input_handling import InputHandling
 

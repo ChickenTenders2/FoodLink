@@ -3,15 +3,33 @@
 
 {% block styles %}
 {{super()}}
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin_style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 {% endblock %}
 
 {% block title %}
-    Smart Fridge
+    FoodLink Admin
+{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-inverse navbar-fixed-top" style="padding: 0;"> 
+    <div  style="display: flex; align-items: center; justify-content: space-between; height: 60px;"> 
+        <ul class="nav navbar-nav"> 
+            <li><a href="{{ url_for('AdminDashboard') }}">Dashboard</a></li> 
+            <li><a href="{{ url_for('display_reports') }}">Reports</a></li>
+            <li><a href="{{ url_for('add_item') }}">Add Item</a></li>
+            <li><a href="{{ url_for('get_items') }}">Items</a></li>
+            <li><a href="{{ url_for('admin_get_recipes') }}">Recipes</a></li>
+            <li> 
+                <a href="{{ url_for('logout') }}">Sign Out</a> 
+            </li> 
+        </ul> 
+    </div> 
+</nav> 
 {% endblock %}
 
 {% block content %}
-    <div class="container">
+<div class="container" style="margin-top: 80px;">  <!-- Add top margin to avoid overlap with fixed navbar -->
 
 {% with messages = get_flashed_messages() %}
   {% if messages %}
@@ -23,7 +41,6 @@
   {% endif %}
 {% endwith %}
 
-        {% block page_content %}{% endblock %}
-    </div>
-
+    {% block page_content %}{% endblock %}
+</div>
 {% endblock %}

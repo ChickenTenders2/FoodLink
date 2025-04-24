@@ -1,5 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "admin_base.html" %}
+
+{% block page_content %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -51,4 +52,4 @@
     <script src="{{ url_for('static', filename='js/barcode_scan.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/add_item.js') }}"></script> 
 </body>
-</html>
+{% endblock %}

@@ -1,40 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Item Reports</title>
-    <!-- Link to the external CSS file -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <!-- displays each users items-->
-    <div class="reports-container">
-        <label>Show not assigned reports?</label>
-        <input type="checkbox" id="show_null_assign" checked onchange="sort_filter_reports()">
-        <br>
-        <label>Sort By</label>
-        <select id="sort_by" onchange="sort_filter_reports()">
-            <!-- if statments make sure the current sort is shown as the default option-->
-            <option value="error_type">Error Type</option>
-            <option value="date_asc" selected>Date Created Ascending</option>
-            <option value="date_desc">Date Created Descending</option>
+{% extends "admin_base.html" %}
 
-        </select>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>New Item Name</th>
-                    <th>Error Type</th>
-                    <th>Date Created</th>
-                    <th>Assigned To</th>
-                </tr>
-            </thead>
-            <tbody id="table_body"></tbody>
-        </table>
-    </div>
+{% block page_content %}
+<!-- displays each users items-->
+<div class="reports-container">
+    <label>Show not assigned reports?</label>
+    <input type="checkbox" id="show_null_assign" checked onchange="sort_filter_reports()">
+    <br>
+    <label>Sort By</label>
+    <select id="sort_by" onchange="sort_filter_reports()">
+        <!-- if statments make sure the current sort is shown as the default option-->
+        <option value="error_type">Error Type</option>
+        <option value="date_asc" selected>Date Created Ascending</option>
+        <option value="date_desc">Date Created Descending</option>
 
-    <script src="{{ url_for('static', filename='js/reports.js') }}"></script>
-</body>
-</html>
+    </select>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>New Item Name</th>
+                <th>Error Type</th>
+                <th>Date Created</th>
+                <th>Assigned To</th>
+            </tr>
+        </thead>
+        <tbody id="table_body"></tbody>
+    </table>
+</div>
+
+<script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+{% endblock %}

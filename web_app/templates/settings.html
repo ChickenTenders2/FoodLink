@@ -95,55 +95,6 @@
                         </form>
                     </div>
                     
-                    <!-- <div class="settings-card">
-                        <h3>Two-Factor Authentication</h3>
-                        <form action="{{ url_for('settings.toggle_2fa') }}" method="POST">
-                            <div class="form-group">
-                                <label class="switch">
-                                    <input type="checkbox" name="enable_2fa" {% if current_user.two_factor_enabled %}checked{% endif %}>
-                                    <span class="slider round"></span>
-                                </label>
-                                <span>Enable Two-Factor Authentication</span>
-                            </div>
-                            <p>When enabled, you'll need to enter a verification code sent to your email when logging in from a new device or after 30 days.</p>
-                            <button type="submit" class="btn btn-primary">Save Preference</button>
-                        </form>
-                    </div>
-                    
-                    <div class="settings-card">
-                        <h3>Devices</h3>
-                        <p>Devices you're currently logged in to:</p>
-                        <div class="devices-list">
-                            {% if devices %}
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Device</th>
-                                            <th>Last Used</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for device in devices %}
-                                        <tr>
-                                            <td>{{ device.device_name }}</td>
-                                            <td>{{ device.last_used.strftime('%Y-%m-%d %H:%M') }}</td>
-                                            <td>
-                                                <form action="{{ url_for('settings.remove_device', device_id=device.id) }}" method="POST">
-                                                    <button type="submit" class="btn btn-danger btn-sm">
-                                                        {% if device.is_current %}Sign Out{% else %}Remove{% endif %}
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            {% else %}
-                                <p>No devices found</p>
-                            {% endif %}
-                        </div>
-                    </div> -->
                 </section>
 
                 <!-- Notifications Section -->

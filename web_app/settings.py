@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask.views import MethodView
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, Device, Settings
+from models import User, Settings
 from extensions import db
 
 # Create blueprint
@@ -18,9 +18,6 @@ class SettingsView(BaseSettingsView):
         # login_required ensures a user is authenticated
         user_id = current_user.id
         
-        # Get user devices
-        devices = Device.query.filter_by(user_id=user_id).all()
-        
         # Get or create notification preferences
         notification_prefs = Settings.query.filter_by(user_id=user_id).first()
         if not notification_prefs:
@@ -30,7 +27,6 @@ class SettingsView(BaseSettingsView):
             
         return render_template('settings.html', 
                               user=current_user, 
-                              devices=devices,
                               notification_prefs=notification_prefs)
     
 # Account Management Views
@@ -97,32 +93,6 @@ class PasswordChangeView(BaseSettingsView):
         flash('Password updated successfully', 'success')
         return redirect(url_for('settings.settings_page'))
 
-class TwoFactorToggleView(BaseSettingsView):
-    def post(self):
-        enable_2fa = request.form.get('enable_2fa') == 'on'
-        current_user.two_factor_enabled = enable_2fa
-        db.session.commit()
-        
-        if enable_2fa:
-            flash('Two-factor authentication enabled', 'success')
-        else:
-            flash('Two-factor authentication disabled', 'info')
-            
-        return redirect(url_for('settings.settings_page'))
-
-class DeviceRemoveView(BaseSettingsView):
-    def post(self, device_id):
-        device = Device.query.filter_by(id=device_id, user_id=current_user.id).first()
-        
-        if device:
-            db.session.delete(device)
-            db.session.commit()
-            flash('Device removed successfully', 'success')
-        else:
-            flash('Device not found', 'danger')
-            
-        return redirect(url_for('settings.settings_page'))
-
 # Notification Settings View
 class NotificationUpdateView(BaseSettingsView):
     def post(self):
@@ -163,26 +133,11 @@ class NotificationUpdateView(BaseSettingsView):
         flash('Notification preferences updated', 'success')
         return redirect(url_for('settings.settings_page'))
 
-# Appearance Settings View
-class ThemeUpdateView(BaseSettingsView):
-    def post(self):
-        theme = request.form.get('theme', 'light')
-        current_user.theme = theme
-        db.session.commit()
-        
-        # Update session for immediate effect
-        session['theme'] = theme
-        
-        flash('Theme updated successfully', 'success')
-        return redirect(url_for('settings.settings_page'))
 
 # Register routes: Connect URL paths to their matching functions
 settings_bp.add_url_rule('/', view_func=SettingsView.as_view('settings_page'))
 settings_bp.add_url_rule('/account/update', view_func=AccountUpdateView.as_view('update_account'))
 settings_bp.add_url_rule('/account/delete', view_func=AccountDeleteView.as_view('delete_account'))
 settings_bp.add_url_rule('/security/change-password', view_func=PasswordChangeView.as_view('change_password'))
-settings_bp.add_url_rule('/security/toggle-2fa', view_func=TwoFactorToggleView.as_view('toggle_2fa'))
-settings_bp.add_url_rule('/security/devices/remove/<int:device_id>', view_func=DeviceRemoveView.as_view('remove_device'))
 settings_bp.add_url_rule('/notifications/update', view_func=NotificationUpdateView.as_view('update_notifications'))
-settings_bp.add_url_rule('/appearance/theme', view_func=ThemeUpdateView.as_view('update_theme'))
 settings_bp.add_url_rule('/signout', view_func=lambda: redirect(url_for('auth.logout')), methods=['GET'])

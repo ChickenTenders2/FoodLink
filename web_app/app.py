@@ -84,6 +84,16 @@ login_manager.login_view = 'login'  # This ensures users are redirected to login
 db.init_app(app)
 mail = Mail(app)
 
+# Load user to database based on user ID (or admin ID if admin login)
+@login_manager.user_loader
+def load_user(user_id):
+    user_type = session.get("user_type")
+
+    if user_type == "admin":
+        return Admin.query.get(int(user_id))
+    elif user_type == "user":
+        return User.query.get(int(user_id))
+
 
 ###     DECORATOR FUNCTIONS TO STOP UNAUTHORISED ACCESS TO PAGES
 

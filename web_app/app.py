@@ -453,7 +453,7 @@ def mark_read_notification():
 def inject_notifications(): 
     if current_user.is_authenticated: 
         try: 
-            user_id = current_user.id 
+            user_id = session.get("user_id")
             notif.temperature_humidity_notification(user_id, None, None) 
             notif.expiry_notification(user_id) 
             notifications = notif.get_notifications(user_id) 
@@ -469,20 +469,6 @@ def inject_notifications():
 @app.route('/get_notifications', methods=['GET', 'POST']) 
 @login_required
 def get_notifications():
-    # user_id = 2
-
-    # if POST reques, amrk a specific notification as read
-    if request.method == 'POST' and request.is_json: 
-        try: 
-            notif_id = request.json.get('mark_read') 
-            if notif_id: 
-                notif.mark_read(notif_id) 
-                return jsonify({'success': True}) 
-            else: 
-                return jsonify({'success': False, 'error': 'Notification ID not provided.'}) 
-        except Exception as e: 
-            return jsonify({'success': False, 'error': str(e)})
-    
     try:
         device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
         user_id = session.get("user_id")
@@ -970,12 +956,13 @@ def select_tools():
 @app.route('/tools/save', methods=['POST'])
 @login_required
 def save_tools():
-    user_id = session.get("user_id")
+    user_id = current_user.id
     try:
         selected_tools = request.form.getlist('tool')
         tool.save_user_tools(user_id, selected_tools)
         return jsonify({"success": True, "message": "Tools saved successfully!"})
     except Exception as e:
+        print(e)
         return jsonify({"success": False, "message": "Failed to save tools."})
 
 @app.route("/tools/get")

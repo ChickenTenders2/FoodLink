@@ -9,7 +9,7 @@
             <p class="error text-danger"><strong></strong> {{ error }}</p>
         {% endif %}
 
-        <h2>Sign In</h2>
+        <a href="{{url_for('admin_login')}}" id="admin_link"><h2>Sign In</h2></a>
 
         {{ wtf.quick_form(form) }}
         <button class="button" type="button" style="margin-top: 10px;" onclick="window.location.href='{{ url_for('resetByEmail') }}'"> Forget password?</button> 

@@ -75,7 +75,7 @@ def load_user(user_id):
         return User.query.get(int(user_id))
 
 ## for admin only pages
-def admin_required(f):
+def admin_only(f):
     def decorated_function(*args, **kwargs):
         ## if the admin isnt signed in
         if not current_user.is_authenticated:
@@ -93,7 +93,7 @@ def admin_required(f):
     return decorated_function
 
 ## for user only pages
-def user_required(f):
+def user_only(f):
     def decorated_function(*args, **kwargs):
         ## if the user isnt logged in
         if not current_user.is_authenticated:
@@ -116,7 +116,7 @@ def user_required(f):
 
 # for shared routes (user and admin) make user user email is verified
 # and account also logged in
-def verified_required(f):
+def verified_only(f):
     def decorated_function(*args, **kwargs):
         # makes sure admin or user is logged in
         if not current_user.is_authenticated:
@@ -127,6 +127,25 @@ def verified_required(f):
         if isinstance(user_obj, User) and not user_obj.email_verified:
             flash("Please verify your email before accessing this page.", "warning")
             return redirect(url_for("email_verification_page"))
+        return f(*args, **kwargs)
+    decorated_function.__name__ = f.__name__
+    return decorated_function
+
+# for email verification pages
+def unverified_only(f):
+    def decorated_function(*args, **kwargs):
+        # makes sure user is logged in
+        if not current_user.is_authenticated:
+            flash("You must be logged in to access this page.", "warning")
+            return redirect(url_for("login"))
+        # makes sure account is not already verified (admin emails are always verified)
+        user_obj = current_user._get_current_object()
+        if isinstance(user_obj, Admin):
+            flash("Your email is already verified!", "warning")
+            return redirect(url_for("AdminDashboard"))
+        if user_obj.email_verified:
+            flash("Your email is already verified!", "warning")
+            return redirect(url_for("dashboard"))
         return f(*args, **kwargs)
     decorated_function.__name__ = f.__name__
     return decorated_function
@@ -162,7 +181,7 @@ def admin_login():
 
 
 @app.route("/admin/add", methods=["GET", "POST"])
-@admin_required
+@admin_only
 def AddAdmin():
     # Must be advanced admin to add new admins
     if not current_user.advanced_privileges:
@@ -196,7 +215,7 @@ def AddAdmin():
     return render_template("admin_add.html", form=form, message=message)
 
 @app.route("/admin/update-password", methods=["GET", "POST"])
-@admin_required
+@admin_only
 def AdminUpdatePassword():
     form = AdminPasswordForm()
     message = None
@@ -215,7 +234,7 @@ def AdminUpdatePassword():
     return render_template("admin_update_password.html", form=form, message=message)
 
 @app.route("/admin/dashboard")
-@admin_required
+@admin_only
 def AdminDashboard():
     return render_template("admin_dashboard.html")
 
@@ -401,13 +420,13 @@ def resetPassword():
 
 # Email verification page
 @app.route('/email/verification')
-@login_required
+@unverified_only
 def email_verification_page():
     return render_template('email_verification.html')
 
 # Route to request verification code
 @app.route('/email/send-code', methods=['POST'])
-@login_required
+@unverified_only
 def send_verification_code_route():
     # Check if email is already verified
     if current_user.email_verified:
@@ -421,7 +440,7 @@ def send_verification_code_route():
 
 # Route to verify email with code
 @app.route('/email/verify-code', methods=['POST'])
-@login_required
+@unverified_only
 def verify_code():
     # Get submitted code
     entered_code = request.form.get('verification_code')
@@ -456,7 +475,7 @@ def verify_code():
 ### SETTINGS PAGE ROUTE
 
 @app.route('/settings')
-@user_required
+@user_only
 def settings_page():
     return redirect(url_for('settings.settings_page'))
 
@@ -473,7 +492,7 @@ def settings_page():
 #### USER DASHBOARD ROUTES
 
 @app.route('/dashboard', methods=['GET', 'POST'])
-@user_required
+@user_only
 def dashboard():
 
     temp_url = "https://thingsboard.cs.cf.ac.uk/dashboard/9c597b10-0b04-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2" 
@@ -482,7 +501,7 @@ def dashboard():
     return render_template('index.html', temp_url=temp_url, humid_url = humid_url) #, notifications=notifications, unread_count=unread_count)
 
 @app.route('/notification/mark_read', methods=['POST'])
-@user_required
+@user_only
 def mark_read_notification():
     try:
         notif_id = request.json.get('notif_id')
@@ -512,7 +531,7 @@ def inject_notifications():
 
 # Dynamtically update notification bar
 @app.route('/get_notifications', methods=['GET', 'POST']) 
-@user_required
+@user_only
 def get_notifications():
     try:
         device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
@@ -552,7 +571,7 @@ def get_notifications():
 
 # Inventory interface
 @app.route('/inventory/')
-@user_required
+@user_only
 def get_inventory():
     return render_template("inventory.html")
 
@@ -560,7 +579,7 @@ def get_inventory():
 @app.route('/inventory/get/', defaults={'search_query': None})
 @app.route('/inventory/get/<search_query>')
 # used to dynamically get inventory
-@user_required
+@user_only
 def api_inventory(search_query = None):
     user_id = current_user.id
     try:
@@ -576,13 +595,13 @@ def api_inventory(search_query = None):
 
 # Add item to inventory interface
 @app.route("/inventory/add_item/")
-@user_required
+@user_only
 def add_to_inventory():
     return render_template("inventory_add.html")
 
 # Add item to inventory
 @app.route("/inventory/add_item/add", methods=["POST"])
-@user_required
+@user_only
 def append_inventory():
     user_id = current_user.id
     item_id = request.form.get("item_id")
@@ -591,7 +610,7 @@ def append_inventory():
 
 # Update quantity and expiry of item in inventory
 @app.route('/inventory/update_item', methods = ['POST'])
-@user_required
+@user_only
 def update_item(): 
     try:
         # gets variables needed to update item
@@ -607,7 +626,7 @@ def update_item():
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/remove_item', methods=['POST'])
-@user_required
+@user_only
 def remove_item():
     try:
         inventory_id = request.form['inventory_id']
@@ -618,7 +637,7 @@ def remove_item():
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route("/inventory/add_item/new", methods = ["POST"])
-@user_required
+@user_only
 def new_item():
     user_id = current_user.id
     response = item.process_add_form(request.form, user_id)
@@ -644,7 +663,7 @@ def new_item():
         return jsonify(response)
     
 @app.route("/inventory/update_items_quantity", methods=["POST"])
-@user_required
+@user_only
 def update_quantities():
     try:  
         items_used_string = request.form.get("items_used")
@@ -669,20 +688,20 @@ def update_quantities():
 
 # Opens camera module and returns feed
 @app.route('/scanner/get')
-@verified_required
+@verified_only
 def get_scanner():
     return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # Closes camera module
 @app.route('/scanner/close')
-@verified_required
+@verified_only
 def close_scanner():
     scanner.release_capture()
     return jsonify({"success":True})
 
 # Returns the barcode number if one is found
 @app.route('/scanner/get_object')
-@verified_required
+@verified_only
 def get_object():
     object = scanner.get_scanned()
     if (object):
@@ -692,13 +711,13 @@ def get_object():
         return jsonify({"success": False})
 
 @app.route("/unpause_scanner")
-@verified_required
+@verified_only
 def unpause_scanner():
     scanner.unpause_scanner()
     return jsonify({"success":True})
 
 @app.route("/scanner/toggle_mode/<value>")
-@verified_required
+@verified_only
 def toggle_scan_mode(value):
     if value == "true":
         scanner.toggle_mode(True)
@@ -713,7 +732,7 @@ def toggle_scan_mode(value):
 ### ITEM ROUTES ###
 
 @app.route("/items/single_text_search/<item_name>")
-@user_required
+@user_only
 def single_item_search(item_name):
     user_id = current_user.id
     try:
@@ -725,7 +744,7 @@ def single_item_search(item_name):
 
 # Get items by text search
 @app.route("/items/text_search", methods=["POST"])
-@user_required
+@user_only
 def text_search():
     user_id = current_user.id
     try:
@@ -737,7 +756,7 @@ def text_search():
 
 # Get item by barcode search
 @app.route("/items/barcode_search/<barcode>")
-@user_required
+@user_only
 def get_item_by_barcode(barcode):
     user_id = current_user.id
     try:
@@ -752,7 +771,7 @@ def get_item_by_barcode(barcode):
 
 # Get item by id
 @app.route("/items/get_item/<item_id>")
-@user_required
+@user_only
 def get_item(item_id):
     try:
         item_info = item.get_item(item_id)
@@ -762,13 +781,13 @@ def get_item(item_id):
 
 # Add item interface
 @app.route('/items/add_item')
-@admin_required
+@admin_only
 def add_item():
     return render_template("add_item.html")
 
 # Add item to item table
 @app.route('/items/add_item/add', methods=["POST"])
-@admin_required
+@admin_only
 def append_item_db():
     response = item.process_add_form(request.form)
     if response["success"]:
@@ -785,7 +804,7 @@ def append_item_db():
 
 # Check if item has an image
 @app.route("/find_image/<item_id>")
-@verified_required
+@verified_only
 def find_image(item_id):
     path = f"static/images/{item_id}.jpg"
     exists = file_exists(path)
@@ -795,7 +814,7 @@ def find_image(item_id):
 ### ITEM REPORT ROUTES
 
 @app.route("/items/reports/new", methods=["POST"])
-@user_required
+@user_only
 def report_item():
     user_id = current_user.id
     try:
@@ -807,22 +826,22 @@ def report_item():
         return jsonify({"success": False, "error":str(e)})
 
 @app.route("/items/reports")
-@admin_required
+@admin_only
 def display_reports():
     return render_template("reports.html")
 
 @app.route("/items/reports/get")
-@admin_required
+@admin_only
 def get_reports():
     return jsonify({"success": True, "reports": report.get_reports()})
 
 @app.route("/items/reports/<new_item_id>/<item_id>")
-@admin_required
+@admin_only
 def display_report(new_item_id, item_id):
     return render_template("report.html", new_item_id = new_item_id, item_id = item_id)
 
 @app.route("/items/reports/resolve", methods=["POST"])
-@admin_required
+@admin_only
 def resolve_report():
     try:
         action = request.form.get("action")
@@ -919,7 +938,7 @@ def resolve_report():
 
 # Item table interface
 @app.route('/admin/item_view')
-@admin_required
+@admin_only
 def get_items():
     # Splits the list of items into several pages.
     item_list = item.get_all()
@@ -938,7 +957,7 @@ def get_items():
 # allows for no search query to be entered
 @app.route('/admin/item_view/get', defaults={'search_query': None})
 @app.route('/admin/item_view/get/<search_query>')
-@admin_required
+@admin_only
 def search_items(search_query = None):
         # Checks if the search is for a specifc page.
         if search_query.isnumeric():
@@ -967,26 +986,26 @@ def search_items(search_query = None):
         
 # Recipe table interface.
 @app.route('/admin/recipe_view')
-@admin_required
+@admin_only
 def admin_get_recipes():
     recipes = admin_recipe_sql.get_all()
     return render_template("recipe_view.html", recipes = recipes)
 
 @app.route('/admin/recipe_view/add_item/<int:recipe_id>', methods=['GET'])
-@admin_required
+@admin_only
 def get_ingredients(recipe_id):
     ingredients = recipe_sql.get_recipe_items(recipe_id)
     return jsonify(ingredients)
 
 @app.route('/admin/recipe_view/get_tools_ids/<int:recipe_id>', methods=['GET'])
-@admin_required
+@admin_only
 def get_tools_ids(recipe_id):
     tools = recipe_sql.get_recipe_tools(recipe_id)
     return jsonify(tools)
 
 # Returns the tools as a dictionary so that names can be mapped to ids in the js code. 
 @app.route('/admin/recipe_view/get_tools/', methods=['GET'])
-@admin_required
+@admin_only
 def admin_get_tools():
     tools = tool.get_tools()
     tools = dict(tools)
@@ -994,7 +1013,7 @@ def admin_get_tools():
 
 # Removes an item from the item table.
 @app.route('/admin/item_view/delete', methods = ['POST'])
-@admin_required
+@admin_only
 def delete_item():
     try:
         # Form data is formatted in utf-8 so it needs to be decoded.
@@ -1017,7 +1036,7 @@ def delete_recipe():
 
 # Updates the details of a selected item in the item table.
 @app.route('/admin/item_view/update_item', methods = ['POST'])
-@admin_required
+@admin_only
 def update_item_admin(): 
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_check.sanitise_all(['name', 'brand', 'quantity', 
@@ -1044,7 +1063,7 @@ def update_item_admin():
     
 # Adds a new item to the database.
 @app.route('/admin/item_view/add_item', methods = ['POST'])
-@admin_required
+@admin_only
 def add_item_admin(): 
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_check.sanitise_all(['barcode', 'name', 'brand', 'quantity', 
@@ -1071,7 +1090,7 @@ def add_item_admin():
 
 # Updates the details of a selected recipe in the recipe table.
 @app.route('/admin/item_view/update_recipe', methods = ['POST'])
-@admin_required
+@admin_only
 def update_recipe_admin():
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_check.sanitise_all(['name', 'instructions', 
@@ -1090,7 +1109,7 @@ def update_recipe_admin():
     
 # Adds the details of a selected recipe in the recipe table.
 @app.route('/admin/item_view/add_recipe', methods = ['POST'])
-@admin_required
+@admin_only
 def add_recipe_admin():
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_check.sanitise_all(['name', 'instructions', 
@@ -1107,7 +1126,7 @@ def add_recipe_admin():
         return jsonify({'success': False, 'error': str(e)})
     
 @app.route('/admin/item_view/update_recipe_ingredients', methods=['POST'])
-@admin_required
+@admin_only
 def update_recipe_ingredients():
     try:
         # Requests lists since the rows are dynamically generated.
@@ -1123,7 +1142,7 @@ def update_recipe_ingredients():
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/admin/item_view/add_recipe_ingredients', methods=['POST'])
-@admin_required
+@admin_only
 def add_recipe_ingredients():
     try:
         # Requests lists since the rows are dynamically generated.
@@ -1139,7 +1158,7 @@ def add_recipe_ingredients():
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/admin/recipe_view/recipe_id/', methods=['GET'])
-@admin_required
+@admin_only
 def get_recipe_id():
     try:
         id = admin_recipe_sql.get_id()
@@ -1148,7 +1167,7 @@ def get_recipe_id():
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/admin/item_view/update_recipe_tools', methods=['POST'])
-@admin_required
+@admin_only
 def update_recipe_tools():
     try:
         tool_ids = request.form.getlist('tools[]')
@@ -1160,7 +1179,7 @@ def update_recipe_tools():
         return jsonify({'success': False, 'error': str(e)})
     
 @app.route('/admin/item_view/add_recipe_tools', methods=['POST'])
-@admin_required
+@admin_only
 def add_recipe_tools():
     try:
         tool_ids = request.form.getlist('tools[]')
@@ -1176,7 +1195,7 @@ def add_recipe_tools():
 # Shopping List Interface Route
 
 @app.route('/shopping_list', methods=['GET', 'POST'])
-@user_required
+@user_only
 def get_shoppingList():
     user_id = current_user.id
     if request.method == 'POST':
@@ -1205,7 +1224,7 @@ def get_shoppingList():
     return render_template("shoppinglist.html", items=items, unbought_items=unbought_items, bought_items=bought_items, low_stock=low_stock)
 
 @app.route('/shopping_list/add', methods=['POST'])
-@user_required
+@user_only
 def add_shopping_item():
     user_id = current_user.id
     try:
@@ -1217,7 +1236,7 @@ def add_shopping_item():
         return jsonify({"success": False, "error": str(e)})
 
 @app.route('/shopping_list/update', methods=['POST'])
-@user_required
+@user_only
 def update_shopping_item():
     try:
         item_id = request.form['item_id']
@@ -1229,7 +1248,7 @@ def update_shopping_item():
         return jsonify({"success": False, "error": str(e)})
 
 @app.route("/shopping_list/add_multi", methods=["POST"])
-@user_required
+@user_only
 def add_shopping_items():
     user_id = current_user.id
     try:
@@ -1247,7 +1266,7 @@ def add_shopping_items():
 ### UTENSILS AND APPLIANCE SELECTION ROUTES
     
 @app.route('/tools/select')
-@user_required
+@user_only
 def select_tools():
     user_id = current_user.id
     utensils = tool.get_tools("utensil")
@@ -1256,7 +1275,7 @@ def select_tools():
     return render_template('select_utensils.html', utensils=utensils, appliances=appliances, selected_ids=tool_ids)
 
 @app.route('/tools/save', methods=['POST'])
-@user_required
+@user_only
 def save_tools():
     user_id = current_user.id
     try:
@@ -1268,19 +1287,19 @@ def save_tools():
         return jsonify({"success": False, "message": "Failed to save tools."})
 
 @app.route("/tools/get")
-@user_required
+@user_only
 def get_tools():
     tools = tool.get_tools()
     print(tools)
     return jsonify({"success": True, "tools": tools})
 
 @app.route("/recipes")
-@user_required
+@user_only
 def recipe_page():
     return render_template("recipes.html")
 
 @app.route("/recipes/get", methods=["POST"])
-@user_required
+@user_only
 def get_recipes():
     user_id = current_user.id
     try:
@@ -1325,7 +1344,7 @@ def get_recipes():
         return jsonify({"success": False, "error": str(e)})
     
 @app.route("/recipes/get/<recipe_id>")
-@user_required
+@user_only
 def get_recipe(recipe_id):
     user_id = current_user.id
     try:
@@ -1340,7 +1359,7 @@ def get_recipe(recipe_id):
         return jsonify({"success": False, "error": str(e)})
 
 @app.route("/recipes/add", methods=["POST"])
-@user_required
+@user_only
 def add_recipe():
     user_id = current_user.id
     try:
@@ -1378,7 +1397,7 @@ def add_recipe():
         return jsonify({"success": False, "error": str(e)})
 
 @app.route("/recipes/update", methods=["POST"])
-@user_required
+@user_only
 def update_recipe():
     try:
         recipe_id = request.form.get("recipe_id")
@@ -1417,7 +1436,7 @@ def update_recipe():
         return jsonify({"success": False, "error": str(e)})
 
 @app.route("/recipes/delete/<recipe_id>")
-@user_required
+@user_only
 def remove_recipe(recipe_id):
     try:
         ### MERGE FUNCTIONS WHEM REMOVING OOP

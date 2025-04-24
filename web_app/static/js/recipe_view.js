@@ -329,7 +329,7 @@ async function create_list_tools(recipe_id) {
     }
 }
 
-function add_tool_display_row(tool_id, recipe_id, add = false) {
+function add_tool_display_row(tool_id = "", recipe_id = "", add = false) {
     const row = document.createElement("div");
     row.className = "tool-row";
 

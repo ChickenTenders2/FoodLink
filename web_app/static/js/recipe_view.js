@@ -15,6 +15,7 @@ async function remove_item(id) {
     if (result.success) {
         // Updates the page.
         location.reload();
+        close_popup();
     } else {
         alert('There was an error deleting the item.');
     }
@@ -38,6 +39,13 @@ function open_popup(recipeName, name, servings, prep, cook, instructions, recipe
 
         document.getElementById('update-form').addEventListener('submit', function(event) {
             submit_next_update(event, recipe_id);});
+        
+        // moved delete button inside popup
+        const deleteBtn = document.getElementById('delete_button');
+        deleteBtn.style.display = 'inline-block';
+        deleteBtn.onclick = () => {
+            remove_item(recipe_id);
+        }
     }
 
     document.getElementById('name').value = name;
@@ -53,15 +61,13 @@ function open_popup(recipeName, name, servings, prep, cook, instructions, recipe
     document.getElementById('recipe-id').value = recipe_id;
     document.getElementById('popup').style.display = 'block';
 
-    // moved delete button inside popup
-    const deleteBtn = document.getElementById('delete-button');
-    deleteBtn.style.display = 'inline-block';
-    deleteBtn.onclick = () => remove_item(recipe_id);
 }
 
 // Closes the recipe information popup.
 function close_popup() {
     document.getElementById('popup').style.display = 'none';
+    document.getElementById('delete_button').style.display = "none";
+    document.getElementById('exit').style.display = "none";
 }
 
 async function submit_next_update(event, recipe_id) {
@@ -333,7 +339,7 @@ function add_tool_display_row(tool_id, recipe_id, add = false) {
         <input type="text" name="tools[]" placeholder="Tools" id="Tools" required value="${""}">
         <br>
         <input type="hidden" name="recipe-id" placeholder="recipe-id" required value="${recipe_id}">
-        <button type="button" onclick="if (remove_conditional(this)">X</button>
+        <button type="button" onclick="remove_conditional(this)">X</button>
     `;
     } else {
     // Displays information and creates button which removes tool on click.
@@ -342,7 +348,7 @@ function add_tool_display_row(tool_id, recipe_id, add = false) {
         <input type="text" name="tools[]" placeholder="Tools" id="Tools" required value="${tool_id}">
         <br>
         <input type="hidden" name="recipe-id" placeholder="recipe-id" required value="${recipe_id}">
-        <button type="button" onclick="if (remove_conditional(this)">X</button>
+        <button type="button" onclick="remove_conditional(this)">X</button>
     `;
     }
     document.getElementById("tools_list_container").appendChild(row);

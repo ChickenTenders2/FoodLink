@@ -57,6 +57,7 @@
             <input type="hidden" id="original-instructions" name="original-instructions">
             <input type="hidden" id="recipe-id" name="recipe-id">
             <button type="submit">Next</button>
+            <button type="button" class="hidden-button" id="delete_button">Delete</button>
             <button type="button" id="exit" style="display: none"; onclick="close_popup()">Exit</button>
         </form>
     </div>
@@ -73,11 +74,11 @@
     </div>
     <div id="edit_tools_popup" class="popup">
         <form id="update-form-tools"> 
-        <h3>Edit Tools</h3>
-        <div id="tools_list_container"></div>
-        <div id="tool_add_controls"></div>
-        <button type="submit">Save</button>
-        <br>
+            <h3>Edit Tools</h3>
+            <div id="tools_list_container"></div>
+            <div id="tool_add_controls"></div>
+            <button type="submit">Save</button>
+            <br>
         </form>
     </div>
     <script src="{{ url_for('static', filename='js/recipe_view.js') }}"></script> 

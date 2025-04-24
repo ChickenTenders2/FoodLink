@@ -4,14 +4,6 @@ class Recipe(database):
     def __init__(self):
         super().__init__()
 
-    def get_all(self):
-        cursor = self.connection.cursor()
-        query = "SELECT id, name, servings, prep_time, cook_time, instructions FROM FoodLink.recipe WHERE user_id IS null;"
-        cursor.execute(query)
-        items = cursor.fetchall()
-        cursor.close()
-        return items
-
     def get_recipes(self, search_term, page, user_id, user_only):
         limit = 10
         offset = (page - 1) * limit

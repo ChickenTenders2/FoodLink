@@ -36,14 +36,6 @@ class User(db.Model, UserMixin):
     def last_login(self):
         return None  # Default to None
 
-class Device(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    device_id = db.Column(db.String(100), nullable=False)
-    device_name = db.Column(db.String(100), nullable=False)
-    last_used = db.Column(db.DateTime, default=datetime.now(pytz.utc))
-    is_current = db.Column(db.Boolean, default=False)
-
 class Settings(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True, nullable=False)
     

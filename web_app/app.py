@@ -1,34 +1,55 @@
-import re
-import time
+## general imports for flask setup
 from flask import Flask, jsonify, render_template, request, url_for, Response, redirect, session, flash
 from flask_bootstrap import Bootstrap
-from inventory import Inventory
+import os
+
+## shared operations for user and admin:
+# for scanning items (barcode or ai object recogniser)
 from scanner import Scanner
-from item import Item
-#from success import Success
-from report import Report
-from shoppingList import shoppingList
+# for checking item image exists
 from os.path import isfile as file_exists
-from notification import notification
-from thingsboard import thingsboard
 
 from tool import Tool
+from item import Item
+
+## user operations
+from inventory import Inventory
+from notification import notification
+# for getting temperature and humidity of fridge
+from thingsboard import thingsboard
+#from success import Success
+from shoppingList import shoppingList
+# for recipe handling
 from recipe import Recipe
 from recipe_object import recipe_object
+# for parsing ingredients and tools list of lists as string
 import json
-from extensions import db, login_manager
-import os
-# for login system
-from flask_login import LoginManager, login_required, current_user, login_user, logout_user
-from flask_mail import Mail
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_session import Session
-from models import User, Admin
-from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
-from email_verification import send_verification_code
-# for admin item and recipe view
+
+## admin operations
+# for admin, item and recipe view
 from admin_recipe import admin_recipe
 from input_handling import InputHandling
+
+from report import Report
+
+### for login systems
+# general flask login functions
+from flask_login import LoginManager, login_required, current_user, login_user, logout_user
+# for email verification
+from flask_mail import Mail
+from email_verification import send_verification_code
+# for user lockout after too many attempts
+from time import time as current_time
+# for validating password complexity (regular expression checker)
+from re import search as re_search
+# for encrypting password
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_session import Session
+# for accessing database
+from models import User, Admin
+# login forms
+from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
+from extensions import db, login_manager
 
 # Import database and user model
 app = Flask(__name__, template_folder = "templates")
@@ -63,18 +84,8 @@ login_manager.login_view = 'login'  # This ensures users are redirected to login
 db.init_app(app)
 mail = Mail(app)
 
-# Initialize Flask-Login
-login_manager = LoginManager(app)
 
-# User loader function for Flask-Login
-@login_manager.user_loader
-def load_user(user_id):
-    user_type = session.get("user_type")
-
-    if user_type == "admin":
-        return Admin.query.get(int(user_id))
-    elif user_type == "user":
-        return User.query.get(int(user_id))
+###     DECORATOR FUNCTIONS TO STOP UNAUTHORISED ACCESS TO PAGES
 
 ## for admin only pages
 def admin_only(f):
@@ -268,7 +279,7 @@ def login():
     lockoutThrehold = 5  # Number of allowed failed attempts
     lockoutDuration = 60  # Lockout time in seconds (1 minute)
     
-    if session["userLockoutTime"] and time.time() >= session["userLockoutTime"]:
+    if session["userLockoutTime"] and current_time() >= session["userLockoutTime"]:
         session["userLockoutTime"] = None
         session["userFailedAttempts"] = 0
 
@@ -280,14 +291,14 @@ def login():
         if user is None:
             error = "Error: Invalid Credentials User"
         else:
-            if session["userLockoutTime"] and time.time() < session["userLockoutTime"]:
+            if session["userLockoutTime"] and current_time() < session["userLockoutTime"]:
                 error = "Account tempororily locked. Please try again later."
             else:
                 if not check_password_hash(user.password, form.password.data):
                     session["userFailedAttempts"] += 1
                     attempt = session["userFailedAttempts"]
                     if session["userFailedAttempts"] >= lockoutThrehold:
-                        session["userLockoutTime"] = time.time() + lockoutDuration
+                        session["userLockoutTime"] = current_time() + lockoutDuration
                         error = f"Account locked for {lockoutDuration} seconds due to multiple failed attempts."
                     else:
                         error = f"Error: Invalid Credentials PWD {attempt}"
@@ -321,7 +332,7 @@ def createAccount():
             if existing_user.email == form.email.data:
                 msg = "Email already exists."
         else:    
-            if len(form.password.data) >= 6 and sum(c.isdigit() for c in form.password.data) >= 2 and re.search(r"[!@#$%^&*(),.?\":{}|<>]", form.password.data):
+            if len(form.password.data) >= 6 and sum(c.isdigit() for c in form.password.data) >= 2 and re_search(r"[!@#$%^&*(),.?\":{}|<>]", form.password.data):
                 if form.password.data == form.passwordConfirm.data:
                     # Create new user
                     user = User(
@@ -401,7 +412,7 @@ def resetPassword():
   
 
     if form.validate_on_submit():
-        if len(form.password.data) >= 6 and sum(c.isdigit() for c in form.password.data) >= 2 and re.search(r"[!@#$%^&*(),.?\":{}|<>]", form.password.data):
+        if len(form.password.data) >= 6 and sum(c.isdigit() for c in form.password.data) >= 2 and re_search(r"[!@#$%^&*(),.?\":{}|<>]", form.password.data):
             if form.password.data == form.passwordConfirm.data:
                 print("Setting new password")
                 user.password = generate_password_hash(form.password.data)

@@ -71,7 +71,7 @@ async function resolve_report(event) {
     //Waits until result is recieved
     const result = await response.json();
     if (result.success) {
-        alert("report resolved. "+ result.message)
+        alert("report resolved.")
         window.location.href = "/items/reports"
     } else {
         alert('There was an error resolving the report. Error: ' + result.error);

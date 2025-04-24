@@ -795,7 +795,7 @@ def get_item_by_barcode(barcode):
 
 # Get item by id
 @app.route("/items/get_item/<item_id>")
-@user_only
+@admin_only
 def get_item(item_id):
     try:
         item_info = item.get_item(item_id)

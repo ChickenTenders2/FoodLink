@@ -114,7 +114,7 @@ class Inventory(database):
         else:
             # sets quantity to max if it exceeds limit
             query = """UPDATE FoodLink.inventory SET 
-	                item_id = %s
+	                item_id = %s,
                     quantity = CASE
                         WHEN quantity > %s THEN %s
                         ELSE quantity

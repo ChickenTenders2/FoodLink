@@ -703,19 +703,25 @@ a.tile-link {
 
 .item-actions {
     display: flex;
-    gap: 2px;
+    gap: 6px;
+    align-items: center;
 }
 
 .item-actions button {
-    margin-left: 10px;
     padding: 5px 10px;
     font-size: 14px;
-    border: none;
     border-radius: 5px;
-    background-color: #aed581;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
+    height: 30px;
+    line-height: 1;
+    box-sizing: border-box;
+    vertical-align: middle;
+  }
+
+  .item-actions form button {
+    transform: translateY(-10px);
+  }
+  
+  
 
 .item-actions button:hover {
     background-color: #9ccc65;
@@ -841,6 +847,10 @@ input[type="submit"]:hover {
     justify-content: center;
     /* margin-bottom: 10px; */
     margin-top: 10px;
+}
+
+.button-group form button {
+    transform: translateY(-10px);
 }
 
 .input-group .button-group {
@@ -1210,7 +1220,7 @@ input[type="submit"] {
     font-size: 16px;
     border: none;
     border-radius: 30px;
-    background-color: #a6d785; /* Light green */
+    background-color: #a6d785;
     color: #000;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -1218,7 +1228,7 @@ input[type="submit"] {
 
 button:hover,
 input[type="submit"]:hover {
-    background-color: #8fca6c; /* Slightly darker green */
+    background-color: #8fca6c; 
 }
 
 .button-group {

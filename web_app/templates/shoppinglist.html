@@ -2,7 +2,7 @@
 
 {% block page_content %}
 
-  <h1>Shopping List</h1>
+  <h1 style="text-align: center;">Shopping List</h1>
 
   <div class="button-group">
     <button class="item-actions" onclick="openAddPopup()">Add Item</button>
@@ -105,5 +105,9 @@
 
   <div id="toast" class="toast"></div>
 
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
   <script src="{{ url_for('static', filename='js/shopping_list.js') }}"></script> 
 {% endblock %}

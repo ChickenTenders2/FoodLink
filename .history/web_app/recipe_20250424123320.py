@@ -131,7 +131,6 @@ class Recipe(database):
         data = (recipe_id,)
         cursor.execute(query, data)
         tool_ids = cursor.fetchall()
-        self.connection.commit()
         cursor.close()
         # formats each id into a list
         tool_ids = [id[0] for id in tool_ids]
@@ -143,7 +142,6 @@ class Recipe(database):
         data = (recipe_id,)
         cursor.execute(query, data)
         items = cursor.fetchall()
-        self.connection.commit()
         cursor.close()
         items = [list(item) for item in items]
         return items

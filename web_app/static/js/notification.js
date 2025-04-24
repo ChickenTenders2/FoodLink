@@ -36,37 +36,74 @@ function fetchNotifications() {
         });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    const popup = document.getElementById('notification-popup');
+// document.addEventListener("DOMContentLoaded", function () {
+//     const popup = document.getElementById('notification-popup');
+//     const icon = document.getElementById('notification-icon');
+
+//     // Toggle popup on icon click
+//     icon.addEventListener('click', function (e) {
+//         console.log("Clicked notification icon");
+//         e.stopPropagation(); // Prevent window click from firing
+//         // Toggle visibility
+//         if (popup.style.display === 'block') {
+//             popup.style.display = 'none';
+//         } else {
+//             popup.style.display = 'block';
+//         }
+//     });
+
+//     // Prevent click inside the popup from closing it
+//     popup.addEventListener('click', function (e) {
+//         e.stopPropagation();
+//     });
+
+//     // Click anywhere else closes the popup
+//     window.addEventListener('click', function () {
+//         popup.style.display = 'none';
+//     });
+
+//     const tbFooter = document.querySelector('.tb-powered-by-footer');
+//     if (tbFooter) tbFooter.style.display = 'none';
+
+//     setInterval(fetchNotifications, 300000); // auto-refresh every 5 minutes
+//     fetchNotifications(); // run once on page load
+// });
+
+document.addEventListener("DOMContentLoaded", function () { 
+    const popup = document.getElementById('notification-popup'); 
     const icon = document.getElementById('notification-icon');
 
-    // Toggle popup on icon click
+    if (!popup || !icon) {
+        console.error('Notification popup or icon not found');
+        return;
+    }
+    
     icon.addEventListener('click', function (e) {
-        e.stopPropagation(); // Prevent window click from firing
-        // Toggle visibility
-        if (popup.style.display === 'block') {
-            popup.style.display = 'none';
-        } else {
-            popup.style.display = 'block';
-        }
+        e.stopPropagation(); // Prevent body click from hiding it immediately
+        popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
     });
-
-    // Prevent click inside the popup from closing it
+    
+    // Hide popup when clicking outside
+    window.addEventListener('click', function () {
+        popup.style.display = 'none';
+    });
+    
     popup.addEventListener('click', function (e) {
         e.stopPropagation();
     });
 
-    // Click anywhere else closes the popup
-    window.addEventListener('click', function () {
-        popup.style.display = 'none';
-    });
-
     const tbFooter = document.querySelector('.tb-powered-by-footer');
     if (tbFooter) tbFooter.style.display = 'none';
-
-    setInterval(fetchNotifications, 300000); // auto-refresh every 5 minutes
-    fetchNotifications(); // run once on page load
+    
+    fetchNotifications();
+    setInterval(fetchNotifications, 300000);
 });
+
+// const tbFooter = document.querySelector('.tb-powered-by-footer');
+// if (tbFooter) tbFooter.style.display = 'none';
+
+// setInterval(fetchNotifications, 300000); // auto-refresh every 5 minutes
+// fetchNotifications(); // run once on page load
 
 
 function markRead(elem) {

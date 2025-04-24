@@ -1,8 +1,6 @@
 import random
 from flask_mail import Message
-from flask import current_app
-
-verification_codes = {}
+from flask import current_app, session
 
 def generate_verification_code():
     return str(random.randint(100000, 999999))
@@ -11,7 +9,13 @@ def generate_verification_code():
 ## action text is either "verify" or "reset" and mofifies email text to match accordingly
 def send_verification_code(user, mail, action_text):
     code = generate_verification_code()
-    verification_codes[user.email] = code
+    if "verification_codes" not in session:
+        session["verification_codes"] = {}
+    # stores the verification code in a users session instead of globally
+    # improves scaling and reduces risk of code mixing between users
+    session["verification_codes"][user.email] = code
+    # ensures flask saves changes
+    session.modified = True 
 
     msg = Message(
         f'FoodLink - {"Verify Your Email" if action_text == "verify" else "Reset Your Password"}',

@@ -23,23 +23,22 @@ class notification(database):
         cursor.execute(query, data)
         settings = cursor.fetchone()
 
-        print(settings)
-
+        # store user temperature/humidity settings into local variables
         if settings:
-            min_temperature = settings[0]
-            max_temperature = settings[1]
-            max_humidity = settings[2]
+            min_temperature = float(settings[0])
+            max_temperature = float(settings[1])
+            max_humidity = float(settings[2])
             alerts_enabled = settings[3]
+        else:
+            # if not user setting found exit function
+            cursor.close()
+            return
                 
-        temperature = float(temperature)
-        humidity = float(humidity)
-        min_temperature = float(min_temperature)
-        max_temperature = float(max_temperature)
-        max_humidity = float(max_humidity)
         
         if alerts_enabled:
             # compare temperature against temperature thresholds and send notification to user if it exceeds
             if temperature is not None:
+                temperature = float(temperature)
                 temperature = round(temperature, 2)
                 notif_type = 'temperature'
                 if temperature < min_temperature:
@@ -62,6 +61,7 @@ class notification(database):
                         )
             # compare humdity against humidity threshold and send notification to user if it exceeds threshold  
             if humidity is not None:
+                humidity = float(humidity)
                 humidity = round(humidity, 2)
                 if humidity > max_humidity:
                     notif_type = 'humidity'

@@ -68,17 +68,44 @@ login_manager = LoginManager(app)
 # User loader function for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
-    #return User.query.get(int(user_id)) was working but adding user_type makes life easier in the future
-    user_type = session.get("user_type")
-    if user_type == "admin":
-        return Admin.query.get(int(user_id))
-    else:
-        return User.query.get(int(user_id))
+    # attempts to load regular user first
+    user = User.query.get(int(user_id))
+    if user:
+        return user
+    # if admin login return instead
+    return Admin.query.get(int(user_id))
 
-@login_manager.unauthorized_handler
-def back_to_login():
-    return redirect('/login')
+## for admin only pages
+def admin_required(f):
+    def decorated_function(*args, **kwargs):
+        ## if the admin isnt signed in
+        if not current_user.is_authenticated:
+            flash("You must be logged in to access this page.", "warning")
+            ## redirect to admin login
+            return redirect(url_for("admin_login"))
+        ## if the user tries to access the page
+        elif not isinstance(current_user._get_current_object(), Admin):
+            flash("You do not have permission to access this page.", "danger")
+            ## send them back to dashboard
+            return redirect(url_for("dashboard"))
+        return f(*args, **kwargs)
+    return decorated_function
 
+## for user only pages
+def user_required(f):
+    def decorated_function(*args, **kwargs):
+        ## if the user isnt logged in
+        if not current_user.is_authenticated:
+            flash("You must be logged in to access this page.", "warning")
+            ## redirect to login page
+            return redirect(url_for("login"))
+        ## if an admin tries to access a normal account page
+        if isinstance(current_user._get_current_object(), Admin):
+            flash("Admins cannot access this page.", "danger")
+            ## redirect to dashboard
+            return redirect(url_for("AdminDashboard"))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Index route
 @app.route('/')
@@ -101,8 +128,6 @@ def admin_login():
         admin = Admin.query.filter_by(username=form.username.data).first()
         if admin and check_password_hash(admin.password, form.password.data):
             login_user(admin, remember=False)
-            session["username"] = admin.username
-            session["user_type"] = "admin"
             flash("Logged in successfully as admin.", "success")
             return redirect(url_for("AdminDashboard"))
         else:
@@ -112,7 +137,7 @@ def admin_login():
 
 
 @app.route("/admin/add", methods=["GET", "POST"])
-@login_required
+@admin_required
 def AddAdmin():
     # Must be advanced admin
     if not isinstance(current_user._get_current_object(), Admin) or not current_user.advanced_privileges:
@@ -146,7 +171,7 @@ def AddAdmin():
     return render_template("admin_add.html", form=form, message=message)
 
 @app.route("/admin/update-password", methods=["GET", "POST"])
-@login_required
+@admin_required
 def AdminUpdatePassword():
     if not isinstance(current_user._get_current_object(), Admin):
         flash("Unauthorized access.", "danger")
@@ -169,13 +194,13 @@ def AdminUpdatePassword():
     return render_template("admin_update_password.html", form=form, message=message)
 
 @app.route("/admin/dashboard")
-@login_required
+@admin_required
 def AdminDashboard():
     return render_template("admin_dashboard.html")
 # 
 # Logout route
 @app.route('/admin/logout')
-@login_required
+@admin_required
 def admin_logout():
     logout_user()
     session.clear()
@@ -187,8 +212,6 @@ def admin_logout():
 def login():
     form = LoginForm()
     error = None
-
-    #session["username"] = []
     
     if "userFailedAttempts" not in session:
         session["userFailedAttempts"] = 0
@@ -226,7 +249,6 @@ def login():
                     login_user(user, form.remember_me.data)
                     #flash("You were successfully logged in!")
 
-                    session["username"] = form.username.data
                     session["userFailedAttempts"] = 0
                     session["userLockoutTime"] = None
                   # Check if email is verified
@@ -298,8 +320,10 @@ def resetByEmail():
     elif form.submit_otp.data and form.validate():
         user = User.query.filter_by(email=form.email.data).first()
 
-        if user and verification_codes.get(user.email) == form.otp.data:
-        
+        if user and session.get("verification_codes", {}).get(user.email) == form.otp.data:
+            # removes code if correct
+            session["verification_codes"].pop(user.email, None)
+            session.modified = True
             session['reset_email'] = user.email
             return redirect(url_for('resetPassword'))
         else:
@@ -351,7 +375,7 @@ def resetPassword():
 
 # Logout route
 @app.route('/logout')
-@login_required
+@user_required
 def logout():
     logout_user()
     session.pop('username', None)
@@ -359,13 +383,13 @@ def logout():
 
 # Email verification page
 @app.route('/email/verification')
-@login_required
+@user_required
 def email_verification_page():
     return render_template('email_verification.html')
 
 # Route to request verification code
 @app.route('/email/send-code', methods=['POST'])
-@login_required
+@user_required
 def send_verification_code_route():
     # Check if email is already verified
     if current_user.email_verified:
@@ -379,7 +403,7 @@ def send_verification_code_route():
 
 # Route to verify email with code
 @app.route('/email/verify-code', methods=['POST'])
-@login_required
+@user_required
 def verify_code():
     # Get submitted code
     entered_code = request.form.get('verification_code')
@@ -389,7 +413,7 @@ def verify_code():
         return redirect(url_for('email_verification_page'))
     
     # Check if code matches
-    stored_code = verification_codes.get(current_user.email)
+    stored_code = session.get("verification_codes", {}).get(current_user.email)
     
     if not stored_code:
         flash('No verification code found. Please request a new code.', 'danger')
@@ -401,7 +425,8 @@ def verify_code():
         db.session.commit()
         
         # Clear the code
-        verification_codes.pop(current_user.email, None)
+        session["verification_codes"].pop(current_user.email, None)
+        session.modified = True
         
         flash('Your email has been verified successfully!', 'success')
     else:
@@ -413,7 +438,7 @@ def verify_code():
 ### SETTINGS PAGE ROUTE
 
 @app.route('/settings')
-@login_required
+@user_required
 def settings_page():
     return redirect(url_for('settings.settings_page'))
 
@@ -430,7 +455,7 @@ def settings_page():
 #### USER DASHBOARD ROUTES
 
 @app.route('/dashboard', methods=['GET', 'POST'])
-@login_required
+@user_required
 def dashboard():
 
     temp_url = "https://thingsboard.cs.cf.ac.uk/dashboard/9c597b10-0b04-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2" 
@@ -439,7 +464,7 @@ def dashboard():
     return render_template('index.html', temp_url=temp_url, humid_url = humid_url) #, notifications=notifications, unread_count=unread_count)
 
 @app.route('/notification/mark_read', methods=['POST'])
-@login_required
+@user_required
 def mark_read_notification():
     try:
         notif_id = request.json.get('notif_id')
@@ -451,11 +476,11 @@ def mark_read_notification():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.context_processor 
+@app.context_processor
 def inject_notifications(): 
     if current_user.is_authenticated: 
         try: 
-            user_id = current_user.id 
+            user_id = current_user.id
             notif.temperature_humidity_notification(user_id, None, None) 
             notif.expiry_notification(user_id) 
             notifications = notif.get_notifications(user_id) 
@@ -469,25 +494,11 @@ def inject_notifications():
 
 # Dynamtically update notification bar
 @app.route('/get_notifications', methods=['GET', 'POST']) 
-@login_required
+@user_required
 def get_notifications():
-    # user_id = 2
-
-    # if POST reques, amrk a specific notification as read
-    if request.method == 'POST' and request.is_json: 
-        try: 
-            notif_id = request.json.get('mark_read') 
-            if notif_id: 
-                notif.mark_read(notif_id) 
-                return jsonify({'success': True}) 
-            else: 
-                return jsonify({'success': False, 'error': 'Notification ID not provided.'}) 
-        except Exception as e: 
-            return jsonify({'success': False, 'error': str(e)})
-    
     try:
         device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
-        user_id = session.get("user_id")
+        user_id = current_user.id
 
         token = tb.get_jwt_token()
         data = tb.get_telemetry(token, device_id)
@@ -523,7 +534,7 @@ def get_notifications():
 
 # Inventory interface
 @app.route('/inventory/')
-@login_required
+@user_required
 def get_inventory():
     return render_template("inventory.html")
 
@@ -531,9 +542,9 @@ def get_inventory():
 @app.route('/inventory/get/', defaults={'search_query': None})
 @app.route('/inventory/get/<search_query>')
 # used to dynamically get inventory
-@login_required
+@user_required
 def api_inventory(search_query = None):
-    user_id = session.get("user_id")
+    user_id = current_user.id
     try:
         # searches for an item if query is provided otherwise gets all items
         if search_query:
@@ -546,24 +557,23 @@ def api_inventory(search_query = None):
         return jsonify({"success": False, "error":str(e)})
 
 # Add item to inventory interface
-@login_required
 @app.route("/inventory/add_item/")
-@login_required
+@user_required
 def add_to_inventory():
     return render_template("inventory_add.html")
 
 # Add item to inventory
-@login_required
 @app.route("/inventory/add_item/add", methods=["POST"])
+@user_required
 def append_inventory():
-    user_id = session.get("user_id")
+    user_id = current_user.id
     item_id = request.form.get("item_id")
     response = inventory.process_add_form(user_id, item_id, request.form)    
     return jsonify(response)
 
 # Update quantity and expiry of item in inventory
-@login_required
 @app.route('/inventory/update_item', methods = ['POST'])
+@user_required
 def update_item(): 
     try:
         # gets variables needed to update item
@@ -578,8 +588,8 @@ def update_item():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-@login_required
 @app.route('/remove_item', methods=['POST'])
+@user_required
 def remove_item():
     try:
         inventory_id = request.form['inventory_id']
@@ -589,10 +599,10 @@ def remove_item():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-@login_required
 @app.route("/inventory/add_item/new", methods = ["POST"])
+@user_required
 def new_item():
-    user_id = session.get("user_id")
+    user_id = current_user.id
     response = item.process_add_form(request.form, user_id)
     item_id = response["item_id"]
 
@@ -615,8 +625,8 @@ def new_item():
     else:
         return jsonify(response)
     
-@login_required
 @app.route("/inventory/update_items_quantity", methods=["POST"])
+@user_required
 def update_quantities():
     try:  
         items_used_string = request.form.get("items_used")
@@ -640,21 +650,21 @@ def update_quantities():
 # ### BARCODE SCANNING ROUTES ###
 
 # Opens camera module and returns feed
-@login_required
 @app.route('/scanner/get')
+@login_required
 def get_scanner():
     return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # Closes camera module
-@login_required
 @app.route('/scanner/close')
+@login_required
 def close_scanner():
     scanner.release_capture()
     return jsonify({"success":True})
 
 # Returns the barcode number if one is found
-@login_required
 @app.route('/scanner/get_object')
+@login_required
 def get_object():
     object = scanner.get_scanned()
     if (object):
@@ -685,9 +695,9 @@ def toggle_scan_mode(value):
 ### ITEM ROUTES ###
 
 @app.route("/items/single_text_search/<item_name>")
-@login_required
+@user_required
 def single_item_search(item_name):
-    user_id = session.get("user_id")
+    user_id = current_user.id
     try:
         items = item.text_search(user_id, item_name)
         item_info = items[0]
@@ -697,9 +707,9 @@ def single_item_search(item_name):
 
 # Get items by text search
 @app.route("/items/text_search", methods=["POST"])
-@login_required
+@user_required
 def text_search():
-    user_id = session.get("user_id")
+    user_id = current_user.id
     try:
         search_term = request.form["search_term"]
         items = item.text_search(user_id, search_term)
@@ -709,9 +719,9 @@ def text_search():
 
 # Get item by barcode search
 @app.route("/items/barcode_search/<barcode>")
-@login_required
+@user_required
 def get_item_by_barcode(barcode):
-    user_id = session.get("user_id")
+    user_id = current_user.id
     try:
         item_info = item.barcode_search(user_id, barcode)
         if item_info:
@@ -724,7 +734,7 @@ def get_item_by_barcode(barcode):
 
 # Get item by id
 @app.route("/items/get_item/<item_id>")
-@login_required
+@user_required
 def get_item(item_id):
     try:
         item_info = item.get_item(item_id)
@@ -734,13 +744,13 @@ def get_item(item_id):
 
 # Add item interface
 @app.route('/items/add_item')
-@login_required
+@admin_required
 def add_item():
     return render_template("add_item.html")
 
 # Add item to item table
 @app.route('/items/add_item/add', methods=["POST"])
-@login_required
+@admin_required
 def append_item_db():
     response = item.process_add_form(request.form)
     if response["success"]:
@@ -767,9 +777,9 @@ def find_image(item_id):
 ### ITEM REPORT ROUTES
 
 @app.route("/items/reports/new", methods=["POST"])
-@login_required
+@user_required
 def report_item():
-    user_id = session.get("user_id")
+    user_id = current_user.id
     try:
         new_item_id = request.form.get("new_item_id")
         item_id = request.form.get("item_id") or None
@@ -779,22 +789,22 @@ def report_item():
         return jsonify({"success": False, "error":str(e)})
 
 @app.route("/items/reports")
-@login_required
+@admin_required
 def display_reports():
     return render_template("reports.html")
 
 @app.route("/items/reports/get")
-@login_required
+@admin_required
 def get_reports():
     return jsonify({"success": True, "reports": report.get_reports()})
 
 @app.route("/items/reports/<new_item_id>/<item_id>")
-@login_required
+@admin_required
 def display_report(new_item_id, item_id):
     return render_template("report.html", new_item_id = new_item_id, item_id = item_id)
 
 @app.route("/items/reports/resolve", methods=["POST"])
-@login_required
+@admin_required
 def resolve_report():
     try:
         action = request.form.get("action")
@@ -891,6 +901,7 @@ def resolve_report():
 
 # Item table interface
 @app.route('/admin/item_view')
+@admin_required
 def get_items():
     # Splits the list of items into several pages.
     item_list = item.get_all()
@@ -909,6 +920,7 @@ def get_items():
 # allows for no search query to be entered
 @app.route('/admin/item_view/get', defaults={'search_query': None})
 @app.route('/admin/item_view/get/<search_query>')
+@admin_required
 def search_items(search_query = None):
         # Checks if the search is for a specifc page.
         if search_query.isnumeric():
@@ -937,22 +949,26 @@ def search_items(search_query = None):
         
 # Recipe table interface.
 @app.route('/admin/recipe_view')
+@admin_required
 def admin_get_recipes():
     recipes = admin_recipe_sql.get_all()
     return render_template("recipe_view.html", recipes = recipes)
 
 @app.route('/admin/recipe_view/add_item/<int:recipe_id>', methods=['GET'])
+@admin_required
 def get_ingredients(recipe_id):
     ingredients = recipe_sql.get_recipe_items(recipe_id)
     return jsonify(ingredients)
 
 @app.route('/admin/recipe_view/get_tools_ids/<int:recipe_id>', methods=['GET'])
+@admin_required
 def get_tools_ids(recipe_id):
     tools = recipe_sql.get_recipe_tools(recipe_id)
     return jsonify(tools)
 
 # Returns the tools as a dictionary so that names can be mapped to ids in the js code. 
 @app.route('/admin/recipe_view/get_tools/', methods=['GET'])
+@admin_required
 def admin_get_tools():
     tools = tool.get_tools()
     tools = dict(tools)
@@ -960,6 +976,7 @@ def admin_get_tools():
 
 # Removes an item from the item table.
 @app.route('/admin/item_view/delete', methods = ['POST'])
+@admin_required
 def delete_item():
     try:
         # Form data is formatted in utf-8 so it needs to be decoded.
@@ -982,6 +999,7 @@ def delete_recipe():
 
 # Updates the details of a selected item in the item table.
 @app.route('/admin/item_view/update_item', methods = ['POST'])
+@admin_required
 def update_item_admin(): 
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_check.sanitise_all(['name', 'brand', 'quantity', 
@@ -1008,6 +1026,7 @@ def update_item_admin():
     
 # Adds a new item to the database.
 @app.route('/admin/item_view/add_item', methods = ['POST'])
+@admin_required
 def add_item_admin(): 
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_check.sanitise_all(['barcode', 'name', 'brand', 'quantity', 
@@ -1034,6 +1053,7 @@ def add_item_admin():
 
 # Updates the details of a selected recipe in the recipe table.
 @app.route('/admin/item_view/update_recipe', methods = ['POST'])
+@admin_required
 def update_recipe_admin():
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_check.sanitise_all(['name', 'instructions', 
@@ -1052,6 +1072,7 @@ def update_recipe_admin():
     
 # Adds the details of a selected recipe in the recipe table.
 @app.route('/admin/item_view/add_recipe', methods = ['POST'])
+@admin_required
 def add_recipe_admin():
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_check.sanitise_all(['name', 'instructions', 
@@ -1068,6 +1089,7 @@ def add_recipe_admin():
         return jsonify({'success': False, 'error': str(e)})
     
 @app.route('/admin/item_view/update_recipe_ingredients', methods=['POST'])
+@admin_required
 def update_recipe_ingredients():
     try:
         # Requests lists since the rows are dynamically generated.
@@ -1083,6 +1105,7 @@ def update_recipe_ingredients():
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/admin/item_view/add_recipe_ingredients', methods=['POST'])
+@admin_required
 def add_recipe_ingredients():
     try:
         # Requests lists since the rows are dynamically generated.
@@ -1098,6 +1121,7 @@ def add_recipe_ingredients():
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/admin/recipe_view/recipe_id/', methods=['GET'])
+@admin_required
 def get_recipe_id():
     try:
         id = admin_recipe_sql.get_id()
@@ -1106,6 +1130,7 @@ def get_recipe_id():
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/admin/item_view/update_recipe_tools', methods=['POST'])
+@admin_required
 def update_recipe_tools():
     try:
         tool_ids = request.form.getlist('tools[]')
@@ -1117,6 +1142,7 @@ def update_recipe_tools():
         return jsonify({'success': False, 'error': str(e)})
     
 @app.route('/admin/item_view/add_recipe_tools', methods=['POST'])
+@admin_required
 def add_recipe_tools():
     try:
         tool_ids = request.form.getlist('tools[]')
@@ -1132,9 +1158,9 @@ def add_recipe_tools():
 # Shopping List Interface Route
 
 @app.route('/shopping_list', methods=['GET', 'POST'])
-@login_required
+@user_required
 def get_shoppingList():
-    user_id = session.get("user_id")
+    user_id = current_user.id
     if request.method == 'POST':
         try:
             if 'clear' in request.form:
@@ -1161,9 +1187,9 @@ def get_shoppingList():
     return render_template("shoppinglist.html", items=items, unbought_items=unbought_items, bought_items=bought_items, low_stock=low_stock)
 
 @app.route('/shopping_list/add', methods=['POST'])
-@login_required
+@user_required
 def add_shopping_item():
-    user_id = session.get("user_id")
+    user_id = current_user.id
     try:
         item_name = request.form['item_name']
         quantity = request.form['quantity']
@@ -1173,7 +1199,7 @@ def add_shopping_item():
         return jsonify({"success": False, "error": str(e)})
 
 @app.route('/shopping_list/update', methods=['POST'])
-@login_required
+@user_required
 def update_shopping_item():
     try:
         item_id = request.form['item_id']
@@ -1185,9 +1211,9 @@ def update_shopping_item():
         return jsonify({"success": False, "error": str(e)})
 
 @app.route("/shopping_list/add_multi", methods=["POST"])
-@login_required
+@user_required
 def add_shopping_items():
-    user_id = session.get("user_id")
+    user_id = current_user.id
     try:
         items_string = request.form.get("items")
         items = json.loads(items_string)
@@ -1203,41 +1229,42 @@ def add_shopping_items():
 ### UTENSILS AND APPLIANCE SELECTION ROUTES
     
 @app.route('/tools/select')
-@login_required
+@user_required
 def select_tools():
-    user_id = session.get("user_id")
+    user_id = current_user.id
     utensils = tool.get_tools("utensil")
     appliances = tool.get_tools("appliance")
     tool_ids = tool.get_user_tool_ids(user_id)
     return render_template('select_utensils.html', utensils=utensils, appliances=appliances, selected_ids=tool_ids)
 
 @app.route('/tools/save', methods=['POST'])
-@login_required
+@user_required
 def save_tools():
-    user_id = session.get("user_id")
+    user_id = current_user.id
     try:
         selected_tools = request.form.getlist('tool')
         tool.save_user_tools(user_id, selected_tools)
         return jsonify({"success": True, "message": "Tools saved successfully!"})
     except Exception as e:
+        print(e)
         return jsonify({"success": False, "message": "Failed to save tools."})
 
 @app.route("/tools/get")
-@login_required
+@user_required
 def get_tools():
     tools = tool.get_tools()
     print(tools)
     return jsonify({"success": True, "tools": tools})
 
 @app.route("/recipes")
-@login_required
+@user_required
 def recipe_page():
     return render_template("recipes.html")
 
 @app.route("/recipes/get", methods=["POST"])
-@login_required
+@user_required
 def get_recipes():
-    user_id = session.get("user_id")
+    user_id = current_user.id
     try:
         ###### CURRENTLY GET TOOL IDS EACH TIME UPDATE WHEN SESSION MADE TO CHANGEO NLY AFTER TOOLS/SAVE
         user_tool_ids = tool.get_user_tool_ids(user_id)
@@ -1280,9 +1307,9 @@ def get_recipes():
         return jsonify({"success": False, "error": str(e)})
     
 @app.route("/recipes/get/<recipe_id>")
-@login_required
+@user_required
 def get_recipe(recipe_id):
-    user_id = session.get("user_id")
+    user_id = current_user.id
     try:
         record = recipe_sql.get_recipe(recipe_id)
         recipe = recipe_object(record)
@@ -1295,9 +1322,9 @@ def get_recipe(recipe_id):
         return jsonify({"success": False, "error": str(e)})
 
 @app.route("/recipes/add", methods=["POST"])
-@login_required
+@user_required
 def add_recipe():
-    user_id = session.get("user_id")
+    user_id = current_user.id
     try:
         name = request.form.get("name")
         servings = request.form.get("servings")
@@ -1333,7 +1360,7 @@ def add_recipe():
         return jsonify({"success": False, "error": str(e)})
 
 @app.route("/recipes/update", methods=["POST"])
-@login_required
+@user_required
 def update_recipe():
     try:
         recipe_id = request.form.get("recipe_id")
@@ -1372,7 +1399,7 @@ def update_recipe():
         return jsonify({"success": False, "error": str(e)})
 
 @app.route("/recipes/delete/<recipe_id>")
-@login_required
+@user_required
 def remove_recipe(recipe_id):
     try:
         ### MERGE FUNCTIONS WHEM REMOVING OOP

@@ -1287,26 +1287,9 @@ input[type="submit"]:hover {
   
 
 /* Notification Styles */
-.notification-icon {
-    position: relative;
-    cursor: pointer;
-}
-  
-.notification-icon img {
-    width: 24px;
-    height: 24px;
-}
-  
-.notification-badge {
-    position: absolute;
-    top: -5px;
-    right: -13px;
-    background: red;
-    color: white;
-    font-size: 10px;
-    padding: 2px 5px;
-    border-radius: 50%;
-}
+.notification-icon { display: flex; align-items: center; position: relative; height: 100%; }
+
+.notification-badge { position: absolute; top: 25px; right: 5px; transform: translateY(-50%); }
   
 .notification-popup {
     position: absolute;

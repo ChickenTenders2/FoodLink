@@ -578,6 +578,7 @@ def get_notifications():
             'unread_count': unread_count
         })
     except Exception as e:
+        print('[DEBUG]' , e)
         return jsonify({'success': False, 'error': str(e)})
   
 ### INVENTORY ROUTES ###

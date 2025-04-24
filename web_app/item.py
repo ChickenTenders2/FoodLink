@@ -63,7 +63,8 @@ class Item(database):
         # gets first (and only) row
         quantity = cursor.fetchone()
         cursor.close()
-        return quantity
+        # unpacks tuple
+        return quantity[0]
     
     def add_item(self, barcode, name, brand, expiry_time, default_quantity, unit, user_id = None):
         cursor = self.connection.cursor()

@@ -6,7 +6,6 @@ function fetchNotifications() {
             const badge = document.getElementById('notification-badge');
 
             list.innerHTML = '';
-
             data.notifications.forEach(n => {
                 const li = document.createElement('li');
                 li.className = n.read ? 'read' : 'unread';

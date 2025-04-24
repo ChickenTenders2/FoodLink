@@ -30,73 +30,27 @@
         <div class="settings-container">
             <div class="settings-sidebar">
                 <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#notification">Notifications</a></li>
                     <li><a href="#account">My Account</a></li>
                     <li><a href="#security">Privacy & Security</a></li>
-                    <li><a href="#notification">Notifications</a></li>
-                    <li><a href="#appearance">Appearance</a></li>
-                    <li><a href="#features">Features</a></li>
                     <li><a href="/">Home</a></li>
                 </ul>
             </div>
 
             <div class="settings-content">
-                <!-- My Account Section -->
-                <section id="account" class="settings-section">
-                    <h2>My Account</h2>
+                
+                <!-- Features Section -->
+                <section id="features" class="settings-section">
+                    <h2>Features</h2>
                     
                     <div class="settings-card">
-                        <h3>Profile Information</h3>
-                        <form action="{{ url_for('settings.update_account') }}" method="POST">
-                            <div class="form-group">
-                                <label for="username">Username</label>
-                                <input type="text" id="username" name="username" value="{{ current_user.username }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="name">Name</label>
-                                <input type="text" id="name" name="name" value="{{ current_user.name or '' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Email</label>
-                                <input type="email" id="email" value="{{ current_user.email }}" disabled>
-                                <small>Email cannot be changed</small>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Update Profile</button>
-                        </form>
-                    </div>
-                    
-                    <div class="settings-card danger-zone">
-                        <h3>Delete Account</h3>
-                        <p>Once you delete your account, there is no going back. Please be certain.</p>
-                        <button class="btn btn-danger" onclick="showDeleteModal()">Delete My Account</button>
+                        <h3>Utensils Management</h3>
+                        <p>Manage the utensils available in your kitchen.</p>
+                        <a href="{{ url_for('select_tools') }}" class="btn btn-primary">Manage Utensils</a>
                     </div>
                 </section>
-
-                <!-- Privacy & Security Section -->
-                <section id="security" class="settings-section">
-                    <h2>Privacy & Security</h2>
-                    
-                    <div class="settings-card">
-                        <h3>Change Password</h3>
-                        <form action="{{ url_for('settings.change_password') }}" method="POST">
-                            <div class="form-group">
-                                <label for="current_password">Current Password</label>
-                                <input type="password" id="current_password" name="current_password" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="new_password">New Password</label>
-                                <input type="password" id="new_password" name="new_password" required>
-                                <small>Must be at least 6 characters, include 2 numbers and 1 special character</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirm_password">Confirm New Password</label>
-                                <input type="password" id="confirm_password" name="confirm_password" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Change Password</button>
-                        </form>
-                    </div>
-                    
-                </section>
-
+                
                 <!-- Notifications Section -->
                 <section id="notification" class="settings-section">
                     <h2>Notifications</h2>
@@ -158,17 +112,62 @@
                     </div>
                 </section>
 
-                <!-- Features Section -->
-                <section id="features" class="settings-section">
-                    <h2>Features</h2>
+                <!-- My Account Section -->
+                <section id="account" class="settings-section">
+                    <h2>My Account</h2>
                     
                     <div class="settings-card">
-                        <h3>Utensils Management</h3>
-                        <p>Manage the utensils available in your kitchen.</p>
-                        <a href="{{ url_for('select_tools') }}" class="btn btn-primary">Manage Utensils</a>
+                        <h3>Profile Information</h3>
+                        <form action="{{ url_for('settings.update_account') }}" method="POST">
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" id="username" name="username" value="{{ current_user.username }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="name">Name</label>
+                                <input type="text" id="name" name="name" value="{{ current_user.name or '' }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" value="{{ current_user.email }}" disabled>
+                                <small>Email cannot be changed</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </form>
+                    </div>
+                    
+                    <div class="settings-card danger-zone">
+                        <h3>Delete Account</h3>
+                        <p>Once you delete your account, there is no going back. Please be certain.</p>
+                        <button class="btn btn-danger" onclick="showDeleteModal()">Delete My Account</button>
                     </div>
                 </section>
 
+                <!-- Privacy & Security Section -->
+                <section id="security" class="settings-section">
+                    <h2>Privacy & Security</h2>
+                    
+                    <div class="settings-card">
+                        <h3>Change Password</h3>
+                        <form action="{{ url_for('settings.change_password') }}" method="POST">
+                            <div class="form-group">
+                                <label for="current_password">Current Password</label>
+                                <input type="password" id="current_password" name="current_password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="new_password">New Password</label>
+                                <input type="password" id="new_password" name="new_password" required>
+                                <small>Must be at least 6 characters, include 2 numbers and 1 special character</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm_password">Confirm New Password</label>
+                                <input type="password" id="confirm_password" name="confirm_password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Change Password</button>
+                        </form>
+                    </div>
+                    
+                </section>
             </div>
         </div>
     </div>

@@ -34,7 +34,7 @@ from report import Report
 
 ### for login systems
 # general flask login functions
-from flask_login import LoginManager, login_required, current_user, login_user, logout_user
+from flask_login import login_required, current_user, login_user, logout_user
 # for email verification
 from flask_mail import Mail
 from email_verification import send_verification_code
@@ -559,17 +559,21 @@ def get_notifications():
     try:
         device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
         user_id = current_user.id
+        # wrapped thingsboards functionality in try except 
+        # so i dont have to use the vpn the whole time
+        try:
+            token = tb.get_jwt_token()
+            data = tb.get_telemetry(token, device_id)
 
-        token = tb.get_jwt_token()
-        data = tb.get_telemetry(token, device_id)
+            temperature = humidity = None
+            if data:
+                temperature = float(data['temperature'][0]['value'])
+                humidity = float(data['humidity'][0]['value'])
 
-        temperature = humidity = None
-        if data:
-            temperature = float(data['temperature'][0]['value'])
-            humidity = float(data['humidity'][0]['value'])
-
-        notif.temperature_humidity_notification(user_id, temperature, humidity)
-        notif.expiry_notification(user_id)
+            notif.temperature_humidity_notification(user_id, temperature, humidity)
+            notif.expiry_notification(user_id)
+        except Exception as e:
+            print("Not connected to school wifi, " + str(e))
 
         notifications = notif.get_notifications(user_id)
         unread_count = sum(1 for n in notifications if n[4] == 0)
@@ -795,7 +799,7 @@ def get_item_by_barcode(barcode):
 
 # Get item by id
 @app.route("/items/get_item/<item_id>")
-@user_only
+@admin_only
 def get_item(item_id):
     try:
         item_info = item.get_item(item_id)

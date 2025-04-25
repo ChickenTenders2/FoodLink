@@ -35,6 +35,7 @@ def mark_read(notif_id):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[mark_read error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -69,6 +70,7 @@ def insert_notification(user_id, notif_type, message, severity):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[insert_notification error] {e}")
         # deatiled report of error for admins
         return {"success": False, 

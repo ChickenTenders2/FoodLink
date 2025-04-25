@@ -14,6 +14,7 @@ def add_report(new_item_id, item_id, user_id):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[add_report error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -31,6 +32,7 @@ def remove_report(new_item_id):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[remove_report error] {e}")
         # more detailed report for admin only function
         return {"success": False, "error": f"[remove_report error] {e}"}

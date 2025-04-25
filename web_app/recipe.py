@@ -153,7 +153,6 @@ def get_recipe_tools(recipe_id):
         data = (recipe_id,)
         cursor.execute(query, data)
         tool_ids = cursor.fetchall()
-        connection.commit()
         # formats each id into a list
         tool_ids = [id[0] for id in tool_ids]
         return {"success": True, "tool_ids": tool_ids}
@@ -172,7 +171,6 @@ def get_recipe_items(recipe_id):
         data = (recipe_id,)
         cursor.execute(query, data)
         items = cursor.fetchall()
-        connection.commit()
         items = [list(item) for item in items]
         return {"success": True, "items": items}
     except Exception as e:

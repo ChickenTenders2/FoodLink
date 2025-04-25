@@ -558,21 +558,16 @@ def inject_notifications():
 def get_notifications():
     device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
     user_id = current_user.id
-    # wrapped thingsboards functionality in try except 
-    # so i dont have to use the vpn the whole time
-    try:
-        token = thingsboard.get_jwt_token()
-        data = thingsboard.get_telemetry(token, device_id)
+    token = thingsboard.get_jwt_token()
+    data = thingsboard.get_telemetry(token, device_id)
 
-        temperature = humidity = None
-        if data:
-            temperature = float(data['temperature'][0]['value'])
-            humidity = float(data['humidity'][0]['value'])
+    temperature = humidity = None
+    if data:
+        temperature = float(data['temperature'][0]['value'])
+        humidity = float(data['humidity'][0]['value'])
 
-        notification.temperature_humidity_notification(user_id, temperature, humidity)
-        notification.expiry_notification(user_id)
-    except Exception as e:
-        print("Not connected to school wifi, " + str(e))
+    notification.temperature_humidity_notification(user_id, temperature, humidity)
+    notification.expiry_notification(user_id)
 
     result = notification.get_notifications(user_id) 
     if not result.get("success"):

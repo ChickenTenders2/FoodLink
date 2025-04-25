@@ -137,6 +137,7 @@ def add_item(barcode, name, brand, expiry_time, default_quantity, unit, user_id=
         item_id = cursor.lastrowid
         return {"success": True, "item_id": item_id}
     except Exception as e:
+        connection.rollback()
         print(f"[add_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -215,6 +216,7 @@ def update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, u
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[update_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -265,6 +267,7 @@ def remove_item_sql(id):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[remove_item_sql error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:

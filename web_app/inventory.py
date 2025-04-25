@@ -57,6 +57,7 @@ def add_item(user_id, item_id, quantity, expiry_date):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[add_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -79,6 +80,7 @@ def remove_item(inventory_id):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[remove_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -99,6 +101,7 @@ def update_quantities(items_used):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[update_quantities error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -114,6 +117,7 @@ def update_item(inventory_id, quantity, expiry_date):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[update_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -150,6 +154,7 @@ def correct_personal_item(personal_item_id, item_id, default_quantity):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[correct_personal_item error] {e}")
         # detailed error report for admins
         return {"success": False, 

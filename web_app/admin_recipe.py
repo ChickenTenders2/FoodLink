@@ -34,6 +34,7 @@ def remove_recipe(id):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[admin_recipe.remove_recipe error] {e}")
         return {"success": False, "error": f"[admin_recipe.remove_recipe error] {e}"}
     finally:
@@ -50,6 +51,7 @@ def update_recipe(self, recipe_id, name, serv, prep, cook, instructions, user_id
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[admin_recipe.update_recipe error] {e}")
         return {"success": False, "error": f"[admin_recipe.update_recipe error] {e}"}
     finally:
@@ -67,6 +69,7 @@ def add_recipe(self, name, serv, prep, cook, instructions, user_id = None):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[admin_recipe.add_recipe error] {e}")
         return {"success": False, "error": f"[admin_recipe.add_recipe error] {e}"}
     finally:
@@ -90,6 +93,7 @@ def update_recipe_ingredients(recipe_id, names, units, quantities):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[admin_recipe.update_recipe_ingredients error] {e}")
         return {"success": False, "error": f"[admin_recipe.update_recipe_ingredients error] {e}"}
     finally:
@@ -109,6 +113,7 @@ def add_recipe_ingredients(recipe_id, names, units, quantities):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[admin_recipe.add_recipe_ingredients error] {e}")
         return {"success": False, "error": f"[admin_recipe.add_recipe_ingredients error] {e}"}
     finally:
@@ -126,6 +131,7 @@ def get_id():
         connection.commit()
         return {"success": True, "id": id}
     except Exception as e:
+        connection.rollback()
         print(f"[admin_recipe.get_id error] {e}")
         return {"success": False, "error": f"[admin_recipe.get_id error] {e}"}
     finally:
@@ -149,6 +155,7 @@ def update_recipe_tools(recipe_id, tool_ids):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[admin_recipe.update_recipe_tools error] {e}")
         return {"success": False, "error": f"[admin_recipe.update_recipe_tools error] {e}"}
     finally:
@@ -168,6 +175,7 @@ def add_recipe_tools(recipe_id, tool_ids):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[admin_recipe.add_recipe_tools error] {e}")
         return {"success": False, "error": f"[admin_recipe.add_recipe_tools error] {e}"}
     finally:

@@ -10,6 +10,7 @@ def add_tool(name, tool_type):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[add_tool error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -76,6 +77,7 @@ def save_user_tools(user_id, tool_ids):
         connection.commit()
         return {"success": True}
     except Exception as e:
+        connection.rollback()
         print(f"[save_user_tools error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:

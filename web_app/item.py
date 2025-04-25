@@ -115,6 +115,7 @@ def add_item(barcode, name, brand, expiry_time, default_quantity, unit, user_id=
         if cursor:
             cursor.close()
 
+# no returns, as images arent important enough to return a whole request as failed
 def add_item_image(image, new_item_id, original_item_id=None):
     try:
         if image:
@@ -129,40 +130,39 @@ def add_item_image(image, new_item_id, original_item_id=None):
                 path = f"static/images/{new_item_id}.jpg"
                 # clone the image as well
                 copy_file(old_path, path)
-        return {"success": True}
     except Exception as e:
         print(f"[add_item_image error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
 
 def process_add_form(form, user_id=None):
-    try:
-        # gets item information
-        barcode = form.get("barcode") or None
-        name = form.get("name")
-        brand = form.get("brand") or None
-        default_quantity = form.get("default_quantity")
-        unit = form.get("unit")
+    # gets item information
+    barcode = form.get("barcode") or None
+    name = form.get("name")
+    brand = form.get("brand") or None
+    default_quantity = form.get("default_quantity")
+    unit = form.get("unit")
 
-        # gets expiry time and converts to int to remove any leading zeros
-        # also checks inputs are numbers
-        day = int(form.get("expiry_day"))
-        month = int(form.get("expiry_month"))
-        year = int(form.get("expiry_year"))
+    if not name or not default_quantity or not unit:
+        return {"success": False, "error": "Required value(s) missing."}
 
-        # makes sure expire date is not 0 and that each number is within the correct range
-        if (day == 0 and month == 0 and year == 0) \
-            or not (0 <= day < 31 and 0 <= month < 12 and 0 <= year < 100):
-            return {"success": False, "error": "Expiry time out of range."}
+    # gets expiry time and converts to int to remove any leading zeros
+    # also checks inputs are numbers
+    day = int(form.get("expiry_day"))
+    month = int(form.get("expiry_month"))
+    year = int(form.get("expiry_year"))
 
-        # formats expiry time as string
-        expiry_time = f"{day}/{month}/{year}"
+    if not day or not month or not year:
+        return {"success": False, "error": "Expiry time value(s) missing."}
 
-         # adds item to db and gets item id
-        item_id = add_item(barcode, name, brand, expiry_time, default_quantity, unit, user_id)
-        return {"success": True, "item_id": item_id}
-    except Exception as e:
-        print(f"[process_add_form error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+    # makes sure expire date is not 0 and that each number is within the correct range
+    if (day == 0 and month == 0 and year == 0) \
+        or not (0 <= day < 31 and 0 <= month < 12 and 0 <= year < 100):
+        return {"success": False, "error": "Expiry time out of range."}
+
+    # formats expiry time as string
+    expiry_time = f"{day}/{month}/{year}"
+
+    # adds item to db and gets item id
+    return add_item(barcode, name, brand, expiry_time, default_quantity, unit, user_id)
 
 def update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, user_id=None):
     cursor = None
@@ -189,34 +189,35 @@ def update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, u
             cursor.close()
 
 def process_update_form(id, form, user_id=None):
-    try:
-        # gets item information
-        barcode = form.get("barcode") or None
-        name = form.get("name")
-        brand = form.get("brand") or None
-        default_quantity = form.get("default_quantity")
-        unit = form.get("unit")
+    # gets item information
+    barcode = form.get("barcode") or None
+    name = form.get("name")
+    brand = form.get("brand") or None
+    default_quantity = form.get("default_quantity")
+    unit = form.get("unit")
 
-        # gets expiry time and converts to int to remove any leading zeros
-        # also checks inputs are numbers
-        day = int(form.get("expiry_day"))
-        month = int(form.get("expiry_month"))
-        year = int(form.get("expiry_year"))
+    if not name or not default_quantity or not unit:
+        return {"success": False, "error": "Required value(s) missing."}
+    
+    # gets expiry time and converts to int to remove any leading zeros
+    # also checks inputs are numbers
+    day = int(form.get("expiry_day"))
+    month = int(form.get("expiry_month"))
+    year = int(form.get("expiry_year"))
 
-        # makes sure expire date is not 0 and that each number is within the correct range
-        if (day == 0 and month == 0 and year == 0) \
-            or not (0 <= day < 31 and 0 <= month < 12 and 0 <= year < 100):
-            return {"success": False, "error": "Expiry time out of range."}
+    if not day or not month or not year:
+        return {"success": False, "error": "Expiry time value(s) missing."}
 
-        # formats expiry time as string
-        expiry_time = f"{day}/{month}/{year}"
+    # makes sure expire date is not 0 and that each number is within the correct range
+    if (day == 0 and month == 0 and year == 0) \
+        or not (0 <= day < 31 and 0 <= month < 12 and 0 <= year < 100):
+        return {"success": False, "error": "Expiry time out of range."}
 
-        # updates item with id
-        update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, user_id)
-        return {"success": True}
-    except Exception as e:
-        print(f"[process_update_form error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+    # formats expiry time as string
+    expiry_time = f"{day}/{month}/{year}"
+
+    # updates item with id
+    return update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, user_id)
 
 def remove_item(id):
     try:

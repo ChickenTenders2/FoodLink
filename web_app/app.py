@@ -665,24 +665,28 @@ def update_item():
 @app.route('/inventory/remove_item', methods=['POST'])
 @user_only
 def remove_item():
-    try:
-        inventory_id = request.form['inventory_id']
-        print("Inventory ID received:", request.form['inventory_id'])
-        inventory.remove_item(inventory_id)
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+    inventory_id = request.form['inventory_id']
+    if not inventory_id:
+        return jsonify({"success": False, "error": "Form was missing inventory ID."}), 400
+    
+    result = inventory.remove_item(inventory_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 @app.route("/inventory/add_item/new", methods = ["POST"])
 @user_only
 def new_item():
     user_id = current_user.id
-    response = item.process_add_form(request.form, user_id)
-    item_id = response["item_id"]
+    result = item.process_add_form(request.form, user_id)
+    item_id = result.get("item_id")
 
     # if the item was not succesffuly added to the item table
-    if not response["success"]:
-        return jsonify(response)
+    if not result.get("success"):
+        if result.get("error") == "An internal error occurred.":
+            return jsonify(result), 500
+        else:
+            return jsonify(result), 400
     else:
         # gets image if uploaded otherwise equals none
         image = request.form.get("item_image", None)
@@ -693,32 +697,29 @@ def new_item():
     if not request.form.get("add_to_inventory"):
         return jsonify({"success": True, "item_id": item_id, "message": "Item added to personal items."})
     
-    response = inventory.process_add_form(user_id, item_id, request.form)
-    if response["success"]:
+    result = inventory.process_add_form(user_id, item_id, request.form)
+    if result.get("success"):
         return jsonify({"success": True, "item_id": item_id, "message": "Item added to inventory and personal items."})
     else:
-        return jsonify(response)
+        return jsonify(result)
     
 @app.route("/inventory/update_items_quantity", methods=["POST"])
 @user_only
 def update_quantities():
-    try:  
-        items_used_string = request.form.get("items_used")
+    items_used_string = request.form.get("items_used")
 
-        # list variables must be stringified client side so lists transfer correctly
-        # they are so decoded to get original data type back
-        items_used = json.loads(items_used_string)
+    # list variables must be stringified client side so lists transfer correctly
+    # they are so decoded to get original data type back
+    items_used = json.loads(items_used_string)
 
-        if not (items_used):
-            return jsonify({"success": False, "error": "no items added."})
+    if not (items_used):
+        return jsonify({"success": False, "error": "No items added."})
 
-        # performs updates function (set to amount or removes if quantity <= 0)
-        inventory.update_quantities(items_used)
-
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
-
+    # performs updates function (set to amount or removes if quantity <= 0)
+    result = inventory.update_quantities(items_used)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 
 # ### BARCODE SCANNING ROUTES ###

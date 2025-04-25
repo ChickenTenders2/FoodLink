@@ -1,4 +1,5 @@
 from database import connection
+import logging
 
 def get_all():
     cursor = None
@@ -9,7 +10,7 @@ def get_all():
         recipes = cursor.fetchall()
         return {"success": True, "recipes": recipes}
     except Exception as e:
-        print(f"[admin_recipe.get_all error] {e}")
+        logging.error(f"[admin_recipe.get_all error] {e}")
         return {"success": False, "error": f"[admin_recipe.get_all error] {e}"}
     finally:
         if cursor:
@@ -35,7 +36,7 @@ def remove_recipe(id):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[admin_recipe.remove_recipe error] {e}")
+        logging.error(f"[admin_recipe.remove_recipe error] {e}")
         return {"success": False, "error": f"[admin_recipe.remove_recipe error] {e}"}
     finally:
         if cursor:
@@ -52,7 +53,7 @@ def update_recipe(self, recipe_id, name, serv, prep, cook, instructions, user_id
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[admin_recipe.update_recipe error] {e}")
+        logging.error(f"[admin_recipe.update_recipe error] {e}")
         return {"success": False, "error": f"[admin_recipe.update_recipe error] {e}"}
     finally:
         if cursor:
@@ -70,7 +71,7 @@ def add_recipe(self, name, serv, prep, cook, instructions, user_id = None):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[admin_recipe.add_recipe error] {e}")
+        logging.error(f"[admin_recipe.add_recipe error] {e}")
         return {"success": False, "error": f"[admin_recipe.add_recipe error] {e}"}
     finally:
         if cursor:
@@ -94,7 +95,7 @@ def update_recipe_ingredients(recipe_id, names, units, quantities):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[admin_recipe.update_recipe_ingredients error] {e}")
+        logging.error(f"[admin_recipe.update_recipe_ingredients error] {e}")
         return {"success": False, "error": f"[admin_recipe.update_recipe_ingredients error] {e}"}
     finally:
         if cursor:
@@ -114,7 +115,7 @@ def add_recipe_ingredients(recipe_id, names, units, quantities):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[admin_recipe.add_recipe_ingredients error] {e}")
+        logging.error(f"[admin_recipe.add_recipe_ingredients error] {e}")
         return {"success": False, "error": f"[admin_recipe.add_recipe_ingredients error] {e}"}
     finally:
         if cursor:
@@ -132,7 +133,7 @@ def get_id():
         return {"success": True, "id": id}
     except Exception as e:
         connection.rollback()
-        print(f"[admin_recipe.get_id error] {e}")
+        logging.error(f"[admin_recipe.get_id error] {e}")
         return {"success": False, "error": f"[admin_recipe.get_id error] {e}"}
     finally:
         if cursor:
@@ -156,7 +157,7 @@ def update_recipe_tools(recipe_id, tool_ids):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[admin_recipe.update_recipe_tools error] {e}")
+        logging.error(f"[admin_recipe.update_recipe_tools error] {e}")
         return {"success": False, "error": f"[admin_recipe.update_recipe_tools error] {e}"}
     finally:
         if cursor:
@@ -176,7 +177,7 @@ def add_recipe_tools(recipe_id, tool_ids):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[admin_recipe.add_recipe_tools error] {e}")
+        logging.error(f"[admin_recipe.add_recipe_tools error] {e}")
         return {"success": False, "error": f"[admin_recipe.add_recipe_tools error] {e}"}
     finally:
         if cursor:

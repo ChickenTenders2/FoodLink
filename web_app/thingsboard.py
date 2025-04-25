@@ -19,7 +19,7 @@ def get_jwt_token():
         else:
             print("Login failed: ", response.json())
     except Exception as e:
-        print(f"[get_jwt_token error] {e}")
+        logging.error(f"[get_jwt_token error] {e}")
         return None
 
 def get_telemetry(token, device_id):
@@ -44,5 +44,5 @@ def get_telemetry(token, device_id):
         else:
             return None
     except Exception as e:
-        print(f"[get_telemetry error] {e}")
+        logging.error(f"[get_telemetry error] {e}")
         return None

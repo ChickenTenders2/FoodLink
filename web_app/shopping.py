@@ -1,4 +1,5 @@
 from database import connection
+import logging
 
 def get_items(user_id):
     cursor = None
@@ -10,7 +11,7 @@ def get_items(user_id):
         items = cursor.fetchall()
         return {"success": True, "items": items}
     except Exception as e:
-        print(f"[get_items error] {e}")
+        logging.error(f"[get_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -25,7 +26,7 @@ def add_item(user_id, item_name, quantity):
         return {"success": True, "action": "add", "item": item_name}
     except Exception as e:
         connection.rollback()
-        print(f"[add_item error] {e}")
+        logging.error(f"[add_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -42,7 +43,7 @@ def add_items(user_id, items):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[add_items error] {e}")
+        logging.error(f"[add_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -59,7 +60,7 @@ def update_item(item_id, item_name, quantity):
         return {"success": True, "action": "update", "item": item_name}
     except Exception as e:
         connection.rollback()
-        print(f"[update_item error] {e}")
+        logging.error(f"[update_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -77,7 +78,7 @@ def item_bought(item_id, bought):
         return {"success": True, "action": "mark_bought"}
     except Exception as e:
         connection.rollback()
-        print(f"[item_bought error] {e}")
+        logging.error(f"[item_bought error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -93,7 +94,7 @@ def low_stock_items(user_id):
         items = cursor.fetchall()
         return {"success": True, "items": items}
     except Exception as e:
-        print(f"[low_stock_items error] {e}")
+        logging.error(f"[low_stock_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -108,7 +109,7 @@ def remove_item(item_id):
         return {"success": True, "action": "remove", "item_id": item_id}
     except Exception as e:
         connection.rollback()
-        print(f"[remove_item error] {e}")
+        logging.error(f"[remove_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -123,7 +124,7 @@ def clear_items(user_id):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[clear_items error] {e}")
+        logging.error(f"[clear_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:

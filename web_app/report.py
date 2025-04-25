@@ -1,4 +1,5 @@
 from database import connection
+import logging
 
 # user function
 def add_report(new_item_id, item_id, user_id):
@@ -15,7 +16,7 @@ def add_report(new_item_id, item_id, user_id):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[add_report error] {e}")
+        logging.error(f"[add_report error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -33,7 +34,7 @@ def remove_report(new_item_id):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[remove_report error] {e}")
+        logging.error(f"[remove_report error] {e}")
         # more detailed report for admin only function
         return {"success": False, "error": f"[remove_report error] {e}"}
     finally:
@@ -61,7 +62,7 @@ def get_reports_by(new_item_id, identifier=None, type=None):
         reports = cursor.fetchall()
         return {"success": True, "reports": reports}
     except Exception as e:
-        print(f"[get_reports_by error] {e}")
+        logging.error(f"[get_reports_by error] {e}")
         # more detailed report for admin only function
         return {"success": False, "error": f"[get_reports_by error] {e}"}
     finally:
@@ -81,7 +82,7 @@ def get_reports():
         reports = cursor.fetchall()
         return {"success": True, "reports": reports}
     except Exception as e:
-        print(f"[get_reports error] {e}")
+        logging.error(f"[get_reports error] {e}")
         # more detailed report for admin only function
         return {"success": False, "error": f"[get_reports error] {e}"}
     finally:

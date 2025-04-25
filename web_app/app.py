@@ -17,7 +17,8 @@ import inventory
 import notification
 # for getting temperature and humidity of fridge
 import thingsboard
-#from success import Success
+# for alerting when item is added on raspberry pi screen
+import success
 import shopping
 # for recipe handling
 import recipe as recipe_sql
@@ -636,6 +637,8 @@ def append_inventory():
             return jsonify(result), 500
         else:
             return jsonify(result), 400
+    # displays success alert on raspberry pi display
+    success.send_success_alert()
     return jsonify(result)
 
 # Update quantity and expiry of item in inventory
@@ -1446,6 +1449,8 @@ def get_recipes():
         recipe_object.strip_recipe_flags(recipe)
         
         filtered.append(recipe)
+    
+    print(filtered)
 
     return jsonify({"success": True, "recipes": filtered})
     

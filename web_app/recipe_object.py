@@ -25,13 +25,13 @@ def create(record):
 
     result = recipe_sql.get_recipe_tools(recipe_id)
     if result.get("success"):
-        recipe["tool_ids"] = result.get("data", [])
+        recipe["tool_ids"] = result.get("tool_ids", [])
     else:
         return result
 
     result = recipe_sql.get_recipe_items(recipe_id)
     if result.get("success"):
-        recipe["ingredients"] = result.get("data", [])
+        recipe["ingredients"] = result.get("items", [])
     else:
         return result
 

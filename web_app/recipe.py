@@ -1,4 +1,5 @@
 from database import connection
+import logging
 
 def get_recipes(search_term, page, user_id, user_only):
     cursor = None
@@ -21,7 +22,7 @@ def get_recipes(search_term, page, user_id, user_only):
         recipes = cursor.fetchall()
         return {"success": True, "recipes": recipes}
     except Exception as e:
-        print(f"[get_recipes error] {e}")
+        logging.error(f"[get_recipes error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -37,7 +38,7 @@ def get_recipe(recipe_id):
         recipe = cursor.fetchone()
         return {"success": True, "recipe": recipe}
     except Exception as e:
-        print(f"[get_recipe error] {e}")
+        logging.error(f"[get_recipe error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -64,7 +65,7 @@ def remove_recipe(recipe_id):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[remove_recipe error] {e}")
+        logging.error(f"[remove_recipe error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -88,7 +89,7 @@ def add_recipe(name, servings, prep_time, cook_time, instructions, items, tool_i
         return {"success": True, "recipe_id": recipe_id}
     except Exception as e:
         connection.rollback()
-        print(f"[add_recipe error] {e}")
+        logging.error(f"[add_recipe error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -115,7 +116,7 @@ def edit_recipe(cursor, recipe_id, name, servings, prep_time, cook_time, instruc
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[add_recipe error] {e}")
+        logging.error(f"[add_recipe error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -157,7 +158,7 @@ def get_recipe_tools(recipe_id):
         tool_ids = [id[0] for id in tool_ids]
         return {"success": True, "tool_ids": tool_ids}
     except Exception as e:
-        print(f"[get_recipe_tools error] {e}")
+        logging.error(f"[get_recipe_tools error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -174,7 +175,7 @@ def get_recipe_items(recipe_id):
         items = [list(item) for item in items]
         return {"success": True, "items": items}
     except Exception as e:
-        print(f"[get_recipe_items error] {e}")
+        logging.error(f"[get_recipe_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -216,7 +217,7 @@ def strict_search(user_id, item_name, quantity_threshold):
             item[6] = item[6].strftime('%Y-%m-%d')
         return {"success": True, "item": item}
     except Exception as e:
-        print(f"[strict_search error] {e}")
+        logging.error(f"[strict_search error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:

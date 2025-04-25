@@ -1,4 +1,5 @@
 from database import connection
+import logging
 from os.path import isfile as file_exists
 from os import remove as remove_file
 from shutil import copyfile as copy_file
@@ -15,7 +16,7 @@ def get_all():
         items = cursor.fetchall()
         return {"success": True, "items": items}
     except Exception as e:
-        print(f"[item.get_all error] {e}")
+        logging.error(f"[item.get_all error] {e}")
         # detailed error report for admins
         return {"success": False, "error": f"[item.get_all error] {e}"}
     finally:
@@ -32,7 +33,7 @@ def get_item(item_id):
         item = cursor.fetchone()
         return {"success": True, "item": item}
     except Exception as e:
-        print(f"[item.get_item error] {e}")
+        logging.error(f"[item.get_item error] {e}")
         #detailed for admin
         return {"success": False, "error": f"[item.get_item error] {e}"}
     finally:
@@ -48,7 +49,7 @@ def get_item_from_name(name):
         items = cursor.fetchall()
         return {"success": True, "items": items}
     except Exception as e:
-        print(f"[item.get_item_from_name error] {e}")
+        logging.error(f"[item.get_item_from_name error] {e}")
         # deailed error report for admins
         return {"success": False, "error": f"[item.get_item_from_name error] {e}"}
     finally:
@@ -65,7 +66,7 @@ def get_default_quantity(item_id):
         quantity = quantity_tuple[0]
         return {"success": True, "quantity": quantity}
     except Exception as e:
-        print(f"[get_default_quantity error] {e}")
+        logging.error(f"[get_default_quantity error] {e}")
         # more detailed report for admin only function
         return {"success": False, "error": f"[get_default_quantity error] {e}"}
     finally:
@@ -86,7 +87,7 @@ def barcode_search(user_id, barcode_number):
         item = cursor.fetchone()
         return {"success": True, "item": item}
     except Exception as e:
-        print(f"[item.barcode_search error] {e}")
+        logging.error(f"[item.barcode_search error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -103,7 +104,7 @@ def text_search(user_id, search_term):
         items = cursor.fetchall()
         return {"success": True, "items": items}
     except Exception as e:
-        print(f"[item.text_search error] {e}")
+        logging.error(f"[item.text_search error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -120,7 +121,7 @@ def text_single_search(user_id, search_term):
         item = cursor.fetchone()
         return {"success": True, "item": item}
     except Exception as e:
-        print(f"[item.text_single_search error] {e}")
+        logging.error(f"[item.text_single_search error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -138,7 +139,7 @@ def add_item(barcode, name, brand, expiry_time, default_quantity, unit, user_id=
         return {"success": True, "item_id": item_id}
     except Exception as e:
         connection.rollback()
-        print(f"[add_item error] {e}")
+        logging.error(f"[add_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -160,7 +161,7 @@ def add_item_image(image, new_item_id, original_item_id=None):
                 # clone the image as well
                 copy_file(old_path, path)
     except Exception as e:
-        print(f"[add_item_image error] {e}")
+        logging.error(f"[add_item_image error] {e}")
 
 def process_add_form(form, user_id=None):
     # gets item information
@@ -217,7 +218,7 @@ def update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, u
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[update_item error] {e}")
+        logging.error(f"[update_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -268,7 +269,7 @@ def remove_item_sql(id):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[remove_item_sql error] {e}")
+        logging.error(f"[remove_item_sql error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -280,5 +281,5 @@ def remove_item_image(id):
         if file_exists(path):
             remove_file(path)
     except Exception as e:
-        print(f"[remove_item_image error] {e}")
+        logging.error(f"[remove_item_image error] {e}")
 

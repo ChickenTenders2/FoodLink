@@ -1,4 +1,5 @@
 from database import connection
+import logging
 
 def add_tool(name, tool_type):
     cursor = None
@@ -11,7 +12,7 @@ def add_tool(name, tool_type):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[add_tool error] {e}")
+        logging.error(f"[add_tool error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -31,7 +32,7 @@ def get_tools(type=None):
         tools = cursor.fetchall()
         return {"success": True, "tools": tools}
     except Exception as e:
-        print(f"[get_tools error] {e}")
+        logging.error(f"[get_tools error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -50,7 +51,7 @@ def get_user_tool_ids(user_id):
         ids = [id[0] for id in ids]
         return {"success": True, "ids": ids}
     except Exception as e:
-        print(f"[get_user_tool_ids error] {e}")
+        logging.error(f"[get_user_tool_ids error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -78,7 +79,7 @@ def save_user_tools(user_id, tool_ids):
         return {"success": True}
     except Exception as e:
         connection.rollback()
-        print(f"[save_user_tools error] {e}")
+        logging.error(f"[save_user_tools error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:

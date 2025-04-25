@@ -31,6 +31,7 @@ class AdminCreateForm(FlaskForm):
         name = StringField("Name", validators=[DataRequired(), Length(1, 16)])
         email = StringField('Email', validators=[DataRequired(), Email()])
         password = PasswordField('Password', validators=[DataRequired()])
+        advanced_privileges = BooleanField('Grant Advanced Privileges')
         submit = SubmitField('Add Admin')
 
 class AdminPasswordForm(FlaskForm):

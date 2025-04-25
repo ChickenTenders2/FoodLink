@@ -49,8 +49,8 @@ from flask_session import Session
 # for accessing database
 from models import User, Admin
 # login forms
-from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
-from extensions import db
+from flask_forms import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
+from database import db
 
 # Import database and user model
 app = Flask(__name__, template_folder = "templates")
@@ -231,7 +231,7 @@ def AddAdmin():
                 username=form.username.data,
                 email=form.email.data,
                 password=generate_password_hash(form.password.data),
-                advanced_privileges=False
+                advanced_privileges=form.advanced_privileges.data,
             )
             db.session.add(new_admin)
             db.session.commit()

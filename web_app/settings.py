@@ -3,7 +3,7 @@ from flask.views import MethodView
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import User, Settings
-from extensions import db
+from database import db
 
 # Create blueprint
 settings_bp = Blueprint('settings', __name__, url_prefix='/settings')

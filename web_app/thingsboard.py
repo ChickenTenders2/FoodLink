@@ -1,4 +1,5 @@
 import requests
+import logging
 
 def get_jwt_token():
     try:

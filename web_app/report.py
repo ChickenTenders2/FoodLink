@@ -97,7 +97,7 @@ def check_assigned(new_item_id):
         data = (new_item_id,)
         cursor.execute(query, data)
         admin_id = cursor.fetchone()
-        return {"success": True, "admin_id": admin_id}
+        return {"success": True, "admin_id": admin_id[0]}
     except Exception as e:
         logging.error(f"[check_assigned error] {e}")
         # more detailed report for admin only function

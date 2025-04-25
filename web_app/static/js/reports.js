@@ -63,7 +63,7 @@ function fill_table(reports) {
         const assignCell = document.createElement("td");
         const assignBtn = document.createElement("button");
         assignBtn.innerText = "Assign to Me";
-        assignBtn.onclick = async () => assign_report(new_item_id);
+        assignBtn.onclick = async (event) => assign_report(event, new_item_id);
         assignCell.appendChild(assignBtn);
         row.appendChild(assignCell);
 
@@ -71,12 +71,14 @@ function fill_table(reports) {
     }
 }
 
-async function assign_report(new_item_id) {
+async function assign_report(event, new_item_id) {
+    event.stopPropagation();
     const response = await fetch("/items/reports/check_assigned/"+ new_item_id);
     const result = await response.json();
     if (!result.success) {
         alert(result.error);
     }
+    console.log(result.admin_id);
     if (result.admin_id) {
         const confirmReplace = confirm(`This report is already assigned to an admin. Reassign it to yourself?`);
         if (!confirmReplace) return;

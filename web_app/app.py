@@ -547,7 +547,7 @@ def inject_notifications():
             unread_count = sum(1 for n in notifications if n[4] == 0) 
             return dict(notifications=notifications, unread_count=unread_count) 
         except Exception as e: 
-            print("[Context Processor Error]", e) 
+            print("[Context Processor Error]", e)             
             return dict(notifications=[], unread_count=0)
     else:
         return dict(notifications=[], unread_count=0)

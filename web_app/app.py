@@ -618,7 +618,7 @@ def api_inventory(search_query = None):
     if not result.get("success"):
         return jsonify(result), 500
 
-    return jsonify({"success": True, "items": result.get("data")})
+    return jsonify(result)
 
 # Add item to inventory interface
 @app.route("/inventory/add_item/")
@@ -737,7 +737,7 @@ def close_scanner():
     scanner.release_capture()
     return jsonify({"success":True})
 
-# Returns the barcode number if one is found
+# Returns the barcode number if one is found or item name if object recognised
 @app.route('/scanner/get_object')
 @verified_only
 def get_object():
@@ -773,49 +773,49 @@ def toggle_scan_mode(value):
 @user_only
 def single_item_search(item_name):
     user_id = current_user.id
-    try:
-        items = item.text_search(user_id, item_name)
-        item_info = items[0]
-        return jsonify({"success": True, "item": item_info})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+    result = item.text_single_search(user_id, item_name)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
+
 
 # Get items by text search
 @app.route("/items/text_search", methods=["POST"])
 @user_only
 def text_search():
     user_id = current_user.id
-    try:
-        search_term = request.form["search_term"]
-        items = item.text_search(user_id, search_term)
-        return jsonify({"success": True, "items": items})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+    search_term = request.form.get("search_term")
+    if not search_term:
+        return jsonify({"success": False, "error": "No search term provided."}), 400
+    
+    result = item.text_search(user_id, search_term)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 # Get item by barcode search
 @app.route("/items/barcode_search/<barcode>")
 @user_only
 def get_item_by_barcode(barcode):
     user_id = current_user.id
-    try:
-        item_info = item.barcode_search(user_id, barcode)
-        if item_info:
-            # returns the first item in the list as barcodes are unique
-            return jsonify({"success": True, "item": item_info})
-        else:
-            return jsonify({"success": False, "error": "Item not found."})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+
+    # Ensure barcode is digits only
+    if not barcode.isdigit():
+        return jsonify({"success": False, "error": "Invalid barcode format."}), 400
+    
+    result = item.barcode_search(user_id, barcode)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 # Get item by id
 @app.route("/items/get_item/<item_id>")
 @admin_only
 def get_item(item_id):
-    try:
-        item_info = item.get_item(item_id)
-        return jsonify({"success": True, "item": item_info})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+    result = item.get_item(item_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 # Add item interface
 @app.route('/items/add_item')
@@ -827,18 +827,20 @@ def add_item():
 @app.route('/items/add_item/add', methods=["POST"])
 @admin_only
 def append_item_db():
-    response = item.process_add_form(request.form)
-    if response["success"]:
-        item_id = response["item_id"]
-        # gets image if uploaded otherwise equals none
-        image = request.form.get("item_image", None)
-        # adds image if uploaded
-        item.add_item_image(image, item_id)
+    result = item.process_add_form(request.form)
+    if not result.get("success"):
+        if result.get("error") == "An internal error occurred.":
+            return jsonify(result), 500
+        else:
+            return jsonify(result), 400
     
-        # item id does not need to be returned
-        return jsonify({"success": True})
-    else:
-        return jsonify(response)
+    item_id = result.get("item_id")
+    # gets image if uploaded otherwise equals none
+    image = request.form.get("item_image")
+    # adds image if uploaded
+    item.add_item_image(image, item_id)
+    # item id does not need to be returned
+    return jsonify({"success": True})
 
 # Check if item has an image
 @app.route("/find_image/<item_id>")

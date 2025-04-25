@@ -16,7 +16,7 @@ def get_items(user_id):
         items = [list(i) for i in items]
         for item in items:
             item[6] = item[6].strftime('%Y-%m-%d')
-        return {"success": True, "data": items}
+        return {"success": True, "items": items}
     except Exception as e:
         print(f"[get_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -40,7 +40,7 @@ def search_items(user_id, search_term):
         items = [list(i) for i in items]
         for item in items:
             item[6] = item[6].strftime('%Y-%m-%d')
-        return {"success": True, "data": items}
+        return {"success": True, "items": items}
     except Exception as e:
         print(f"[search_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}

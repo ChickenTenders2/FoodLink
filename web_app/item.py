@@ -10,7 +10,7 @@ def get_all():
         query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE user_id IS null;"
         cursor.execute(query)
         items = cursor.fetchall()
-        return {"success": True, "data": items}
+        return {"success": True, "items": items}
     except Exception as e:
         print(f"[get_all error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -27,7 +27,7 @@ def barcode_search(user_id, barcode_number):
         data = (barcode_number, user_id)
         cursor.execute(query, data)
         item = cursor.fetchone()
-        return {"success": True, "data": item}
+        return {"success": True, "item": item}
     except Exception as e:
         print(f"[barcode_search error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -44,7 +44,24 @@ def text_search(user_id, search_term):
         data = (search_term, user_id)
         cursor.execute(query, data)
         items = cursor.fetchall()
-        return {"success": True, "data": items}
+        return {"success": True, "items": items}
+    except Exception as e:
+        print(f"[text_search error] {e}")
+        return {"success": False, "error": "An internal error occurred."}
+    finally:
+        if cursor:
+            cursor.close()
+
+def text_single_search(user_id, search_term):
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        # search query uses full text for relevance based searching of items
+        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE) AND (user_id IS NULL OR user_id = %s);"
+        data = (search_term, user_id)
+        cursor.execute(query, data)
+        item = cursor.fetchone()
+        return {"success": True, "item": item}
     except Exception as e:
         print(f"[text_search error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -59,7 +76,7 @@ def get_item(item_id):
         query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE id = %s;"
         cursor.execute(query, (item_id,))
         item = cursor.fetchone()
-        return {"success": True, "data": item}
+        return {"success": True, "item": item}
     except Exception as e:
         print(f"[get_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -74,7 +91,7 @@ def get_item_from_name(name):
         query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE name LIKE UPPER(%s);"
         cursor.execute(query, (name,))
         items = cursor.fetchall()
-        return {"success": True, "data": items}
+        return {"success": True, "items": items}
     except Exception as e:
         print(f"[get_item_from_name error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -90,7 +107,7 @@ def get_default_quantity(item_id):
         quantity_tuple = cursor.fetchone()
         # unpack tuple
         quantity = quantity_tuple[0]
-        return {"success": True, "data": quantity}
+        return {"success": True, "quantity": quantity}
     except Exception as e:
         print(f"[get_default_quantity error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -107,7 +124,7 @@ def add_item(barcode, name, brand, expiry_time, default_quantity, unit, user_id=
         connection.commit()
         # gets id of the item inserted
         item_id = cursor.lastrowid
-        return {"success": True, "data": item_id}
+        return {"success": True, "item_id": item_id}
     except Exception as e:
         print(f"[add_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -144,14 +161,19 @@ def process_add_form(form, user_id=None):
     if not name or not default_quantity or not unit:
         return {"success": False, "error": "Required value(s) missing."}
 
-    # gets expiry time and converts to int to remove any leading zeros
-    # also checks inputs are numbers
-    day = int(form.get("expiry_day"))
-    month = int(form.get("expiry_month"))
-    year = int(form.get("expiry_year"))
+    day_str = form.get("expiry_day")
+    month_str = form.get("expiry_month")
+    year_str = form.get("expiry_year")
 
-    if not day or not month or not year:
+    if not day_str or not month_str or not year_str:
         return {"success": False, "error": "Expiry time value(s) missing."}
+    
+    if not (day_str.isdigit() and month_str.isdigit() and year_str.isdigit()):
+        return {"success": False, "error": "Expiry time value(s) must be numbers."}
+
+    day = int(day_str)
+    month = int(month_str)
+    year = int(year_str)
 
     # makes sure expire date is not 0 and that each number is within the correct range
     if (day == 0 and month == 0 and year == 0) \

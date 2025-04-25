@@ -53,9 +53,41 @@ function fill_table(reports) {
     for (let report of reports) {
         const [new_item_id, item_id, error_type, date_created, username, new_item_name] = report;
         const row = document.createElement("tr");
-        row.innerHTML = `<td>${new_item_id}</td><td>${new_item_name}</td><td>${error_type}</td><td>${date_created}</td><td>${username}</td>`;
+        row.innerHTML = `<td>${new_item_id}</td>
+                        <td>${new_item_name}</td>
+                        <td>${error_type}</td>
+                        <td>${date_created}</td>
+                        <td>${username}</td>`;
         row.onclick = () => window.location.href = "/items/reports/" + new_item_id + "/" + item_id;
+
+        const assignCell = document.createElement("td");
+        const assignBtn = document.createElement("button");
+        assignBtn.innerText = "Assign to Me";
+        assignBtn.onclick = async () => assign_report(new_item_id);
+        assignCell.appendChild(assignBtn);
+        row.appendChild(assignCell);
+
         table_body.appendChild(row);
+    }
+}
+
+async function assign_report(new_item_id) {
+    const response = await fetch("/items/reports/check_assigned/"+ new_item_id);
+    const result = await response.json();
+    if (!result.success) {
+        alert(result.error);
+    }
+    if (result.admin_id) {
+        const confirmReplace = confirm(`This report is already assigned to an admin. Reassign it to yourself?`);
+        if (!confirmReplace) return;
+    }
+    const response2 = await fetch("/items/reports/assign/"+ new_item_id);
+    const result2 = await response2.json();
+    if (result2.success) {
+        alert("Successfully assigned report!");
+        get_reports();
+    } else {
+        alert(result2.error);
     }
 }
 

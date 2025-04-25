@@ -5,7 +5,7 @@ import os
 
 ### shared operations for user and admin:
 # for scanning items (barcode or ai object recogniser)
-from scanner import Scanner
+import scanner
 # for checking item image exists
 from os.path import isfile as file_exists
 
@@ -621,7 +621,7 @@ def api_inventory(search_query = None):
     return jsonify({"success": True, "items": result.get("data")})
 
 # Add item to inventory interface
-@app.route("/inventory/add_item")
+@app.route("/inventory/add_item/")
 @user_only
 def add_to_inventory():
     return render_template("inventory_add.html")
@@ -759,12 +759,12 @@ def unpause_scanner():
 def toggle_scan_mode(value):
     if value == "true":
         scanner.toggle_mode(True)
-        return jsonify({"success":True})
-    elif value =="false":
+        return jsonify({"success": True})
+    elif value == "false":
         scanner.toggle_mode(False)
-        return jsonify({"success":True})
+        return jsonify({"success": True})
     else:
-        return jsonify({"success":False})
+        return jsonify({"success": False})
 
 
 ### ITEM ROUTES ###
@@ -1485,7 +1485,6 @@ def remove_recipe(recipe_id):
         return jsonify({"success": False, "error": str(e)})
 
 if __name__ == '__main__':
-    scanner = Scanner()
     # Runs the app
     app.run(debug=True)
 

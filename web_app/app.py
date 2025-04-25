@@ -1016,7 +1016,10 @@ def resolve_report():
 @admin_only
 def get_items():
     # Splits the list of items into several pages.
-    item_list = item.get_all()
+    result = item.get_all()
+    if not result.get("success"):
+        return jsonify(result), 500
+    item_list = result.get("items")
     current_page = []
     items = []
     for index, row in enumerate(item_list, start = 1):
@@ -1036,7 +1039,10 @@ def get_items():
 def search_items(search_query = None):
         # Checks if the search is for a specifc page.
         if search_query.isnumeric():
-                item_list = item.get_all()
+                result = item.get_all()
+                if not result.get("success"):
+                    return jsonify(result), 500
+                item_list = result.get("items")
                 current_page = []
                 items = []
                 # Splits the items so that 30 are displayed per page.
@@ -1053,8 +1059,11 @@ def search_items(search_query = None):
         else:
             # Searches for an item if query is provided otherwise gets all items.
             result = item.get_item_from_name(search_query)
-            if result != [None]:
-                return render_template("item_view_search.html", items = result)
+            if not result.get("success"):
+                return jsonify(result), 500
+            items = result.get("items")
+            if items != [None]:
+                return render_template("item_view_search.html", items = items)
             else:
                 return render_template("item_view_search.html", items = [])
         
@@ -1062,26 +1071,38 @@ def search_items(search_query = None):
 @app.route('/admin/recipe_view')
 @admin_only
 def admin_get_recipes():
-    recipes = admin_recipe.get_all()
+    result = admin_recipe.get_all()
+    if not result.get("success"):
+        return jsonify(result), 500
+    recipes = result.get("recipes")
     return render_template("recipe_view.html", recipes = recipes)
 
 @app.route('/admin/recipe_view/add_item/<int:recipe_id>', methods=['GET'])
 @admin_only
 def get_ingredients(recipe_id):
-    ingredients = recipe_sql.get_recipe_items(recipe_id)
+    result = recipe_sql.get_recipe_items(recipe_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    ingredients = result.get("items")
     return jsonify(ingredients)
 
 @app.route('/admin/recipe_view/get_tools_ids/<int:recipe_id>', methods=['GET'])
 @admin_only
 def get_tools_ids(recipe_id):
-    tools = recipe_sql.get_recipe_tools(recipe_id)
+    result = recipe_sql.get_recipe_tools(recipe_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    tools = result.get("tool_ids")
     return jsonify(tools)
 
 # Returns the tools as a dictionary so that names can be mapped to ids in the js code. 
 @app.route('/admin/recipe_view/get_tools/', methods=['GET'])
 @admin_only
 def admin_get_tools():
-    tools = tool.get_tools()
+    result = tool.get_tools()
+    if not result.get("success"):
+        return jsonify(result), 500
+    tools = result.get("data")
     tools = dict(tools)
     return jsonify(tools)
 
@@ -1089,24 +1110,23 @@ def admin_get_tools():
 @app.route('/admin/item_view/delete', methods = ['POST'])
 @admin_only
 def delete_item():
-    try:
-        # Form data is formatted in utf-8 so it needs to be decoded.
-        id = request.data.decode('utf-8')
-        item.remove_item(id)
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+    # Form data is formatted in utf-8 so it needs to be decoded.
+    id = request.data.decode('utf-8')
+    result = item.remove_item(id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
     
 # Removes an item from the item table.
 @app.route('/admin/recipe_view/delete', methods = ['POST'])
 def delete_recipe():
-    try:
-        # Form data is formatted in utf-8 so it needs to be decoded since id was not submitted in a form.
-        id = request.data.decode('utf-8')
-        admin_recipe.remove_recipe(id)
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+    # Form data is formatted in utf-8 so it needs to be decoded since id was not submitted in a form.
+    id = request.data.decode('utf-8')
+    result = admin_recipe.remove_recipe(id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
+        
 
 # Updates the details of a selected item in the item table.
 @app.route('/admin/item_view/update_item', methods = ['POST'])
@@ -1127,11 +1147,10 @@ def update_item_admin():
     # Checks that the format is correct for the expiry date.
     valid = input_handling.validate_expiry(expiry_date)
     if valid:
-        try:
-            item.update_item(inventory_id, barcode, name, brand, expiry_date, quantity, unit)
-            return jsonify({'success': True})
-        except Exception as e:
-            return jsonify({'success': False, 'error': str(e)})
+        result = item.update_item(inventory_id, barcode, name, brand, expiry_date, quantity, unit)
+        if not result.get("success"):
+            return jsonify(result), 500
+        return jsonify(result)
     else:
          return jsonify({'success': False, 'error': str("Expiry formatted incorrectly")})
     
@@ -1154,8 +1173,10 @@ def add_item_admin():
     valid = input_handling.validate_expiry(expiry_date)
     if valid:
         try:
-            item.add_item(barcode, name, brand, expiry_date, quantity, unit)
-            return jsonify({'success': True})
+            result = item.add_item(barcode, name, brand, expiry_date, quantity, unit)
+            if not result.get("success"):
+                return jsonify(result), 500
+            return jsonify({"success": True})
         except Exception as e:
             print(e)
             return jsonify({'success': False, 'error': str(e)})
@@ -1175,11 +1196,10 @@ def update_recipe_admin():
     prep = sanitised_fields[2]
     cook = sanitised_fields[3]
     servings = sanitised_fields[4]
-    try:
-        admin_recipe.update_recipe(recipe_id, name, servings, prep, cook, instructions)
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+    result = admin_recipe.update_recipe(recipe_id, name, servings, prep, cook, instructions)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
     
 # Adds the details of a selected recipe in the recipe table.
 @app.route('/admin/item_view/add_recipe', methods = ['POST'])
@@ -1193,77 +1213,67 @@ def add_recipe_admin():
     prep = sanitised_fields[2]
     cook = sanitised_fields[3]
     servings = sanitised_fields[4]
-    try:
-        admin_recipe.add_recipe(name, servings, prep, cook, instructions)
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+    result = admin_recipe.add_recipe(name, servings, prep, cook, instructions)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
     
 @app.route('/admin/item_view/update_recipe_ingredients', methods=['POST'])
 @admin_only
 def update_recipe_ingredients():
-    try:
-        # Requests lists since the rows are dynamically generated.
-        names = request.form.getlist('name[]')
-        units = request.form.getlist('unit[]')
-        quantities = request.form.getlist('quantity[]')
-        recipe_id = request.form['recipe-id']  
+    # Requests lists since the rows are dynamically generated.
+    names = request.form.getlist('name[]')
+    units = request.form.getlist('unit[]')
+    quantities = request.form.getlist('quantity[]')
+    recipe_id = request.form.get('recipe-id')
 
-        admin_recipe.update_recipe_ingredients(recipe_id, names, units, quantities)
-
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+    result = admin_recipe.update_recipe_ingredients(recipe_id, names, units, quantities)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 @app.route('/admin/item_view/add_recipe_ingredients', methods=['POST'])
 @admin_only
 def add_recipe_ingredients():
-    try:
-        # Requests lists since the rows are dynamically generated.
-        names = request.form.getlist('name[]')
-        units = request.form.getlist('unit[]')
-        quantities = request.form.getlist('quantity[]')
-        recipe_id = request.form['recipe-id']  
+    # Requests lists since the rows are dynamically generated.
+    names = request.form.getlist('name[]')
+    units = request.form.getlist('unit[]')
+    quantities = request.form.getlist('quantity[]')
+    recipe_id = request.form.get('recipe-id')
 
-        admin_recipe.add_recipe_ingredients(recipe_id, names, units, quantities)
-
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+    result = admin_recipe.add_recipe_ingredients(recipe_id, names, units, quantities)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 @app.route('/admin/recipe_view/recipe_id/', methods=['GET'])
 @admin_only
 def get_recipe_id():
-    try:
-        id = admin_recipe.get_id()
-        return jsonify(id)
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+    result = admin_recipe.get_id()
+    if not result.get("success"):
+        return jsonify(result), 500
+    id = result.get("id")
+    return jsonify(id)
 
 @app.route('/admin/item_view/update_recipe_tools', methods=['POST'])
 @admin_only
 def update_recipe_tools():
-    try:
-        tool_ids = request.form.getlist('tools[]')
-        recipe_id = request.form['recipe-id']  
-        admin_recipe.update_recipe_tools(recipe_id, tool_ids)
-
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+    tool_ids = request.form.getlist('tools[]')
+    recipe_id = request.form.get('recipe-id')
+    result = admin_recipe.update_recipe_tools(recipe_id, tool_ids)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
     
 @app.route('/admin/item_view/add_recipe_tools', methods=['POST'])
 @admin_only
 def add_recipe_tools():
-    try:
-        tool_ids = request.form.getlist('tools[]')
-        recipe_id = request.form['recipe-id']  
-        admin_recipe.add_recipe_tools(recipe_id, tool_ids)
-
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
-
+    tool_ids = request.form.getlist('tools[]')
+    recipe_id = request.form.get('recipe-id')
+    result = admin_recipe.add_recipe_tools(recipe_id, tool_ids)
+    if not result.get("success"):
+            return jsonify(result), 500
+    return jsonify(result)
 
 
 # Shopping List Interface Route
@@ -1366,6 +1376,9 @@ def get_tools():
     tools = tool.get_tools()
     print(tools)
     return jsonify({"success": True, "tools": tools})
+
+
+####    RECIPE ROUTES
 
 @app.route("/recipes")
 @user_only

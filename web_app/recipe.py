@@ -197,7 +197,7 @@ def get_recipe_tools(recipe_id):
         connection.commit()
         # formats each id into a list
         tool_ids = [id[0] for id in tool_ids]
-        return {"success": True, "data": tool_ids}
+        return {"success": True, "tool_ids": tool_ids}
     except Exception as e:
         print(f"[get_recipe_tools error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -215,7 +215,7 @@ def get_recipe_items(recipe_id):
         items = cursor.fetchall()
         connection.commit()
         items = [list(item) for item in items]
-        return {"success": True, "data": items}
+        return {"success": True, "items": items}
     except Exception as e:
         print(f"[get_recipe_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}

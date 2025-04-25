@@ -7,61 +7,68 @@ def get_all():
         query = "SELECT id, name, servings, prep_time, cook_time, instructions FROM recipe WHERE user_id IS NULL;"
         cursor.execute(query)
         recipes = cursor.fetchall()
-        return {"success": True, "data": recipes}
+        return {"success": True, "recipes": recipes}
     except Exception as e:
-        print(f"[get_all error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+        print(f"[admin_recipe.get_all error] {e}")
+        return {"success": False, "error": f"[admin_recipe.get_all error] {e}"}
     finally:
         if cursor:
             cursor.close()
 
-def remove_recipe(recipe_id):
+def remove_recipe(id):
     cursor = None
     try:
         cursor = connection.cursor()
-        cursor.execute("DELETE FROM recipe WHERE id = %s;", (recipe_id,))
+        query1 = "DELETE FROM recipe WHERE id = %s;"
+        # one item tuple
+        data1 = (id,)
+        cursor.execute(query1, data1)
+        query2 = "DELETE FROM recipe_items WHERE recipe_id = %s;"
+        # one item tuple
+        data2 = (id,)
+        cursor.execute(query2, data2)
+        query3 = "DELETE FROM recipe_tool WHERE recipe_id = %s;"
+        # one item tuple
+        data3 = (id,)
+        cursor.execute(query3, data3)
         connection.commit()
         return {"success": True}
     except Exception as e:
-        print(f"[remove_recipe error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+        print(f"[admin_recipe.remove_recipe error] {e}")
+        return {"success": False, "error": f"[admin_recipe.remove_recipe error] {e}"}
     finally:
         if cursor:
             cursor.close()
 
-def update_recipe(recipe_id, name, servings, prep_time, cook_time, instructions):
+def update_recipe(self, recipe_id, name, serv, prep, cook, instructions, user_id = None):
     cursor = None
     try:
         cursor = connection.cursor()
-        query = """
-            UPDATE recipe
-            SET name = %s, servings = %s, prep_time = %s, cook_time = %s, instructions = %s
-            WHERE id = %s;
-        """
-        cursor.execute(query, (name, servings, prep_time, cook_time, instructions, recipe_id))
+        query = "UPDATE FoodLink.recipe SET name = %s, servings = %s, prep_time = %s, cook_time = %s, instructions = %s, user_id = %s WHERE id = %s;"
+        data = [name, serv, prep, cook, instructions, user_id, recipe_id]
+        cursor.execute(query, data)
         connection.commit()
         return {"success": True}
     except Exception as e:
-        print(f"[update_recipe error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+        print(f"[admin_recipe.update_recipe error] {e}")
+        return {"success": False, "error": f"[admin_recipe.update_recipe error] {e}"}
     finally:
         if cursor:
             cursor.close()
 
-def add_recipe(name, servings, prep_time, cook_time, instructions):
+def add_recipe(self, name, serv, prep, cook, instructions, user_id = None):
     cursor = None
     try:
         cursor = connection.cursor()
-        query = """
-            INSERT INTO recipe (name, servings, prep_time, cook_time, instructions)
-            VALUES (%s, %s, %s, %s, %s);
-        """
-        cursor.execute(query, (name, servings, prep_time, cook_time, instructions))
+        query = "INSERT INTO FoodLink.recipe (name, servings, prep_time, cook_time, instructions, user_id) VALUES (%s, %s, %s, %s, %s, %s);"
+        data = [name, serv, prep, cook, instructions, user_id]
+        print(data)
+        cursor.execute(query, data)
         connection.commit()
         return {"success": True}
     except Exception as e:
-        print(f"[add_recipe error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+        print(f"[admin_recipe.add_recipe error] {e}")
+        return {"success": False, "error": f"[admin_recipe.add_recipe error] {e}"}
     finally:
         if cursor:
             cursor.close()
@@ -70,34 +77,57 @@ def update_recipe_ingredients(recipe_id, names, units, quantities):
     cursor = None
     try:
         cursor = connection.cursor()
-        cursor.execute("DELETE FROM recipe_items WHERE recipe_id = %s;", (recipe_id,))
-        query = "INSERT INTO recipe_items (recipe_id, item_name, quantity, unit) VALUES (%s, %s, %s, %s);"
-        data = [(recipe_id, names[i], quantities[i], units[i]) for i in range(len(names))]
-        cursor.executemany(query, data)
+        query = "DELETE FROM recipe_items WHERE recipe_id = %s"
+        data = (recipe_id, )
+        cursor.execute(query, data)
+        
+        for name, unit, quantity in zip(names, units, quantities):
+            cursor = connection.cursor()
+            query = "INSERT INTO recipe_items (recipe_id, item_name, unit, quantity) VALUES (%s, %s, %s, %s);"
+            data = [recipe_id, name, unit, quantity]
+            cursor.execute(query, data)
+        # only commits after completely updated
         connection.commit()
         return {"success": True}
     except Exception as e:
-        print(f"[update_recipe_ingredients error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+        print(f"[admin_recipe.update_recipe_ingredients error] {e}")
+        return {"success": False, "error": f"[admin_recipe.update_recipe_ingredients error] {e}"}
     finally:
         if cursor:
             cursor.close()
 
 def add_recipe_ingredients(recipe_id, names, units, quantities):
-    return update_recipe_ingredients(recipe_id, names, units, quantities)
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        for name, unit, quantity in zip(names, units, quantities):
+            cursor = connection.cursor()
+            query = "INSERT INTO recipe_items (recipe_id, item_name, unit, quantity) VALUES (%s, %s, %s, %s);"
+            data = [recipe_id, name, unit, quantity]
+            cursor.execute(query, data)
+        # only commits after completely updated
+        connection.commit()
+        return {"success": True}
+    except Exception as e:
+        print(f"[admin_recipe.add_recipe_ingredients error] {e}")
+        return {"success": False, "error": f"[admin_recipe.add_recipe_ingredients error] {e}"}
+    finally:
+        if cursor:
+            cursor.close()
 
 def get_id():
     cursor = None
     try:
         cursor = connection.cursor()
-        query = "SELECT MAX(id) + 1 FROM recipe;"
+        query = "SELECT MAX(id) from FoodLink.recipe;"
         cursor.execute(query)
-        result = cursor.fetchone()
-        id = result[0]
-        return {"success": True, "data": id}
+        id = cursor.fetchone()
+        print(id)
+        connection.commit()
+        return {"success": True, "id": id}
     except Exception as e:
-        print(f"[get_id error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+        print(f"[admin_recipe.get_id error] {e}")
+        return {"success": False, "error": f"[admin_recipe.get_id error] {e}"}
     finally:
         if cursor:
             cursor.close()
@@ -106,19 +136,40 @@ def update_recipe_tools(recipe_id, tool_ids):
     cursor = None
     try:
         cursor = connection.cursor()
-        cursor.execute("DELETE FROM recipe_tool WHERE recipe_id = %s;", (recipe_id,))
-        if tool_ids:
+        query = "DELETE FROM recipe_tool WHERE recipe_id = %s"
+        data = (recipe_id, )
+        cursor.execute(query, data)
+        
+        for tool in tool_ids:
+            cursor = connection.cursor()
             query = "INSERT INTO recipe_tool (recipe_id, tool_id) VALUES (%s, %s);"
-            data = [(recipe_id, tid) for tid in tool_ids]
-            cursor.executemany(query, data)
+            data = [recipe_id, tool]
+            cursor.execute(query, data)
+            
         connection.commit()
         return {"success": True}
     except Exception as e:
-        print(f"[update_recipe_tools error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+        print(f"[admin_recipe.update_recipe_tools error] {e}")
+        return {"success": False, "error": f"[admin_recipe.update_recipe_tools error] {e}"}
     finally:
         if cursor:
             cursor.close()
 
 def add_recipe_tools(recipe_id, tool_ids):
-    return update_recipe_tools(recipe_id, tool_ids)
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        for tool in tool_ids:
+            cursor = connection.cursor()
+            query = "INSERT INTO recipe_tool (recipe_id, tool_id) VALUES (%s, %s);"
+            data = [recipe_id, tool]
+            cursor.execute(query, data)
+
+        connection.commit()
+        return {"success": True}
+    except Exception as e:
+        print(f"[admin_recipe.add_recipe_tools error] {e}")
+        return {"success": False, "error": f"[admin_recipe.add_recipe_tools error] {e}"}
+    finally:
+        if cursor:
+            cursor.close()

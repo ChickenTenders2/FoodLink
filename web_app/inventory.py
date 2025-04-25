@@ -1,4 +1,5 @@
 from database import connection
+import logging
 
 def get_items(user_id):
     cursor = None
@@ -18,7 +19,7 @@ def get_items(user_id):
             item[6] = item[6].strftime('%Y-%m-%d')
         return {"success": True, "items": items}
     except Exception as e:
-        print(f"[get_items error] {e}")
+        logging.error(f"[get_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -42,7 +43,7 @@ def search_items(user_id, search_term):
             item[6] = item[6].strftime('%Y-%m-%d')
         return {"success": True, "items": items}
     except Exception as e:
-        print(f"[search_items error] {e}")
+        logging.error(f"[search_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -57,7 +58,8 @@ def add_item(user_id, item_id, quantity, expiry_date):
         connection.commit()
         return {"success": True}
     except Exception as e:
-        print(f"[add_item error] {e}")
+        connection.rollback()
+        logging.error(f"[add_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -79,7 +81,8 @@ def remove_item(inventory_id):
         connection.commit()
         return {"success": True}
     except Exception as e:
-        print(f"[remove_item error] {e}")
+        connection.rollback()
+        logging.error(f"[remove_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -99,7 +102,8 @@ def update_quantities(items_used):
         connection.commit()
         return {"success": True}
     except Exception as e:
-        print(f"[update_quantities error] {e}")
+        connection.rollback()
+        logging.error(f"[update_quantities error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -114,7 +118,8 @@ def update_item(inventory_id, quantity, expiry_date):
         connection.commit()
         return {"success": True}
     except Exception as e:
-        print(f"[update_item error] {e}")
+        connection.rollback()
+        logging.error(f"[update_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -150,7 +155,8 @@ def correct_personal_item(personal_item_id, item_id, default_quantity):
         connection.commit()
         return {"success": True}
     except Exception as e:
-        print(f"[correct_personal_item error] {e}")
+        connection.rollback()
+        logging.error(f"[correct_personal_item error] {e}")
         # detailed error report for admins
         return {"success": False, 
                 "error": f"""[correct_personal_item error]:

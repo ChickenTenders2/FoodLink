@@ -1,4 +1,5 @@
 from database import connection
+import logging
 from datetime import datetime
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -19,7 +20,7 @@ def get_notifications(user_id):
         cursor.execute(query, (user_id,))
         return {"success": True, "data": cursor.fetchall()}
     except Exception as e:
-        print(f"[get_notifications error] {e}")
+        logging.error(f"[get_notifications error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -35,7 +36,8 @@ def mark_read(notif_id):
         connection.commit()
         return {"success": True}
     except Exception as e:
-        print(f"[mark_read error] {e}")
+        connection.rollback()
+        logging.error(f"[mark_read error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -50,7 +52,7 @@ def notification_exists(user_id, notif_type, message):
         cursor.execute(query, (user_id, notif_type, message))
         return cursor.fetchone()[0]
     except Exception as e:
-        print(f"[notification_exists error] {e}")
+        logging.error(f"[notification_exists error] {e}")
         return 1
     finally:
         if cursor:
@@ -69,7 +71,8 @@ def insert_notification(user_id, notif_type, message, severity):
         connection.commit()
         return {"success": True}
     except Exception as e:
-        print(f"[insert_notification error] {e}")
+        connection.rollback()
+        logging.error(f"[insert_notification error] {e}")
         # deatiled report of error for admins
         return {"success": False, 
                 "error": f"""[insert_notification error]:
@@ -127,7 +130,7 @@ def expiry_notification(user_id):
                 insert_notification(user_id, 'expiry', message, severity)
                 send_email(user_id, 'expiry', f"{message} Please check your inventory.")
     except Exception as e:
-        print(f"[expiry_notification error] {e}")
+        logging.error(f"[expiry_notification error] {e}")
     finally:
         if cursor:
             cursor.close()
@@ -165,7 +168,7 @@ def temperature_humidity_notification(user_id, temperature, humidity):
                     insert_notification(user_id, notif_type, message, 'warning')
                     send_email(user_id, notif_type, f"Warning: Your fridge humidity is above {max_hum}%.\nDetected: {humidity}%")
     except Exception as e:
-        print(f"[temperature_humidity_notification error] {e}")
+        logging.error(f"[temperature_humidity_notification error] {e}")
     finally:
         if cursor:
             cursor.close()
@@ -200,7 +203,7 @@ def cooldown_check(user_id, notif_type, cooldown_minutes=10):
                 return True  # Cooldown active
         return False
     except Exception as e:
-        print(f"[cooldown_check error] {e}")
+        logging.error(f"[cooldown_check error] {e}")
         return True 
     finally:
         if cursor:
@@ -217,7 +220,7 @@ def send_email(user_id, subject_type, message_text):
         cursor.execute("SELECT email FROM user WHERE id = %s;", (user_id,))
         recipient_email = cursor.fetchone()[0]
     except Exception as e:
-        print(f"[send_email DB error] {e}")
+        logging.error(f"[send_email DB error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -254,5 +257,5 @@ def send_email(user_id, subject_type, message_text):
             server.sendmail("foodlink2305@gmail.com", recipient_email, msg.as_bytes())
         return {"success": True}
     except Exception as e:
-        print(f"[send_email SMTP error] {e}")
+        logging.error(f"[send_email SMTP error] {e}")
         return {"success": False, "error": "An internal error occurred."}

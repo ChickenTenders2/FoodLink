@@ -3,35 +3,39 @@ import time
 import uuid
 from tb_device_mqtt import TBDeviceMqttClient, TBPublishInfo
 
+def send_success_alert():
+    # Unique id is generated every time a connection is established.
+    unique_id = str(uuid.uuid4())
 
-class Success():
-    def __init__(self):
-        # Unique id is generated every time a connection is established.
-        unique_id = str(uuid.uuid4())
+    telemetry_with_ts = {
+        "ts": int(round(time.time() * 1000)),
+        "values": {"message": "Added"}
+    }
 
-        self.telemetry_with_ts = {
-            "ts": int(round(time.time() * 1000)),
-            "values": {"message": "Added"}
-        }
+    client = TBDeviceMqttClient(
+        "thingsboard.cs.cf.ac.uk",
+        username="FoodLinkAccess2025",
+        client_id=f"client_{unique_id}"
+    )
 
-        self.client = TBDeviceMqttClient(
-            "thingsboard.cs.cf.ac.uk",
-            username="FoodLinkAccess2025",
-            client_id=f"client_{unique_id}"
-        )
-
+    try:
         # Connect to ThingsBoard.
-        self.client.connect()
+        client.connect()
 
-    # Sends the success message to ThingsBoard.  
-    def alert(self):
-
-        result = self.client.send_telemetry(self.telemetry_with_ts)
+        # Sends the success message to ThingsBoard.
+        result = client.send_telemetry(telemetry_with_ts)
 
         if result.get() == TBPublishInfo.TB_ERR_SUCCESS:
             logging.info("Telemetry sent successfully.")
         else:
             logging.error("Failed to send telemetry.")
 
-        # Disconnect to prevent connection conflicts when the next message is sent.
-        self.client.disconnect()
+    except Exception as e:
+         logging.error(f"[ThingsBoard Error] {e}")
+    finally:
+        try:
+            # Disconnect to prevent connection conflicts when the next message is sent.
+            client.disconnect()
+        except Exception:
+            # If connection was never made, disconnect might fail — ignore silently
+            pass

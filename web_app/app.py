@@ -17,11 +17,12 @@ import inventory
 import notification
 # for getting temperature and humidity of fridge
 import thingsboard
-#from success import Success
+# for alerting when item is added on raspberry pi screen
+import success
 import shopping
 # for recipe handling
 import recipe as recipe_sql
-from recipe_object import recipe_object
+import recipe_object
 # for parsing ingredients and tools list of lists as string
 import json
 
@@ -48,8 +49,8 @@ from flask_session import Session
 # for accessing database
 from models import User, Admin
 # login forms
-from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
-from extensions import db
+from flask_forms import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
+from database import db
 
 # Import database and user model
 app = Flask(__name__, template_folder = "templates")
@@ -230,7 +231,7 @@ def AddAdmin():
                 username=form.username.data,
                 email=form.email.data,
                 password=generate_password_hash(form.password.data),
-                advanced_privileges=False
+                advanced_privileges=form.advanced_privileges.data,
             )
             db.session.add(new_admin)
             db.session.commit()
@@ -316,8 +317,9 @@ def login():
                         error = f"Error: Invalid Credentials PWD {attempt}"
                 else:
                     login_user(user, form.remember_me.data)
-                    #flash("You were successfully logged in!")
+                    # sets user_type for load user function
                     session["user_type"] = "user"
+                    
                     session["userFailedAttempts"] = 0
                     session["userLockoutTime"] = None
                   # Check if email is verified
@@ -557,21 +559,16 @@ def inject_notifications():
 def get_notifications():
     device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
     user_id = current_user.id
-    # wrapped thingsboards functionality in try except 
-    # so i dont have to use the vpn the whole time
-    try:
-        token = thingsboard.get_jwt_token()
-        data = thingsboard.get_telemetry(token, device_id)
+    token = thingsboard.get_jwt_token()
+    data = thingsboard.get_telemetry(token, device_id)
 
-        temperature = humidity = None
-        if data:
-            temperature = float(data['temperature'][0]['value'])
-            humidity = float(data['humidity'][0]['value'])
+    temperature = humidity = None
+    if data:
+        temperature = float(data['temperature'][0]['value'])
+        humidity = float(data['humidity'][0]['value'])
 
-        notification.temperature_humidity_notification(user_id, temperature, humidity)
-        notification.expiry_notification(user_id)
-    except Exception as e:
-        print("Not connected to school wifi, " + str(e))
+    notification.temperature_humidity_notification(user_id, temperature, humidity)
+    notification.expiry_notification(user_id)
 
     result = notification.get_notifications(user_id) 
     if not result.get("success"):
@@ -640,6 +637,8 @@ def append_inventory():
             return jsonify(result), 500
         else:
             return jsonify(result), 400
+    # displays success alert on raspberry pi display
+    success.send_success_alert()
     return jsonify(result)
 
 # Update quantity and expiry of item in inventory
@@ -1403,150 +1402,164 @@ def recipe_page():
 @user_only
 def get_recipes():
     user_id = current_user.id
-    try:
-        ###### CURRENTLY GET TOOL IDS EACH TIME UPDATE WHEN SESSION MADE TO CHANGEO NLY AFTER TOOLS/SAVE
-        user_tool_ids = tool.get_user_tool_ids(user_id)
+    result = tool.get_user_tool_ids(user_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    user_tool_ids = result.get("ids")
 
+    search_term = request.form.get("search_term")
+    page = int(request.form.get("page"))
 
-        search_term = request.form.get("search_term")
-        page = int(request.form.get("page"))
+    print(search_term)
+    personal_only = request.form.get("personal_only") == "on"
+    allow_missing_items = request.form.get("missing_items") == "on"
+    allow_insufficient_items = request.form.get("insufficient_items") == "on"
+    allow_missing_tools = request.form.get("missing_tools") == "on"
+    result = recipe_sql.get_recipes(search_term, page, user_id, personal_only)
+    if not result.get("success"):
+        return jsonify(result), 500
+    recipes = result.get("recipes")
 
-        print(search_term)
-        personal_only = request.form.get("personal_only") == "on"
-        allow_missing_items = request.form.get("missing_items") == "on"
-        allow_insufficient_items = request.form.get("insufficient_items") == "on"
-        allow_missing_tools = request.form.get("missing_tools") == "on"
-        recipes = recipe_sql.get_recipes(search_term, page, user_id, personal_only)
+    filtered = []
+    # for each recipe record returned from database
+    for record in recipes:
+        result = recipe_object.create(record)
+        if not result.get("success"):
+            return jsonify(result), 500
+        recipe = result.get("recipe")
 
-        filtered = []
-        # for each recipe record returned from database
-        for record in recipes:
-            recipe = recipe_object(record)
-            recipe.calculate_missing_tools(user_tool_ids)
-            recipe.find_items_in_inventory(user_id)
+        recipe_object.calculate_missing_tools(recipe, user_tool_ids)
 
-            # applies filters
-            # if the filter referenced is true:
-            # stops recipes with missing ingredients
-            if not allow_missing_items and recipe.missing_ingredients:
-                continue
-            # stops recipes with insufficient ingredient quantities
-            if not allow_insufficient_items and recipe.insufficient_ingredients:
-                continue
-            # stops recipes with missing tools
-            if not allow_missing_tools and recipe.missing_tool_ids:
-                continue
+        result = recipe_object.find_items_in_inventory(recipe, user_id)
+        if not result.get("success"):
+            return jsonify(result), 500
 
-            filtered.append(recipe.to_dict())
+        # applies filters
+        # if the filter referenced is true:
+        # stops recipes with missing ingredients
+        if not allow_missing_items and recipe.get("missing_ingredients"):
+            continue
+        # stops recipes with insufficient ingredient quantities
+        if not allow_insufficient_items and recipe.get("insufficient_ingredients"):
+            continue
+        # stops recipes with missing tools
+        if not allow_missing_tools and recipe.get("missing_tool_ids"):
+            continue
 
-        return jsonify({"success": True, "recipes": filtered})
-    except Exception as e:
-        print(e)
-        return jsonify({"success": False, "error": str(e)})
+        recipe_object.strip_recipe_flags(recipe)
+        
+        filtered.append(recipe)
+    
+    print(filtered)
+
+    return jsonify({"success": True, "recipes": filtered})
     
 @app.route("/recipes/get/<recipe_id>")
 @user_only
 def get_recipe(recipe_id):
     user_id = current_user.id
-    try:
-        record = recipe_sql.get_recipe(recipe_id)
-        recipe = recipe_object(record)
-        user_tool_ids = tool.get_user_tool_ids(user_id)
-        recipe.calculate_missing_tools(user_tool_ids)
-        recipe.find_items_in_inventory(user_id)
-        recipe_dict = recipe.to_dict()
-        return jsonify({"success": True, "recipe": recipe_dict})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+
+    result = tool.get_user_tool_ids(user_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    user_tool_ids = result.get("ids")
+
+    result = recipe_sql.get_recipe(recipe_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    record = result.get("recipe")
+
+    result = recipe_object.create(record)
+    if not result.get("success"):
+        return jsonify(result), 500
+    recipe = result.get("recipe")
+
+    recipe_object.calculate_missing_tools(recipe, user_tool_ids)
+
+    result = recipe_object.find_items_in_inventory(recipe, user_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+
+    recipe_object.strip_recipe_flags(recipe)
+    
+    return jsonify({"success": True, "recipe": recipe})
+
 
 @app.route("/recipes/add", methods=["POST"])
 @user_only
 def add_recipe():
     user_id = current_user.id
-    try:
-        name = request.form.get("name")
-        servings = request.form.get("servings")
-        prep_time = request.form.get("prep_time")
-        cook_time = request.form.get("cook_time")
-        instructions = request.form.get("instructions")
-        
-        ingredients_string = request.form.get("ingredients")
-        tool_ids_string = request.form.get("tool_ids")
+    name = request.form.get("name")
+    servings = request.form.get("servings")
+    prep_time = request.form.get("prep_time")
+    cook_time = request.form.get("cook_time")
+    instructions = request.form.get("instructions")
 
-        # list variables must be stringified client side so lists transfer correctly
-        # they are so decoded to get original data type back
-        ingredients = json.loads(ingredients_string)
-        tool_ids = json.loads(tool_ids_string)
+    # if any information not entered
+    if not (name and servings and prep_time and cook_time and instructions):
+        return jsonify({"success": False, "error": "Form value(s) were missing."})
+    
+    ingredients_string = request.form.get("ingredients")
+    tool_ids_string = request.form.get("tool_ids")
 
-        if not (ingredients or tool_ids):
-            return jsonify({"success": False, "error": "ingredients or tool were empty."})
-        
-        print(ingredients)
-        print(tool_ids)
+    # list variables must be stringified client side so lists transfer correctly
+    # they are so decoded to get original data type back
+    ingredients = json.loads(ingredients_string)
+    tool_ids = json.loads(tool_ids_string)
 
-        # performs update functions
-        #### WHEN REMOVING OOP MAKE SURE TO USE SINGLE CURSOR AND COMMIT FOR THESE FUNCTIONS
-        recipe_id = recipe_sql.add_recipe(name, servings, prep_time, cook_time, instructions, user_id)
-        print("added recipe")
-        recipe_sql.edit_recipe_items(recipe_id, ingredients)
-        print("updated recipe_items")
-        recipe_sql.edit_recipe_tools(recipe_id, tool_ids)
-        print("updated recipe_tools")
+    if not (ingredients or tool_ids):
+        return jsonify({"success": False, "error": "Ingredients or tools were empty."})
+    
+    print(ingredients)
+    print(tool_ids)
 
-        return jsonify({"success": True, "recipe_id": recipe_id})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+    # performs add functions
+    result = recipe_sql.add_recipe(name, servings, prep_time, cook_time, instructions, ingredients, tool_ids, user_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 @app.route("/recipes/update", methods=["POST"])
 @user_only
 def update_recipe():
-    try:
-        recipe_id = request.form.get("recipe_id")
-        name = request.form.get("name")
-        servings = request.form.get("servings")
-        prep_time = request.form.get("prep_time")
-        cook_time = request.form.get("cook_time")
-        instructions = request.form.get("instructions")
-        
-        ingredients_string = request.form.get("ingredients")
-        tool_ids_string = request.form.get("tool_ids")
+    recipe_id = request.form.get("recipe_id")
+    name = request.form.get("name")
+    servings = request.form.get("servings")
+    prep_time = request.form.get("prep_time")
+    cook_time = request.form.get("cook_time")
+    instructions = request.form.get("instructions")
 
-        
-        # list variables must be stringified client side so lists transfer correctly
-        # they are so decoded to get original data type back
-        ingredients = json.loads(ingredients_string)
-        tool_ids = json.loads(tool_ids_string)
+    # if any information not entered
+    if not (name and servings and prep_time and cook_time and instructions):
+        return jsonify({"success": False, "error": "Form value(s) were missing."})
+    
+    ingredients_string = request.form.get("ingredients")
+    tool_ids_string = request.form.get("tool_ids")
 
-        if not (ingredients or tool_ids):
-            return jsonify({"success": False, "error": "ingredients or tool were empty."})
-        
-        print(ingredients)
-        print(tool_ids)
+    # list variables must be stringified client side so lists transfer correctly
+    # they are so decoded to get original data type back
+    ingredients = json.loads(ingredients_string)
+    tool_ids = json.loads(tool_ids_string)
 
-        # performs update functions
-        #### WHEN REMOVING OOP MAKE SURE TO USE SINGLE CURSOR AND COMMIT FOR THESE FUNCTIONS
-        recipe_sql.edit_recipe(recipe_id, name, servings, prep_time, cook_time, instructions)
-        print("updated recipe")
-        recipe_sql.edit_recipe_items(recipe_id, ingredients)
-        print("updated recipe_items")
-        recipe_sql.edit_recipe_tools(recipe_id, tool_ids)
-        print("updated recipe_tools")
+    if not (ingredients or tool_ids):
+        return jsonify({"success": False, "error": "Ingredients or tools were empty."})
+    
+    print(ingredients)
+    print(tool_ids)
 
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+    # performs update functions
+    result = recipe_sql.edit_recipe(recipe_id, name, servings, prep_time, cook_time, instructions, ingredients, tool_ids)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 @app.route("/recipes/delete/<recipe_id>")
 @user_only
 def remove_recipe(recipe_id):
-    try:
-        ### MERGE FUNCTIONS WHEM REMOVING OOP
-        recipe_sql.remove_recipe(recipe_id)
-        recipe_sql.remove_recipe_items(recipe_id)
-        recipe_sql.remove_recipe_tools(recipe_id)
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+    result = recipe_sql.remove_recipe(recipe_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return result
 
 if __name__ == '__main__':
     # Runs the app

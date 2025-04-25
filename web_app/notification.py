@@ -85,12 +85,21 @@ def insert_notification(user_id, notif_type, message, severity):
             cursor.close()
 
 def support_notification(user_id, message):
+    send_email(user_id, 'support', message)
     return insert_notification(user_id, 'support', message, 'info')
 
 def expiry_notification(user_id):
     cursor = None
     try:
         cursor = connection.cursor()
+
+        settings_query = "SELECT expiring_food FROM FoodLink.settings WHERE user_id = %s;"
+        cursor.execute(settings_query, (user_id,))
+        settings = cursor.fetchone()
+
+        if not settings or not settings[0]:
+            return
+
         query = """
             SELECT inv.id, i.id, i.name, expiry_date
             FROM FoodLink.inventory inv
@@ -116,6 +125,7 @@ def expiry_notification(user_id):
                 continue
             if notification_exists(user_id, 'expiry', message) == 0:
                 insert_notification(user_id, 'expiry', message, severity)
+                send_email(user_id, 'expiry', f"{message} Please check your inventory.")
     except Exception as e:
         print(f"[expiry_notification error] {e}")
     finally:
@@ -160,7 +170,7 @@ def temperature_humidity_notification(user_id, temperature, humidity):
         if cursor:
             cursor.close()
 
-def cooldown_check(user_id, notif_type, cooldown_minutes=5):
+def cooldown_check(user_id, notif_type, cooldown_minutes=10):
     # """
     # Returns True if a notification of the given type was sent within cooldown_minutes.
     # Otherwise returns False, meaning it's okay to send a new one.

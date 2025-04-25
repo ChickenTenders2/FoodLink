@@ -1,13 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Fridge Inventory</title>
-    <!-- Link to the external CSS file -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block page_content %}
     <form class="add-item-form" action="/inventory/add_item">
         <button type="submit">Add Item</button>
     </form>
@@ -72,7 +65,10 @@
 
     <div id="toast" class="toast"></div>
 
+ {% endblock %}
+
+{% block scripts %}
+    {{ super() }}
     <script src="{{ url_for('static', filename='js/item_handling.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/inventory.js') }}"></script> 
-</body>
-</html>
+{% endblock %}

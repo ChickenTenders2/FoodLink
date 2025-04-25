@@ -135,7 +135,8 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin-top: 50px;
+    margin: 0;
+    padding-top: 65px;
 }
 
 
@@ -184,81 +185,151 @@ h2 {
 }
 
 /* Navigation Bar */
-.navbar {
-    background-color: #a6d785;
-    border: none;
-    border-radius: 0;
-    margin-bottom: 0;
-    height: 70px; /* Set fixed height */
-    display: flex;
-    align-items: center; /* Vertically center items */
-    padding: 0 20px;
+/* .topnav { width: 100%; background-color: #a6d785; border-bottom: 2px solid #8fca6c; border-radius: 0 0 12px 12px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); font-family: 'Arial', sans-serif; display: flex; flex-wrap: wrap; justify-content: space-around;  padding: 0; margin: 0 auto; position: relative; z-index: 1000; }
+
+  
+  .topnav a {
+    float: left;
+    display: block;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
   }
   
-  /* Flex layout for container inside navbar */
-  .navbar .container {
+  .topnav a:hover {
+    background-color: #ddd;
+    color: black;
+  }
+  
+  .topnav a.active {
+    background-color: #04AA6D;
+    color: white;
+  }
+  
+  .topnav .icon {
+    display: none;
+  }
+  
+  @media screen and (max-width: 600px) {
+    .topnav a:not(:first-child) {display: none;}
+    .topnav a.icon {
+      float: right;
+      display: block;
+    }
+  }
+  
+  @media screen and (max-width: 600px) {
+    .topnav.responsive {position: relative;}
+    .topnav.responsive .icon {
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+    .topnav.responsive a {
+      float: none;
+      display: block;
+      text-align: left;
+    }
+  } */
+
+  /* .topnav {background-color: #a6d785; display: flex; flex-wrap: wrap; align-items: center; padding: 0 10px; width: 100%; z-index: 1000;}
+
+  .topnav a { display: block; color: #000; padding: 14px 16px; text-decoration: none; font-size: 17px; font-weight: bold; }
+  
+  .topnav a:hover { background-color: #8fca6c; color: white; }
+  
+  .topnav .icon { display: none; margin-left: auto; }
+  
+  @media screen and (max-width: 768px) { .topnav a:not(:first-child) {display: none;}
+  .topnav a.icon {
+    float: right;
+    display: block;
+  }
+  
+  .topnav.responsive {position: relative; flex-direction: column; align-items: flex-start; height: auto; margin-top: 45%;}
+  .topnav.responsive .icon {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  
+  .topnav.responsive a { display: block; width: 100%; text-align: left; }}
+  
+  /* .topnav .icon { display: block; } } */
+  
+  .topnav {
+    overflow: hidden;
+    background-color: #a6d785;
+    position: fixed; /* makes it stick to top */
+    top: 0;
+    left: 0;    width: 100%;
+    z-index: 1000;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 100%;
-    padding: 10px;
+    flex-wrap: wrap;
+    padding: 0 10px;
   }
+
+  .nav-left, .nav-right { display: flex; align-items: center; flex-wrap: wrap; }
+
+  .nav-right { margin-left: auto; }
   
-  /* Navbar brand and nav links */
-  .navbar .navbar-brand,
-  .navbar .nav > li > a {
-    height: 70px;
-    display: flex;
-    align-items: center;
-    padding: 0 15px;
-    font-weight: bold;
+  .topnav a {
+    /* float: left; */
+    display: block;
     color: #000;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+    font-weight: bold;
   }
   
-  .navbar .navbar-brand {
-    font-size: 24px;
-  }
-  
-  .navbar .nav > li > a {
-    font-size: 18px;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    line-height: 30px;
-  }
-  
-  /* Hover states */
-  .navbar-inverse .navbar-nav > li > a:hover {
+  .topnav a:hover {
     background-color: #8fca6c;
     color: white;
   }
   
-  .navbar-inverse .navbar-brand:hover {
-    color: white;
+  .topnav .icon {
+    display: none;
   }
   
-  /* Optional: Toggle button styles (for small screens) */
-  .navbar-inverse .navbar-toggle {
-    border-color: #ddd;
-  }
-  .navbar-inverse .navbar-toggle .icon-bar {
-    background-color: #000;
+  @media screen and (max-width: 768px) {
+    .topnav a:not(:first-child) {
+      display: none;
+    }
+  
+    .topnav a.icon {
+      float: right;
+      display: block;
+    }
+
+    .topnav.responsive .nav-left, .topnav.responsive .nav-right { flex-direction: column; width: 100%; }
+
+    .topnav.responsive .nav-left a, .topnav.responsive .nav-right a { width: 100%; text-align: left; }
+  
+    .topnav.responsive {
+      position: fixed;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .topnav.responsive a {
+      float: none;
+      display: block;
+      text-align: left;
+    }
+  
+    .topnav.responsive .icon {
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
   }
   
-
-/* Container Padding */ .container { padding-top: 70px; padding-bottom: 30px;}
-
-/* Flash Messages */ .flashes { list-style-type: none; padding: 0; margin: 20px 0; }
-
-.flashes li { background-color: #d4edc9; color: #2e6e3e; padding: 10px 15px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #c3e6cb; }
-
-/* Form Styling */ form { margin-top: 20px; }
-
-/* Optional: Buttons */ .btn { background-color: #a6d785; color: #000; border: none; border-radius: 30px; padding: 10px 20px; font-weight: bold; transition: background-color 0.3s ease; }
-
-.btn:hover { background-color: #8fca6c; color: #fff; }
-
-@media (max-width: 768px) { .container { padding-left: 15px; padding-right: 15px; } }
-
 
 /* Dashboard Styles */
 .dashboard-grid { display: flex; flex-direction: column; gap: 20px; padding: 20px; box-sizing: border-box; width: 100%; max-width: 100%; overflow-x: hidden; }
@@ -273,7 +344,7 @@ h2 {
 
 .tile-pair { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
 
-.tile-pair .tile { flex: 1 1 200px; min-width: 200px; max-width: 100%; }
+.tile-pair .tile { flex: 1 1 200px; min-width: 200px; max-width: 100%; } */
   
   
 
@@ -289,7 +360,7 @@ h2 {
 .auth-container {
     background-color: rgba(255, 255, 255, 0.85);
     padding: 40px;
-    border-radius: 20px;
+    border-radius: 10px;
     width: 90%;
     max-width: 50vw;
     box-shadow: 0 8px 16px rgba(0,0,0,0.3);
@@ -327,7 +398,7 @@ h2 {
     padding: 12px;
     font-size: 16px;
     border: none;
-    border-radius: 30px;
+    border-radius: 10px;
     background-color: #f3f3f3;
     box-sizing: border-box;
 }
@@ -337,7 +408,7 @@ h2 {
     padding: 12px 20px; /* ensures even left and right padding */
     font-size: 14px;
     border: none;
-    border-radius: 30px;
+    border-radius: 10px;
     background-color: #f3f3f3;
     box-sizing: border-box;
     margin: 0;
@@ -348,7 +419,7 @@ input.form-control {
     padding: 12px 20px;
     font-size: 14px;
     border: none;
-    border-radius: 30px;
+    border-radius: 10px;
     background-color: #f3f3f3;
     box-sizing: border-box;
     margin: 0;
@@ -359,7 +430,7 @@ input.form-control {
     padding: 12px 24px;
     font-size: 18px;
     border: none;
-    border-radius: 30px;
+    border-radius: 10px;
     background-color: #a6d785;
     color: #000;
     cursor: pointer;
@@ -377,7 +448,7 @@ input.form-control {
 
 .verification-container h2 { color: #333; font-size: 24px; margin-bottom: 15px; }
 
-.alert { padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left; }
+.alert { padding: 15px; border-radius: 10px; margin: 20px 0; text-align: left; }
 
 .alert-success { background-color: #d4edc9; color: #2d572c; border: 1px solid #c3e6cb; }
 
@@ -391,7 +462,7 @@ input.form-control {
 
 .code-input { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 15px; }
 
-.code-input input[type="text"] { padding: 10px; width: 120px; border-radius: 20px; border: 1px solid #ccc; text-align: center; font-size: 16px; }
+.code-input input[type="text"] { padding: 10px; width: 120px; border-radius: 10px; border: 1px solid #ccc; text-align: center; font-size: 16px; }
 
 .instructions { font-size: 14px; color: #555; text-align: left; margin-top: 20px; }
 
@@ -399,7 +470,7 @@ input.form-control {
 
 .actions { text-align: center; margin-top: 20px; }
 
-.btn { padding: 10px 20px; font-size: 16px; border: none; border-radius: 30px; background-color: #a6d785; color: #000; cursor: pointer; text-decoration: none; transition: background-color 0.3s ease; }
+.btn { padding: 10px 20px; font-size: 16px; border: none; border-radius: 10px; background-color: #a6d785; color: #000; cursor: pointer; text-decoration: none; transition: background-color 0.3s ease; }
 
 .btn:hover { background-color: #8fca6c; }
 
@@ -412,7 +483,7 @@ input.form-control {
 .inventory-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 10px;
+    gap: 7px;
     max-width: 1000px;
     background-color: #f4f4f4;
     padding: 15px;
@@ -482,6 +553,7 @@ input.form-control {
     position: relative;
     cursor: pointer;
     transition: transform 0.2s ease-in-out;
+    margin: 8px;
 }
 
 .inventory-tile.expires-2-days {
@@ -575,7 +647,7 @@ a.tile-link {
     flex: 1;
     padding: 8px;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     background-color: #aed581;
     cursor: pointer;
     transition: background-color 0.2s ease;
@@ -665,7 +737,7 @@ a.tile-link {
     padding: 5px 10px;
     font-size: 14px;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     background-color: #aed581;
     cursor: pointer;
     transition: background-color 0.2s ease;
@@ -710,7 +782,7 @@ a.tile-link {
 .item-actions button {
     padding: 5px 10px;
     font-size: 14px;
-    border-radius: 5px;
+    border-radius: 10px;
     height: 30px;
     line-height: 1;
     box-sizing: border-box;
@@ -727,11 +799,17 @@ a.tile-link {
     background-color: #9ccc65;
 }
 
+.filter-form {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  } 
+
 .filter-form input[type="text"],
 .filter-form select {
     padding: 10px;
     font-size: 16px;
-    border-radius: 30px;
+    border-radius: 10px;
     border: none;
     background-color: #f3f3f3;
     width: 250px;
@@ -742,7 +820,7 @@ a.tile-link {
     padding: 10px 20px;
     font-size: 16px;
     border: none;
-    border-radius: 30px;
+    border-radius: 10px;
     background-color: #a6d785;
     cursor: pointer;
     transition: background-color 0.2s ease;
@@ -752,13 +830,18 @@ a.tile-link {
     background-color: #8fca6c;
 }
 
+.add-item-form {
+    display: flex;
+    justify-content: center;
+  }  
+
 .add-item-form button {
     padding: 10px 20px;
     margin-bottom: 10px;
     width: 200px;
     font-size: 16px;
     border: none;
-    border-radius: 30px;
+    border-radius: 10px;
     background-color: #a6d785;
     cursor: pointer;
     transition: background-color 0.2s ease;
@@ -828,7 +911,7 @@ input[type="submit"] {
     padding: 10px 20px;
     font-size: 16px;
     border: none;
-    border-radius: 30px;
+    border-radius: 10px;
     background-color: #a6d785; /* Light green */
     color: #000;
     cursor: pointer;
@@ -911,26 +994,17 @@ input[type="submit"]:hover {
 
 /* Notification Styles */
 
-.notification-icon {
-    position: relative;
-    cursor: pointer;
-}
-  
-.notification-icon img {
-    width: 24px;
-    height: 24px;
-}
-  
 .notification-wrapper {
-    position: relative;
     display: inline-block;
-    vertical-align: middle;
+    align-items: center;
+    position: relative;
+    padding: 14px 16px;
   }
   
   .notification-badge {
     position: absolute;
-    top: -6px;
-    right: -6px;
+    top: 0;
+    right: 0;
     background-color: red;
     color: white;
     font-size: 10px;
@@ -939,15 +1013,9 @@ input[type="submit"]:hover {
     font-weight: bold;
     line-height: 1;
     z-index: 1050;
-    display: inline-block;
+    transform: translate(30%, -80%) !important;
   }
   
-  .navbar-nav > li.nav-item {
-    position: relative;
-    display: flex;
-    align-items: center;
-    padding: 0 10px;
-  }
   
 .notification-popup {
     position: absolute;
@@ -1011,43 +1079,6 @@ input[type="submit"]:hover {
 .notification-popup li[data-severity="warning"] { border-left: 4px solid #ff9800; }
 .notification-popup li[data-severity="critical"] { border-left: 4px solid #f44336; }
 
-/* Navbar */ 
-
-.navbar { 
-    position: fixed; 
-    top: 0; left: 0; 
-    width: 100%; 
-    background-color: #d4edc9; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    padding: 10px 20px; 
-    border-bottom: 2px solid #b3d8a2; 
-    z-index: 1000; 
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
-}
-
-.feature-badge { 
-    background-color: #c9eec4; 
-    color: #2e7d32; 
-    padding: 3px 12px; 
-    border-radius: 20px; 
-    font-size: 12px; 
-    font-weight: 500; 
-}
-
-.nav-left h1 {
-    margin: 0; 
-    font-size: 24px; 
-    color: #2e7d32; /* darker green */ }
-
-.nav-right { 
-    position: relative; 
-    display: flex; 
-    align-items: center; 
-}
-
-  
 /* Inventory_add styling */
 /* Barcode Scanner Styling Enhancements */
 .video-window {
@@ -1064,7 +1095,7 @@ input[type="submit"]:hover {
     border: none;
     padding: 10px 20px;
     margin: 10px auto;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s ease;
@@ -1118,7 +1149,7 @@ input[type="submit"]:hover {
     width: 95%;
     padding: 10px;
     margin: 5px 0;
-    border-radius: 6px;
+    border-radius: 10px;
     border: 1px solid #ccc;
 }
 
@@ -1144,7 +1175,7 @@ input[type="submit"]:hover {
     background-color: #aed581;
     border: none;
     padding: 10px;
-    border-radius: 6px;
+    border-radius: 10px;
     cursor: pointer;
     margin: 5px 0;
     width: 100%;
@@ -1219,7 +1250,7 @@ input[type="submit"] {
     padding: 10px 20px;
     font-size: 16px;
     border: none;
-    border-radius: 30px;
+    border-radius: 10px;
     background-color: #a6d785;
     color: #000;
     cursor: pointer;
@@ -1409,7 +1440,7 @@ input[type="submit"]:hover {
     border: none;
     padding: 10px 20px;
     margin: 5px 10px;
-    border-radius: 999px;
+    border-radius: 10px;
     cursor: pointer;
     font-weight: bold;
     transition: background-color 0.3s ease;
@@ -1561,7 +1592,7 @@ input[type="submit"]:hover {
 #recipe-search-form input[type="text"] { 
     padding: 10px;
     font-size: 16px;
-    border-radius: 30px;
+    border-radius: 10px;
     border: none;
     background-color: #f3f3f3;
     /* width: 100%; */
@@ -1573,7 +1604,7 @@ input[type="submit"]:hover {
 
 .form-row input[type="checkbox"] { transform: scale(1.2); margin-left: 12px; accent-color: #aed581;}
 
-#recipe-search-form button[type="submit"] { padding: 10px; font-size: 16px; border: none; border-radius: 30px; background-color: #a6d785; cursor: pointer; transition: background-color 0.3s ease; }
+#recipe-search-form button[type="submit"] { padding: 10px; font-size: 16px; border: none; border-radius: 10px; background-color: #a6d785; cursor: pointer; transition: background-color 0.3s ease; }
 
 #recipe-search-form button[type="submit"]:hover { background-color: #8fca6c; }
 

@@ -4,6 +4,7 @@
 {% block styles %}
 {{super()}}
   <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='style.css')}}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 {% endblock %}
 
 {% block title %}
@@ -11,43 +12,51 @@
 {% endblock %}
 
 {% block navbar %}
-
-    <nav class="navbar navbar-inverse navbar-fixed-top" style="padding: 0;"> 
-        <div  style="display: flex; align-items: center; justify-content: space-between; height: 60px;"> 
-            <div class="navbar-header nav-left"> 
-                <a class="navbar-brand" href="{{ url_for('index') }}"> 
-                    <h1 style="margin: 0; font-size: 24px; line-height: 60px;">FoodLink</h1> 
-                </a> 
-            </div> 
-            <ul class="nav navbar-nav"> 
-                <li><a href="{{ url_for('index') }}">Home</a></li> 
-                <li><a href="{{ url_for('get_inventory') }}">Inventory</a></li>
-                <li><a href="{{ url_for('get_shoppingList') }}">Shopping List</a></li>
-                <li><a href="{{ url_for('recipe_page') }}">Recipes</a></li>
-            </ul> 
-            <div class="nav-right" style="display: flex; align-items: center;"> 
-                <ul class="nav navbar-nav navbar-right"> 
-                    <li class="nav-item"> <a href="#" class="nav-link" id="notification-icon" style="display: flex; align-items: center; padding: 20px 15px;"> 🔔 {% if unread_count > 0 %} <span id="notification-badge" class="notification-badge">{{ unread_count }}</span> {% endif %} </a> <div id="notification-popup" class="notification-popup" style="display: none;"> <h3>Notifications</h3> <ul id="notification-list"> {% for n in notifications %} <li class="{{ 'unread' if n[4] == 0 else 'read' }}" data-severity="{{ n[5] }}" data-id="{{ n[0] }}" onclick="markRead(this)"> <strong>{{ n[5].capitalize() }}</strong>: {{ n[2] }}<br> <small>{{ n[3].strftime('%Y-%m-%d %H:%M') }}</small> </li> {% endfor %} </ul> </div> </li>                    
-                    <li>
-                        <a href="{{ url_for('settings_page') }}">⚙️</a>
-                    </li>
-                    <li> 
-                        {% if current_user.is_authenticated %} 
-                            <a href="{{ url_for('logout') }}">Sign Out</a> 
-                        {% else %} 
-                            <a href="{{ url_for('login') }}">Sign In</a> 
-                        {% endif %} 
-                    </li>
-                </ul> 
-            </div> 
-        </div> 
-    </nav> 
-    <!-- <script src="{{ url_for('static', filename='js/notification.js') }}"></script> -->
+<div class="topnav" id="myTopnav">
+  <div class="nav-left">
+    <a href="{{ url_for('index') }}">FoodLink</a>
+    <a href="{{ url_for('get_inventory') }}">Inventory</a>
+    <a href="{{ url_for('get_shoppingList') }}">Shopping List</a>
+    <a href="{{ url_for('recipe_page') }}">Recipes</a>
+  </div>
+  <div class="nav-right">
+    <a href="#" class="nav-link notification-wrapper" id="notification-icon">
+        🔔
+        <span id="notification-badge" class="notification-badge"></span>
+    </a> 
+    <a href="{{ url_for('settings_page') }}">
+        <span>⚙️</span>
+    </a>
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('logout') }}">Sign Out</a>
+    {% else %}
+        <a href="{{ url_for('login') }}">Sign In</a>
+    {% endif %}
+  </div>    
+  <a href="#" class="icon" onclick="navbar()">
+    <i class="fa fa-bars"></i>
+  </a>
+</div>
+<div id="notification-popup" class="notification-popup" style="display: none;">
+    <h3>Notifications</h3>
+    <ul id="notification-list">
+    {% for n in notifications %}
+        <li class="{{ 'unread' if n[4] == 0 else 'read' }}"
+            data-severity="{{ n[5] }}"
+            data-id="{{ n[0] }}"
+            onclick="markRead(this)">
+        <strong>{{ n[5].capitalize() }}</strong>: {{ n[2] }}<br>
+        <small>{{ n[3].strftime('%Y-%m-%d %H:%M') }}</small>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+  
 {% endblock %}
 
 {% block scripts %}
-
 <script src="{{ url_for('static', filename='js/notification.js') }}"></script>
+<script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
 {% endblock %}
 
 {% block content %}

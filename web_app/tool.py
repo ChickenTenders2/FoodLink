@@ -27,8 +27,8 @@ def get_tools(type=None):
         else:
             query = "SELECT id, name FROM tool ORDER BY type, name;"
             cursor.execute(query)
-        appliances = cursor.fetchall()
-        return {"success": True, "data": appliances}
+        tools = cursor.fetchall()
+        return {"success": True, "tools": tools}
     except Exception as e:
         print(f"[get_tools error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -47,45 +47,9 @@ def get_user_tool_ids(user_id):
         ids = cursor.fetchall()
         # formats each id into a list
         ids = [id[0] for id in ids]
-        return {"success": True, "data": ids}
+        return {"success": True, "ids": ids}
     except Exception as e:
         print(f"[get_user_tool_ids error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
-    finally:
-        if cursor:
-            cursor.close()
-
-def get_user_appliance_ids(user_id):
-    cursor = None
-    try:
-        cursor = connection.cursor()
-        query = "SELECT tool_id FROM FoodLink.user_tool JOIN tool ON (user_tool.tool_id = tool.id) WHERE user_id = %s AND tool.type = 'appliance';"
-        data = (user_id,)
-        cursor.execute(query, data)
-        ids = cursor.fetchall()
-        # formats each id into a list
-        ids = [id[0] for id in ids]
-        return {"success": True, "data": ids}
-    except Exception as e:
-        print(f"[get_user_appliance_ids error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
-    finally:
-        if cursor:
-            cursor.close()
-
-def get_user_utensil_ids(user_id):
-    cursor = None
-    try:
-        cursor = connection.cursor()
-        query = "SELECT tool_id FROM FoodLink.user_tool JOIN tool ON (user_tool.tool_id = tool.id) WHERE user_id = %s AND tool.type = 'utensil';"
-        data = (user_id,)
-        cursor.execute(query, data)
-        ids = cursor.fetchall()
-        # formats each id into a list
-        ids = [id[0] for id in ids]
-        return {"success": True, "data": ids}
-    except Exception as e:
-        print(f"[get_user_utensil_ids error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -102,7 +66,7 @@ def save_user_tools(user_id, tool_ids):
 
         # stops inserting tools if none were selected
         if not tool_ids:
-            return
+            return {"success": False, "error": "No tools were selected."}
 
         query = "INSERT INTO user_tool (user_id, tool_id) VALUES (%s, %s);"
         # creates list of the data needed to execute each query for storing user tools

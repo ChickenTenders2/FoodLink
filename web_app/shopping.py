@@ -8,7 +8,7 @@ def get_items(user_id):
         data = (user_id,)
         cursor.execute(query, data)
         items = cursor.fetchall()
-        return {"success": True, "data": items}
+        return {"success": True, "items": items}
     except Exception as e:
         print(f"[get_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -22,7 +22,7 @@ def add_item(user_id, item_name, quantity):
         cursor = connection.cursor()
         cursor.execute("INSERT INTO shopping_list (user_id, item_name, quantity) VALUES (%s, %s, %s)", (user_id, item_name, quantity))
         connection.commit()
-        return {"success": True}
+        return {"success": True, "action": "add", "item": item_name}
     except Exception as e:
         print(f"[add_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -54,7 +54,7 @@ def update_item(item_id, item_name, quantity):
         data = (item_name, quantity, item_id)
         cursor.execute(query, data)
         connection.commit()
-        return {"success": True}
+        return {"success": True, "action": "update", "item": item_name}
     except Exception as e:
         print(f"[update_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -71,7 +71,7 @@ def item_bought(item_id, bought):
         cursor.execute(query, data)
         connection.commit()
         print("Item:", item_id, "Bought:", bought)
-        return {"success": True}
+        return {"success": True, "action": "mark_bought"}
     except Exception as e:
         print(f"[item_bought error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -87,7 +87,7 @@ def low_stock_items(user_id):
         data = (user_id,)
         cursor.execute(query, data)
         items = cursor.fetchall()
-        return {"success": True, "data": items}
+        return {"success": True, "items": items}
     except Exception as e:
         print(f"[low_stock_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}
@@ -101,7 +101,7 @@ def remove_item(item_id):
         cursor = connection.cursor()
         cursor.execute("DELETE FROM shopping_list WHERE id = %s", (item_id,))
         connection.commit()
-        return {"success": True}
+        return {"success": True, "action": "remove", "item_id": item_id}
     except Exception as e:
         print(f"[remove_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}

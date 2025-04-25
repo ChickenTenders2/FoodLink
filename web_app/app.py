@@ -647,9 +647,9 @@ def append_inventory():
 @user_only
 def update_item(): 
     # gets variables needed to update item
-    inventory_id = request.form['inventory_id']
-    quantity = request.form['quantity']
-    expiry_date = request.form['expiry_date']
+    inventory_id = request.form.get('inventory_id')
+    quantity = request.form.get('quantity')
+    expiry_date = request.form.get('expiry_date')
 
     if not inventory_id or not quantity or not expiry_date:
         return jsonify({"success": False, "error": "Form was missing a value"}), 400
@@ -664,7 +664,7 @@ def update_item():
 @app.route('/inventory/remove_item', methods=['POST'])
 @user_only
 def remove_item():
-    inventory_id = request.form['inventory_id']
+    inventory_id = request.form.get('inventory_id')
     if not inventory_id:
         return jsonify({"success": False, "error": "Form was missing inventory ID."}), 400
     
@@ -1135,13 +1135,13 @@ def update_item_admin():
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_handling.sanitise_all(['name', 'brand', 'quantity', 
                                                 'expiry', 'unit'])
-    inventory_id = request.form['inventory_id']
+    inventory_id = request.form.get('inventory_id')
     name = sanitised_fields[0]
     brand = sanitised_fields[1]
     quantity = sanitised_fields[2]
     expiry_date = sanitised_fields[3]
     unit = sanitised_fields[4]
-    barcode = request.form['barcode']
+    barcode = request.form.get('barcode')
     if barcode == "None":
         barcode = None
     # Checks that the format is correct for the expiry date.
@@ -1192,7 +1192,7 @@ def update_recipe_admin():
                                                 'prep', 'cook', 'servings'])
     name = sanitised_fields[0]
     instructions = sanitised_fields[1]
-    recipe_id = request.form['recipe-id']
+    recipe_id = request.form.get('recipe-id')
     prep = sanitised_fields[2]
     cook = sanitised_fields[3]
     servings = sanitised_fields[4]
@@ -1283,68 +1283,70 @@ def add_recipe_tools():
 def get_shoppingList():
     user_id = current_user.id
     if request.method == 'POST':
-        try:
-            if 'clear' in request.form:
-                shopping.clear_items(user_id)
-                return jsonify({"success": True, "action": "clear"})
-            elif 'remove' in request.form:
-                item_id = request.form['remove']
-                shopping.remove_item(item_id)
-                return jsonify({"success": True, "action": "remove", "item_id": item_id})
-            elif 'mark_bought' in request.form:
-                item_id = request.form['mark_bought']
-                bought_str = request.form.get('bought', 0)
-                bought = int(bought_str)
-                shopping.item_bought(item_id, bought)
-                return jsonify({"success": True, "action": "mark_bought"})
-        except Exception as e:
-            return jsonify({"success": False, "error": str(e)})
+        if 'clear' in request.form:
+            result = shopping.clear_items(user_id)
+        elif 'remove' in request.form:
+            item_id = request.form.get('remove')
+            result = shopping.remove_item(item_id)  
+        elif 'mark_bought' in request.form:
+            item_id = request.form.get('mark_bought')
+            bought_str = request.form.get('bought', 0)
+            bought = int(bought_str)
+            result = shopping.item_bought(item_id, bought)
+        
+        if not result.get("success"):
+            return jsonify(result), 500
+        return jsonify(result)
     
-    items = shopping.get_items(user_id)
+    result = shopping.get_items(user_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    items = result.get("items")
     unbought_items = [item for item in items if item[3] == 0]
     bought_items = [item for item in items if item[3] == 1]
 
-    low_stock = shopping.low_stock_items(user_id)
+    result = shopping.low_stock_items(user_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    low_stock = result.get("items")
     return render_template("shoppinglist.html", items=items, unbought_items=unbought_items, bought_items=bought_items, low_stock=low_stock)
 
 @app.route('/shopping_list/add', methods=['POST'])
 @user_only
 def add_shopping_item():
     user_id = current_user.id
-    try:
-        item_name = request.form['item_name']
-        quantity = request.form['quantity']
-        shopping.add_item(user_id, item_name, quantity)
-        return jsonify({"success": True, "action": "add", "item": item_name})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+    item_name = request.form.get('item_name')
+    quantity = request.form.get('quantity')
+    result = shopping.add_item(user_id, item_name, quantity)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 @app.route('/shopping_list/update', methods=['POST'])
 @user_only
 def update_shopping_item():
-    try:
-        item_id = request.form['item_id']
-        item_name = request.form['item_name']
-        quantity = request.form['quantity']
-        shopping.update_item(item_id, item_name, quantity)
-        return jsonify({"success": True, "action": "update", "item": item_name})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+    item_id = request.form.get('item_id')
+    item_name = request.form.get('item_name')
+    quantity = request.form.get('quantity')
+    result = shopping.update_item(item_id, item_name, quantity)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
+    
 
 @app.route("/shopping_list/add_multi", methods=["POST"])
 @user_only
 def add_shopping_items():
     user_id = current_user.id
-    try:
-        items_string = request.form.get("items")
-        items = json.loads(items_string)
-        if not (items):
-            return jsonify({"success": False, "error": "No items selected."})
-        
-        shopping.add_items(user_id, items)
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+    items_string = request.form.get("items")
+    items = json.loads(items_string)
+    if not (items):
+        return jsonify({"success": False, "error": "No items selected."})
+    
+    result = shopping.add_items(user_id, items)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 
 ### UTENSILS AND APPLIANCE SELECTION ROUTES
@@ -1353,28 +1355,40 @@ def add_shopping_items():
 @user_only
 def select_tools():
     user_id = current_user.id
-    utensils = tool.get_tools("utensil")
-    appliances = tool.get_tools("appliance")
-    tool_ids = tool.get_user_tool_ids(user_id)
+    result = tool.get_tools("utensil")
+    if not result.get("success"):
+        return jsonify(result), 500
+    utensils = result.get("tools")
+
+    result = tool.get_tools("appliance")
+    if not result.get("success"):
+        return jsonify(result), 500
+    appliances = result.get("tools")
+
+    result = tool.get_user_tool_ids(user_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    tool_ids = result.get("ids")
+
     return render_template('select_utensils.html', utensils=utensils, appliances=appliances, selected_ids=tool_ids)
 
 @app.route('/tools/save', methods=['POST'])
 @user_only
 def save_tools():
     user_id = current_user.id
-    try:
-        selected_tools = request.form.getlist('tool')
-        tool.save_user_tools(user_id, selected_tools)
-        return jsonify({"success": True, "message": "Tools saved successfully!"})
-    except Exception as e:
-        print(e)
-        return jsonify({"success": False, "message": "Failed to save tools."})
+    selected_tools = request.form.getlist('tool')
+    result = tool.save_user_tools(user_id, selected_tools)
+    if not result.get("success"):
+        return jsonify({"success": False, "message": "Failed to save tools."}), 500
+    return jsonify({"success": True, "message": "Tools saved successfully!"})
 
 @app.route("/tools/get")
 @user_only
 def get_tools():
-    tools = tool.get_tools()
-    print(tools)
+    result = tool.get_tools()
+    if not result.get("success"):
+        return jsonify(result), 500
+    tools = result.get("tools")
     return jsonify({"success": True, "tools": tools})
 
 

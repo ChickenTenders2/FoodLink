@@ -531,11 +531,10 @@ def mark_read_notification():
     notif_id = request.json.get('notif_id')
     if not notif_id:
         return jsonify({'success': False, 'error': 'Notification ID missing'}), 400
-    else:
-        result = notification.mark_read(notif_id)
-        if not result.get("success"):
-            return jsonify(result), 500
-        return jsonify(result)
+    result = notification.mark_read(notif_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 @app.context_processor
 def inject_notifications(): 
@@ -857,13 +856,16 @@ def find_image(item_id):
 @user_only
 def report_item():
     user_id = current_user.id
-    try:
-        new_item_id = request.form.get("new_item_id")
-        item_id = request.form.get("item_id") or None
-        report.add_report(new_item_id, item_id, user_id)
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"success": False, "error":str(e)})
+    new_item_id = request.form.get("new_item_id")
+    item_id = request.form.get("item_id") or None
+
+    if not new_item_id:
+        return jsonify({"success": False, "error": "No item ID provided."}), 400
+    
+    result = report.add_report(new_item_id, item_id, user_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 @app.route("/items/reports")
 @admin_only
@@ -873,7 +875,10 @@ def display_reports():
 @app.route("/items/reports/get")
 @admin_only
 def get_reports():
-    return jsonify({"success": True, "reports": report.get_reports()})
+    result = report.get_reports()
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 @app.route("/items/reports/<new_item_id>/<item_id>")
 @admin_only
@@ -883,95 +888,125 @@ def display_report(new_item_id, item_id):
 @app.route("/items/reports/resolve", methods=["POST"])
 @admin_only
 def resolve_report():
-    try:
-        action = request.form.get("action")
-        barcode = request.form.get("barcode") or None
-        new_item_id = request.form.get("new_item_id")
-        original_item_id = request.form.get("item_id") or None
-        # gets image if uploaded otherwise equals none
-        image = request.form.get("item_image", None)
-        # if the missing item reported isnt elligible for being added 
-        if action == "deny" and original_item_id is None:
-            # gets the reports
-            reports = report.get_reports_by(new_item_id)
-            # report will be singular
-            _, personal_item_name, user_id = reports[0]
-            # removes the report
-            report.remove_report(new_item_id)
-            # notification message
-            message = lambda item_name : f"""Thank you for reporting the missing item, {item_name}. 
-                        Unfortunately, your item is not currently elligible to be added at this time.
-                        However, you can still continue to use your personal item. 
-                        """
+    action = request.form.get("action")
+    barcode = request.form.get("barcode") or None
+    new_item_id = request.form.get("new_item_id")
+    original_item_id = request.form.get("item_id") or None
+    # gets image if uploaded otherwise equals none
+    image = request.form.get("item_image", None)
+    # if the missing item reported isnt elligible for being added 
+    if action == "deny" and original_item_id is None:
+        # gets the reports
+        result = report.get_reports_by(new_item_id)
+        if not result.get("success"):
+            return jsonify(result), 500
+        reports = result.get("reports")
+        # report will be singular
+        _, personal_item_name, user_id = reports[0]
+        # removes the report
+        result = report.remove_report(new_item_id)
+        if not result.get("success"):
+            return jsonify(result), 500
+        # notification message
+        message = lambda item_name : f"""Thank you for reporting the missing item, {item_name}. 
+                    Unfortunately, your item is not currently elligible to be added at this time.
+                    However, you can still continue to use your personal item. 
+                    """
 
-            # notify user of the change
-            notification.support_notification(user_id, message(personal_item_name))
-
-            return jsonify({"success": True})
-        # if the proposed error was with an item having incorrect information (misinformation)
-        if original_item_id:
-            # if the original item had an error
-            if action == "approve":
-                # updates original item with correct information if approved
-                # sets the user_id = null for the item so it appears for all users
-                item.process_update_form(original_item_id, request.form)
-                # updates image if uploaded
-                item.add_item_image(image, original_item_id)
-                # notification message
-                message = lambda item_name : f"""Thank you for reporting an error with item, {item_name}. 
-                            Your personal item has been successfully replaced."""
-            # if original item was already correct
-            else:
-                # notification message
-                message = lambda item_name : f"""Thank you for reporting an error with item, {item_name}. 
-                        However the original item was already correct! 
-                        Please be careful to double check before reporting an item.
-                        Your personal item has been successfully replaced."""
-
-            # id of item to replace personal items with
-            replace_id = original_item_id
-
-            # finds reports that report the original item
-            duplicate_reports = report.get_reports_by(new_item_id, original_item_id, "id")
-
-        # if the error was a missing item and it got approved
-        else:
-            # adds the missing item to the table
+        # notify user of the change
+        result = notification.support_notification(user_id, message(personal_item_name))
+        if not result.get("success"):
+            return jsonify(result), 500
+        return jsonify(result)
+        
+    # if the proposed error was with an item having incorrect information (misinformation)
+    if original_item_id:
+        # if the original item had an error
+        if action == "approve":
+            # updates original item with correct information if approved
             # sets the user_id = null for the item so it appears for all users
-            response = item.process_add_form(request.form)
-            # gets the id to replace the personal items with
-            replace_id = response["item_id"]
-
-            # adds image if uploaded or uses users personal item image if possible
-            item.add_item_image(image, replace_id, new_item_id)
-    
+            result = item.process_update_form(original_item_id, request.form)
+            if not result.get("success"):
+                return jsonify({"success": False, "error": "Error updating item information."}), 500
+            # updates image if uploaded
+            item.add_item_image(image, original_item_id)
             # notification message
-            message = lambda item_name : f"""Thank you for reporting the missing item, {item_name}.
-                        Your request has been approved!
+            message = lambda item_name : f"""Thank you for reporting an error with item, {item_name}. 
                         Your personal item has been successfully replaced."""
+        # if original item was already correct
+        else:
+            # notification message
+            message = lambda item_name : f"""Thank you for reporting an error with item, {item_name}. 
+                    However the original item was already correct! 
+                    Please be careful to double check before reporting an item.
+                    Your personal item has been successfully replaced."""
 
-            # find other reports that reported the missing item
-            # finds by same barcode as their is no original item for missing items
-            # also searches using the new_item_id incase the item has no barcode
-            duplicate_reports = report.get_reports_by(new_item_id, barcode, "barcode")
+        # id of item to replace personal items with
+        replace_id = original_item_id
 
-        # gets the limit that a users item can have for quantity
-        default_quantity = item.get_default_quantity(replace_id)
-        # for each report of an item
-        for personal_item_id, personal_item_name, user_id in duplicate_reports:
-            # replace the personal item the user made with the now corrected / new item
-            inventory.correct_personal_item(personal_item_id, replace_id, default_quantity)
-            # removes the users personal item as it is no longer needed
-            item.remove_item(personal_item_id)
-            # removes the report
-            report.remove_report(personal_item_id)
-            # notify user of the change
-            notification.support_notification(user_id, message(personal_item_name))
+        # finds reports that report the original item
+        result = report.get_reports_by(new_item_id, original_item_id, "id")
+        if not result.get("success"):
+            return jsonify(result), 500
+        duplicate_reports = result.get("reports")
 
-        return jsonify({"success": True})
-    
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+    # if the error was a missing item and it got approved
+    else:
+        # adds the missing item to the table
+        # sets the user_id = null for the item so it appears for all users
+        result = item.process_add_form(request.form)
+        if not result.get("success"):
+                return jsonify({"success": False, "error": "Error adding new item."}), 500
+        # gets the id to replace the personal items with
+        replace_id = result.get("item_id")
+
+        # adds image if uploaded or uses users personal item image if possible
+        item.add_item_image(image, replace_id, new_item_id)
+
+        # notification message
+        message = lambda item_name : f"""Thank you for reporting the missing item, {item_name}.
+                    Your request has been approved!
+                    Your personal item has been successfully replaced."""
+
+        # find other reports that reported the missing item
+        # finds by same barcode as their is no original item for missing items
+        # also searches using the new_item_id incase the item has no barcode
+        result = report.get_reports_by(new_item_id, barcode, "barcode")
+        if not result.get("success"):
+            return jsonify(result), 500
+        duplicate_reports = result.get("reports")
+
+    # gets the limit that a users item can have for quantity
+    result = item.get_default_quantity(replace_id)
+    if not result.get("success"):
+            return jsonify(result), 500
+    default_quantity = result.get("quantity")
+
+    # for each report of an item
+    for personal_item_id, personal_item_name, user_id in duplicate_reports:
+        # replace the personal item the user made with the now corrected / new item
+        result = inventory.correct_personal_item(personal_item_id, replace_id, default_quantity)
+        if not result.get("success"):
+            return jsonify(result), 500
+        # removes the users personal item as it is no longer needed
+        result = item.remove_item(personal_item_id)
+        if not result.get("success"):
+            # detailed report of error for admins
+            return jsonify({"success": False, 
+                            "error": f"""[remove_item_sql error]:
+                            Occured for user id: {user_id}.
+                            Inputs: personal_item_id: {personal_item_id}."""
+                            }), 500
+        # removes the report
+        result = report.remove_report(personal_item_id)
+        if not result.get("success"):
+            return jsonify(result), 500
+        # notify user of the change
+        result = notification.support_notification(user_id, message(personal_item_name))
+        if not result.get("success"):
+            return jsonify(result), 500
+
+    return jsonify({"success": True})
     
 
 #### ADMIN VIEW ITEMS AND RECIPES ROUTES

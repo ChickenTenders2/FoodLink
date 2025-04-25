@@ -3,6 +3,9 @@ from os.path import isfile as file_exists
 from os import remove as remove_file
 from shutil import copyfile as copy_file
 
+
+##### ADMIN ONLY FUNCTIONS
+
 def get_all():
     cursor = None
     try:
@@ -12,11 +15,65 @@ def get_all():
         items = cursor.fetchall()
         return {"success": True, "items": items}
     except Exception as e:
-        print(f"[get_all error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+        print(f"[item.get_all error] {e}")
+        # detailed error report for admins
+        return {"success": False, "error": f"[item.get_all error] {e}"}
     finally:
         if cursor:
             cursor.close()
+
+
+def get_item(item_id):
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE id = %s;"
+        cursor.execute(query, (item_id,))
+        item = cursor.fetchone()
+        return {"success": True, "item": item}
+    except Exception as e:
+        print(f"[item.get_item error] {e}")
+        #detailed for admin
+        return {"success": False, "error": f"[item.get_item error] {e}"}
+    finally:
+        if cursor:
+            cursor.close()
+
+def get_item_from_name(name):
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE name LIKE UPPER(%s);"
+        cursor.execute(query, (name,))
+        items = cursor.fetchall()
+        return {"success": True, "items": items}
+    except Exception as e:
+        print(f"[item.get_item_from_name error] {e}")
+        # deailed error report for admins
+        return {"success": False, "error": f"[item.get_item_from_name error] {e}"}
+    finally:
+        if cursor:
+            cursor.close()
+
+def get_default_quantity(item_id):
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        cursor.execute("SELECT default_quantity FROM FoodLink.item WHERE id = %s;", (item_id,))
+        quantity_tuple = cursor.fetchone()
+        # unpack tuple
+        quantity = quantity_tuple[0]
+        return {"success": True, "quantity": quantity}
+    except Exception as e:
+        print(f"[get_default_quantity error] {e}")
+        # more detailed report for admin only function
+        return {"success": False, "error": f"[get_default_quantity error] {e}"}
+    finally:
+        if cursor:
+            cursor.close()
+
+
+##### USER + ADMIN FUNCTIONS
 
 def barcode_search(user_id, barcode_number):
     cursor = None
@@ -29,7 +86,7 @@ def barcode_search(user_id, barcode_number):
         item = cursor.fetchone()
         return {"success": True, "item": item}
     except Exception as e:
-        print(f"[barcode_search error] {e}")
+        print(f"[item.barcode_search error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -46,7 +103,7 @@ def text_search(user_id, search_term):
         items = cursor.fetchall()
         return {"success": True, "items": items}
     except Exception as e:
-        print(f"[text_search error] {e}")
+        print(f"[item.text_search error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -63,53 +120,7 @@ def text_single_search(user_id, search_term):
         item = cursor.fetchone()
         return {"success": True, "item": item}
     except Exception as e:
-        print(f"[text_search error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
-    finally:
-        if cursor:
-            cursor.close()
-
-def get_item(item_id):
-    cursor = None
-    try:
-        cursor = connection.cursor()
-        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE id = %s;"
-        cursor.execute(query, (item_id,))
-        item = cursor.fetchone()
-        return {"success": True, "item": item}
-    except Exception as e:
-        print(f"[get_item error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
-    finally:
-        if cursor:
-            cursor.close()
-
-def get_item_from_name(name):
-    cursor = None
-    try:
-        cursor = connection.cursor()
-        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE name LIKE UPPER(%s);"
-        cursor.execute(query, (name,))
-        items = cursor.fetchall()
-        return {"success": True, "items": items}
-    except Exception as e:
-        print(f"[get_item_from_name error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
-    finally:
-        if cursor:
-            cursor.close()
-
-def get_default_quantity(item_id):
-    cursor = None
-    try:
-        cursor = connection.cursor()
-        cursor.execute("SELECT default_quantity FROM FoodLink.item WHERE id = %s;", (item_id,))
-        quantity_tuple = cursor.fetchone()
-        # unpack tuple
-        quantity = quantity_tuple[0]
-        return {"success": True, "quantity": quantity}
-    except Exception as e:
-        print(f"[get_default_quantity error] {e}")
+        print(f"[item.text_single_search error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -242,13 +253,9 @@ def process_update_form(id, form, user_id=None):
     return update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, user_id)
 
 def remove_item(id):
-    try:
-        remove_item_image(id)
-        remove_item_sql(id)
-        return {"success": True}
-    except Exception as e:
-        print(f"[remove_item error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+    # error removing item image is minor so doesnt effect result
+    remove_item_image(id)
+    return remove_item_sql(id)
 
 def remove_item_sql(id):
     cursor = None
@@ -269,7 +276,6 @@ def remove_item_image(id):
         path = f"static/images/{id}.jpg"
         if file_exists(path):
             remove_file(path)
-        return {"success": True}
     except Exception as e:
         print(f"[remove_item_image error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+

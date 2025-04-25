@@ -70,7 +70,16 @@ def insert_notification(user_id, notif_type, message, severity):
         return {"success": True}
     except Exception as e:
         print(f"[insert_notification error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+        # deatiled report of error for admins
+        return {"success": False, 
+                "error": f"""[insert_notification error]:
+                Inputs: 
+                user_id: {user_id},
+                notif_type: {notif_type},
+                message: {message},
+                severity: {severity},
+                Error: {e}"""
+            }
     finally:
         if cursor:
             cursor.close()

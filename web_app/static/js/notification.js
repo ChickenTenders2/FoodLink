@@ -128,6 +128,8 @@ function markRead(elem) {
                     badge.style.display = 'none';
                 }
             }
+        } else {
+            alert(data.error);
         }
     });
 }

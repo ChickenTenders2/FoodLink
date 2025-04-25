@@ -151,7 +151,15 @@ def correct_personal_item(personal_item_id, item_id, default_quantity):
         return {"success": True}
     except Exception as e:
         print(f"[correct_personal_item error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+        # detailed error report for admins
+        return {"success": False, 
+                "error": f"""[correct_personal_item error]:
+                Inputs: 
+                personal_item_id: {personal_item_id},
+                item_id: {item_id},
+                default_quantity: {default_quantity},
+                Error: {e}"""
+            }
     finally:
         if cursor:
             cursor.close()

@@ -1,5 +1,6 @@
 from database import connection
 
+# user function
 def add_report(new_item_id, item_id, user_id):
     cursor = None
     try:
@@ -19,7 +20,7 @@ def add_report(new_item_id, item_id, user_id):
         if cursor:
             cursor.close()
 
-# removes an error and any duplicate reports once it has been solved
+# removes an error report once its been resolved
 def remove_report(new_item_id):
     cursor = None
     try:
@@ -31,7 +32,8 @@ def remove_report(new_item_id):
         return {"success": True}
     except Exception as e:
         print(f"[remove_report error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+        # more detailed report for admin only function
+        return {"success": False, "error": f"[remove_report error] {e}"}
     finally:
         if cursor:
             cursor.close()
@@ -55,10 +57,11 @@ def get_reports_by(new_item_id, identifier=None, type=None):
             data = (new_item_id,)
         cursor.execute(query, data)
         reports = cursor.fetchall()
-        return {"success": True, "data": reports}
+        return {"success": True, "reports": reports}
     except Exception as e:
         print(f"[get_reports_by error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+        # more detailed report for admin only function
+        return {"success": False, "error": f"[get_reports_by error] {e}"}
     finally:
         if cursor:
             cursor.close()
@@ -74,10 +77,11 @@ def get_reports():
                     JOIN item i ON (error.new_item_id = i.id);""" 
         cursor.execute(query)
         reports = cursor.fetchall()
-        return {"success": True, "data": reports}
+        return {"success": True, "reports": reports}
     except Exception as e:
         print(f"[get_reports error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
+        # more detailed report for admin only function
+        return {"success": False, "error": f"[get_reports error] {e}"}
     finally:
         if cursor:
             cursor.close()

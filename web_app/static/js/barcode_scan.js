@@ -31,14 +31,10 @@ function toggle_scan_mode() {
 
 // Checks if an object (barcode or AI identified item name) has been found
 async function get_object() {
-    try {
-        let response = await fetch("/scanner/get_object");
-        let data = await response.json();
-        if (data.success) {
-            // Redirects to correct function for each page
-            process_barcode(data.object);
-        }
-    } catch (e) {
-        alert(e);
+    let response = await fetch("/scanner/get_object");
+    let data = await response.json();
+    if (data.success) {
+        // Redirects to correct function for each page
+        process_barcode(data.object);
     }
 }

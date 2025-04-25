@@ -5,7 +5,7 @@ async function open_item_popup(item, estimated_expiry, from_scanner) {
         stop_check();
     }
     // gets variables from item
-    const [id, barcode, name, brand, expiry_time, default_quantity, unit] = item;
+    const [id, barcode, name, brand, expiry_time, default_quantity, unit, is_personal] = item;
 
     document.getElementById("item_id").value = id;
     document.getElementById("expiry_time").value = expiry_time;
@@ -22,6 +22,13 @@ async function open_item_popup(item, estimated_expiry, from_scanner) {
     }
     document.getElementById("unit").value = unit;
     document.getElementById('popup').style.display = 'block';
+
+    if (is_personal) {
+        const modify_action_button = document.getElementById("modify_action_button");
+        modify_action_button.innerHTML = "Edit Item";
+        modify_action_button.onclick = () => open_add_popup("edit");
+
+    }
 }
 
 function close_item_popup(to_scanner) {
@@ -30,6 +37,9 @@ function close_item_popup(to_scanner) {
         document.getElementById("close-popup").onclick = () => close_item_popup(false);
         start_check();
     }
+    const modify_action_button = document.getElementById("modify_action_button");
+    modify_action_button.innerHTML = "Clone Item";
+    modify_action_button.onclick = () => open_add_popup("clone");
     document.getElementById('popup').style.display = 'none';
 }
 
@@ -277,39 +287,36 @@ function process_barcode(object) {
 }
 
 async function single_search_item(item_name) {
-    try {
+    // Searches for an item by name and awaits result
+    const response = await fetch('/items/single_text_search/'+item_name)               
+    let result = await response.json();
 
-        // Searches for an item by name and awaits result
-        const response = await fetch('/items/single_text_search/'+item_name)               
-        let result = await response.json();
-
-        // If an item is found
-        if (result.success) {
+    if (result.success) {
+        if (result.item) {
             select_item(result.item, true);
         } else {
             open_not_found_popup(true, item_name);
         }
-    } catch (e) {
-        alert(e);
+    } else {
+        alert(result.error);
     }
 }
 
 // Checks if barcode is in item table
 async function barcode_search_item(barcode_number) {
-    try {
+    // Searches for item by barcode and awaits result
+    const result = await fetch('/items/barcode_search/'+barcode_number)               
+    let response = await result.json();
 
-        // Searches for item by barcode and awaits result
-        const result = await fetch('/items/barcode_search/'+barcode_number)               
-        let response = await result.json();
-
-        // If an item is found
-        if (response.success) {
+    // If an item is found
+    if (response.success) {
+        if (response.item) {
             select_item(response.item, true);
         } else {
             open_not_found_popup(false, barcode_number);
         }
-    } catch (e) {
-        alert(e);
+    } else {
+        alert(response.error);
     }
 }
 

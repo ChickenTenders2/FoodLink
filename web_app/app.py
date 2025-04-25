@@ -1,40 +1,40 @@
-## general imports for flask setup
+### general imports for flask setup
 from flask import Flask, jsonify, render_template, request, url_for, Response, redirect, session, flash
 from flask_bootstrap import Bootstrap
 import os
 
-## shared operations for user and admin:
+### shared operations for user and admin:
 # for scanning items (barcode or ai object recogniser)
 from scanner import Scanner
 # for checking item image exists
 from os.path import isfile as file_exists
 
-from tool import Tool
-from item import Item
+import tool
+import item
 
-## user operations
-from inventory import Inventory
-from notification import notification
+### user operations
+import inventory
+import notification
 # for getting temperature and humidity of fridge
-from thingsboard import thingsboard
+import thingsboard
 #from success import Success
-from shoppingList import shoppingList
+import shopping
 # for recipe handling
-from recipe import Recipe
+import recipe as recipe_sql
 from recipe_object import recipe_object
 # for parsing ingredients and tools list of lists as string
 import json
 
-## admin operations
+### admin operations
 # for admin, item and recipe view
-from admin_recipe import admin_recipe
-from input_handling import InputHandling
+import admin_recipe
+import input_handling
 
-from report import Report
+import report
 
 ### for login systems
 # general flask login functions
-from flask_login import login_required, current_user, login_user, logout_user
+from flask_login import login_required, current_user, login_user, logout_user, LoginManager
 # for email verification
 from flask_mail import Mail
 from email_verification import send_verification_code
@@ -49,7 +49,7 @@ from flask_session import Session
 from models import User, Admin
 # login forms
 from applogin import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
-from extensions import db, login_manager
+from extensions import db
 
 # Import database and user model
 app = Flask(__name__, template_folder = "templates")
@@ -79,6 +79,8 @@ app.register_blueprint(settings_bp)
 
 # Initialize extensions
 bootstrap = Bootstrap(app)
+# Flask-Login for managing user sessions
+login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'  # This ensures users are redirected to login when needed
 db.init_app(app)
@@ -526,29 +528,27 @@ def dashboard():
 @app.route('/notification/mark_read', methods=['POST'])
 @user_only
 def mark_read_notification():
-    try:
-        notif_id = request.json.get('notif_id')
-        if not notif_id:
-            return jsonify({'success': False, 'error': 'Notification ID missing'}), 400
-        else:
-            notif.mark_read(notif_id)
-            return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+    notif_id = request.json.get('notif_id')
+    if not notif_id:
+        return jsonify({'success': False, 'error': 'Notification ID missing'}), 400
+    else:
+        result = notification.mark_read(notif_id)
+        if not result.get("success"):
+            return jsonify(result), 500
+        return jsonify(result)
 
 @app.context_processor
 def inject_notifications(): 
-    if current_user.is_authenticated: 
-        try: 
-            user_id = current_user.id
-            notif.temperature_humidity_notification(user_id, None, None) 
-            notif.expiry_notification(user_id) 
-            notifications = notif.get_notifications(user_id) 
-            unread_count = sum(1 for n in notifications if n[4] == 0) 
-            return dict(notifications=notifications, unread_count=unread_count) 
-        except Exception as e: 
-            print("[Context Processor Error]", e) 
+    if current_user.is_authenticated and isinstance(current_user._get_current_object(), User): 
+        user_id = current_user.id
+        notification.temperature_humidity_notification(user_id, None, None) 
+        notification.expiry_notification(user_id) 
+        result = notification.get_notifications(user_id) 
+        if not result.get("success"):
             return dict(notifications=[], unread_count=0)
+        notifications = result.get("data")
+        unread_count = sum(1 for n in notifications if n[4] == 0) 
+        return dict(notifications=notifications, unread_count=unread_count)  
     else:
         return dict(notifications=[], unread_count=0)
 
@@ -556,44 +556,43 @@ def inject_notifications():
 @app.route('/get_notifications', methods=['GET', 'POST']) 
 @user_only
 def get_notifications():
+    device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
+    user_id = current_user.id
+    # wrapped thingsboards functionality in try except 
+    # so i dont have to use the vpn the whole time
     try:
-        device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
-        user_id = current_user.id
-        # wrapped thingsboards functionality in try except 
-        # so i dont have to use the vpn the whole time
-        try:
-            token = tb.get_jwt_token()
-            data = tb.get_telemetry(token, device_id)
+        token = thingsboard.get_jwt_token()
+        data = thingsboard.get_telemetry(token, device_id)
 
-            temperature = humidity = None
-            if data:
-                temperature = float(data['temperature'][0]['value'])
-                humidity = float(data['humidity'][0]['value'])
+        temperature = humidity = None
+        if data:
+            temperature = float(data['temperature'][0]['value'])
+            humidity = float(data['humidity'][0]['value'])
 
-            notif.temperature_humidity_notification(user_id, temperature, humidity)
-            notif.expiry_notification(user_id)
-        except Exception as e:
-            print("Not connected to school wifi, " + str(e))
-
-        notifications = notif.get_notifications(user_id)
-        unread_count = sum(1 for n in notifications if n[4] == 0)
-
-        return jsonify({
-            'notifications': [
-                {
-                    'id': n[0],
-                    'message': n[2],
-                    'timestamp': n[3].strftime('%Y-%m-%d %H:%M'),
-                    'severity': n[5],
-                    'read': n[4] == 1
-                }
-                for n in notifications
-            ],
-            'unread_count': unread_count
-        })
+        notification.temperature_humidity_notification(user_id, temperature, humidity)
+        notification.expiry_notification(user_id)
     except Exception as e:
-        print('[DEBUG]' , e)
-        return jsonify({'success': False, 'error': str(e)})
+        print("Not connected to school wifi, " + str(e))
+
+    result = notification.get_notifications(user_id) 
+    if not result.get("success"):
+        return jsonify(result), 500
+    notifications = result.get("data")
+    
+    unread_count = sum(1 for n in notifications if n[4] == 0)
+    return jsonify({
+        'notifications': [
+            {
+                'id': n[0],
+                'message': n[2],
+                'timestamp': n[3].strftime('%Y-%m-%d %H:%M'),
+                'severity': n[5],
+                'read': n[4] == 1
+            }
+            for n in notifications
+        ],
+        'unread_count': unread_count
+    })
   
 ### INVENTORY ROUTES ###
 
@@ -610,19 +609,19 @@ def get_inventory():
 @user_only
 def api_inventory(search_query = None):
     user_id = current_user.id
-    try:
+    if search_query:
         # searches for an item if query is provided otherwise gets all items
-        if search_query:
-            items = inventory.search_items(user_id, search_query)
-        else:
-            items = inventory.get_items(user_id)
+        result = inventory.search_items(user_id, search_query)
+    else:
+        result = inventory.get_items(user_id)
 
-        return jsonify({"success": True, 'items': items})
-    except Exception as e:
-        return jsonify({"success": False, "error":str(e)})
+    if not result.get("success"):
+        return jsonify(result), 500
+
+    return jsonify({"success": True, "items": result.get("data")})
 
 # Add item to inventory interface
-@app.route("/inventory/add_item/")
+@app.route("/inventory/add_item")
 @user_only
 def add_to_inventory():
     return render_template("inventory_add.html")
@@ -633,27 +632,37 @@ def add_to_inventory():
 def append_inventory():
     user_id = current_user.id
     item_id = request.form.get("item_id")
-    response = inventory.process_add_form(user_id, item_id, request.form)    
-    return jsonify(response)
+    if not item_id:
+        return jsonify({"success": False, "error": "Item ID is required."}), 400
+    
+    result = inventory.process_add_form(user_id, item_id, request.form)
+    if not result.get("success"):
+        if result.get("error") == "An internal error occurred.":
+            return jsonify(result), 500
+        else:
+            return jsonify(result), 400
+    return jsonify(result)
 
 # Update quantity and expiry of item in inventory
 @app.route('/inventory/update_item', methods = ['POST'])
 @user_only
 def update_item(): 
-    try:
-        # gets variables needed to update item
-        inventory_id = request.form['inventory_id']
-        quantity = request.form['quantity']
-        expiry_date = request.form['expiry_date']
-        
-        # Update the database with new quantity and expiry date
-        inventory.update_item(inventory_id, quantity, expiry_date)
-        # returns response to js code
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)})
+    # gets variables needed to update item
+    inventory_id = request.form['inventory_id']
+    quantity = request.form['quantity']
+    expiry_date = request.form['expiry_date']
 
-@app.route('/remove_item', methods=['POST'])
+    if not inventory_id or not quantity or not expiry_date:
+        return jsonify({"success": False, "error": "Form was missing a value"}), 400
+    
+    # Update the database with new quantity and expiry date
+    result = inventory.update_item(inventory_id, quantity, expiry_date)
+    # returns response to js code
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
+
+@app.route('/inventory/remove_item', methods=['POST'])
 @user_only
 def remove_item():
     try:
@@ -893,7 +902,7 @@ def resolve_report():
                         """
 
             # notify user of the change
-            notif.support_notification(user_id, message(personal_item_name))
+            notification.support_notification(user_id, message(personal_item_name))
 
             return jsonify({"success": True})
         # if the proposed error was with an item having incorrect information (misinformation)
@@ -954,7 +963,7 @@ def resolve_report():
             # removes the report
             report.remove_report(personal_item_id)
             # notify user of the change
-            notif.support_notification(user_id, message(personal_item_name))
+            notification.support_notification(user_id, message(personal_item_name))
 
         return jsonify({"success": True})
     
@@ -1009,14 +1018,13 @@ def search_items(search_query = None):
             if result != [None]:
                 return render_template("item_view_search.html", items = result)
             else:
-                result = item.get_all()
                 return render_template("item_view_search.html", items = [])
         
-# Recipe table interface.
+# Recipe table interface
 @app.route('/admin/recipe_view')
 @admin_only
 def admin_get_recipes():
-    recipes = admin_recipe_sql.get_all()
+    recipes = admin_recipe.get_all()
     return render_template("recipe_view.html", recipes = recipes)
 
 @app.route('/admin/recipe_view/add_item/<int:recipe_id>', methods=['GET'])
@@ -1057,7 +1065,7 @@ def delete_recipe():
     try:
         # Form data is formatted in utf-8 so it needs to be decoded since id was not submitted in a form.
         id = request.data.decode('utf-8')
-        admin_recipe_sql.remove_recipe(id)
+        admin_recipe.remove_recipe(id)
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
@@ -1067,7 +1075,7 @@ def delete_recipe():
 @admin_only
 def update_item_admin(): 
     # Sanitise the input to prevent sql injection.
-    sanitised_fields = input_check.sanitise_all(['name', 'brand', 'quantity', 
+    sanitised_fields = input_handling.sanitise_all(['name', 'brand', 'quantity', 
                                                 'expiry', 'unit'])
     inventory_id = request.form['inventory_id']
     name = sanitised_fields[0]
@@ -1079,7 +1087,7 @@ def update_item_admin():
     if barcode == "None":
         barcode = None
     # Checks that the format is correct for the expiry date.
-    valid = input_check.validate_expiry(expiry_date)
+    valid = input_handling.validate_expiry(expiry_date)
     if valid:
         try:
             item.update_item(inventory_id, barcode, name, brand, expiry_date, quantity, unit)
@@ -1094,7 +1102,7 @@ def update_item_admin():
 @admin_only
 def add_item_admin(): 
     # Sanitise the input to prevent sql injection.
-    sanitised_fields = input_check.sanitise_all(['barcode', 'name', 'brand', 'quantity', 
+    sanitised_fields = input_handling.sanitise_all(['barcode', 'name', 'brand', 'quantity', 
                                                 'expiry', 'unit'])
     barcode = sanitised_fields[0]
     name = sanitised_fields[1]
@@ -1105,7 +1113,7 @@ def add_item_admin():
     if barcode == "":
         barcode = None
     # Checks that the format is correct for the expiry date.
-    valid = input_check.validate_expiry(expiry_date)
+    valid = input_handling.validate_expiry(expiry_date)
     if valid:
         try:
             item.add_item(barcode, name, brand, expiry_date, quantity, unit)
@@ -1121,7 +1129,7 @@ def add_item_admin():
 @admin_only
 def update_recipe_admin():
     # Sanitise the input to prevent sql injection.
-    sanitised_fields = input_check.sanitise_all(['name', 'instructions', 
+    sanitised_fields = input_handling.sanitise_all(['name', 'instructions', 
                                                 'prep', 'cook', 'servings'])
     name = sanitised_fields[0]
     instructions = sanitised_fields[1]
@@ -1130,7 +1138,7 @@ def update_recipe_admin():
     cook = sanitised_fields[3]
     servings = sanitised_fields[4]
     try:
-        admin_recipe_sql.update_recipe(recipe_id, name, servings, prep, cook, instructions)
+        admin_recipe.update_recipe(recipe_id, name, servings, prep, cook, instructions)
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
@@ -1140,7 +1148,7 @@ def update_recipe_admin():
 @admin_only
 def add_recipe_admin():
     # Sanitise the input to prevent sql injection.
-    sanitised_fields = input_check.sanitise_all(['name', 'instructions', 
+    sanitised_fields = input_handling.sanitise_all(['name', 'instructions', 
                                                 'prep', 'cook', 'servings'])
     name = sanitised_fields[0]
     instructions = sanitised_fields[1]
@@ -1148,7 +1156,7 @@ def add_recipe_admin():
     cook = sanitised_fields[3]
     servings = sanitised_fields[4]
     try:
-        admin_recipe_sql.add_recipe(name, servings, prep, cook, instructions)
+        admin_recipe.add_recipe(name, servings, prep, cook, instructions)
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
@@ -1163,7 +1171,7 @@ def update_recipe_ingredients():
         quantities = request.form.getlist('quantity[]')
         recipe_id = request.form['recipe-id']  
 
-        admin_recipe_sql.update_recipe_ingredients(recipe_id, names, units, quantities)
+        admin_recipe.update_recipe_ingredients(recipe_id, names, units, quantities)
 
         return jsonify({'success': True})
     except Exception as e:
@@ -1179,7 +1187,7 @@ def add_recipe_ingredients():
         quantities = request.form.getlist('quantity[]')
         recipe_id = request.form['recipe-id']  
 
-        admin_recipe_sql.add_recipe_ingredients(recipe_id, names, units, quantities)
+        admin_recipe.add_recipe_ingredients(recipe_id, names, units, quantities)
 
         return jsonify({'success': True})
     except Exception as e:
@@ -1189,7 +1197,7 @@ def add_recipe_ingredients():
 @admin_only
 def get_recipe_id():
     try:
-        id = admin_recipe_sql.get_id()
+        id = admin_recipe.get_id()
         return jsonify(id)
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
@@ -1200,7 +1208,7 @@ def update_recipe_tools():
     try:
         tool_ids = request.form.getlist('tools[]')
         recipe_id = request.form['recipe-id']  
-        admin_recipe_sql.update_recipe_tools(recipe_id, tool_ids)
+        admin_recipe.update_recipe_tools(recipe_id, tool_ids)
 
         return jsonify({'success': True})
     except Exception as e:
@@ -1212,7 +1220,7 @@ def add_recipe_tools():
     try:
         tool_ids = request.form.getlist('tools[]')
         recipe_id = request.form['recipe-id']  
-        admin_recipe_sql.add_recipe_tools(recipe_id, tool_ids)
+        admin_recipe.add_recipe_tools(recipe_id, tool_ids)
 
         return jsonify({'success': True})
     except Exception as e:
@@ -1229,26 +1237,26 @@ def get_shoppingList():
     if request.method == 'POST':
         try:
             if 'clear' in request.form:
-                shop.clear_items(user_id)
+                shopping.clear_items(user_id)
                 return jsonify({"success": True, "action": "clear"})
             elif 'remove' in request.form:
                 item_id = request.form['remove']
-                shop.remove_item(item_id)
+                shopping.remove_item(item_id)
                 return jsonify({"success": True, "action": "remove", "item_id": item_id})
             elif 'mark_bought' in request.form:
                 item_id = request.form['mark_bought']
                 bought_str = request.form.get('bought', 0)
                 bought = int(bought_str)
-                shop.item_bought(item_id, bought)
+                shopping.item_bought(item_id, bought)
                 return jsonify({"success": True, "action": "mark_bought"})
         except Exception as e:
             return jsonify({"success": False, "error": str(e)})
     
-    items = shop.get_items(user_id)
+    items = shopping.get_items(user_id)
     unbought_items = [item for item in items if item[3] == 0]
     bought_items = [item for item in items if item[3] == 1]
 
-    low_stock = shop.low_stock_items(user_id)
+    low_stock = shopping.low_stock_items(user_id)
     return render_template("shoppinglist.html", items=items, unbought_items=unbought_items, bought_items=bought_items, low_stock=low_stock)
 
 @app.route('/shopping_list/add', methods=['POST'])
@@ -1258,7 +1266,7 @@ def add_shopping_item():
     try:
         item_name = request.form['item_name']
         quantity = request.form['quantity']
-        shop.add_item(user_id, item_name, quantity)
+        shopping.add_item(user_id, item_name, quantity)
         return jsonify({"success": True, "action": "add", "item": item_name})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
@@ -1270,7 +1278,7 @@ def update_shopping_item():
         item_id = request.form['item_id']
         item_name = request.form['item_name']
         quantity = request.form['quantity']
-        shop.update_item(item_id, item_name, quantity)
+        shopping.update_item(item_id, item_name, quantity)
         return jsonify({"success": True, "action": "update", "item": item_name})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
@@ -1285,7 +1293,7 @@ def add_shopping_items():
         if not (items):
             return jsonify({"success": False, "error": "No items selected."})
         
-        shop.add_items(user_id, items)
+        shopping.add_items(user_id, items)
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
@@ -1476,31 +1484,7 @@ def remove_recipe(recipe_id):
         return jsonify({"success": False, "error": str(e)})
 
 if __name__ == '__main__':
-    # Classes for handling sql expressions
-    inventory = Inventory()
-    item = Item()
-    report = Report()
-    # Class for handling barcode scanning
     scanner = Scanner()
-
-    shop = shoppingList()
-
-    #success = Success()
-
-    # notification class instance
-    notif = notification() 
-
-    # thingsboard class instance
-    tb = thingsboard()
-
-    tool = Tool()
-
-    recipe_sql = Recipe()
-
-    input_check = InputHandling()
-
-    admin_recipe_sql = admin_recipe()
-
     # Runs the app
     app.run(debug=True)
 

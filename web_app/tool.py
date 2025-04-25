@@ -1,19 +1,25 @@
-from database import database
+from database import connection
 
-class Tool(database):
-    def __init__(self):
-        super().__init__()
-    
-    def add_tool(self, name, tool_type):
-        cursor = self.connection.cursor()
+def add_tool(name, tool_type):
+    cursor = None
+    try:
+        cursor = connection.cursor()
         query = "INSERT INTO tool (name, type) VALUES (%s, %s);"
         data = (name, tool_type)
         cursor.execute(query, data)
-        self.connection.commit()
-        cursor.close()
+        connection.commit()
+        return {"success": True}
+    except Exception as e:
+        print(f"[add_tool error] {e}")
+        return {"success": False, "error": "An internal error occurred."}
+    finally:
+        if cursor:
+            cursor.close()
 
-    def get_tools(self, type = None):
-        cursor = self.connection.cursor()
+def get_tools(type=None):
+    cursor = None
+    try:
+        cursor = connection.cursor()
         if type:
             query = "SELECT id, name FROM tool WHERE type = %s ORDER BY name;"
             data = (type,)
@@ -22,46 +28,73 @@ class Tool(database):
             query = "SELECT id, name FROM tool ORDER BY type, name;"
             cursor.execute(query)
         appliances = cursor.fetchall()
-        cursor.close()
-        return appliances
+        return {"success": True, "data": appliances}
+    except Exception as e:
+        print(f"[get_tools error] {e}")
+        return {"success": False, "error": "An internal error occurred."}
+    finally:
+        if cursor:
+            cursor.close()
 
-    def get_user_tool_ids(self, user_id):
-        cursor = self.connection.cursor()
+def get_user_tool_ids(user_id):
+    cursor = None
+    try:
+        cursor = connection.cursor()
         # gets the tool_id for each tool a user has selected previously
         query = "SELECT tool_id FROM user_tool WHERE user_id = %s;"
         data = (user_id,)
         cursor.execute(query, data)
         ids = cursor.fetchall()
-        cursor.close()
         # formats each id into a list
         ids = [id[0] for id in ids]
-        return ids
+        return {"success": True, "data": ids}
+    except Exception as e:
+        print(f"[get_user_tool_ids error] {e}")
+        return {"success": False, "error": "An internal error occurred."}
+    finally:
+        if cursor:
+            cursor.close()
 
-    def get_user_appliance_ids(self, user_id):
-        cursor = self.connection.cursor()
+def get_user_appliance_ids(user_id):
+    cursor = None
+    try:
+        cursor = connection.cursor()
         query = "SELECT tool_id FROM FoodLink.user_tool JOIN tool ON (user_tool.tool_id = tool.id) WHERE user_id = %s AND tool.type = 'appliance';"
         data = (user_id,)
         cursor.execute(query, data)
         ids = cursor.fetchall()
-        cursor.close()
         # formats each id into a list
         ids = [id[0] for id in ids]
-        return ids
-    
-    def get_user_utensil_ids(self, user_id):
-        cursor = self.connection.cursor()
+        return {"success": True, "data": ids}
+    except Exception as e:
+        print(f"[get_user_appliance_ids error] {e}")
+        return {"success": False, "error": "An internal error occurred."}
+    finally:
+        if cursor:
+            cursor.close()
+
+def get_user_utensil_ids(user_id):
+    cursor = None
+    try:
+        cursor = connection.cursor()
         query = "SELECT tool_id FROM FoodLink.user_tool JOIN tool ON (user_tool.tool_id = tool.id) WHERE user_id = %s AND tool.type = 'utensil';"
         data = (user_id,)
         cursor.execute(query, data)
         ids = cursor.fetchall()
-        cursor.close()
         # formats each id into a list
         ids = [id[0] for id in ids]
-        return ids
+        return {"success": True, "data": ids}
+    except Exception as e:
+        print(f"[get_user_utensil_ids error] {e}")
+        return {"success": False, "error": "An internal error occurred."}
+    finally:
+        if cursor:
+            cursor.close()
 
-    def save_user_tools(self, user_id, tool_ids):
-        cursor = self.connection.cursor()
-        
+def save_user_tools(user_id, tool_ids):
+    cursor = None
+    try:
+        cursor = connection.cursor()
         # removes all tools so any unhighlighted options are removed
         query = "DELETE FROM user_tool WHERE user_id = %s;"
         data = (user_id,)
@@ -76,6 +109,11 @@ class Tool(database):
         data = [(user_id, tool_id) for tool_id in tool_ids]
         # executes all queries
         cursor.executemany(query, data)
-        self.connection.commit()
-        cursor.close()
-
+        connection.commit()
+        return {"success": True}
+    except Exception as e:
+        print(f"[save_user_tools error] {e}")
+        return {"success": False, "error": "An internal error occurred."}
+    finally:
+        if cursor:
+            cursor.close()

@@ -1,8 +1,8 @@
-from recipe import Recipe
+import recipe as recipe_sql
 
-class recipe_object(Recipe):
+
+class recipe_object():
     def __init__(self, recipe):
-        super().__init__()
         self.id = int(recipe[0])
         self.name = recipe[1]
         self.servings = recipe[2]
@@ -11,13 +11,16 @@ class recipe_object(Recipe):
         self.instructions = recipe[5]
         # true if the user made the recipe else false (if default)
         self.personal = True if recipe[6] else False
-        self.tool_ids = self.get_recipe_tools(self.id)
+        self.tool_ids = recipe_sql.get_recipe_tools(self.id)
         self.missing_tool_ids = []
-        self.ingredients = self.get_recipe_items(self.id)
+        self.ingredients = recipe_sql.get_recipe_items(self.id)
         # ingredients that are in the users inventory
         self.inventory_ingredients = []
         # ingredients that have insufficient quantity or are missing from inventory
         self.shopping_list = []
+        # flags for filtering 
+        self.insufficient_ingredients = False
+        self.missing_ingredients = False
 
     # sets the list of the ids for any tools required for a recipe that a user doesn't own
     # only passes tool_ids to front end as sets are used to calculate, which has a faster time complexity
@@ -30,7 +33,7 @@ class recipe_object(Recipe):
             # item must have atleast 95% of the needed quantity to match
             quantity_threshold = ingredient[1] * 0.95
             # finds the best match in inventory
-            inv_item = self.strict_search(user_id, ingredient_name, quantity_threshold)
+            inv_item = recipe_sql.strict_search(user_id, ingredient_name, quantity_threshold)
             if not inv_item:
                 # empty item so it can be replaced if user wants to substitute ingredient in create stage
                 self.inventory_ingredients.append([])
@@ -38,6 +41,8 @@ class recipe_object(Recipe):
                 # adds attribute to each ingredient so it can be highlighted
                 # a different colour based on how good the match to the inventory was
                 ingredient.append("missing")
+                # sets missing flag
+                self.missing_ingredients = True
             # if quantity bigger than threshold
             elif inv_item[4] >= quantity_threshold:
                 self.inventory_ingredients.append(inv_item)
@@ -47,6 +52,8 @@ class recipe_object(Recipe):
                 self.inventory_ingredients.append(inv_item)
                 self.shopping_list.append(ingredient)
                 ingredient.append("insufficient")
+                # sets insufficient flag
+                self.insufficient_ingredients = True
 
     def to_dict(self):
         return {

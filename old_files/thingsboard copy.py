@@ -1,7 +1,7 @@
 import requests
 
-def get_jwt_token():
-    try:
+class thingsboard():
+    def get_jwt_token(self):
         login_url = "https://thingsboard.cs.cf.ac.uk/api/auth/login"
         headers = {
             "Content-Type": "application/json"
@@ -14,16 +14,14 @@ def get_jwt_token():
         response = requests.post(login_url, json=data, headers=headers)
 
         if response.status_code == 200:
+            # print('Login successful')
             token = response.json()['token']
+            # print("JET token:", token)
             return token
         else:
             print("Login failed: ", response.json())
-    except Exception as e:
-        print(f"[get_jwt_token error] {e}")
-        return None
 
-def get_telemetry(token, device_id):
-    try:
+    def get_telemetry(self, token, device_id):
         headers = {
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"
@@ -34,15 +32,15 @@ def get_telemetry(token, device_id):
         response = requests.get(url, headers=headers)
 
         if response.status_code == 401:
-            new_token = get_jwt_token()
+            # print("Token expired, refreshing...")
+            new_token = thingsboard.get_jwt_token()
             if new_token:
-                return get_telemetry(new_token, device_id)
+                return thingsboard.get_telemetry(new_token, device_id)
             else:
                 return None
         elif response.ok:
-            return response.json()
+            data = response.json()
+            return data
         else:
+            # print("Error: ", response.status_code, response.text)
             return None
-    except Exception as e:
-        print(f"[get_telemetry error] {e}")
-        return None

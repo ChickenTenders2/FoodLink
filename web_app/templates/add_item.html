@@ -17,7 +17,7 @@
     <!-- added popup from inventory.html for inputting data of new item-->
     <div id="popup" class="popup">
         <h2 id="popup-title">Add Item</h2>
-        <button onclick="close_popup()">X</button>
+        <button id="close-popup" onclick="close_popup()">×</button>
         <form id="update-form" method="POST" onsubmit="add_item(event)">
             <!-- all fields must be filled to add item (using required tag)-->
             <label>Barcode:</label>
@@ -30,12 +30,13 @@
             <input type="text" id="brand" name="brand" required>
             <br>
             <label>Expiry Time:</label>
+            <div class="expiry-fields">
             <input type="number" id="expiry_day" class="date_field" name="expiry_day" min="0" max="30" placeholder="DD" required>
             <label>/</label>
             <input type="number" id="expiry_month" class="date_field" name="expiry_month" min="0" max="11" placeholder="MM" required>
             <label>/</label>
             <input type="number" id="expiry_year" class="date_field" name="expiry_year" min="0" max="99" placeholder="YY" required>
-            <br>
+            </div>
             <label>Quantity:</label>
             <input type="number" id="default_quantity" name="default_quantity" required>
             <br>

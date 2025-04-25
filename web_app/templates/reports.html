@@ -5,8 +5,8 @@
 <div class="reports-container">
     <label>Show not assigned reports?</label>
     <input type="checkbox" id="show_null_assign" checked onchange="sort_filter_reports()">
-    <br>
-    <label>Sort By</label>
+
+    <label style="margin-left: 30px;">Sort By</label>
     <select id="sort_by" onchange="sort_filter_reports()">
         <!-- if statments make sure the current sort is shown as the default option-->
         <option value="error_type">Error Type</option>
@@ -28,5 +28,9 @@
     </table>
 </div>
 
-<script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/reports.js') }}"></script>
 {% endblock %}

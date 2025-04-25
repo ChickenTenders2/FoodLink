@@ -2,18 +2,23 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block page_content %}
-{% if error %}
-    <p class="error"><strong></strong> {{ error }}</p>
-{% endif %}
-<h1>Admin Login</h1>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    {{ form.username.label }}<br>
-    {{ form.username() }}<br>
+<div class="auth-wrapper">
+    <div class="auth-container">
+        {% if error %}
+            <p class="error"><strong></strong> {{ error }}</p>
+        {% endif %}
+        <h1><strong>Admin Login</strong></h1>
+        <br>
+        <form method="POST" id="form" role="form">
+            {{ form.hidden_tag() }}
+            {{ form.username.label }}<br>
+            {{ form.username(class="form-control") }}<br>
 
-    {{ form.password.label }}<br>
-    {{ form.password() }}<br>
+            {{ form.password.label }}<br>
+            {{ form.password(class="form-control") }}<br>
 
-    {{ form.submit() }}
-</form>
+            {{ form.submit() }}
+        </form>
+    </div>
+</div>
 {% endblock %}

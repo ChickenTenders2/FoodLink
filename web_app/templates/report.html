@@ -1,14 +1,7 @@
 {% extends "admin_base.html" %}
 
 {% block page_content %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Item Report</title>
-    <!-- Link to the external CSS file -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+
     <h1>Item report</h1>
     <!-- displays each users items-->
     <div class="report-container">
@@ -26,11 +19,13 @@
                 <input type="text" id="original_brand" name="brand" readonly>
                 <br>
                 <label>Expiry Time:</label>
+                <div class="expiry-fields">
                 <input type="number" id="original_expiry_day" class="date_field" name="expiry_day" min="0" max="30" placeholder="DD" readonly>
                 <label>/</label>
                 <input type="number" id="original_expiry_month" class="date_field" name="expiry_month" min="0" max="11" placeholder="MM" readonly>
                 <label>/</label>
                 <input type="number" id="original_expiry_year" class="date_field" name="expiry_year" min="0" max="99" placeholder="YY" readonly>
+                </div>
                 <br>
                 <label>Quantity:</label>
                 <input type="number" id="original_default_quantity" name="default_quantity" readonly>
@@ -47,7 +42,7 @@
                 <label>Upload Image:</label>
                 <!-- only accepts image files -->
                 <input type="file" id="item_image" name="item_image" accept="image/jpeg" onchange="update_image_preview(event)">
-                <br>
+                
                 <label>Barcode:</label>
                 <input type="text" id="barcode" name="barcode">
                 <br>
@@ -58,12 +53,14 @@
                 <input type="text" id="brand" name="brand">
                 <br>
                 <label>Expiry Time:</label>
+                <div class="expiry-fields">
                 <input type="number" id="expiry_day" class="date_field" name="expiry_day" min="0" max="30" placeholder="DD" required>
                 <label>/</label>
                 <input type="number" id="expiry_month" class="date_field" name="expiry_month" min="0" max="11" placeholder="MM" required>
                 <label>/</label>
                 <input type="number" id="expiry_year" class="date_field" name="expiry_year" min="0" max="99" placeholder="YY" required>
-                <br>
+                </div>
+                
                 <label>Quantity:</label>
                 <input type="number" id="default_quantity" name="default_quantity" required>
                 <br>
@@ -74,13 +71,17 @@
                 <!-- only set values of original item id if it not null-->
                 <input type="hidden" id="original_item_id" name="item_id" value="{{ item_id if item_id != 'null' else '' }}">
                 <input type="hidden" id="report_action" name="action">
+                <div class="button-group">
                 <button onclick="set_action('approve')" type="submit">Approve</button>
                 <button onclick="set_action('deny')" type="submit">Deny</button>
+                </div>
             </form>
         </div>
     </div>
 
+{% endblock %}
+
+{% block scripts %}
     <script src="{{ url_for('static', filename='js/item_handling.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/report.js') }}"></script>
-</body>
 {% endblock %}

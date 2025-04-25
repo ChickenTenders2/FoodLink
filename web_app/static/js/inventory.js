@@ -174,7 +174,7 @@ async function removeItem() {
     const formData = new FormData();
     formData.append('inventory_id', inventoryId);
 
-    const response = await fetch('/remove_item', {
+    const response = await fetch('/inventory/remove_item', {
         method: 'POST',
         body: formData
     });

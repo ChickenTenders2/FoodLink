@@ -1,0 +1,81 @@
+from database import database
+
+class Tool(database):
+    def __init__(self):
+        super().__init__()
+    
+    def add_tool(self, name, tool_type):
+        cursor = self.connection.cursor()
+        query = "INSERT INTO tool (name, type) VALUES (%s, %s);"
+        data = (name, tool_type)
+        cursor.execute(query, data)
+        self.connection.commit()
+        cursor.close()
+
+    def get_tools(self, type = None):
+        cursor = self.connection.cursor()
+        if type:
+            query = "SELECT id, name FROM tool WHERE type = %s ORDER BY name;"
+            data = (type,)
+            cursor.execute(query, data)
+        else:
+            query = "SELECT id, name FROM tool ORDER BY type, name;"
+            cursor.execute(query)
+        appliances = cursor.fetchall()
+        cursor.close()
+        return appliances
+
+    def get_user_tool_ids(self, user_id):
+        cursor = self.connection.cursor()
+        # gets the tool_id for each tool a user has selected previously
+        query = "SELECT tool_id FROM user_tool WHERE user_id = %s;"
+        data = (user_id,)
+        cursor.execute(query, data)
+        ids = cursor.fetchall()
+        cursor.close()
+        # formats each id into a list
+        ids = [id[0] for id in ids]
+        return ids
+
+    def get_user_appliance_ids(self, user_id):
+        cursor = self.connection.cursor()
+        query = "SELECT tool_id FROM FoodLink.user_tool JOIN tool ON (user_tool.tool_id = tool.id) WHERE user_id = %s AND tool.type = 'appliance';"
+        data = (user_id,)
+        cursor.execute(query, data)
+        ids = cursor.fetchall()
+        cursor.close()
+        # formats each id into a list
+        ids = [id[0] for id in ids]
+        return ids
+    
+    def get_user_utensil_ids(self, user_id):
+        cursor = self.connection.cursor()
+        query = "SELECT tool_id FROM FoodLink.user_tool JOIN tool ON (user_tool.tool_id = tool.id) WHERE user_id = %s AND tool.type = 'utensil';"
+        data = (user_id,)
+        cursor.execute(query, data)
+        ids = cursor.fetchall()
+        cursor.close()
+        # formats each id into a list
+        ids = [id[0] for id in ids]
+        return ids
+
+    def save_user_tools(self, user_id, tool_ids):
+        cursor = self.connection.cursor()
+        
+        # removes all tools so any unhighlighted options are removed
+        query = "DELETE FROM user_tool WHERE user_id = %s;"
+        data = (user_id,)
+        cursor.execute(query, data)
+
+        # stops inserting tools if none were selected
+        if not tool_ids:
+            return
+
+        query = "INSERT INTO user_tool (user_id, tool_id) VALUES (%s, %s);"
+        # creates list of the data needed to execute each query for storing user tools
+        data = [(user_id, tool_id) for tool_id in tool_ids]
+        # executes all queries
+        cursor.executemany(query, data)
+        self.connection.commit()
+        cursor.close()
+

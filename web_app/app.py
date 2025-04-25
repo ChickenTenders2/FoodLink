@@ -879,6 +879,23 @@ def get_reports():
         return jsonify(result), 500
     return jsonify(result)
 
+@app.route("/items/reports/check_assigned/<new_item_id>")
+@admin_only
+def check_assigned(new_item_id):
+    result = report.check_assigned(new_item_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
+
+@app.route("/items/reports/assign/<new_item_id>")
+@admin_only
+def report_assign(new_item_id):
+    admin_id = current_user.id
+    result = report.assign(new_item_id, admin_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
+
 @app.route("/items/reports/<new_item_id>/<item_id>")
 @admin_only
 def display_report(new_item_id, item_id):

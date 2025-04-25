@@ -88,3 +88,38 @@ def get_reports():
     finally:
         if cursor:
             cursor.close()
+
+def check_assigned(new_item_id):
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        query = """SELECT admin_id FROM item_error WHERE new_item_id = %s;""" 
+        data = (new_item_id,)
+        cursor.execute(query, data)
+        admin_id = cursor.fetchone()
+        return {"success": True, "admin_id": admin_id[0]}
+    except Exception as e:
+        logging.error(f"[check_assigned error] {e}")
+        # more detailed report for admin only function
+        return {"success": False, "error": f"[check_assigned error] {e}"}
+    finally:
+        if cursor:
+            cursor.close()
+
+def assign(new_item_id, admin_id):
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        query = """UPDATE item_error SET admin_id = %s WHERE new_item_id = %s;""" 
+        data = (admin_id, new_item_id)
+        cursor.execute(query, data)
+        connection.commit()
+        return {"success": True}
+    except Exception as e:
+        connection.rollback()
+        logging.error(f"[report.assign error] {e}")
+        # more detailed report for admin only function
+        return {"success": False, "error": f"[report.assign error] {e}"}
+    finally:
+        if cursor:
+            cursor.close()

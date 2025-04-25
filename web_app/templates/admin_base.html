@@ -23,6 +23,9 @@
   <div class="nav-right">
     <a href="{{ url_for('logout') }}">Sign Out</a> 
   </div>
+  <a href="#" class="icon" onclick="navbar()">
+    <i class="fa fa-bars"></i>
+  </a>
 </div>
 {% endblock %}
 
@@ -41,4 +44,8 @@
 
     {% block page_content %}{% endblock %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
 {% endblock %}

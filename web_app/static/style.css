@@ -1328,6 +1328,12 @@ input[type="submit"]:hover {
 .popup button:hover {
     background-color: #8fca6c;
 }
+
+.popup form textarea {
+    min-height: 100px;
+    max-width: 320px;
+    resize: vertical;
+}
   
 
 /* Notification Styles */
@@ -1692,7 +1698,7 @@ input[type="submit"]:hover {
 
 #original_item, #new_item { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); flex: 1; min-width: 320px; max-width: 480px; margin-top: 70px;}
 
-h1, h2 { text-align: center; color: #2e6e3e; margin-bottom: 20px; }
+h1, h2 { text-align: center; color: #2e6e3e; margin-bottom: 20px; font-weight: bold; }
 
 .item_img { display: block; margin: 0 auto 15px; max-width: 200px; border-radius: 10px; border: 1px solid #ccc; }
 
@@ -1789,13 +1795,21 @@ button:hover { background-color: #8fca6c; color: white; }
 }
 
 .table-items th {
-    background-color: #d4edc9;
-    color: #2e6e3e;
+    background-color: #a6d785;
+    color: #000;
     font-weight: bold;
 }
 
+.table-items tr:nth-child(even) {
+    background-color: #d4edc9;
+}
+
+.table-items tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
 .table-items tr:hover {
-    background-color: #eaf5e0;
+    background-color: #f1f1f1;
     cursor: pointer;
 }
 
@@ -1803,6 +1817,7 @@ button:hover { background-color: #8fca6c; color: white; }
 .next-form-container {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 15px;
     margin: 20px 0;
     flex-wrap: wrap;
@@ -1829,22 +1844,16 @@ button:hover { background-color: #8fca6c; color: white; }
   
 
 /* Add New Item Button */
-.add {
-    display: block;
-    margin: 30px auto;
+.next-form-container .add {
     padding: 12px 30px;
+    margin-right: 1035px;
+    min-width: 180px;
     background-color: #a6d785;
     color: black;
     font-size: 18px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.add:hover {
-    background-color: #8fca6c;
-    color: white;
 }
 
 .hidden-button {
@@ -1854,6 +1863,45 @@ button:hover { background-color: #8fca6c; color: white; }
 
 .hidden-button:hover {
     background-color: #d32f2f;
+}
+
+/* ADMIN RECIPE VIEW STYLING */
+.table-items {
+    width: 100%;
+    min-width: 800px; /* Ensures table doesn't get squished */
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+.table-recipes th, .table-items td {
+    border: 1px solid #e0e0e0;
+    padding: 12px;
+    text-align: center;
+    word-break: break-word;
+}
+
+.table-recipes th {
+    background-color: #a6d785;
+    color: #000;
+    font-weight: bold;
+}
+
+.table-recipes tr:nth-child(even) {
+    background-color: #d4edc9;
+}
+
+.table-recipes tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.table-recipes tr:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+
+.table-recipes th:nth-child(6), /* Instructions */
+.table-recipes td:nth-child(6) {
+    width: 35%;
 }
 
 /* Responsive Fixes */
@@ -1870,6 +1918,18 @@ button:hover { background-color: #8fca6c; color: white; }
     .table-items {
         min-width: unset;
     }
+
+    .table-recipes {
+        min-width: unset;
+    }
+
+    .table-items th, .table-items td {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    .table-recipes th, .table-recipes td {
+        padding: 8px;
+        font-size: 14px;
+    }
 }
-
-

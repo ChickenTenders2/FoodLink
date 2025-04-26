@@ -369,7 +369,7 @@ function add_ingredient_row(name = "", quantity = "", unit = "") {
         <input type="text" name="name" placeholder="Name" required value="${name}">
         <input type="number" name="quantity" min="1" placeholder="Quantity" required value="${quantity}">
         <input type="text" name="unit" placeholder="Unit" required value="${unit}">
-        <button type="button" onclick="this.parentElement.remove()">X</button>
+        <button type="button" style="background: transparent; font-size: 24px; color: #e74c3c;" onclick="this.parentElement.remove()">×</button>
     `;
 
     document.getElementById("ingredients_list_container").appendChild(row);
@@ -432,6 +432,28 @@ function open_edit_tools_popup(tool_ids) {
         }
     };
 
+    dropdown.style.padding = "8px";
+    dropdown.style.marginRight = "10px";
+    dropdown.style.borderRadius = "5px";
+    dropdown.style.border = "1px solid #ccc";
+    dropdown.style.fontSize = "14px";
+
+    addButton.style.backgroundColor = "#aed581"; 
+    addButton.style.border = "none";
+    addButton.style.padding = "8px 12px";
+    addButton.style.borderRadius = "10px";
+    addButton.style.cursor = "pointer";
+    addButton.style.fontSize = "14px";
+    addButton.style.marginLeft = "5px";
+    addButton.style.transition = "background-color 0.3s";
+
+    addButton.onmouseover = () => {
+        addButton.style.backgroundColor = "#9ccc65"; // darker green on hover
+    };
+    addButton.onmouseout = () => {
+        addButton.style.backgroundColor = "#aed581"; // normal color back
+    };
+
     addContainer.appendChild(dropdown);
     addContainer.appendChild(addButton);
 
@@ -454,16 +476,27 @@ function add_tool_display_row(tool_id, dropdown) {
     const row = document.createElement("div");
     row.className = "tool-row";
 
+       // Row styling
+       row.style.display = "flex";
+       row.style.alignItems = "center";
+       row.style.justifyContent = "space-between";
+       row.style.padding = "0px 6px";
+       row.style.margin = "3px 0";
+       row.style.border = "1px solid #ddd";
+       row.style.borderRadius = "5px";
+       row.style.background = "#f9f9f9";
+
     // adds tool name to row
     const tool_name = window.tools_dict[tool_id];
     const label = document.createElement("span");
     label.innerText = tool_name;
+    label.style.fontSize = "14px";
     label.value = tool_id;
     row.appendChild(label);
 
     // adds remove button to row
     const remove_button = document.createElement("button");
-    remove_button.innerText = "X";
+    remove_button.innerText = "×";
     remove_button.onclick = () => {
         // removes row on click and
         row.remove();
@@ -472,6 +505,17 @@ function add_tool_display_row(tool_id, dropdown) {
         if (option) {
             option.hidden = false;
         }
+    };
+
+    // styling remove button
+    remove_button.style.background = "transparent";
+    remove_button.style.fontSize = "24px";
+    remove_button.style.color = "#e74c3c"; // nice red color
+    remove_button.onmouseover = () => {
+    remove_button.style.color = "#c0392b"; // darker red on hover
+    };
+    remove_button.onmouseout = () => {
+        remove_button.style.color = "#e74c3c"; // normal color back
     };
 
     row.appendChild(remove_button);
@@ -586,7 +630,7 @@ async function add_inventory_ingredient(i, additional = false) {
 
     // remove button, shows add button once pressed so different item can be selected
     const remove_button = document.createElement("button");
-    remove_button.innerText = "X";
+    remove_button.innerText = "×";
     remove_button.onclick = () => {
         // clear item from list
         if (!additional) {
@@ -601,6 +645,18 @@ async function add_inventory_ingredient(i, additional = false) {
             inventory_item.remove();
         }
     };
+
+    // styling remove button
+    remove_button.style.background = "transparent";
+    remove_button.style.fontSize = "24px";
+    remove_button.style.color = "#e74c3c"; // nice red color
+    remove_button.onmouseover = () => {
+    remove_button.style.color = "#c0392b"; // darker red on hover
+    };
+    remove_button.onmouseout = () => {
+        remove_button.style.color = "#e74c3c"; // normal color back
+    };
+
     inventory_item.appendChild(remove_button);
     return inventory_item;
 }

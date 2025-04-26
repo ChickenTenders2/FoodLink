@@ -222,25 +222,31 @@ def AddAdmin():
     message = None
 
     if form.validate_on_submit():
-        existing_admin = Admin.query.filter(
-            (Admin.username == form.username.data) | 
-            (Admin.email == form.email.data)
-        ).first()
+        # Check password complexity
+        password = form.password.data
+        if len(password) >= 6 and sum(c.isdigit() for c in password) >= 2 and re_search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+            # Check if username or email already exist
+            existing_admin = Admin.query.filter(
+                (Admin.username == form.username.data) | 
+                (Admin.email == form.email.data)
+            ).first()
 
-        if existing_admin:
-            message = "Admin already exists."
+            if existing_admin:
+                message = "Admin already exists."
+            else:
+                new_admin = Admin(
+                    name=form.name.data,
+                    username=form.username.data,
+                    email=form.email.data,
+                    password=generate_password_hash(form.password.data),
+                    advanced_privileges=form.advanced_privileges.data,
+                )
+                db.session.add(new_admin)
+                db.session.commit()
+                flash("New admin added successfully!", "success")
+                return redirect(url_for('AdminDashboard'))
         else:
-            new_admin = Admin(
-                name=form.name.data,
-                username=form.username.data,
-                email=form.email.data,
-                password=generate_password_hash(form.password.data),
-                advanced_privileges=form.advanced_privileges.data,
-            )
-            db.session.add(new_admin)
-            db.session.commit()
-            flash("New admin added successfully!", "success")
-            return redirect(url_for('AdminDashboard'))
+            message = "Password format error: Password must be at least 6 characters, include at least 2 numbers, and 1 special character."
 
     return render_template("admin_add.html", form=form, message=message)
 

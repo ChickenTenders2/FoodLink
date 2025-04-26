@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Tools</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}
+  Select Tools
+{% endblock %}
+
+{% block page_content %}
     <div class="tool-selection container">
         <h1>Select Your Tools</h1>
         <!-- multi stage form for better design-->
@@ -48,56 +46,9 @@
     </div>
 
     <div id="toast" class="toast"></div>
+{% endblock %}
 
-    <script>
-        // hides the utensils checkboxes and shows appliances
-        function showAppliances() {
-            document.getElementById("utensils").style.display = "none";
-            document.getElementById("appliances").style.display = "block";
-            document.getElementById("nextButton").style.display = "none";
-            document.getElementById("backButton").style.display = "inline";
-            document.getElementById("saveButton").style.display = "inline";
-        }
-        // hides the appliances checkboxes and shows utensils
-        function showUtensils() {
-            document.getElementById("appliances").style.display = "none";
-            document.getElementById("utensils").style.display = "block";
-            document.getElementById("nextButton").style.display = "inline";
-            document.getElementById("backButton").style.display = "none";
-            document.getElementById("saveButton").style.display = "none";
-        }
-        document.getElementById("tool-form").addEventListener("submit", async function(e) {
-            e.preventDefault();
-            
-            const form = e.target;
-            const formData = new FormData(form);
-            
-            const response = await fetch("/tools/save", {
-                method: "POST",
-                body: formData
-            });
-
-            const result = await response.json();
-            
-            if (result.success) {
-                showToast(result.message, true);
-                setTimeout(() => {
-                    window.location.href = "/dashboard";
-                }, 2000); // delay before redirect
-            } else {
-                showToast(result.message, false);
-            }
-        });
-
-        function showToast(message, isSuccess = true) {
-            const toast = document.getElementById("toast");
-            toast.innerText = message;
-            toast.style.backgroundColor = isSuccess ? "#4caf50" : "#f44336";
-            toast.className = "toast show";
-            setTimeout(() => {
-                toast.className = toast.className.replace("show", "");
-            }, 3000);
-        }
-    </script>
-</body>
-</html>
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/select_utensils.js') }}"></script> 
+{% endblock %}

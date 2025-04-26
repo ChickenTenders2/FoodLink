@@ -570,11 +570,12 @@ def get_notifications():
     device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
     user_id = current_user.id
     token = thingsboard.get_jwt_token()
-    data = thingsboard.get_telemetry(token, device_id)
-    if data:
-        temperature = float(data['temperature'][0]['value'])
-        humidity = float(data['humidity'][0]['value'])
-        notification.temperature_humidity_notification(user_id, temperature, humidity)
+    if token:
+        data = thingsboard.get_telemetry(token, device_id)
+        if data:
+            temperature = float(data['temperature'][0]['value'])
+            humidity = float(data['humidity'][0]['value'])
+            notification.temperature_humidity_notification(user_id, temperature, humidity)
     
     notification.expiry_notification(user_id)
 

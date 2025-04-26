@@ -1,6 +1,10 @@
 import requests
 import logging
 
+# makes sure requests dont retry and wait forever
+# stops page reloading taking forever after clicking rapdily
+timeout = 3
+
 def get_jwt_token():
     try:
         login_url = "https://thingsboard.cs.cf.ac.uk/api/auth/login"
@@ -12,7 +16,7 @@ def get_jwt_token():
             "password": "group012025"
         }
 
-        response = requests.post(login_url, json=data, headers=headers)
+        response = requests.post(login_url, json=data, headers=headers, timeout=timeout)
 
         if response.status_code == 200:
             token = response.json()['token']
@@ -32,7 +36,7 @@ def get_telemetry(token, device_id):
 
         url = f"https://thingsboard.cs.cf.ac.uk/api/plugins/telemetry/DEVICE/{device_id}/values/timeseries?keys=temperature,humidity"
 
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=timeout)
 
         if response.status_code == 401:
             new_token = get_jwt_token()

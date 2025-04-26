@@ -29,8 +29,8 @@ def get_connection():
     return connection
 
 def get_cursor():
-    connection = get_connection()
-    return connection.cursor()
+    connect = get_connection()
+    return connect.cursor()
 
 def commit():
     connection.commit()

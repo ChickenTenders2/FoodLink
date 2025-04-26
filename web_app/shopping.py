@@ -121,7 +121,7 @@ def clear_items(user_id):
         cursor = connection.cursor()
         cursor.execute("DELETE FROM shopping_list WHERE user_id = %s", (user_id,))
         connection.commit()
-        return {"success": True}
+        return {"success": True, "action": "clear"}
     except Exception as e:
         connection.rollback()
         logging.error(f"[clear_items error] {e}")

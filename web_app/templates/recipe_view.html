@@ -1,5 +1,9 @@
 {% extends "admin_base.html" %}
 
+{% block title %}
+    FoodLink Admin Recipes
+{% endblock %}
+
 {% block page_content %}
     <h1 class="item_view_title">Recipes Table</h1>
     <div class="items">
@@ -27,6 +31,7 @@
        <!-- Pop-Up for Editing Quantity & Expiration Date -->
        <div id="popup" class="popup">
         <h2 id="popup-title"></h2>
+        <button id="exit" class="close-popup" onclick="close_popup()">×</button>
         <form id="update-form">
             <label for="name">Name:</label>
             <input type="string" id="name" name ="name" required>

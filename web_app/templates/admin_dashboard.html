@@ -1,5 +1,9 @@
 {% extends "admin_base.html" %}
 
+{% block title %}
+    FoodLink Admin Dashboard
+{% endblock %}
+
 {% block page_content %}
 <div class="admin-home">
   <a class="home-link" href="{{ url_for('display_reports') }}">Manage Reports</a>

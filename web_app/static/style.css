@@ -19,7 +19,7 @@
 
 /* General Styles */
 
-input[type="checkbox"] { 
+input[type="checkbox"], .checkBox { 
     margin: 8px 6px 8px 0; 
     accent-color: #aed581; 
 }
@@ -141,7 +141,7 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    padding-top: 65px;
+    padding-top: 60px;
 }
 
 

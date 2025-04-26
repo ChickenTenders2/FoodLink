@@ -1,30 +1,34 @@
 {% extends "admin_base.html" %}
 
 {% block page_content %}
-<h2>Add New Admin</h2>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    {{ form.username.label }}<br>
-    {{ form.username() }}<br>
+<div class="auth-wrapper">
+    <div class="auth-container">
+        <h2>Add New Admin</h2>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.username.label }}
+            {{ form.username(class="form-control") }}<br>
 
-    {{ form.name.label }}<br>
-    {{ form.name() }}<br>
+            {{ form.name.label }}
+            {{ form.name(class="form-control") }}<br>
 
-    {{ form.email.label }}<br>
-    {{ form.email() }}<br>
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}<br>
 
-    {{ form.password.label }}<br>
-    {{ form.password() }}<br>
+            {{ form.password.label }}
+            {{ form.password(class="form-control") }}<br>
+            <div class="button-group">
+            {{ form.advanced_privileges.label }}
+            {{ form.advanced_privileges(class="checkBox") }}</div><br>
 
-    {{ form.advanced_privileges.label }}<br>
-    {{ form.advanced_privileges() }}<br>
-
-    {{ form.submit() }}
-</form>
+            {{ form.submit() }}
+        </form>
+    </div>
+</div>
 
 {% if message %}
     <div class="message">{{ message }}</div>
 {% endif %}
 
-<a class="home-link" href="{{ url_for('AdminDashboard') }}">Back to Dashboard</a>
+<!-- <a class="home-link" href="{{ url_for('AdminDashboard') }}">Back to Dashboard</a> -->
 {% endblock %}

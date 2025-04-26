@@ -1,13 +1,10 @@
 {% extends "admin_base.html" %}
 
+{% block title %}
+    FoodLink Admin Add Item
+{% endblock %}
+
 {% block page_content %}
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
     <div class="video-window">
         <button onclick="open_popup(null)">Manually enter barcode</button>
         <br>
@@ -49,8 +46,11 @@
 
             <button type="submit">Add Item</button>
         </form>
-    </div>
+    </div> 
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
     <script src="{{ url_for('static', filename='js/barcode_scan.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/add_item.js') }}"></script> 
-</body>
 {% endblock %}

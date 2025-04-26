@@ -1,6 +1,10 @@
 {% extends "admin_base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
+{% block title %}
+    FoodLink Admin Login
+{% endblock %}
+
 {% block page_content %}
 <div class="auth-wrapper">
     <div class="auth-container">
@@ -11,10 +15,10 @@
         <br>
         <form method="POST" id="form" role="form">
             {{ form.hidden_tag() }}
-            {{ form.username.label }}<br>
+            {{ form.username.label }}
             {{ form.username(class="form-control") }}<br>
 
-            {{ form.password.label }}<br>
+            {{ form.password.label }}
             {{ form.password(class="form-control") }}<br>
 
             {{ form.submit() }}

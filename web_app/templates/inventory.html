@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block title %}
+  Inventory
+{% endblock %}
+
 {% block page_content %}
     <form class="add-item-form" action="/inventory/add_item">
         <button type="submit">Add Item</button>

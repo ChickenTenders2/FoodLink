@@ -1,17 +1,17 @@
-from database import connection
+from database import get_cursor, commit, safe_rollback
 import logging
 
 def add_tool(name, tool_type):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "INSERT INTO tool (name, type) VALUES (%s, %s);"
         data = (name, tool_type)
         cursor.execute(query, data)
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[add_tool error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -21,7 +21,7 @@ def add_tool(name, tool_type):
 def get_tools(type=None):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         if type:
             query = "SELECT id, name FROM tool WHERE type = %s ORDER BY name;"
             data = (type,)
@@ -41,7 +41,7 @@ def get_tools(type=None):
 def get_user_tool_ids(user_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         # gets the tool_id for each tool a user has selected previously
         query = "SELECT tool_id FROM user_tool WHERE user_id = %s;"
         data = (user_id,)
@@ -60,7 +60,7 @@ def get_user_tool_ids(user_id):
 def save_user_tools(user_id, tool_ids):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         # removes all tools so any unhighlighted options are removed
         query = "DELETE FROM user_tool WHERE user_id = %s;"
         data = (user_id,)
@@ -75,10 +75,10 @@ def save_user_tools(user_id, tool_ids):
         data = [(user_id, tool_id) for tool_id in tool_ids]
         # executes all queries
         cursor.executemany(query, data)
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[save_user_tools error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:

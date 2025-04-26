@@ -1,4 +1,4 @@
-from database import connection
+from database import get_cursor, commit, safe_rollback
 import logging
 from os.path import isfile as file_exists
 from os import remove as remove_file
@@ -10,7 +10,7 @@ from shutil import copyfile as copy_file
 def get_all():
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE user_id IS null;"
         cursor.execute(query)
         items = cursor.fetchall()
@@ -27,7 +27,7 @@ def get_all():
 def get_item(item_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE id = %s;"
         cursor.execute(query, (item_id,))
         item = cursor.fetchone()
@@ -43,7 +43,7 @@ def get_item(item_id):
 def get_item_from_name(name):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE name LIKE UPPER(%s);"
         cursor.execute(query, (name,))
         items = cursor.fetchall()
@@ -59,7 +59,7 @@ def get_item_from_name(name):
 def get_default_quantity(item_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         cursor.execute("SELECT default_quantity FROM FoodLink.item WHERE id = %s;", (item_id,))
         quantity_tuple = cursor.fetchone()
         # unpack tuple
@@ -79,7 +79,7 @@ def get_default_quantity(item_id):
 def get_personal(user_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         # search query uses full text for relevance based searching of items
         query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit, TRUE AS is_personal FROM FoodLink.item WHERE user_id = %s;"
         data = (user_id,)
@@ -96,7 +96,7 @@ def get_personal(user_id):
 def barcode_search(user_id, barcode_number):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         # searches for an item by barcode
         query = """SELECT id, barcode, name, brand, expiry_time, default_quantity, unit, 
                     CASE WHEN user_id = %s THEN TRUE ELSE FALSE END AS is_personal 
@@ -118,7 +118,7 @@ def barcode_search(user_id, barcode_number):
 def text_search(user_id, search_term):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         # search query uses full text for relevance based searching of items
         query = """SELECT id, barcode, name, brand, expiry_time, default_quantity, unit, 
                     CASE WHEN user_id = %s THEN TRUE ELSE FALSE END AS is_personal 
@@ -140,7 +140,7 @@ def text_search(user_id, search_term):
 def text_single_search(user_id, search_term):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         # search query uses full text for relevance based searching of items
         query = """SELECT id, barcode, name, brand, expiry_time, default_quantity, unit, 
                     CASE WHEN user_id = %s THEN TRUE ELSE FALSE END AS is_personal 
@@ -162,15 +162,15 @@ def text_single_search(user_id, search_term):
 def add_item(barcode, name, brand, expiry_time, default_quantity, unit, user_id=None):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "INSERT INTO FoodLink.item (barcode, name, brand, expiry_time, default_quantity, unit, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s);"
         cursor.execute(query, (barcode, name, brand, expiry_time, default_quantity, unit, user_id))
-        connection.commit()
+        commit()
         # gets id of the item inserted
         item_id = cursor.lastrowid
         return {"success": True, "item_id": item_id}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[add_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -239,7 +239,7 @@ def update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, u
             return result
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = f"""UPDATE FoodLink.item SET 
                     barcode = %s,
                     name = %s,
@@ -251,10 +251,10 @@ def update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, u
                 WHERE id = %s;""" 
         data = (barcode, name, brand, expiry_time, default_quantity, unit, user_id, id)
         cursor.execute(query, data)
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[update_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -311,17 +311,17 @@ def remove_item(id, user_id = None):
 def remove_item_sql(id, user_item):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         cursor.execute("DELETE FROM item WHERE id = %s;", (id,))
         if user_item:
             # makes sure item is removed from inventories aswell
             cursor.execute("DELETE FROM inventory WHERE item_id = %s", (id,))
             # makes sure item report is removed aswell (if reported)
             cursor.execute("DELETE FROM item_error WHERE new_item_id = %s", (id,))
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[remove_item_sql error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -341,7 +341,7 @@ def remove_item_image(id):
 def owner_check(id, user_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         cursor.execute("SELECT user_id FROM FoodLink.item WHERE id = %s;", (id,))
         result = cursor.fetchone()
         if not result or result[0] != user_id:

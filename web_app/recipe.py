@@ -1,10 +1,10 @@
-from database import connection
+from database import get_cursor, commit, safe_rollback
 import logging
 
 def get_recipes(search_term, page, user_id, user_only):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         limit = 10
         offset = (page - 1) * limit
         query = f"""SELECT id, name, servings, prep_time, cook_time, instructions, user_id FROM recipe 
@@ -31,7 +31,7 @@ def get_recipes(search_term, page, user_id, user_only):
 def get_recipe(recipe_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "SELECT id, name, servings, prep_time, cook_time, instructions, user_id FROM recipe WHERE id = %s"
         data = (recipe_id,)
         cursor.execute(query, data)
@@ -52,7 +52,7 @@ def remove_recipe(recipe_id, user_id=None):
             return result
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         # remove from recipe table
         query = "DELETE FROM recipe WHERE id = %s;"
         data = (recipe_id,)
@@ -66,10 +66,10 @@ def remove_recipe(recipe_id, user_id=None):
         data = (recipe_id,)
         cursor.execute(query, data)
 
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[remove_recipe error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -79,7 +79,7 @@ def remove_recipe(recipe_id, user_id=None):
 def add_recipe(name, servings, prep_time, cook_time, instructions, items, tool_ids, user_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         # adds to recipe table
         query = """INSERT INTO recipe (name, servings, prep_time, cook_time, instructions, user_id) 
                 VALUES (%s, %s, %s, %s, %s, %s);"""
@@ -90,10 +90,10 @@ def add_recipe(name, servings, prep_time, cook_time, instructions, items, tool_i
 
         edit_recipe_tools(cursor, recipe_id, tool_ids)
         edit_recipe_items(cursor, recipe_id, items)
-        connection.commit()
+        commit()
         return {"success": True, "recipe_id": recipe_id}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[add_recipe error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -108,7 +108,7 @@ def edit_recipe(cursor, recipe_id, name, servings, prep_time, cook_time, instruc
             return result
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         # updates recipe table
         query = """UPDATE recipe SET 
                 name = %s,
@@ -122,10 +122,10 @@ def edit_recipe(cursor, recipe_id, name, servings, prep_time, cook_time, instruc
 
         edit_recipe_tools(cursor, recipe_id, tool_ids)
         edit_recipe_items(cursor, recipe_id, items)
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[add_recipe error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -160,7 +160,7 @@ def edit_recipe_items(cursor, recipe_id, items):
 def owner_check(id, user_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         cursor.execute("SELECT user_id FROM recipe WHERE id = %s;", (id,))
         result = cursor.fetchone()
         if not result or result[0] != user_id:
@@ -177,7 +177,7 @@ def owner_check(id, user_id):
 def get_recipe_tools(recipe_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "SELECT tool_id FROM recipe_tool WHERE recipe_id = %s"
         data = (recipe_id,)
         cursor.execute(query, data)
@@ -195,7 +195,7 @@ def get_recipe_tools(recipe_id):
 def get_recipe_items(recipe_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "SELECT item_name, quantity, unit FROM FoodLink.recipe_items WHERE recipe_id = %s;"
         data = (recipe_id,)
         cursor.execute(query, data)
@@ -214,7 +214,7 @@ def get_recipe_items(recipe_id):
 def strict_search(user_id, item_name, quantity_threshold):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         # gets each word in item name seperately
         terms = item_name.strip().split()
         # adds a + before each word to make sure that results must include ALL words in the item name

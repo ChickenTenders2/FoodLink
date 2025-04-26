@@ -1,4 +1,4 @@
-from database import connection
+from database import get_cursor, commit, safe_rollback
 import logging
 from datetime import datetime
 import smtplib
@@ -10,7 +10,7 @@ from email import charset
 def get_notifications(user_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = """
             SELECT id, type, message, date_created, is_read, severity
             FROM notification
@@ -31,13 +31,13 @@ def get_notifications(user_id):
 def mark_read(notif_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "UPDATE notification SET is_read = 1 WHERE id = %s;"
         cursor.execute(query, (notif_id,))
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[mark_read error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -48,7 +48,7 @@ def mark_read(notif_id):
 def notification_exists(user_id, notif_type, message):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "SELECT COUNT(*) FROM notification WHERE user_id = %s AND type = %s AND message = %s;"
         cursor.execute(query, (user_id, notif_type, message))
         return cursor.fetchone()[0]
@@ -63,16 +63,16 @@ def notification_exists(user_id, notif_type, message):
 def insert_notification(user_id, notif_type, message, severity):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = """
             INSERT INTO notification (user_id, type, message, date_created, is_read, severity)
             VALUES (%s, %s, %s, NOW(), 0, %s);
         """
         cursor.execute(query, (user_id, notif_type, message, severity))
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[insert_notification error] {e}")
         # deatiled report of error for admins
         return {"success": False, 
@@ -95,7 +95,7 @@ def support_notification(user_id, message):
 def expiry_notification(user_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
 
         settings_query = "SELECT expiring_food FROM FoodLink.settings WHERE user_id = %s;"
         cursor.execute(settings_query, (user_id,))
@@ -139,7 +139,7 @@ def expiry_notification(user_id):
 def temperature_humidity_notification(user_id, temperature, humidity):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         cursor.execute("SELECT min_temperature, max_temperature, max_humidity, temperature_alerts FROM settings WHERE user_id = %s;", (user_id,))
         settings = cursor.fetchone()
         if not settings:
@@ -181,7 +181,7 @@ def cooldown_check(user_id, notif_type, cooldown_minutes=10):
     # """
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = """
             SELECT date_created FROM notification 
             WHERE user_id = %s AND type = %s 
@@ -213,7 +213,7 @@ def cooldown_check(user_id, notif_type, cooldown_minutes=10):
 def send_email(user_id, subject_type, message_text):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         cursor.execute("SELECT email_notifications FROM settings WHERE user_id = %s;", (user_id,))
         enabled = cursor.fetchone()
         if not enabled or not enabled[0]:

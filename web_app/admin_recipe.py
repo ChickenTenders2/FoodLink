@@ -1,10 +1,10 @@
-from database import connection
+from database import get_cursor, commit, safe_rollback
 import logging
 
 def get_all():
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "SELECT id, name, servings, prep_time, cook_time, instructions FROM recipe WHERE user_id IS NULL;"
         cursor.execute(query)
         recipes = cursor.fetchall()
@@ -19,7 +19,7 @@ def get_all():
 def remove_recipe(id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query1 = "DELETE FROM recipe WHERE id = %s;"
         # one item tuple
         data1 = (id,)
@@ -32,10 +32,10 @@ def remove_recipe(id):
         # one item tuple
         data3 = (id,)
         cursor.execute(query3, data3)
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[admin_recipe.remove_recipe error] {e}")
         return {"success": False, "error": f"[admin_recipe.remove_recipe error] {e}"}
     finally:
@@ -45,14 +45,14 @@ def remove_recipe(id):
 def update_recipe(recipe_id, name, serv, prep, cook, instructions, user_id = None):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "UPDATE FoodLink.recipe SET name = %s, servings = %s, prep_time = %s, cook_time = %s, instructions = %s, user_id = %s WHERE id = %s;"
         data = [name, serv, prep, cook, instructions, user_id, recipe_id]
         cursor.execute(query, data)
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[admin_recipe.update_recipe error] {e}")
         return {"success": False, "error": f"[admin_recipe.update_recipe error] {e}"}
     finally:
@@ -62,15 +62,15 @@ def update_recipe(recipe_id, name, serv, prep, cook, instructions, user_id = Non
 def add_recipe(name, serv, prep, cook, instructions, user_id = None):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "INSERT INTO FoodLink.recipe (name, servings, prep_time, cook_time, instructions, user_id) VALUES (%s, %s, %s, %s, %s, %s);"
         data = [name, serv, prep, cook, instructions, user_id]
         print(data)
         cursor.execute(query, data)
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[admin_recipe.add_recipe error] {e}")
         return {"success": False, "error": f"[admin_recipe.add_recipe error] {e}"}
     finally:
@@ -80,7 +80,7 @@ def add_recipe(name, serv, prep, cook, instructions, user_id = None):
 def update_recipe_ingredients(recipe_id, names, units, quantities):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "DELETE FROM recipe_items WHERE recipe_id = %s"
         data = (recipe_id, )
         cursor.execute(query, data)
@@ -90,10 +90,10 @@ def update_recipe_ingredients(recipe_id, names, units, quantities):
             data = [recipe_id, name, unit, quantity]
             cursor.execute(query, data)
         # only commits after completely updated
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[admin_recipe.update_recipe_ingredients error] {e}")
         return {"success": False, "error": f"[admin_recipe.update_recipe_ingredients error] {e}"}
     finally:
@@ -103,16 +103,16 @@ def update_recipe_ingredients(recipe_id, names, units, quantities):
 def add_recipe_ingredients(recipe_id, names, units, quantities):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         for name, unit, quantity in zip(names, units, quantities):
             query = "INSERT INTO recipe_items (recipe_id, item_name, unit, quantity) VALUES (%s, %s, %s, %s);"
             data = [recipe_id, name, unit, quantity]
             cursor.execute(query, data)
         # only commits after completely updated
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[admin_recipe.add_recipe_ingredients error] {e}")
         return {"success": False, "error": f"[admin_recipe.add_recipe_ingredients error] {e}"}
     finally:
@@ -122,15 +122,15 @@ def add_recipe_ingredients(recipe_id, names, units, quantities):
 def get_id():
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "SELECT MAX(id) from FoodLink.recipe;"
         cursor.execute(query)
         id = cursor.fetchone()
         print(id)
-        connection.commit()
+        commit()
         return {"success": True, "id": id}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[admin_recipe.get_id error] {e}")
         return {"success": False, "error": f"[admin_recipe.get_id error] {e}"}
     finally:
@@ -140,7 +140,7 @@ def get_id():
 def update_recipe_tools(recipe_id, tool_ids):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "DELETE FROM recipe_tool WHERE recipe_id = %s"
         data = (recipe_id, )
         cursor.execute(query, data)
@@ -150,10 +150,10 @@ def update_recipe_tools(recipe_id, tool_ids):
             data = [recipe_id, tool]
             cursor.execute(query, data)
             
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[admin_recipe.update_recipe_tools error] {e}")
         return {"success": False, "error": f"[admin_recipe.update_recipe_tools error] {e}"}
     finally:
@@ -163,16 +163,16 @@ def update_recipe_tools(recipe_id, tool_ids):
 def add_recipe_tools(recipe_id, tool_ids):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         for tool in tool_ids:
             query = "INSERT INTO recipe_tool (recipe_id, tool_id) VALUES (%s, %s);"
             data = [recipe_id, tool]
             cursor.execute(query, data)
 
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[admin_recipe.add_recipe_tools error] {e}")
         return {"success": False, "error": f"[admin_recipe.add_recipe_tools error] {e}"}
     finally:

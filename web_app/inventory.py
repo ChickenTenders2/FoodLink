@@ -1,10 +1,10 @@
-from database import connection
+from database import get_cursor, commit, safe_rollback
 import logging
 
 def get_items(user_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = """
             SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity
             FROM FoodLink.inventory inv
@@ -28,7 +28,7 @@ def get_items(user_id):
 def search_items(user_id, search_term):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         # search query uses full text for relevance based searching of items
         query = """
             SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date, i.default_quantity
@@ -52,13 +52,13 @@ def search_items(user_id, search_term):
 def add_item(user_id, item_id, quantity, expiry_date):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "INSERT INTO inventory (user_id, item_id, quantity, expiry_date) VALUES (%s, %s, %s, %s);"
         cursor.execute(query, (user_id, item_id, quantity, expiry_date))
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[add_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -75,13 +75,13 @@ def process_add_form(user_id, item_id, form):
 def remove_item(inventory_id):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "DELETE FROM inventory WHERE id = %s;"
         cursor.execute(query, (inventory_id,))
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[remove_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -91,7 +91,7 @@ def remove_item(inventory_id):
 def update_quantities(items_used):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         for inventory_id, quantity in items_used:
             # Delete item if quantity is zero or less
             if quantity <= 0:
@@ -99,10 +99,10 @@ def update_quantities(items_used):
             # Otherwise, update the quantity
             else:
                 cursor.execute("UPDATE inventory SET quantity = %s WHERE id = %s;", (quantity, inventory_id))
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[update_quantities error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -112,13 +112,13 @@ def update_quantities(items_used):
 def update_item(inventory_id, quantity, expiry_date):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         query = "UPDATE inventory SET quantity = %s, expiry_date = %s WHERE id = %s;"
         cursor.execute(query, (quantity, expiry_date, inventory_id))
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[update_item error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
@@ -130,7 +130,7 @@ def update_item(inventory_id, quantity, expiry_date):
 def correct_personal_item(personal_item_id, item_id, default_quantity):
     cursor = None
     try:
-        cursor = connection.cursor()
+        cursor = get_cursor()
         # item_id = the item id of the now added item if missing, or the item id of the item that has now been corrected
         # personal_item_id = the users personal item id that they added before reporting
 
@@ -152,10 +152,10 @@ def correct_personal_item(personal_item_id, item_id, default_quantity):
             """
             data = (item_id, default_quantity, default_quantity, personal_item_id)
         cursor.execute(query, data)
-        connection.commit()
+        commit()
         return {"success": True}
     except Exception as e:
-        connection.rollback()
+        safe_rollback()
         logging.error(f"[correct_personal_item error] {e}")
         # detailed error report for admins
         return {"success": False, 

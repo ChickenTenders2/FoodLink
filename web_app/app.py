@@ -1354,12 +1354,12 @@ def get_shoppingList():
             result = shopping.clear_items(user_id)
         elif 'remove' in request.form:
             item_id = request.form.get('remove')
-            result = shopping.remove_item(item_id)  
+            result = shopping.remove_item(user_id, item_id)  
         elif 'mark_bought' in request.form:
             item_id = request.form.get('mark_bought')
             bought_str = request.form.get('bought', 0)
             bought = int(bought_str)
-            result = shopping.item_bought(item_id, bought)
+            result = shopping.item_bought(user_id, item_id, bought)
         
         if not result.get("success"):
             return jsonify(result), 500
@@ -1395,7 +1395,7 @@ def update_shopping_item():
     item_id = request.form.get('item_id')
     item_name = request.form.get('item_name')
     quantity = request.form.get('quantity')
-    result = shopping.update_item(item_id, item_name, quantity)
+    result = shopping.update_item(user_id, item_id, item_name, quantity)
     if not result.get("success"):
         return jsonify(result), 500
     return jsonify(result)

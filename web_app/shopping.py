@@ -49,12 +49,12 @@ def add_items(user_id, items):
         if cursor:
             cursor.close()
 
-def update_item(item_id, item_name, quantity):
+def update_item(user_id, item_id, item_name, quantity):
     cursor = None
     try:
         cursor = connection.cursor()
-        query = "UPDATE shopping_list SET item_name = %s, quantity = %s WHERE id = %s"
-        data = (item_name, quantity, item_id)
+        query = "UPDATE shopping_list SET item_name = %s, quantity = %s WHERE id = %s AND user_id = %s"
+        data = (item_name, quantity, item_id, user_id)
         cursor.execute(query, data)
         connection.commit()
         return {"success": True, "action": "update", "item": item_name}
@@ -66,12 +66,12 @@ def update_item(item_id, item_name, quantity):
         if cursor:
             cursor.close()
 
-def item_bought(item_id, bought):
+def item_bought(user_id, item_id, bought):
     cursor = None
     try:
         cursor = connection.cursor()
-        query = "UPDATE shopping_list SET bought = %s WHERE id = %s"
-        data = (bought, item_id)
+        query = "UPDATE shopping_list SET bought = %s WHERE id = %s AND user_id = %s"
+        data = (bought, item_id, user_id)
         cursor.execute(query, data)
         connection.commit()
         print("Item:", item_id, "Bought:", bought)
@@ -100,11 +100,11 @@ def low_stock_items(user_id):
         if cursor:
             cursor.close()
 
-def remove_item(item_id):
+def remove_item(user_id, item_id):
     cursor = None
     try:
         cursor = connection.cursor()
-        cursor.execute("DELETE FROM shopping_list WHERE id = %s", (item_id,))
+        cursor.execute("DELETE FROM shopping_list WHERE id = %s AND user_id = %s", (item_id, user_id))
         connection.commit()
         return {"success": True, "action": "remove", "item_id": item_id}
     except Exception as e:

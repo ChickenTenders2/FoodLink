@@ -18,7 +18,8 @@ def get_notifications(user_id):
             ORDER BY date_created DESC;
         """
         cursor.execute(query, (user_id,))
-        return {"success": True, "data": cursor.fetchall()}
+        notifications = cursor.fetchall()
+        return {"success": True, "notifications": notifications}
     except Exception as e:
         logging.error(f"[get_notifications error] {e}")
         return {"success": False, "error": "An internal error occurred."}

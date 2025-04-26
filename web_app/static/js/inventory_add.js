@@ -46,7 +46,7 @@ function close_item_popup(to_scanner) {
 
 function open_search_popup() {
     close_not_found_popup();
-    stop_check();display_personal
+    stop_check();
     document.getElementById('search_popup').style.display = 'block';
 }
 
@@ -159,6 +159,7 @@ function close_add_popup(to_scanner, edit_mode = false) {
         }
         // if personal items search popup is open, refresh items
         else if (document.getElementById("search_popup").style.display != "none") {
+            display_personal();
         }
     }
     document.getElementById("expiry_day").value = null;

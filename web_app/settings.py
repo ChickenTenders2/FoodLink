@@ -1,9 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, session
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask.views import MethodView
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, Settings
-from database import db
+from models import Settings, User
+from alchemy_db import db, safe_execute
 
 # Create blueprint
 settings_bp = Blueprint('settings', __name__, url_prefix='/settings')
@@ -22,8 +22,8 @@ class SettingsView(BaseSettingsView):
         notification_prefs = Settings.query.filter_by(user_id=user_id).first()
         if not notification_prefs:
             notification_prefs = Settings(user_id=user_id)
-            db.session.add(notification_prefs)
-            db.session.commit()
+            safe_execute(db.session.add, notification_prefs)
+            safe_execute(db.session.commit)
             
         return render_template('settings.html', 
                               user=current_user, 
@@ -49,7 +49,7 @@ class AccountUpdateView(BaseSettingsView):
         if name:
             current_user.name = name
             
-        db.session.commit()
+        safe_execute(db.session.commit)
         flash('Profile updated successfully', 'success')
         return redirect(url_for('settings.settings_page'))
     
@@ -63,8 +63,8 @@ class AccountDeleteView(BaseSettingsView):
             return redirect(url_for('settings.settings_page'))
             
         # Delete all user data
-        db.session.delete(current_user)
-        db.session.commit()
+        safe_execute(db.session.delete, current_user)
+        safe_execute(db.session.commit)
         
         flash('Your account has been deleted', 'info')
         return redirect(url_for('auth.logout'))
@@ -88,7 +88,7 @@ class PasswordChangeView(BaseSettingsView):
             
         # Update password
         current_user.password = generate_password_hash(new_password)
-        db.session.commit()
+        safe_execute(db.session.commit)
         
         flash('Password updated successfully', 'success')
         return redirect(url_for('settings.settings_page'))
@@ -112,7 +112,7 @@ class NotificationUpdateView(BaseSettingsView):
         notification_prefs = Settings.query.filter_by(user_id=current_user.id).first()
         if not notification_prefs:
             notification_prefs = Settings(user_id=current_user.id)
-            db.session.add(notification_prefs)
+            safe_execute(db.session.add, notification_prefs)
         
         # Update preferences
         notification_prefs.email_notifications = email_notifications
@@ -129,7 +129,7 @@ class NotificationUpdateView(BaseSettingsView):
         if max_humidity is not None:
             notification_prefs.max_humidity = max_humidity
             
-        db.session.commit()
+        safe_execute(db.session.commit)
         flash('Notification preferences updated', 'success')
         return redirect(url_for('settings.settings_page'))
 

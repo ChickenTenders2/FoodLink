@@ -1,9 +1,6 @@
 import mariadb
-from flask_sqlalchemy import SQLAlchemy
 import logging
 
-# SQLAlchemy for database management
-db = SQLAlchemy()
 
 # lambda function to create a new connection
 create_connection = lambda: mariadb.connect(
@@ -28,7 +25,7 @@ def get_connection():
         except Exception as reconnect_error:
             logging.error(f"[ERROR] Failed to reconnect to database: {reconnect_error}")
             # sends error back to flask route so it returns request with 500
-            raise reconnect_error
+            raise Exception("Failed to reconnect to database.")
     return connection
 
 def get_cursor():
@@ -50,7 +47,7 @@ def safe_rollback():
         except Exception as reconnect_error:
             logging.error(f"[ERROR] Failed to reconnect after rollback: {reconnect_error}")
             # sends error back to flask route so it returns request with 500
-            raise reconnect_error
+            raise Exception("Failed to reconnect to database.")
     except Exception as e:
         logging.error(f"[ERROR] Rollback failed: {e}")
 

@@ -1,4 +1,4 @@
-from database import db
+from alchemy_db import db
 from flask_login import UserMixin
 from datetime import datetime
 import pytz

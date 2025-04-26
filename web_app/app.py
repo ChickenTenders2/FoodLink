@@ -50,7 +50,8 @@ from flask_session import Session
 from models import User, Admin
 # login forms
 from flask_forms import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
-from database import db, close_connection
+from database import close_connection
+from alchemy_db import db, safe_execute
 
 # for closing db connection on exit
 import atexit
@@ -78,7 +79,7 @@ app.config['MAIL_USERNAME'] = 'foodlink2305@gmail.com'
 app.config['MAIL_PASSWORD'] = 'fmgz nrxz mwul nqju'    
 app.config['MAIL_DEFAULT_SENDER'] = 'FoodLink <foodlink2305@gmail.com>'
 
-# Import and register the settings blueprint
+# Import and register the settings blueprint (i'm sorry it wasnt me :( )
 from settings import settings_bp
 app.register_blueprint(settings_bp)
 
@@ -97,9 +98,15 @@ def load_user(user_id):
     user_type = session.get("user_type")
 
     if user_type == "admin":
-        return db.session.get(Admin, int(user_id))
+        return safe_execute(db.session.get, Admin, int(user_id))
     elif user_type == "user":
-        return db.session.get(User, int(user_id))
+        return safe_execute(db.session.get, User, int(user_id))
+
+# clears alchemy db session after every request so errors dont occur
+# helps stop crashing when clicking between pages fast
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.remove()
 
 
 ###     DECORATOR FUNCTIONS TO STOP UNAUTHORISED ACCESS TO PAGES
@@ -241,8 +248,8 @@ def AddAdmin():
                     password=generate_password_hash(form.password.data),
                     advanced_privileges=form.advanced_privileges.data,
                 )
-                db.session.add(new_admin)
-                db.session.commit()
+                safe_execute(db.session.add, new_admin)
+                safe_execute(db.session.commit)
                 flash("New admin added successfully!", "success")
                 return redirect(url_for('AdminDashboard'))
         else:
@@ -266,7 +273,7 @@ def AdminUpdatePassword():
             message = "Password must be at least 6 characters, include at least 2 numbers, and 1 special character."
         else:
             current_user.password = generate_password_hash(form.new_password.data)
-            db.session.commit()
+            safe_execute(db.session.commit)
             flash("Password updated successfully!", "success")
             return redirect(url_for("AdminDashboard"))
 
@@ -369,8 +376,8 @@ def createAccount():
                         password=generate_password_hash(form.password.data),
                         email_verified=False
                     )
-                    db.session.add(user)
-                    db.session.commit()
+                    safe_execute(db.session.add, user)
+                    safe_execute(db.session.commit)
                     
                     # Log the user in
                     login_user(user)
@@ -443,7 +450,7 @@ def resetPassword():
             if form.password.data == form.passwordConfirm.data:
                 print("Setting new password")
                 user.password = generate_password_hash(form.password.data)
-                db.session.commit()
+                safe_execute(db.session.commit)
 
                 session.pop('reset_email', None)
 
@@ -499,7 +506,7 @@ def verify_code():
     if stored_code == entered_code:
         # Code matches, update verification status
         current_user.email_verified = True
-        db.session.commit()
+        safe_execute(db.session.commit)
         
         # Clear the code
         session["verification_codes"].pop(current_user.email, None)
@@ -518,16 +525,6 @@ def verify_code():
 @user_only
 def settings_page():
     return redirect(url_for('settings.settings_page'))
-
-# @app.route('/success')
-# def added_successfully():
-#   try:
-#     # Triggers the success alert function when the route is fetched
-#     # so that the Raspberry Pi LCD updates with the message 'Added!'.
-#     success.alert()
-#     return jsonify({"success": True})
-#   except Exception as e:
-#         return jsonify({"success": False, "error": str(e)})
 
 #### USER DASHBOARD ROUTES
 

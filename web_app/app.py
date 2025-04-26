@@ -557,7 +557,7 @@ def inject_notifications():
         result = notification.get_notifications(user_id) 
         if not result.get("success"):
             return dict(notifications=[], unread_count=0)
-        notifications = result.get("data")
+        notifications = result.get("notifications")
         unread_count = sum(1 for n in notifications if n[4] == 0) 
         return dict(notifications=notifications, unread_count=unread_count)  
     else:
@@ -583,7 +583,7 @@ def get_notifications():
     result = notification.get_notifications(user_id) 
     if not result.get("success"):
         return jsonify(result), 500
-    notifications = result.get("data")
+    notifications = result.get("notifications")
     
     unread_count = sum(1 for n in notifications if n[4] == 0)
     return jsonify({
@@ -1175,7 +1175,7 @@ def admin_get_tools():
     result = tool.get_tools()
     if not result.get("success"):
         return jsonify(result), 500
-    tools = result.get("data")
+    tools = result.get("tools")
     tools = dict(tools)
     return jsonify(tools)
 
@@ -1245,14 +1245,10 @@ def add_item_admin():
     # Checks that the format is correct for the expiry date.
     valid = input_handling.validate_expiry(expiry_date)
     if valid:
-        try:
             result = item.add_item(barcode, name, brand, expiry_date, quantity, unit)
             if not result.get("success"):
                 return jsonify(result), 500
             return jsonify({"success": True})
-        except Exception as e:
-            print(e)
-            return jsonify({'success': False, 'error': str(e)})
     else:
          return jsonify({'success': False, 'error': str("Expiry formatted incorrectly")})
 

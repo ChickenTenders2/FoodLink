@@ -82,7 +82,7 @@ def get_personal(user_id):
         cursor = connection.cursor()
         # search query uses full text for relevance based searching of items
         query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit, TRUE AS is_personal FROM FoodLink.item WHERE user_id = %s;"
-        data = (user_id, user_id)
+        data = (user_id,)
         cursor.execute(query, data)
         items = cursor.fetchall()
         return {"success": True, "items": items}
@@ -103,8 +103,8 @@ def barcode_search(user_id, barcode_number):
                     FROM FoodLink.item 
                     WHERE barcode = %s 
                     AND (user_id IS NULL OR user_id = %s)
-                    ORDER BY user_id;"""
-        data = (user_id, barcode_number, user_id)
+                    ORDER BY (user_id = %s) DESC;"""
+        data = (user_id, barcode_number, user_id, user_id)
         cursor.execute(query, data)
         item = cursor.fetchone()
         return {"success": True, "item": item}
@@ -120,8 +120,13 @@ def text_search(user_id, search_term):
     try:
         cursor = connection.cursor()
         # search query uses full text for relevance based searching of items
-        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit, CASE WHEN user_id = %s THEN TRUE ELSE FALSE END AS is_personal FROM FoodLink.item WHERE MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE) AND (user_id IS NULL OR user_id = %s);"
-        data = (user_id, search_term, user_id)
+        query = """SELECT id, barcode, name, brand, expiry_time, default_quantity, unit, 
+                    CASE WHEN user_id = %s THEN TRUE ELSE FALSE END AS is_personal 
+                    FROM FoodLink.item 
+                    WHERE MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE) 
+                    AND (user_id IS NULL OR user_id = %s)
+                    ORDER BY (user_id = %s) DESC;"""
+        data = (user_id, search_term, user_id, user_id)
         cursor.execute(query, data)
         items = cursor.fetchall()
         return {"success": True, "items": items}
@@ -137,8 +142,13 @@ def text_single_search(user_id, search_term):
     try:
         cursor = connection.cursor()
         # search query uses full text for relevance based searching of items
-        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit, CASE WHEN user_id = %s THEN TRUE ELSE FALSE END AS is_personal FROM FoodLink.item WHERE MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE) AND (user_id IS NULL OR user_id = %s);"
-        data = (user_id, search_term, user_id)
+        query = """SELECT id, barcode, name, brand, expiry_time, default_quantity, unit, 
+                    CASE WHEN user_id = %s THEN TRUE ELSE FALSE END AS is_personal 
+                    FROM FoodLink.item 
+                    WHERE MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE) 
+                    AND (user_id IS NULL OR user_id = %s) 
+                    ORDER BY (user_id = %s) DESC;"""
+        data = (user_id, search_term, user_id, user_id)
         cursor.execute(query, data)
         item = cursor.fetchone()
         return {"success": True, "item": item}
@@ -193,14 +203,14 @@ def process_add_form(form, user_id=None):
     default_quantity = form.get("default_quantity")
     unit = form.get("unit")
 
-    if not name or not default_quantity or not unit:
+    if not (name and default_quantity and unit):
         return {"success": False, "error": "Required value(s) missing."}
 
     day_str = form.get("expiry_day")
     month_str = form.get("expiry_month")
     year_str = form.get("expiry_year")
 
-    if not day_str or not month_str or not year_str:
+    if not (day_str and month_str and year_str):
         return {"success": False, "error": "Expiry time value(s) missing."}
     
     if not (day_str.isdigit() and month_str.isdigit() and year_str.isdigit()):
@@ -222,18 +232,23 @@ def process_add_form(form, user_id=None):
     return add_item(barcode, name, brand, expiry_time, default_quantity, unit, user_id)
 
 def update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, user_id=None):
+    ## if user submitted update, make sure theyre modifying their own item
+    if user_id:
+        result = owner_check(id, user_id)
+        if not result.get("success"):
+            return result
     cursor = None
     try:
         cursor = connection.cursor()
-        query = """UPDATE FoodLink.item SET 
+        query = f"""UPDATE FoodLink.item SET 
                     barcode = %s,
                     name = %s,
                     brand = %s,
                     expiry_time = %s,
                     default_quantity = %s,
                     unit = %s,
-                    user_id = %s
-                WHERE id = %s"""
+                    user_id = %s 
+                WHERE id = %s{" AND user_id = " + user_id if user_id else ""};""" 
         data = (barcode, name, brand, expiry_time, default_quantity, unit, user_id, id)
         cursor.execute(query, data)
         connection.commit()
@@ -257,14 +272,19 @@ def process_update_form(id, form, user_id=None):
     if not name or not default_quantity or not unit:
         return {"success": False, "error": "Required value(s) missing."}
     
-    # gets expiry time and converts to int to remove any leading zeros
-    # also checks inputs are numbers
-    day = int(form.get("expiry_day"))
-    month = int(form.get("expiry_month"))
-    year = int(form.get("expiry_year"))
+    day_str = form.get("expiry_day")
+    month_str = form.get("expiry_month")
+    year_str = form.get("expiry_year")
 
-    if not day or not month or not year:
+    if not (day_str and month_str and year_str):
         return {"success": False, "error": "Expiry time value(s) missing."}
+    
+    if not (day_str.isdigit() and month_str.isdigit() and year_str.isdigit()):
+        return {"success": False, "error": "Expiry time value(s) must be numbers."}
+
+    day = int(day_str)
+    month = int(month_str)
+    year = int(year_str)
 
     # makes sure expire date is not 0 and that each number is within the correct range
     if (day == 0 and month == 0 and year == 0) \
@@ -277,16 +297,27 @@ def process_update_form(id, form, user_id=None):
     # updates item with id
     return update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, user_id)
 
-def remove_item(id):
+def remove_item(id, user_id = None):
+    ## if user submitted, make sure theyre deleting their own item
+    if user_id:
+        result = owner_check(id, user_id)
+        if not result.get("success"):
+            return result
     # error removing item image is minor so doesnt effect result
     remove_item_image(id)
-    return remove_item_sql(id)
+    user_item = True if user_id else False
+    return remove_item_sql(id, user_item)
 
-def remove_item_sql(id):
+def remove_item_sql(id, user_item):
     cursor = None
     try:
         cursor = connection.cursor()
         cursor.execute("DELETE FROM item WHERE id = %s;", (id,))
+        if user_item:
+            # makes sure item is removed from inventories aswell
+            cursor.execute("DELETE FROM inventory WHERE item_id = %s", (id,))
+            # makes sure item report is removed aswell (if reported)
+            cursor.execute("DELETE FROM item_error WHERE new_item_id = %s", (id,))
         connection.commit()
         return {"success": True}
     except Exception as e:
@@ -305,3 +336,20 @@ def remove_item_image(id):
     except Exception as e:
         logging.error(f"[remove_item_image error] {e}")
 
+
+# checks if user is modifying their own item
+def owner_check(id, user_id):
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        cursor.execute("SELECT user_id FROM FoodLink.item WHERE id = %s;", (id,))
+        result = cursor.fetchone()
+        if not result or result[0] != user_id:
+            return {"success": False, "error": "Permission denied."}
+        return {"success": True}
+    except Exception as e:
+        logging.error(f"[owner_check error] {e}")
+        return {"success": False, "error": "An internal error occurred."}
+    finally:
+        if cursor:
+            cursor.close()

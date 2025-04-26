@@ -704,6 +704,34 @@ def new_item():
         return jsonify({"success": True, "item_id": item_id, "message": "Item added to inventory and personal items."})
     else:
         return jsonify(result)
+
+@app.route("/inventory/add_item/update", methods = ["POST"])
+@user_only
+def update_item_information():
+    user_id = current_user.id
+    item_id = request.form.get("item_id")
+    result = item.process_update_form(item_id, request.form, user_id)
+
+    # if the item was not succesffuly added to the item table
+    if not result.get("success"):
+        if result.get("error") == "An internal error occurred.":
+            return jsonify(result), 500
+        else:
+            return jsonify(result), 400
+    else:
+        # gets image if uploaded otherwise equals none
+        image = request.form.get("item_image", None)
+        # adds image if uploaded
+        item.add_item_image(image, item_id)
+    
+    if not request.form.get("add_to_inventory"):
+        return jsonify({"success": True, "message": "Personal item updated."})
+    
+    result = inventory.process_add_form(user_id, item_id, request.form)
+    if result.get("success"):
+        return jsonify({"success": True, "message": "Personal item updated and added to inventory."})
+    else:
+        return jsonify(result)
     
 @app.route("/inventory/update_items_quantity", methods=["POST"])
 @user_only
@@ -722,6 +750,17 @@ def update_quantities():
     if not result.get("success"):
         return jsonify(result), 500
     return jsonify(result)
+
+@app.route("/inventory/delete_item/<item_id>")
+@user_only
+def user_delete_item(item_id):
+    user_id = current_user.id
+    result = item.remove_item(item_id, user_id)
+    if not result.get("success"):
+        if result.get("error") == "Permission denied.":
+            return jsonify(result), 403 # forbidden
+        return jsonify(result), 500
+    return jsonify({"success": True, "message": "Item deleted and removed from inventory."})
 
 
 # ### BARCODE SCANNING ROUTES ###
@@ -770,6 +809,15 @@ def toggle_scan_mode(value):
 
 
 ### ITEM ROUTES ###
+    
+@app.route("/items/get_personal")
+@user_only
+def get_personal():
+    user_id = current_user.id
+    result = item.get_personal(user_id)
+    if not result.get("success"):
+        return jsonify(result), 500
+    return jsonify(result)
 
 @app.route("/items/single_text_search/<item_name>")
 @user_only
@@ -782,11 +830,10 @@ def single_item_search(item_name):
 
 
 # Get items by text search
-@app.route("/items/text_search", methods=["POST"])
+@app.route("/items/text_search/<search_term>")
 @user_only
-def text_search():
+def text_search(search_term):
     user_id = current_user.id
-    search_term = request.form.get("search_term")
     if not search_term:
         return jsonify({"success": False, "error": "No search term provided."}), 400
     

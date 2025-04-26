@@ -36,7 +36,7 @@ def get_cursor():
     return connection
 
 def commit():
-    commit()
+    connection.commit()
 
 def safe_rollback():
     global connection

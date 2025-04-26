@@ -36,6 +36,8 @@ function close_item_popup(to_scanner) {
         document.getElementById("close-popup").onclick = () => close_item_popup(false);
         start_check();
     }
+    // only attribute that has the ability to not get overriden on next open
+    document.getElementById("quantity").removeAttribute("max");
     const modify_action_button = document.getElementById("modify_action_button");
     modify_action_button.innerHTML = "Clone Item";
     modify_action_button.onclick = () => open_add_popup("clone");
@@ -44,7 +46,7 @@ function close_item_popup(to_scanner) {
 
 function open_search_popup() {
     close_not_found_popup();
-    stop_check();
+    stop_check();display_personal
     document.getElementById('search_popup').style.display = 'block';
 }
 
@@ -55,11 +57,11 @@ function close_search_popup() {
     document.getElementById('search_popup').style.display = 'none';
 }
 
-function open_personal_popup() {
+async function open_personal_popup() {
     document.getElementById("search-popup-title").innerHTML = "Personal Items";
     document.getElementById("search-form").style.display = "none";
     document.getElementById("close_search_popup").onclick = () => close_personal();
-    display_personal();
+    await display_personal();
     open_search_popup();
 }
 
@@ -117,7 +119,11 @@ async function add_clone_info() {
     const name = document.getElementById("name").value;
     const barcode = document.getElementById("barcode").value;
     const brand = document.getElementById("brand").value;
-    const default_quantity = document.getElementById("quantity").max;
+    let default_quantity = document.getElementById("quantity").max;
+    // incase of an item with no max quantity (i.e. loose item: banana, apple, etc)
+    if (!default_quantity) {
+        default_quantity = 1;
+    }
     const unit = document.getElementById("unit").value;
     // Fills in input boxes with information
     document.getElementById("expiry_day").value = days;
@@ -140,7 +146,6 @@ function close_add_popup(to_scanner, edit_mode = false) {
         document.getElementById("close-add-popup").onclick = () => close_add_popup(false);
     }
     if (edit_mode) {
-        console.log("edit mode close");
         document.getElementById("add-popup-title").innerHTML = "Add To Personal Items";
         document.getElementById("add-popup-submit").innerHTML = "Add Item";
         document.getElementById("add-form").onsubmit = (event) => add_new_item(event);
@@ -148,9 +153,12 @@ function close_add_popup(to_scanner, edit_mode = false) {
         document.getElementById("delete_item").style.display = "none";
         // closes item popup so there are no discrepancies
         document.getElementById("close-popup").click();
-        // if search popup open, refresh items
-        if (document.getElementById("search_popup").style.display != "none") {
+        // if normal search popup open, refresh items
+        if (document.getElementById("search-form").style.display != "none") {
             text_search_item();
+        }
+        // if personal items search popup is open, refresh items
+        else if (document.getElementById("search_popup").style.display != "none") {
         }
     }
     document.getElementById("expiry_day").value = null;
@@ -163,6 +171,7 @@ function close_add_popup(to_scanner, edit_mode = false) {
     document.getElementById("barcode_edit").value = null;
     document.getElementById("brand_edit").value = null;
     document.getElementById("default_quantity").value = null;
+    document.getElementById("default_quantity").max = null;
     document.getElementById("unit_edit").value = null;
     document.getElementById("quantity2").max = null;
     document.getElementById("quantity2").value = null;

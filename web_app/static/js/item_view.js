@@ -178,7 +178,7 @@ async function search() {
 
 async function next(event, max) {
     event.preventDefault()
-    if (index < parseInt(max)) {
+    if (index < max) {
         index++;
         localStorage.setItem('pageIndex', index);
         history.pushState(null, null, "/admin/item_view/get/" + index);

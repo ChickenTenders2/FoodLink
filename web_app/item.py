@@ -3,26 +3,49 @@ import logging
 from os.path import isfile as file_exists
 from os import remove as remove_file
 from shutil import copyfile as copy_file
+from math import ceil
 
 
 ##### ADMIN ONLY FUNCTIONS
 
-def get_all():
+def get_page(page):
     cursor = None
+    limit = 30
     try:
+        offset = int(page) * limit
         cursor = get_cursor()
-        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE user_id IS null;"
-        cursor.execute(query)
+        query = """SELECT id, barcode, name, brand, expiry_time, default_quantity, unit 
+                    FROM FoodLink.item 
+                    WHERE user_id IS null
+                    LIMIT %s OFFSET %s;"""
+        cursor.execute(query, (limit, offset))
         items = cursor.fetchall()
         return {"success": True, "items": items}
     except Exception as e:
-        logging.error(f"[item.get_all error] {e}")
+        logging.error(f"[item.get_page error] {e}")
         # detailed error report for admins
-        return {"success": False, "error": f"[item.get_all error] {e}"}
+        return {"success": False, "error": f"[item.get_page error] {e}"}
     finally:
         if cursor:
             cursor.close()
 
+def get_max_page():
+    cursor = None
+    try:
+        cursor = get_cursor()
+        query = """SELECT COUNT(*) FROM FoodLink.item WHERE user_id IS null;"""
+        cursor.execute(query)
+        count_tuple = cursor.fetchone()
+        count = count_tuple[0]
+        max_pages = ceil(count / 30) - 1
+        return {"success": True, "max": max_pages}
+    except Exception as e:
+        logging.error(f"[item.get_max_page error] {e}")
+        # detailed error report for admins
+        return {"success": False, "error": f"[item.get_max_page error] {e}"}
+    finally:
+        if cursor:
+            cursor.close()
 
 def get_item(item_id):
     cursor = None

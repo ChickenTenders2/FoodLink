@@ -3,10 +3,10 @@ import logging
 
 def get_recipes(search_term, page, user_id, user_only):
     cursor = None
+    limit = 10
     try:
+        offset = (int(page) - 1) * limit
         cursor = get_cursor()
-        limit = 10
-        offset = (page - 1) * limit
         query = f"""SELECT id, name, servings, prep_time, cook_time, instructions, user_id FROM recipe 
                     WHERE
                         {"MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE) AND" if search_term else ""}

@@ -1087,22 +1087,15 @@ def resolve_report():
 @app.route('/admin/item_view')
 @admin_only
 def get_items():
-    # Splits the list of items into several pages.
-    result = item.get_all()
+    result = item.get_page(1)
     if not result.get("success"):
-        return jsonify(result), 500
-    item_list = result.get("items")
-    current_page = []
-    items = []
-    for index, row in enumerate(item_list, start = 1):
-        if index % 30 == 0:
-            items.append(current_page)
-            current_page = []
-        else:
-            current_page.append(row)
-    items.append(current_page)
-    max = len(items) - 1
-    return render_template("item_view.html", items = items[0], max = max)
+        return result, 500
+    items = result.get("items")
+    result = item.get_max_page()
+    if not result.get("success"):
+        return result, 500
+    max_pages = result.get("max")
+    return render_template("item_view.html", items = items, max = max_pages)
 
 # allows for no search query to be entered
 @app.route('/admin/item_view/get', defaults={'search_query': None})
@@ -1111,23 +1104,22 @@ def get_items():
 def search_items(search_query = None):
         # Checks if the search is for a specifc page.
         if search_query.isnumeric():
-            result = item.get_all()
+            result = item.get_max_page()
             if not result.get("success"):
-                return jsonify(result), 500
-            item_list = result.get("items")
-            current_page = []
-            items = []
-            # Splits the items so that 30 are displayed per page.
-            for index, row in enumerate(item_list, start = 1):
-                if index % 30 == 0:
-                    items.append(current_page)
-                    current_page = []
-                else:
-                    current_page.append(row)
-            items.append(current_page)
-            max = len(items) - 1
+                return result, 500
+            max_pages = result.get("max")
+            page = int(search_query)
+            # error checking: makes sure page is in bounds
+            if page < 0:
+                page = 0
+            elif page > max_pages:
+                page = max_pages
+            result = item.get_page(page)
+            if not result.get("success"):
+                return result, 500
+            items = result.get("items")
             # Renders the page with the given index query.
-            return render_template("item_view.html", items = items[int(search_query)], max = max)
+            return render_template("item_view.html", items = items, max = max_pages)
         else:
             # Searches for an item if query is provided otherwise gets all items.
             result = item.get_item_from_name(search_query)
@@ -1490,7 +1482,7 @@ def get_recipes():
     user_tool_ids = result.get("ids")
 
     search_term = request.form.get("search_term")
-    page = int(request.form.get("page"))
+    page = request.form.get("page")
 
     print(search_term)
     personal_only = request.form.get("personal_only") == "on"

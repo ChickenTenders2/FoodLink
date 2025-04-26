@@ -1908,13 +1908,49 @@ button:hover { background-color: #8fca6c; color: white; }
     color: white;
   }
   
-.button-divider {
-    padding-top: 10;
-    width: 1px;
-    height: 40px; 
+  .item-view-form {
+    display: flex;
+    align-items: flex-end; /* aligns inputs, buttons, divider nicely */
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-width: 100%;
+}
+
+.item-view-form input[type="text"] {
+    font-size: 16px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    background-color: #f3f3f3;
+    padding: 10px 12px;
+    width: 250px;
+    height: 42px; /* consistent height with buttons */
+    box-sizing: border-box;
+    margin-top: 0; /* no extra margin above */
+}
+
+.item-view-form button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    background-color: #a6d785;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+    height: 42px; /* match input height */
+}
+
+.item-view-form button:hover {
+    background-color: #8fca6c;
+}
+
+.item-view-form .button-divider {
+    width: 2px;
+    height: 42px;
     background-color: #ccc;
     margin: 0 0px;
-    align-self: center;
+    align-self: flex-end; /* aligns bottom of buttons */
 }
 
 .hidden-button {
@@ -1993,4 +2029,32 @@ button:hover { background-color: #8fca6c; color: white; }
         padding: 8px;
         font-size: 14px;
     }
+}
+
+.tool-input-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+.tool-input-row input[type="text"] {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.delete-tool-btn {
+    background-color: #f44336;
+    border: none;
+    color: white;
+    font-size: 18px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.delete-tool-btn:hover {
+    background-color: #d32f2f;
 }

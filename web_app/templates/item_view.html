@@ -7,7 +7,7 @@
 {% block page_content %}
     <div>
         <!-- search and sort form -->
-        <form method="GET" action="/admin/item_view" class="filter-form" id="filter-form">
+        <form method="GET" action="/admin/item_view" class="item-view-form" id="filter-form">
             <input type="text" id="search-input" name="search" placeholder="Search items..." value="{{request.args.get('search_query', '')}}">
             <button type="submit">Search</button>
             <div class="button-divider"></div>

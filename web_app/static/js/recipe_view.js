@@ -330,24 +330,22 @@ async function create_list_tools(recipe_id) {
 
 function add_tool_display_row(tool_id = "", recipe_id = "", add = false) {
     const row = document.createElement("div");
-    row.className = "tool-row";
+    row.className = "tool-input-row";
 
     // If the user is adding the format of the form is slightly altered.
     if (add) {
         row.innerHTML = `
         <input type="text" name="tools[]" placeholder="Tools" id="Tools" required value="${""}">
-        <br>
         <input type="hidden" name="recipe-id" placeholder="recipe-id" required value="${recipe_id}">
-        <button type="button" onclick="remove_conditional(this)">X</button>
+        <button type="button" class="delete-tool-btn" onclick="remove_conditional(this)">X</button>
     `;
     } else {
     // Displays information and creates button which removes tool on click.
     row.innerHTML = `
         <label for "Tools">${window.tools[tool_id]}</label>
         <input type="text" name="tools[]" placeholder="Tools" id="Tools" required value="${tool_id}">
-        <br>
         <input type="hidden" name="recipe-id" placeholder="recipe-id" required value="${recipe_id}">
-        <button type="button" onclick="remove_conditional(this)">X</button>
+        <button type="button" class="delete-tool-btn" onclick="remove_conditional(this)">X</button>
     `;
     }
     document.getElementById("tools_list_container").appendChild(row);

@@ -1087,7 +1087,7 @@ def resolve_report():
 @app.route('/admin/item_view')
 @admin_only
 def get_items():
-    result = item.get_page(1)
+    result = item.get_page(0)
     if not result.get("success"):
         return result, 500
     items = result.get("items")
@@ -1639,5 +1639,5 @@ def remove_recipe(recipe_id):
 
 if __name__ == '__main__':
     # Runs the app
-    app.run()
+    app.run(debug=True)
 

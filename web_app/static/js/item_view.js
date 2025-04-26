@@ -170,7 +170,7 @@ async function search() {
         index = 0
         localStorage.setItem('pageIndex', index)
         history.pushState(null, null, "/admin/item_view");
-        //fetch("/admin/item_view/");
+        fetch("/admin/item_view");
         location.reload();
     }
 }

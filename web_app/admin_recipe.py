@@ -86,7 +86,6 @@ def update_recipe_ingredients(recipe_id, names, units, quantities):
         cursor.execute(query, data)
         
         for name, unit, quantity in zip(names, units, quantities):
-            cursor = connection.cursor()
             query = "INSERT INTO recipe_items (recipe_id, item_name, unit, quantity) VALUES (%s, %s, %s, %s);"
             data = [recipe_id, name, unit, quantity]
             cursor.execute(query, data)
@@ -106,7 +105,6 @@ def add_recipe_ingredients(recipe_id, names, units, quantities):
     try:
         cursor = connection.cursor()
         for name, unit, quantity in zip(names, units, quantities):
-            cursor = connection.cursor()
             query = "INSERT INTO recipe_items (recipe_id, item_name, unit, quantity) VALUES (%s, %s, %s, %s);"
             data = [recipe_id, name, unit, quantity]
             cursor.execute(query, data)
@@ -148,7 +146,6 @@ def update_recipe_tools(recipe_id, tool_ids):
         cursor.execute(query, data)
         
         for tool in tool_ids:
-            cursor = connection.cursor()
             query = "INSERT INTO recipe_tool (recipe_id, tool_id) VALUES (%s, %s);"
             data = [recipe_id, tool]
             cursor.execute(query, data)
@@ -168,7 +165,6 @@ def add_recipe_tools(recipe_id, tool_ids):
     try:
         cursor = connection.cursor()
         for tool in tool_ids:
-            cursor = connection.cursor()
             query = "INSERT INTO recipe_tool (recipe_id, tool_id) VALUES (%s, %s);"
             data = [recipe_id, tool]
             cursor.execute(query, data)

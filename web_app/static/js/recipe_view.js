@@ -23,8 +23,7 @@ async function remove_item(id) {
 
 // Opens the item information popup.
 function open_popup(recipeName, name, servings, prep, cook, instructions, recipe_id, add=false) {
-    // Sets values in popup to those of the item.
-
+    
     // Add is a boolean check to see if items are updated or added to the database.
     if (add == true) {
         document.getElementById('popup-title').innerText = `Add ${recipeName}`;
@@ -32,22 +31,23 @@ function open_popup(recipeName, name, servings, prep, cook, instructions, recipe
         document.getElementById('update-form').addEventListener('submit', function(event) {
             submit_next_add(event);});
 
-        document.getElementById('exit').style.display = "block";
     } else {
         // Adds the functionality to submit the form and move to the next state.
         document.getElementById('popup-title').innerText = `Edit ${recipeName}`;
-
+        
         document.getElementById('update-form').addEventListener('submit', function(event) {
             submit_next_update(event, recipe_id);});
-        
-        // moved delete button inside popup
-        const deleteBtn = document.getElementById('delete_button');
-        deleteBtn.style.display = 'inline-block';
-        deleteBtn.onclick = () => {
-            remove_item(recipe_id);
+            
+            // moved delete button inside popup
+            const deleteBtn = document.getElementById('delete_button');
+            deleteBtn.style.display = 'inline-block';
+            deleteBtn.onclick = () => {
+                remove_item(recipe_id);
+            }
         }
-    }
-
+        
+    // Sets values in popup to those of the item.
+    
     document.getElementById('name').value = name;
     document.getElementById('servings').value = servings;
     document.getElementById('prep').value = prep;
@@ -67,7 +67,6 @@ function open_popup(recipeName, name, servings, prep, cook, instructions, recipe
 function close_popup() {
     document.getElementById('popup').style.display = 'none';
     document.getElementById('delete_button').style.display = "none";
-    document.getElementById('exit').style.display = "none";
 }
 
 async function submit_next_update(event, recipe_id) {

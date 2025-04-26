@@ -248,7 +248,7 @@ def update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, u
                     default_quantity = %s,
                     unit = %s,
                     user_id = %s 
-                WHERE id = %s{" AND user_id = " + user_id if user_id else ""};""" 
+                WHERE id = %s;""" 
         data = (barcode, name, brand, expiry_time, default_quantity, unit, user_id, id)
         cursor.execute(query, data)
         connection.commit()
@@ -348,7 +348,7 @@ def owner_check(id, user_id):
             return {"success": False, "error": "Permission denied."}
         return {"success": True}
     except Exception as e:
-        logging.error(f"[owner_check error] {e}")
+        logging.error(f"[item.owner_check error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:

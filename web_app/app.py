@@ -1590,6 +1590,7 @@ def add_recipe():
 @app.route("/recipes/update", methods=["POST"])
 @user_only
 def update_recipe():
+    user_id = current_user.id
     recipe_id = request.form.get("recipe_id")
     name = request.form.get("name")
     servings = request.form.get("servings")
@@ -1616,7 +1617,7 @@ def update_recipe():
     print(tool_ids)
 
     # performs update functions
-    result = recipe_sql.edit_recipe(recipe_id, name, servings, prep_time, cook_time, instructions, ingredients, tool_ids)
+    result = recipe_sql.edit_recipe(recipe_id, name, servings, prep_time, cook_time, instructions, ingredients, tool_ids, user_id)
     if not result.get("success"):
         return jsonify(result), 500
     return jsonify(result)
@@ -1624,7 +1625,8 @@ def update_recipe():
 @app.route("/recipes/delete/<recipe_id>")
 @user_only
 def remove_recipe(recipe_id):
-    result = recipe_sql.remove_recipe(recipe_id)
+    user_id = current_user.id
+    result = recipe_sql.remove_recipe(recipe_id, user_id)
     if not result.get("success"):
         return jsonify(result), 500
     return result

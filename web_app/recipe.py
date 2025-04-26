@@ -44,7 +44,12 @@ def get_recipe(recipe_id):
         if cursor:
             cursor.close()
 
-def remove_recipe(recipe_id):
+def remove_recipe(recipe_id, user_id=None):
+    ## if user submitted, make sure theyre deleting their own recipe
+    if user_id:
+        result = owner_check(recipe_id, user_id)
+        if not result.get("success"):
+            return result
     cursor = None
     try:
         cursor = connection.cursor()
@@ -95,7 +100,12 @@ def add_recipe(name, servings, prep_time, cook_time, instructions, items, tool_i
         if cursor:
             cursor.close()
 
-def edit_recipe(cursor, recipe_id, name, servings, prep_time, cook_time, instructions, items, tool_ids):
+def edit_recipe(cursor, recipe_id, name, servings, prep_time, cook_time, instructions, items, tool_ids, user_id=None):
+    ## if user submitted, make sure theyre editing their own recipe
+    if user_id:
+        result = owner_check(recipe_id, user_id)
+        if not result.get("success"):
+            return result
     cursor = None
     try:
         cursor = connection.cursor()
@@ -145,6 +155,24 @@ def edit_recipe_items(cursor, recipe_id, items):
     data = [(recipe_id, item_name, quantity, unit) for item_name, quantity, unit in items]
     # executes all queries
     cursor.executemany(query, data)
+
+# checks if user is modifying their own recipe
+def owner_check(id, user_id):
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        cursor.execute("SELECT user_id FROM recipe WHERE id = %s;", (id,))
+        result = cursor.fetchone()
+        if not result or result[0] != user_id:
+            return {"success": False, "error": "Permission denied."}
+        return {"success": True}
+    except Exception as e:
+        logging.error(f"[recipe.owner_check error] {e}")
+        return {"success": False, "error": "An internal error occurred."}
+    finally:
+        if cursor:
+            cursor.close()
+
 
 def get_recipe_tools(recipe_id):
     cursor = None

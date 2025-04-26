@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="video-window">
+        <button onclick="open_personal_popup()">Personal Items</button>
         <button onclick="open_search_popup()">Text search</button>
         <br>
         <label>Switch to AI Item recognition?</label>
@@ -24,9 +25,9 @@
     </div>
 
     <div id="search_popup" class="popup">
-        <h2 id="popup-title">Search for item</h2>
+        <h2 id="search-popup-title">Search for item</h2>
         <button id="close_search_popup" onclick="close_search_popup()">×</button>
-        <form id="update-form" method="POST" onsubmit="text_search_item(event)">
+        <form id="search-form" method="POST" onsubmit="text_search_item(event)">
             <input type="text" spellcheck="true" id="search_term" name="search_term" placeholder="Enter item name..." required>
             <button type="submit">Search</button>
         </form>
@@ -36,7 +37,7 @@
 
     <!-- added popup from inventory.html for inputting data of new item-->
     <div id="popup" class="popup">
-        <h2 id="popup-title">Add Item To Inventory</h2>
+        <h2 id="inv-popup-title">Add Item To Inventory</h2>
         <button id="close-popup" onclick="close_item_popup(false)">×</button>
         <!-- on error used to set default image if there is no image for the item-->
         <img class="item_img" id="item_image" src="" alt="">
@@ -69,7 +70,7 @@
     </div>
 
     <div id="add-popup" class="popup">
-        <h2 id="popup-title">Add To Personal Items</h2>
+        <h2 id="add-popup-title">Add To Personal Items</h2>
         <button id="close-add-popup" onclick="close_add_popup(false)">×</button>
         <!-- on error used to set default image if there is no image for the item-->
         <img class="item_img" id="image_preview" src="/static/images/null.jpg" alt="">
@@ -114,8 +115,9 @@
                 <input type="number" id="quantity2" name="quantity" min="1">
             </div>
             <input type="hidden" id="original_item_id" name="item_id">
-            <button type="submit">Add Item</button>
+            <button id="add-popup-submit" type="submit">Add Item</button>
         </form>
+        <button class="hidden-button" id="delete_item" onclick="delete_item()">Delete item</button>
     </div>
 
     <div id="report_popup" class="popup">

@@ -27,7 +27,6 @@ async function open_item_popup(item, estimated_expiry, from_scanner) {
         const modify_action_button = document.getElementById("modify_action_button");
         modify_action_button.innerHTML = "Edit Item";
         modify_action_button.onclick = () => open_add_popup("edit");
-
     }
 }
 
@@ -54,6 +53,21 @@ function close_search_popup() {
     document.getElementById("search_term").value = "";
     document.getElementById("search_results").innerHTML = "";
     document.getElementById('search_popup').style.display = 'none';
+}
+
+function open_personal_popup() {
+    document.getElementById("search-popup-title").innerHTML = "Personal Items";
+    document.getElementById("search-form").style.display = "none";
+    document.getElementById("close_search_popup").onclick = () => close_personal();
+    display_personal();
+    open_search_popup();
+}
+
+function close_personal() {
+    document.getElementById("close_search_popup").onclick = () => close_search_popup();
+    document.getElementById("search-popup-title").innerHTML = "Search for item";
+    document.getElementById("search-form").style.display = "block";
+    close_search_popup();
 }
 
 function select_item(item, from_scanner) {
@@ -83,6 +97,14 @@ function open_add_popup(where_from, object = null) {
         const search_term = document.getElementById("search_term").value;
         document.getElementById("name_edit").value = search_term;
     }
+    else if (where_from == "edit") {
+        add_clone_info();
+        document.getElementById("add-popup-title").innerHTML = "Edit Personal Item";
+        document.getElementById("add-popup-submit").innerHTML = "Update Item";
+        document.getElementById("add-form").onsubmit = (event) => add_update_item(event);
+        document.getElementById("close-add-popup").onclick = () => close_add_popup(false, true);
+        document.getElementById("delete_item").style.display = "block";
+    }
     // Displays popup
     document.getElementById('add-popup').style.display = 'block';
 }
@@ -111,10 +133,25 @@ async function add_clone_info() {
     document.getElementById("unit_edit").value = unit;
 }
 
-function close_add_popup(to_scanner) {
+function close_add_popup(to_scanner, edit_mode = false) {
+    console.log("close add popup");
     if (to_scanner) {
         start_check();
         document.getElementById("close-add-popup").onclick = () => close_add_popup(false);
+    }
+    if (edit_mode) {
+        console.log("edit mode close");
+        document.getElementById("add-popup-title").innerHTML = "Add To Personal Items";
+        document.getElementById("add-popup-submit").innerHTML = "Add Item";
+        document.getElementById("add-form").onsubmit = (event) => add_new_item(event);
+        document.getElementById("close-add-popup").onclick = () => close_add_popup(false);
+        document.getElementById("delete_item").style.display = "none";
+        // closes item popup so there are no discrepancies
+        document.getElementById("close-popup").click();
+        // if search popup open, refresh items
+        if (document.getElementById("search_popup").style.display != "none") {
+            text_search_item();
+        }
     }
     document.getElementById("expiry_day").value = null;
     document.getElementById("expiry_month").value = null;
@@ -224,17 +261,27 @@ function toggle_inventory_fields() {
 
 async function text_search_item(event) {
     // Prevent the form from submitting normally
-    event.preventDefault(); 
+    if (event) {
+        event.preventDefault(); 
+    }
 
-    // Recreates form
-    const form = event.target;
-    const formData = new FormData(form);
+    const search_term = document.getElementById("search_term").value;
 
-    // Sends update command and waits for response
-    const response = await fetch('/items/text_search', {
-        method: 'POST',
-        body: formData,
-    });
+    // fetches and waits for result
+    const response = await fetch('/items/text_search/' + search_term);
+
+    //Waits until result is recieved
+    const result = await response.json();
+    if (result.success) {
+        display_search_results(result.items)
+    } else {
+        alert('There was an error searching. Error: ' + result.error);
+    }
+}
+
+async function display_personal() {
+
+    const response = await fetch('/items/get_personal');
 
     //Waits until result is recieved
     const result = await response.json();
@@ -346,7 +393,34 @@ async function add_item(event) {
     }
 }
 
-// Adds item to inventory
+// Updates personal item and potentially adds to inventory
+async function add_update_item(event) {
+    // Prevent the form from submitting normally
+    event.preventDefault(); 
+
+    // Recreates form
+    const form = event.target;
+    const formData = new FormData(form);
+
+    // Sends update command and waits for response
+    const response = await fetch("/inventory/add_item/update", {
+        method: 'POST',
+        body: formData,
+    });
+
+    //Waits until result is recieved
+    const result = await response.json();
+
+    if (result.success) {
+        alert(result.message);
+        close_add_popup(false, true);
+    } else {
+        alert('There was an error updating the item. Error: ' + result.error);
+    }
+}
+
+
+// Adds new personal item and potentially to inventory
 async function add_new_item(event) {
     // Prevent the form from submitting normally
     event.preventDefault(); 
@@ -373,6 +447,24 @@ async function add_new_item(event) {
 
     } else {
         alert('There was an error adding the item. Error: ' + result.error);
+    }
+}
+
+// deletes item from table and inventory
+async function delete_item() {
+    if (!confirm("Are you sure you want to delete this item? It will also be removed from your inventory.")) {
+        return;
+    }
+    const item_id = document.getElementById("original_item_id").value;
+
+    const response = await fetch('/inventory/delete_item/'+item_id)               
+    let result = await response.json();
+
+    if (result.success) {
+        alert(result.message);
+        close_add_popup(false, true);
+    } else {
+        alert(result.error);
     }
 }
 

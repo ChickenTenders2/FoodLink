@@ -33,7 +33,7 @@ def get_connection():
 
 def get_cursor():
     connection = get_connection()
-    return connection
+    return connection.cursor()
 
 def commit():
     connection.commit()

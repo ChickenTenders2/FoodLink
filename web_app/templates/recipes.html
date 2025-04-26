@@ -45,7 +45,7 @@
     </div>
 
     <div id="recipe_popup" class="popup">
-        <button id="close_recipe_popup" onclick="close_recipe_popup()">X</button>
+        <button class="close-popup" id="close_recipe_popup" onclick="close_recipe_popup()">×</button>
         <h2>
             <input id="recipe_popup_title" class="recipe-title-input" placeholder="Enter name..." readonly>
         </h2>
@@ -70,7 +70,7 @@
                 <div id="recipe_popup_instructions" class="instructions-container"></div>
             </div>
         </div>
-
+        <div class="button-group">
         <button class="hidden-button" id="toggle_edit" value="false">Edit Recipe</button>
         <button class="hidden-button" id="edit_ingredients">Edit Ingredients</button>
         <button class="hidden-button" id="edit_tools">Edit Tools</button>
@@ -79,18 +79,19 @@
         <button id="create_recipe">Create Recipe</button>
         <button id="add_to_shopping_list_button" onclick="open_add_to_shopping_popup()">Shop Insufficient Items</button>
         <button class="hidden-button" id="clone_recipe">Clone recipe</button>
+        </div>
     </div>
 
     <div id="add_to_shopping_popup" class="popup">
         <h3>Add to Shopping List</h3>
-        <button onclick="close_add_to_shopping_popup()">×</button>
+        <button class="close-popup" onclick="close_add_to_shopping_popup()">×</button>
         <div id="shopping_list_ingredient_container"></div>
         <button onclick="submit_to_shopping_list()">Add Selected</button>
       </div>
 
     <div id="edit_ingredients_popup" class="popup">
         <h3>Edit Ingredients</h3>
-        <button onclick="close_edit_ingredients_popup()">×</button>
+        <button class="close-popup" onclick="close_edit_ingredients_popup()">×</button>
         <div id="ingredients_list_container"></div>
         <button type="button" onclick="add_ingredient_row()">+ Add Ingredient</button>
         <br><br>
@@ -99,7 +100,7 @@
 
     <div id="edit_tools_popup" class="popup">
         <h3>Edit Tools</h3>
-        <button id="close-popup" onclick="close_edit_tools_popup()">×</button>
+        <button class="close-popup" id="close-popup" onclick="close_edit_tools_popup()">×</button>
         <div id="tools_list_container"></div>
         <div id="tool_add_controls"></div>
         <button id="save_tools" onclick="update_tools()">Save Tools</button>
@@ -107,7 +108,7 @@
 
     <div id="ingredient_overview_popup" class="popup">
         <h3>Ingredient Overview</h3>
-        <button onclick="close_ingredient_overview()">X</button>
+        <button class="close-popup" onclick="close_ingredient_overview()">×</button>
         <div id="ingredient_scroll_container"></div>
         <div id="overview_controls">
             <button onclick="update_inventory_quantities()">Update Inventory</button>
@@ -116,7 +117,7 @@
 
     <div id="select_inventory_popup" class="popup">
         <h3>Select an Inventory Item</h3>
-        <button onclick="close_inventory_selector()">X</button>
+        <button class="close-popup" onclick="close_inventory_selector()">×</button>
         <input type="text" id="inventory_search_input" placeholder="Search inventory..." oninput="filter_inventory_items()">
         <div id="inventory_items_scroll" class="inventory-scroll-list">
         </div>

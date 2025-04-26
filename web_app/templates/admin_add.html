@@ -23,12 +23,11 @@
 
             {{ form.submit() }}
         </form>
-    </div>
+
+        {% if message %}
+            <div class="message">{{ message }}</div>
+        {% endif %}
 </div>
-
-{% if message %}
-    <div class="message">{{ message }}</div>
-{% endif %}
-
+</div>
 <!-- <a class="home-link" href="{{ url_for('AdminDashboard') }}">Back to Dashboard</a> -->
 {% endblock %}

@@ -1392,6 +1392,7 @@ def add_shopping_item():
 @app.route('/shopping_list/update', methods=['POST'])
 @user_only
 def update_shopping_item():
+    user_id = current_user.id
     item_id = request.form.get('item_id')
     item_name = request.form.get('item_name')
     quantity = request.form.get('quantity')

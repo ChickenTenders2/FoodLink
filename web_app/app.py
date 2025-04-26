@@ -257,10 +257,13 @@ def AdminUpdatePassword():
     message = None
 
     if form.validate_on_submit():
+        new_password = form.new_password.data
         if not check_password_hash(current_user.password, form.current_password.data):
             message = "Current password is incorrect."
         elif form.new_password.data != form.confirm_password.data:
             message = "New passwords do not match."
+        elif not (len(new_password) >= 6 and sum(c.isdigit() for c in new_password) >= 2 and re_search(r"[!@#$%^&*(),.?\":{}|<>]", new_password)):
+            message = "Password must be at least 6 characters, include at least 2 numbers, and 1 special character."
         else:
             current_user.password = generate_password_hash(form.new_password.data)
             db.session.commit()

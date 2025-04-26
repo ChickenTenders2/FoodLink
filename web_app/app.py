@@ -574,13 +574,11 @@ def get_notifications():
     user_id = current_user.id
     token = thingsboard.get_jwt_token()
     data = thingsboard.get_telemetry(token, device_id)
-
-    temperature = humidity = None
     if data:
         temperature = float(data['temperature'][0]['value'])
         humidity = float(data['humidity'][0]['value'])
-
-    notification.temperature_humidity_notification(user_id, temperature, humidity)
+        notification.temperature_humidity_notification(user_id, temperature, humidity)
+    
     notification.expiry_notification(user_id)
 
     result = notification.get_notifications(user_id) 
@@ -1639,5 +1637,5 @@ def remove_recipe(recipe_id):
 
 if __name__ == '__main__':
     # Runs the app
-    app.run(debug=True)
+    app.run()
 

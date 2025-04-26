@@ -41,7 +41,7 @@ def commit():
 def safe_rollback():
     global connection
     try:
-        safe_rollback()
+        connection.rollback()
     except mariadb.InterfaceError as e:
         logging.error(f"[ERROR] Rollback failed, connection lost: {e}")
         try:

@@ -762,7 +762,7 @@ a.tile-link {
 .shopping-item {
     background-color: #d4edc9;
     border-radius: 10px;
-    padding: 15px 20px;
+    padding: 10px 20px;
     font-size: 18px;
     display: flex;
     justify-content: space-between;
@@ -782,6 +782,7 @@ a.tile-link {
     display: flex;
     gap: 6px;
     align-items: center;
+    margin-top: -10x;
 }
 
 .item-actions button {
@@ -794,9 +795,9 @@ a.tile-link {
     vertical-align: middle;
   }
 
-  .item-actions form button {
+  /* .item-actions form button {
     transform: translateY(-10px);
-  }
+  } */
   
   
 

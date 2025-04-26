@@ -1803,7 +1803,7 @@ button:hover { background-color: #8fca6c; color: white; }
     justify-content: center;
     /* margin: 20px 10px 30px; */
     flex-wrap: wrap;
-    gap: 10px;
+
     max-width: 100%;
 }
 
@@ -1887,7 +1887,6 @@ button:hover { background-color: #8fca6c; color: white; }
     justify-content: center;
     align-items: center;
     gap: 15px;
-    margin: 20px 0;
     flex-wrap: wrap;
   }
   
@@ -1899,7 +1898,6 @@ button:hover { background-color: #8fca6c; color: white; }
     padding: 10px 20px;
     background-color: #a6d785;
     border: none;
-    border-radius: 10px;
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -1910,18 +1908,13 @@ button:hover { background-color: #8fca6c; color: white; }
     color: white;
   }
   
-
-/* Add New Item Button */
-.next-form-container .add {
-    padding: 12px 30px;
-    margin-right: 1035px;
-    min-width: 180px;
-    background-color: #a6d785;
-    color: black;
-    font-size: 18px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
+.button-divider {
+    padding-top: 10;
+    width: 1px;
+    height: 40px; 
+    background-color: #ccc;
+    margin: 0 0px;
+    align-self: center;
 }
 
 .hidden-button {

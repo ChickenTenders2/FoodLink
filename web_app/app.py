@@ -5,7 +5,7 @@ import os
 
 ### shared operations for user and admin:
 # for scanning items (barcode or ai object recogniser)
-import scanner
+#import scanner
 # for checking item image exists
 from os.path import isfile as file_exists
 
@@ -696,7 +696,7 @@ def new_item():
             return jsonify(result), 400
     else:
         # gets image if uploaded otherwise equals none
-        image = request.form.get("item_image", None)
+        image = request.files.get("item_image")
         original_item_id = request.form.get("item_id") or None
         # adds image if uploaded or uses cloned image if possible
         item.add_item_image(image, item_id, original_item_id)
@@ -725,7 +725,7 @@ def update_item_information():
             return jsonify(result), 400
     else:
         # gets image if uploaded otherwise equals none
-        image = request.form.get("item_image", None)
+        image = request.files.get("item_image")
         # adds image if uploaded
         item.add_item_image(image, item_id)
     
@@ -890,7 +890,7 @@ def append_item_db():
     
     item_id = result.get("item_id")
     # gets image if uploaded otherwise equals none
-    image = request.form.get("item_image")
+    image = request.files.get("item_image")
     # adds image if uploaded
     item.add_item_image(image, item_id)
     # item id does not need to be returned
@@ -965,7 +965,7 @@ def resolve_report():
     new_item_id = request.form.get("new_item_id")
     original_item_id = request.form.get("item_id") or None
     # gets image if uploaded otherwise equals none
-    image = request.form.get("item_image", None)
+    image = request.files.get("item_image")
     # if the missing item reported isnt elligible for being added 
     if action == "deny" and original_item_id is None:
         # gets the reports
@@ -1111,23 +1111,23 @@ def get_items():
 def search_items(search_query = None):
         # Checks if the search is for a specifc page.
         if search_query.isnumeric():
-                result = item.get_all()
-                if not result.get("success"):
-                    return jsonify(result), 500
-                item_list = result.get("items")
-                current_page = []
-                items = []
-                # Splits the items so that 30 are displayed per page.
-                for index, row in enumerate(item_list, start = 1):
-                    if index % 30 == 0:
-                        items.append(current_page)
-                        current_page = []
-                    else:
-                        current_page.append(row)
-                items.append(current_page)
-                max = len(items) - 1
-                # Renders the page with the given index query.
-                return render_template("item_view.html", items = items[int(search_query)], max = max)
+            result = item.get_all()
+            if not result.get("success"):
+                return jsonify(result), 500
+            item_list = result.get("items")
+            current_page = []
+            items = []
+            # Splits the items so that 30 are displayed per page.
+            for index, row in enumerate(item_list, start = 1):
+                if index % 30 == 0:
+                    items.append(current_page)
+                    current_page = []
+                else:
+                    current_page.append(row)
+            items.append(current_page)
+            max = len(items) - 1
+            # Renders the page with the given index query.
+            return render_template("item_view.html", items = items[int(search_query)], max = max)
         else:
             # Searches for an item if query is provided otherwise gets all items.
             result = item.get_item_from_name(search_query)
@@ -1149,7 +1149,7 @@ def admin_get_recipes():
     recipes = result.get("recipes")
     return render_template("recipe_view.html", recipes = recipes)
 
-@app.route('/admin/recipe_view/add_item/<int:recipe_id>', methods=['GET'])
+@app.route('/admin/recipe_view/gets_items/<int:recipe_id>', methods=['GET'])
 @admin_only
 def get_ingredients(recipe_id):
     result = recipe_sql.get_recipe_items(recipe_id)
@@ -1207,7 +1207,7 @@ def update_item_admin():
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_handling.sanitise_all(['name', 'brand', 'quantity', 
                                                 'expiry', 'unit'])
-    inventory_id = request.form.get('inventory_id')
+    item_id = request.form.get('item_id')
     name = sanitised_fields[0]
     brand = sanitised_fields[1]
     quantity = sanitised_fields[2]
@@ -1218,13 +1218,19 @@ def update_item_admin():
         barcode = None
     # Checks that the format is correct for the expiry date.
     valid = input_handling.validate_expiry(expiry_date)
-    if valid:
-        result = item.update_item(inventory_id, barcode, name, brand, expiry_date, quantity, unit)
-        if not result.get("success"):
-            return jsonify(result), 500
-        return jsonify(result)
-    else:
-         return jsonify({'success': False, 'error': str("Expiry formatted incorrectly")})
+    valid = input_handling.validate_expiry(expiry_date)
+    if not valid:
+         return jsonify({'success': False, 'error': "Expiry formatted incorrectly"}), 400
+    result = item.update_item(item_id, barcode, name, brand, expiry_date, quantity, unit)
+    if not result.get("success"):
+        return jsonify(result), 500
+
+    # gets image if uploaded otherwise equals none
+    image = request.files.get("item_image")
+    # adds image if uploaded
+    item.add_item_image(image, item_id)
+    # item id does not need to be returned
+    return jsonify({"success": True})
     
 # Adds a new item to the database.
 @app.route('/admin/item_view/add_item', methods = ['POST'])
@@ -1243,16 +1249,22 @@ def add_item_admin():
         barcode = None
     # Checks that the format is correct for the expiry date.
     valid = input_handling.validate_expiry(expiry_date)
-    if valid:
-            result = item.add_item(barcode, name, brand, expiry_date, quantity, unit)
-            if not result.get("success"):
-                return jsonify(result), 500
-            return jsonify({"success": True})
-    else:
-         return jsonify({'success': False, 'error': str("Expiry formatted incorrectly")})
+    if not valid:
+         return jsonify({'success': False, 'error': "Expiry formatted incorrectly"}), 400
+    result = item.add_item(barcode, name, brand, expiry_date, quantity, unit)
+    if not result.get("success"):
+        return jsonify(result), 500
+    
+    item_id = result.get("item_id")
+    # gets image if uploaded otherwise equals none
+    image = request.files.get("item_image")
+    # adds image if uploaded
+    item.add_item_image(image, item_id)
+    # item id does not need to be returned
+    return jsonify({"success": True})
 
 # Updates the details of a selected recipe in the recipe table.
-@app.route('/admin/item_view/update_recipe', methods = ['POST'])
+@app.route('/admin/recipe_view/update_recipe', methods = ['POST'])
 @admin_only
 def update_recipe_admin():
     # Sanitise the input to prevent sql injection.
@@ -1270,7 +1282,7 @@ def update_recipe_admin():
     return jsonify(result)
     
 # Adds the details of a selected recipe in the recipe table.
-@app.route('/admin/item_view/add_recipe', methods = ['POST'])
+@app.route('/admin/recipe_view/add_recipe', methods = ['POST'])
 @admin_only
 def add_recipe_admin():
     # Sanitise the input to prevent sql injection.
@@ -1286,7 +1298,7 @@ def add_recipe_admin():
         return jsonify(result), 500
     return jsonify(result)
     
-@app.route('/admin/item_view/update_recipe_ingredients', methods=['POST'])
+@app.route('/admin/recipe_view/update_recipe_ingredients', methods=['POST'])
 @admin_only
 def update_recipe_ingredients():
     # Requests lists since the rows are dynamically generated.
@@ -1300,7 +1312,7 @@ def update_recipe_ingredients():
         return jsonify(result), 500
     return jsonify(result)
 
-@app.route('/admin/item_view/add_recipe_ingredients', methods=['POST'])
+@app.route('/admin/recipe_view/add_recipe_ingredients', methods=['POST'])
 @admin_only
 def add_recipe_ingredients():
     # Requests lists since the rows are dynamically generated.
@@ -1323,7 +1335,7 @@ def get_recipe_id():
     id = result.get("id")
     return jsonify(id)
 
-@app.route('/admin/item_view/update_recipe_tools', methods=['POST'])
+@app.route('/admin/recipe_view/update_recipe_tools', methods=['POST'])
 @admin_only
 def update_recipe_tools():
     tool_ids = request.form.getlist('tools[]')
@@ -1333,7 +1345,7 @@ def update_recipe_tools():
         return jsonify(result), 500
     return jsonify(result)
     
-@app.route('/admin/item_view/add_recipe_tools', methods=['POST'])
+@app.route('/admin/recipe_view/add_recipe_tools', methods=['POST'])
 @admin_only
 def add_recipe_tools():
     tool_ids = request.form.getlist('tools[]')

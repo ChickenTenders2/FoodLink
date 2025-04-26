@@ -1,11 +1,11 @@
 // returns the image path for an item or the placeholder image if it doesnt have one
 async function get_image_path(id) {
     let image_name = "null";
-        const response = await fetch("/items/find_image/" + id);
-        const result = await response.json();
-        if (result.success) {
-            image_name = id;
-        }
+    const response = await fetch("/items/find_image/" + id);
+    const result = await response.json();
+    if (result.success) {
+        image_name = id;
+    }
     return "/static/images/" + image_name + ".jpg";
 }
 

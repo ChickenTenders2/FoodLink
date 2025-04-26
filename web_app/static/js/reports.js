@@ -77,6 +77,8 @@ function fill_table(reports) {
 
 async function assign_report(event, new_item_id) {
     event.stopPropagation();
+    const confirmAssign = confirm(`Assign report?`);
+    if (!confirmAssign) return;
     const response = await fetch("/items/reports/check_assigned/"+ new_item_id);
     const result = await response.json();
     if (!result.success) {

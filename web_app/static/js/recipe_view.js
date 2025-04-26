@@ -78,7 +78,7 @@ async function submit_next_update(event, recipe_id) {
     const formData = new FormData(form);
  
     // Sends update command and waits for response.
-    const response = await fetch('/admin/item_view/update_recipe', {
+    const response = await fetch('/admin/recipe_view/update_recipe', {
          method: 'POST',
          body: formData,
      });
@@ -103,7 +103,7 @@ async function submit_next_add(event) {
     const formData = new FormData(form);
  
     // Sends update command and waits for response.
-    const response = await fetch('/admin/item_view/add_recipe', {
+    const response = await fetch('/admin/recipe_view/add_recipe', {
          method: 'POST',
          body: formData,
      });
@@ -134,7 +134,7 @@ async function submit_next_add(event) {
 
 async function get_ingredients_update(recipe_id) {
     try {
-        const response = await fetch('/admin/recipe_view/add_item/' + recipe_id, {
+        const response = await fetch('/admin/recipe_view/gets_items/' + recipe_id, {
             method: 'GET',
         });
         
@@ -210,7 +210,7 @@ async function update_ingredients(event, recipe_id) {
     const formData = new FormData(form);
      
     // Sends update command and waits for response
-    const response = await fetch('/admin/item_view/update_recipe_ingredients', {
+    const response = await fetch('/admin/recipe_view/update_recipe_ingredients', {
              method: 'POST',
              body: formData,
          });
@@ -234,7 +234,7 @@ async function add_ingredients(event, recipe_id) {
     const formData = new FormData(form);
      
     // Fetches the flask route for adding ingredients to the database.
-    const response = await fetch('/admin/item_view/add_recipe_ingredients', {
+    const response = await fetch('/admin/recipe_view/add_recipe_ingredients', {
              method: 'POST',
              body: formData,
          });
@@ -258,7 +258,7 @@ async function update_ingredients(event, recipe_id) {
     const formData = new FormData(form);
      
     // Fetches the flask route for updating ingredients in the database.
-    const response = await fetch('/admin/item_view/update_recipe_ingredients', {
+    const response = await fetch('/admin/recipe_view/update_recipe_ingredients', {
              method: 'POST',
              body: formData,
          });
@@ -367,7 +367,7 @@ async function update_tools(event) {
     const formData = new FormData(form);
     
     // Fetches the flask route to update the tools in the database.
-    const response = await fetch('/admin/item_view/update_recipe_tools', {
+    const response = await fetch('/admin/recipe_view/update_recipe_tools', {
              method: 'POST',
              body: formData,
     });
@@ -390,7 +390,7 @@ async function add_tools(event) {
     const formData = new FormData(form);
     
     // Fetches the flask route for adding tools to the database.
-    const response = await fetch('/admin/item_view/add_recipe_tools', {
+    const response = await fetch('/admin/recipe_view/add_recipe_tools', {
              method: 'POST',
              body: formData,
     });

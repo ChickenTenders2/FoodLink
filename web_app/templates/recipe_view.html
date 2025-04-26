@@ -5,7 +5,10 @@
 {% endblock %}
 
 {% block page_content %}
-    <h1 class="item_view_title">Recipes Table</h1>
+<div class="next-form-container">
+    <button  onclick="open_popup('New Recipe','', '', '', '', '', '', true)">Add Recipe</button>
+</div> 
+<br>
     <div class="items">
     <table class="table-recipes">
         <tr>
@@ -25,9 +28,6 @@
         {% endfor %}
     </table>
     </div>
-    <div class="next-form-container">
-        <button class="add" onclick="open_popup('New Recipe','', '', '', '', '', '', true)">NEW RECIPE</button>
-    </div> 
        <!-- Pop-Up for Editing Quantity & Expiration Date -->
        <div id="popup" class="popup">
         <h2 id="popup-title"></h2>

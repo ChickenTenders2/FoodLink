@@ -1,5 +1,5 @@
 // Using local storage so that the index value persists on page refresh.
-let index = localStorage.getItem('pageIndex');
+let index = localStorage.getItem('pageIndex') || 0;
 
 async function remove_item(id) {
     if (!confirm("Are you sure you want to delete this item?")) {
@@ -24,7 +24,7 @@ async function remove_item(id) {
 }
 
 // Opens the item information popup.
-function open_popup(itemName, barcode, name, brand, quantity, expiry_date, unit, inventory_id, add=false) {
+async function open_popup(itemName, barcode, name, brand, quantity, expiry_date, unit, item_id, add=false) {
     // Sets values in popup to those of the item.
 
     // Add is a boolean check to see if items are updated or added to the database.
@@ -32,19 +32,26 @@ function open_popup(itemName, barcode, name, brand, quantity, expiry_date, unit,
         document.getElementById('popup-title').innerText = `Add ${itemName}`;
         document.getElementById('barcode-label').hidden = false;
         document.getElementById('barcode').type = "number";
+        //image handling
+        document.getElementById("image_preview").src = "/static/images/null.jpg";
+        document.getElementById("image_preview").alt = null;
+
         // Adds the functionality to submit the form and move to the next state.
         document.getElementById('update-form').addEventListener('submit', submit_add);
     } else {
         document.getElementById('popup-title').innerText = `Edit ${itemName}`;
         document.getElementById('barcode-label').hidden = true;
         document.getElementById('barcode').type = "hidden";
+        //image handling
+        document.getElementById("image_preview").src = await get_image_path(item_id);
+        document.getElementById("image_preview").alt = name;
 
         document.getElementById('update-form').addEventListener('submit', submit_update);
 
         // moved delete button inside popup
         const deleteBtn = document.getElementById('delete_button');
         deleteBtn.style.display = 'inline-block';
-        deleteBtn.onclick = () => remove_item(inventory_id);
+        deleteBtn.onclick = () => remove_item(item_id);
     }
     document.getElementById('name').value = name;
     document.getElementById('barcode').value = barcode;
@@ -52,7 +59,7 @@ function open_popup(itemName, barcode, name, brand, quantity, expiry_date, unit,
     document.getElementById('quantity').value = quantity;
     document.getElementById('expiry').value = expiry_date;
     document.getElementById('unit').value = unit;
-    document.getElementById('inventory-id').value = inventory_id;
+    document.getElementById('item_id').value = item_id;
     document.getElementById('original-expiry').value = expiry_date;
     document.getElementById('original-quantity').value = quantity;
     document.getElementById('original-brand').value = brand;
@@ -81,6 +88,7 @@ async function submit_update(event) {
     const originalName = document.getElementById('original-name').value;
     
     // Gets new values
+    const item_image = document.getElementById("item_image").value;
     const newQuantity = document.getElementById('quantity').value;
     const newExpiry = document.getElementById('expiry').value;
     const newUnit = document.getElementById('unit').value;
@@ -90,7 +98,7 @@ async function submit_update(event) {
     // Checks if values have not been edited
     if (newQuantity == originalQuantity && newExpiry == originalExpiry 
         && newUnit == originalUnit && newBrand == originalBrand
-        && newName == originalName) {
+        && newName == originalName && !item_image) {
         // Prevent sending the update request
         close_popup();
         return;  
@@ -162,7 +170,7 @@ async function search() {
         index = 0
         localStorage.setItem('pageIndex', index)
         history.pushState(null, null, "/admin/item_view");
-        fetch("/admin/item_view/");
+        //fetch("/admin/item_view/");
         location.reload();
     }
 }
@@ -171,12 +179,11 @@ async function search() {
 async function next(event, max) {
     event.preventDefault()
     if (index < parseInt(max)) {
-        index++
-        localStorage.setItem('pageIndex', index)
+        index++;
+        localStorage.setItem('pageIndex', index);
         history.pushState(null, null, "/admin/item_view/get/" + index);
         fetch("/admin/item_view/get/" + index);
         location.reload();
-        console.log(index)
     }
     else {
         document.getElementById('button-next').style.cursor = "not-allowed";
@@ -187,8 +194,8 @@ async function next(event, max) {
 async function previous(event) {
     event.preventDefault()
     if (index > 0) {
-        index--
-        localStorage.setItem('pageIndex', index)
+        index--;
+        localStorage.setItem('pageIndex', index);
         history.pushState(null, null, "/admin/item_view/get/" + index);
         fetch("/admin/item_view/get/" + index);
         location.reload();

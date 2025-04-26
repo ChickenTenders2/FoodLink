@@ -1,5 +1,6 @@
 import mariadb
 from flask_sqlalchemy import SQLAlchemy
+import logging
 
 # SQLAlchemy for database management
 db = SQLAlchemy()
@@ -11,3 +12,11 @@ connection = mariadb.connect(
     password = "Pianoconclusiontown229!",
     database = "FoodLink"
 )
+
+def close_connection():
+    if connection:
+        try:
+            logging.info("[INFO] Closing database connection...")
+            connection.close()
+        except Exception as e:
+            logging.warn(f"[WARN] Error while closing connection: {e}")

@@ -50,7 +50,11 @@ from flask_session import Session
 from models import User, Admin
 # login forms
 from flask_forms import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
-from database import db
+from database import db, close_connection
+
+# for closing db connection on exit
+import atexit
+atexit.register(close_connection)
 
 # Import database and user model
 app = Flask(__name__, template_folder = "templates")
@@ -93,9 +97,9 @@ def load_user(user_id):
     user_type = session.get("user_type")
 
     if user_type == "admin":
-        return Admin.query.get(int(user_id))
+        return db.session.get(Admin, int(user_id))
     elif user_type == "user":
-        return User.query.get(int(user_id))
+        return db.session.get(User, int(user_id))
 
 
 ###     DECORATOR FUNCTIONS TO STOP UNAUTHORISED ACCESS TO PAGES
@@ -841,7 +845,7 @@ def append_item_db():
     return jsonify({"success": True})
 
 # Check if item has an image
-@app.route("/find_image/<item_id>")
+@app.route("/items/find_image/<item_id>")
 @verified_only
 def find_image(item_id):
     path = f"static/images/{item_id}.jpg"

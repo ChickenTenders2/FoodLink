@@ -75,14 +75,36 @@ def get_default_quantity(item_id):
 
 
 ##### USER + ADMIN FUNCTIONS
+            
+def get_personal(user_id):
+    cursor = None
+    try:
+        cursor = connection.cursor()
+        # search query uses full text for relevance based searching of items
+        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit, TRUE AS is_personal FROM FoodLink.item WHERE user_id = %s;"
+        data = (user_id, user_id)
+        cursor.execute(query, data)
+        items = cursor.fetchall()
+        return {"success": True, "items": items}
+    except Exception as e:
+        logging.error(f"[item.get_personal error] {e}")
+        return {"success": False, "error": "An internal error occurred."}
+    finally:
+        if cursor:
+            cursor.close()
 
 def barcode_search(user_id, barcode_number):
     cursor = None
     try:
         cursor = connection.cursor()
         # searches for an item by barcode
-        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE barcode = %s AND (user_id IS NULL OR user_id = %s);"
-        data = (barcode_number, user_id)
+        query = """SELECT id, barcode, name, brand, expiry_time, default_quantity, unit, 
+                    CASE WHEN user_id = %s THEN TRUE ELSE FALSE END AS is_personal 
+                    FROM FoodLink.item 
+                    WHERE barcode = %s 
+                    AND (user_id IS NULL OR user_id = %s)
+                    ORDER BY user_id;"""
+        data = (user_id, barcode_number, user_id)
         cursor.execute(query, data)
         item = cursor.fetchone()
         return {"success": True, "item": item}
@@ -98,8 +120,8 @@ def text_search(user_id, search_term):
     try:
         cursor = connection.cursor()
         # search query uses full text for relevance based searching of items
-        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE) AND (user_id IS NULL OR user_id = %s);"
-        data = (search_term, user_id)
+        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit, CASE WHEN user_id = %s THEN TRUE ELSE FALSE END AS is_personal FROM FoodLink.item WHERE MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE) AND (user_id IS NULL OR user_id = %s);"
+        data = (user_id, search_term, user_id)
         cursor.execute(query, data)
         items = cursor.fetchall()
         return {"success": True, "items": items}
@@ -115,8 +137,8 @@ def text_single_search(user_id, search_term):
     try:
         cursor = connection.cursor()
         # search query uses full text for relevance based searching of items
-        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit FROM FoodLink.item WHERE MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE) AND (user_id IS NULL OR user_id = %s);"
-        data = (search_term, user_id)
+        query = "SELECT id, barcode, name, brand, expiry_time, default_quantity, unit, CASE WHEN user_id = %s THEN TRUE ELSE FALSE END AS is_personal FROM FoodLink.item WHERE MATCH(name) AGAINST (%s IN NATURAL LANGUAGE MODE) AND (user_id IS NULL OR user_id = %s);"
+        data = (user_id, search_term, user_id)
         cursor.execute(query, data)
         item = cursor.fetchone()
         return {"success": True, "item": item}

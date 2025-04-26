@@ -41,7 +41,7 @@
         <!-- on error used to set default image if there is no image for the item-->
         <img class="item_img" id="item_image" src="" alt="">
         <!-- allows user to edit incorrect item information -->
-        <button onclick="open_add_popup('clone')">Clone Item</button>
+        <button id="modify_action_button" onclick="open_add_popup('clone')">Clone Item</button>
         <form id="update-form" method="POST" onsubmit="add_item(event)">
             <!-- item fields are readonly apart from expiry and quantity as they can be different per item-->
             <label>Barcode:</label>

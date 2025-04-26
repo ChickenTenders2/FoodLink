@@ -16,21 +16,17 @@ async function fill_item(id, barcode, name, brand, days, months, years, default_
 }
 
 async function get_item(id, original = false) {
-    try {
-        // Searches for item by barcode and awaits result
-        const response = await fetch('/items/get_item/'+ id);               
-        let result = await response.json();
+    // Searches for item by barcode and awaits result
+    const response = await fetch('/items/get_item/'+ id);               
+    let result = await response.json();
 
-        // If an item is found
-        if (result.success) {
-            const [id, barcode, name, brand, expiry_time, default_quantity, unit] = result.item;
-            const [days, months, years] = get_expiry_values(expiry_time);
-            fill_item(id, barcode, name, brand, days, months, years, default_quantity, unit, original);
-        } else {
-            alert(result.error)
-        }
-    } catch (e) {
-        alert(e);
+    // If an item is found
+    if (result.success) {
+        const [id, barcode, name, brand, expiry_time, default_quantity, unit] = result.item;
+        const [days, months, years] = get_expiry_values(expiry_time);
+        fill_item(id, barcode, name, brand, days, months, years, default_quantity, unit, original);
+    } else {
+        alert(result.error)
     }
 }
 

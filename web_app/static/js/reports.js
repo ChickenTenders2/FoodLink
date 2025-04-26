@@ -64,6 +64,10 @@ function fill_table(reports) {
         const assignBtn = document.createElement("button");
         assignBtn.innerText = "Assign to Me";
         assignBtn.onclick = async (event) => assign_report(event, new_item_id);
+        
+        assignBtn.style.fontSize = "12px";
+        assignBtn.style.marginTop = "0px"; 
+        
         assignCell.appendChild(assignBtn);
         row.appendChild(assignCell);
 

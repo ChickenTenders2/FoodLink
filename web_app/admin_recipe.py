@@ -42,7 +42,7 @@ def remove_recipe(id):
         if cursor:
             cursor.close()
 
-def update_recipe(self, recipe_id, name, serv, prep, cook, instructions, user_id = None):
+def update_recipe(recipe_id, name, serv, prep, cook, instructions, user_id = None):
     cursor = None
     try:
         cursor = connection.cursor()
@@ -59,7 +59,7 @@ def update_recipe(self, recipe_id, name, serv, prep, cook, instructions, user_id
         if cursor:
             cursor.close()
 
-def add_recipe(self, name, serv, prep, cook, instructions, user_id = None):
+def add_recipe(name, serv, prep, cook, instructions, user_id = None):
     cursor = None
     try:
         cursor = connection.cursor()

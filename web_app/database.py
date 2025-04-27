@@ -2,9 +2,11 @@ import mariadb
 import logging
 
 
+
+
 # lambda function to create a new connection
 create_connection = lambda: mariadb.connect(
-    host="81.109.118.20",
+    host="80.0.43.124",
     user="FoodLink",
     password="Pianoconclusiontown229!",
     database="FoodLink"

@@ -45,12 +45,12 @@ def mark_read(notif_id):
             cursor.close()
 
 # checks for duplicate notification
-def notification_exists(user_id, notif_type, message):
+def notification_exists(user_id, notif_type, message, date_created):
     cursor = None
     try:
         cursor = get_cursor()
-        query = "SELECT COUNT(*) FROM notification WHERE user_id = %s AND type = %s AND message = %s;"
-        cursor.execute(query, (user_id, notif_type, message))
+        query = "SELECT COUNT(*) FROM notification WHERE user_id = %s AND type = %s AND message = %s AND date_created = %s;"
+        cursor.execute(query, (user_id, notif_type, message, date_created))
         return cursor.fetchone()[0]
     except Exception as e:
         logging.error(f"[notification_exists error] {e}")
@@ -127,7 +127,7 @@ def expiry_notification(user_id):
                 message, severity = f"{name} has expired!", "critical"
             else:
                 continue
-            if notification_exists(user_id, 'expiry', message) == 0:
+            if notification_exists(user_id, 'expiry', message, datetime.now()) == 0:
                 insert_notification(user_id, 'expiry', message, severity)
                 send_email(user_id, 'expiry', f"{message} Please check your inventory.")
     except Exception as e:

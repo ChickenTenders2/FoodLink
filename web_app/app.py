@@ -1524,8 +1524,6 @@ def get_recipes():
         
         filtered.append(recipe)
     
-    print(filtered)
-
     return jsonify({"success": True, "recipes": filtered})
     
 @app.route("/recipes/get/<recipe_id>")
@@ -1639,5 +1637,5 @@ def remove_recipe(recipe_id):
 
 if __name__ == '__main__':
     # Runs the app
-    app.run(debug=True)
+    app.run()
 

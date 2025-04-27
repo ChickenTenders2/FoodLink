@@ -68,7 +68,7 @@ Session(app)
 
 # Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_key_for_testing')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://FoodLink:Pianoconclusiontown229!@81.109.118.20/FoodLink'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://FoodLink:Pianoconclusiontown229!@80.0.43.124/FoodLink'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Email configuration
@@ -1524,8 +1524,6 @@ def get_recipes():
         
         filtered.append(recipe)
     
-    print(filtered)
-
     return jsonify({"success": True, "recipes": filtered})
     
 @app.route("/recipes/get/<recipe_id>")
@@ -1639,5 +1637,5 @@ def remove_recipe(recipe_id):
 
 if __name__ == '__main__':
     # Runs the app
-    app.run(debug=True)
+    app.run()
 

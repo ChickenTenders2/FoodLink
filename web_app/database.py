@@ -2,9 +2,11 @@ import mariadb
 import logging
 
 
+
+
 # lambda function to create a new connection
 create_connection = lambda: mariadb.connect(
-    host="81.109.118.20",
+    host="80.0.43.124",
     user="FoodLink",
     password="Pianoconclusiontown229!",
     database="FoodLink"
@@ -20,6 +22,7 @@ def get_connection():
     except mariadb.InterfaceError as e:
         logging.error(f"[ERROR] Lost connection, reconnecting: {e}")
         try:
+            close_connection()
             connection = create_connection()
             logging.info("[INFO] Reconnected to database.")
         except Exception as reconnect_error:
@@ -42,6 +45,7 @@ def safe_rollback():
     except mariadb.InterfaceError as e:
         logging.error(f"[ERROR] Rollback failed, connection lost: {e}")
         try:
+            close_connection()
             connection = create_connection()
             logging.info("[INFO] Reconnected to database after rollback failure.")
         except Exception as reconnect_error:

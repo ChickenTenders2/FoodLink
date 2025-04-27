@@ -6,23 +6,22 @@ import logging
 timeout = 3
 
 def get_jwt_token():
+    login_url = "https://thingsboard.cs.cf.ac.uk/api/auth/login"
+    headers = {
+        "Content-Type": "application/json"
+    }
+    data = {
+        "username": "group01@cardiff.ac.uk",
+        "password": "group012025"
+    }
     try:
-        login_url = "https://thingsboard.cs.cf.ac.uk/api/auth/login"
-        headers = {
-            "Content-Type": "application/json"
-        }
-        data = {
-            "username": "group01@cardiff.ac.uk",
-            "password": "group012025"
-        }
-
         response = requests.post(login_url, json=data, headers=headers, timeout=timeout)
 
         if response.status_code == 200:
             token = response.json()['token']
             return token
         else:
-            print("Login failed: ", response.json())
+             logging.error(f"[get_jwt_token error] Login Failed: {response.json()}")
     except Exception as e:
         logging.error(f"[get_jwt_token error] {e}")
         return None

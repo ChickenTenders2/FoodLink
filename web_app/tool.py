@@ -84,3 +84,4 @@ def save_user_tools(user_id, tool_ids):
     finally:
         if cursor:
             cursor.close()
+

@@ -1,5 +1,6 @@
 from database import get_cursor, commit, safe_rollback
 import logging
+import json
 
 def get_recipes(search_term, page, user_id, user_only):
     cursor = None
@@ -75,6 +76,34 @@ def remove_recipe(recipe_id, user_id=None):
     finally:
         if cursor:
             cursor.close()
+
+def process_form(action, form, user_id):
+    recipe_id = form.get("recipe_id")
+    name = form.get("name")
+    servings = form.get("servings")
+    prep_time = form.get("prep_time")
+    cook_time = form.get("cook_time")
+    instructions = form.get("instructions")
+
+    # if any information not entered
+    if not (name and servings and prep_time and cook_time and instructions):
+        return {"success": False, "error": "Form value(s) were missing."}
+    
+    ingredients_string = form.get("ingredients")
+    tool_ids_string = form.get("tool_ids")
+
+    # list variables must be stringified client side so lists transfer correctly
+    # they are so decoded to get original data type back
+    ingredients = json.loads(ingredients_string)
+    tool_ids = json.loads(tool_ids_string)
+
+    if not (ingredients or tool_ids):
+        return {"success": False, "error": "Ingredients or tools were empty."}
+    
+    print(ingredients)
+    print(tool_ids)
+
+    action(recipe_id, name, servings, prep_time, cook_time, instructions, ingredients, tool_ids, user_id)
 
 def add_recipe(name, servings, prep_time, cook_time, instructions, items, tool_ids, user_id):
     cursor = None

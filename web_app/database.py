@@ -22,7 +22,6 @@ def get_connection():
     except mariadb.InterfaceError as e:
         logging.error(f"[ERROR] Lost connection, reconnecting: {e}")
         try:
-            close_connection()
             connection = create_connection()
             logging.info("[INFO] Reconnected to database.")
         except Exception as reconnect_error:
@@ -45,7 +44,6 @@ def safe_rollback():
     except mariadb.InterfaceError as e:
         logging.error(f"[ERROR] Rollback failed, connection lost: {e}")
         try:
-            close_connection()
             connection = create_connection()
             logging.info("[INFO] Reconnected to database after rollback failure.")
         except Exception as reconnect_error:

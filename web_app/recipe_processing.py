@@ -106,6 +106,7 @@ def find_items_in_inventory(recipe, user_id, missing_allowed, insufficient_allow
     
     # sum of close to expire items (with weighting applied)
     # negative value of the sum, so recipes with more close to expire items come first in sort
+    # if no items are close to expire sum([]) = 0 (base value)
     recipe["sort_value"]  = -sum(days_left_count[k] / k for k in days_left_count.keys())  
     
     return {"success": True, "allowed": True}

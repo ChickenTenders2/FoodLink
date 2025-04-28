@@ -201,4 +201,4 @@ settings_bp.add_url_rule('/account/update', view_func=AccountUpdateView.as_view(
 settings_bp.add_url_rule('/account/delete', view_func=AccountDeleteView.as_view('delete_account'))
 settings_bp.add_url_rule('/security/change-password', view_func=PasswordChangeView.as_view('change_password'))
 settings_bp.add_url_rule('/notifications/update', view_func=NotificationUpdateView.as_view('update_notifications'))
-settings_bp.add_url_rule('/signout', view_func=lambda: redirect(url_for('auth.logout')), methods=['GET'])
+settings_bp.add_url_rule('/signout', view_func=lambda: redirect(url_for('logout')), methods=['GET'])

@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask.views import MethodView
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import Settings, User
 from alchemy_db import db, safe_execute
+from database import get_cursor, commit, safe_rollback
+import logging
 
 # Create blueprint
 settings_bp = Blueprint('settings', __name__, url_prefix='/settings')
@@ -52,10 +54,62 @@ class AccountUpdateView(BaseSettingsView):
         safe_execute(db.session.commit)
         flash('Profile updated successfully', 'success')
         return redirect(url_for('settings.settings_page'))
+
+# Delete all data associated with a user from all related tables 
+def delete_user_data(user_id):
+    cursor = None
+    try:
+        cursor = get_cursor()
+        
+        # Find all recipes created by user for later deletion
+        cursor.execute("SELECT id FROM recipe WHERE user_id = %s", (user_id,))
+        user_recipes = cursor.fetchall()
+        recipe_ids = [recipe[0] for recipe in user_recipes]
+        
+        # Delete from inventory
+        cursor.execute("DELETE FROM inventory WHERE user_id = %s", (user_id,))
+        
+        # Delete personal items (items created by this user)
+        cursor.execute("DELETE FROM item WHERE user_id = %s", (user_id,))
+        
+        # Delete item error reports
+        cursor.execute("DELETE FROM item_error WHERE user_id = %s", (user_id,))
+        
+        # Delete notifications
+        cursor.execute("DELETE FROM notification WHERE user_id = %s", (user_id,))
+        
+        # Delete settings
+        cursor.execute("DELETE FROM settings WHERE user_id = %s", (user_id,))
+        
+        # Delete shopping list
+        cursor.execute("DELETE FROM shopping_list WHERE user_id = %s", (user_id,))
+        
+        # Delete user tools
+        cursor.execute("DELETE FROM user_tool WHERE user_id = %s", (user_id,))
+        
+        # Delete each recipe and its associated items and tools
+        for recipe_id in recipe_ids:
+            # Delete recipe tools
+            cursor.execute("DELETE FROM recipe_tool WHERE recipe_id = %s", (recipe_id,))
+            # Delete recipe items
+            cursor.execute("DELETE FROM recipe_items WHERE recipe_id = %s", (recipe_id,))
+            # Delete recipe itself
+            cursor.execute("DELETE FROM recipe WHERE id = %s", (recipe_id,))
+        
+        commit()
+        return True
+    except Exception as e:
+        safe_rollback()
+        logging.error(f"[delete_user_data error] {e}")
+        return False
+    finally:
+        if cursor:
+            cursor.close()
     
 class AccountDeleteView(BaseSettingsView):
     def post(self):
         password = request.form.get('password')
+        user_id = current_user.id
         
         # Verify password before deletion
         if not check_password_hash(current_user.password, password):
@@ -63,11 +117,18 @@ class AccountDeleteView(BaseSettingsView):
             return redirect(url_for('settings.settings_page'))
             
         # Delete all user data
-        safe_execute(db.session.delete, current_user)
-        safe_execute(db.session.commit)
+        if delete_user_data(user_id):
+            safe_execute(db.session.delete, current_user)
+            safe_execute(db.session.commit)
+
+            # Log the user out
+            logout_user()
         
-        flash('Your account has been deleted', 'info')
-        return redirect(url_for('auth.logout'))
+            flash('Your account has been deleted', 'info')
+            return redirect(url_for('auth.logout'))
+        else:
+            flash('An error occured while deleting your account. PLease try again', 'danger')
+            return redirect(url_for('settings.settings_page'))
     
 # Security Settings Views
 class PasswordChangeView(BaseSettingsView):

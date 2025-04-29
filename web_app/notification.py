@@ -14,7 +14,7 @@ def get_notifications(user_id):
         query = """
             SELECT id, type, message, date_created, is_read, severity
             FROM notification
-            WHERE user_id = %s AND is_read = 0
+            WHERE user_id = %s
             ORDER BY date_created DESC;
         """
         cursor.execute(query, (user_id,))
@@ -141,6 +141,7 @@ def temperature_humidity_notification(user_id, temperature, humidity):
     cursor = None
     try:
         cursor = get_cursor()
+        # retrieve user settings
         cursor.execute("SELECT min_temperature, max_temperature, max_humidity, temperature_alerts FROM settings WHERE user_id = %s;", (user_id,))
         settings = cursor.fetchone()
         if not settings:
@@ -151,21 +152,26 @@ def temperature_humidity_notification(user_id, temperature, humidity):
         if temperature is not None:
             temperature = round(float(temperature), 2)
             notif_type = 'temperature'
+            #check temperture against thresholds
             if temperature < min_temp:
                 message = f"Low temperature detected: {temperature}°C"
+                # send new notification if cooldown minutes are satisfied
                 if not cooldown_check(user_id, notif_type):
                     insert_notification(user_id, notif_type, message, 'warning')
                     send_email(user_id, notif_type, f"Warning: Your fridge temperature is below {min_temp}°C.\nDetected: {temperature}°C")
             elif temperature > max_temp:
                 message = f"High temperature detected: {temperature}°C"
+                # send new notification if cooldown minutes are satisfied
                 if not cooldown_check(user_id, notif_type):
                     insert_notification(user_id, notif_type, message, 'critical')
                     send_email(user_id, notif_type, f"Warning: Your fridge temperature is above {max_temp}°C.\nDetected: {temperature}°C")
         if humidity is not None:
             humidity = round(float(humidity), 2)
+            # check humidity aginst threshold
             if humidity > max_hum:
                 notif_type = 'humidity'
                 message = f"High humidity detected: {humidity}%"
+                # send new notification if cooldown minutes are satisfied
                 if not cooldown_check(user_id, notif_type):
                     insert_notification(user_id, notif_type, message, 'warning')
                     send_email(user_id, notif_type, f"Warning: Your fridge humidity is above {max_hum}%.\nDetected: {humidity}%")
@@ -211,20 +217,6 @@ def cooldown_check(user_id, notif_type, cooldown_minutes=10):
         if cursor:
             cursor.close()
 
-# def remove_read_notifications(user_id):
-#     cursor = get_cursor()
-#     try:
-#         cursor.execute(
-#             """
-#             DELETE FROM notification
-#             WHERE user_id = ? AND is_read = 1
-#             """,
-#             (user_id,)
-#         )
-#         commit()
-#         return {"success": True}
-#     except Exception as e:
-#         return {"success": False, "error": str(e)}
 
 def send_email(user_id, subject_type, message_text):
     cursor = None

@@ -527,12 +527,13 @@ def settings_page():
 @app.route('/dashboard', methods=['GET', 'POST'])
 @user_only
 def dashboard():
-
+    # display realtime temperature and humidity sensor data
     temp_url = "https://thingsboard.cs.cf.ac.uk/dashboard/9c597b10-0b04-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2" 
     humid_url = "https://thingsboard.cs.cf.ac.uk/dashboard/74d87180-0dbc-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2"
 
     return render_template('index.html', temp_url=temp_url, humid_url = humid_url)
 
+# marks the notifaction as read upon user click
 @app.route('/notification/mark_read', methods=['POST'])
 @user_only
 def mark_read_notification():
@@ -546,17 +547,22 @@ def mark_read_notification():
 
 @app.context_processor
 def inject_notifications(): 
+    # ensure the user is logged in
     if current_user.is_authenticated and isinstance(current_user._get_current_object(), User): 
         user_id = current_user.id
+        #trgigger temperature/humidity notifications
         notification.temperature_humidity_notification(user_id, None, None) 
+        # trigger expiry notifications
         notification.expiry_notification(user_id) 
         result = notification.get_notifications(user_id) 
         if not result.get("success"):
             return dict(notifications=[], unread_count=0)
         notifications = result.get("notifications")
         unread_count = sum(1 for n in notifications if n[4] == 0) 
+        # inject into all templates as global context variable
         return dict(notifications=notifications, unread_count=unread_count)  
     else:
+        # return empty values is user is unauthticated
         return dict(notifications=[], unread_count=0)
 
 # Dynamtically update notification bar
@@ -574,20 +580,20 @@ def get_notifications():
             humidity = float(data['humidity'][0]['value'])
             notification.temperature_humidity_notification(user_id, temperature, humidity)
     
+    # check for any new expiry alerts
     notification.expiry_notification(user_id)
 
-    # # clear read notification
-    # notification.remove_read_notifications(user_id)
-
+    # fetch notifications
     result = notification.get_notifications(user_id) 
     if not result.get("success"):
         return jsonify(result), 500
     
-    notifications = [
-        n for n in result.get("notifications", [])
-        if n[4] == 0
-    ]
+    notifications = result.get("notifications", [])
 
+    # get number of unread notification
+    unread_count = sum(1 for n in notifications if n[4] == 0)
+
+    # return data in json format for dynamic updating
     return jsonify({
         'notifications': [
             {
@@ -595,11 +601,11 @@ def get_notifications():
                 'message': n[2],
                 'timestamp': n[3].strftime('%Y-%m-%d %H:%M'),
                 'severity': n[5],
-                'read': False
+                'read': n[4] == 1
             }
             for n in notifications
         ],
-        'unread_count': len(notifications)
+        'unread_count': unread_count
     })
   
 ### INVENTORY ROUTES ###
@@ -1357,6 +1363,7 @@ def add_recipe_tools():
 @user_only
 def get_shoppingList():
     user_id = current_user.id
+    # check the user request and performs action accordingly
     if request.method == 'POST':
         if 'clear' in request.form:
             result = shopping.clear_items(user_id)
@@ -1379,15 +1386,18 @@ def get_shoppingList():
     if not item_result.get("success"):
         return jsonify(result), 500
     items = item_result.get("items")
+    # split items into bought and unbough lists
     unbought_items = [item for item in items if item[3] == 0]
     bought_items = [item for item in items if item[3] == 1]
 
+    #check low stock items  in inventory and store them in variable 
     low_stock_result = shopping.low_stock_items(user_id)
     if not low_stock_result.get("success"):
         return jsonify(result), 500
     low_stock = low_stock_result.get("items")
     return render_template("shoppinglist.html", items=items, unbought_items=unbought_items, bought_items=bought_items, low_stock=low_stock)
 
+# add items to shopping list
 @app.route('/shopping_list/add', methods=['POST'])
 @user_only
 def add_shopping_item():
@@ -1399,6 +1409,7 @@ def add_shopping_item():
         return jsonify(result), 500
     return jsonify(result)
 
+# editing shopping list items
 @app.route('/shopping_list/update', methods=['POST'])
 @user_only
 def update_shopping_item():
@@ -1411,7 +1422,7 @@ def update_shopping_item():
         return jsonify(result), 500
     return jsonify(result)
     
-
+# adding multipe shopping items at once, used for recipe system
 @app.route("/shopping_list/add_multi", methods=["POST"])
 @user_only
 def add_shopping_items():

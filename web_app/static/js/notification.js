@@ -11,19 +11,26 @@ function fetchNotifications() {
             return response.json();
         })
         .then(data => {
+            // clear the list
             list.innerHTML = '';
+            // create bothe unread and read notification but hide read ones
             data.notifications.forEach(n => {
                 const li = document.createElement('li');
-                li.className = 'unread';
+                li.className = n.read ? 'read' : 'unread';
                 li.setAttribute('data-id', n.id);
                 li.setAttribute('data-severity', n.severity);
                 li.onclick = function () { markRead(this); };
 
                 li.innerHTML = `<strong>${n.severity.charAt(0).toUpperCase() + n.severity.slice(1)}</strong> : ${n.message}
                                 <small>${n.timestamp}</small>`;
+
+                //Hide read notification
+                if (n.read) li.style.display = 'none';
+
                 list.appendChild(li);
             });
 
+            // Update badge
             if (data.unread_count > 0) {
                 badge.textContent = data.unread_count;
                 badge.style.display = 'inline';
@@ -82,9 +89,11 @@ function markRead(elem) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
+            // change style based on unread/read notifications
             elem.classList.remove('unread');
             elem.classList.add('read');
             const badge = document.getElementById('notification-badge');
+            // update badge
             if (badge) {
                 let count = parseInt(badge.textContent);
                 if (count > 1) {

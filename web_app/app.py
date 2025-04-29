@@ -5,7 +5,7 @@ import os
 
 ### shared operations for user and admin:
 # for scanning items (barcode or ai object recogniser)
-#import scanner
+import scanner
 # for checking item image exists
 from os.path import isfile as file_exists
 

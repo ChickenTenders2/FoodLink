@@ -397,6 +397,7 @@ async function add_item(event) {
 
     if (result.success) {
         alert("Item added succesfully.");
+        // makes sure popup closes properly (restarts scanning if opened from scanner)
         document.getElementById("close-popup").click();
     } else {
         alert('There was an error adding the item. Error: ' + result.error);

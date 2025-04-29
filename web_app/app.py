@@ -535,7 +535,7 @@ def dashboard():
     temp_url = "https://thingsboard.cs.cf.ac.uk/dashboard/9c597b10-0b04-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2" 
     humid_url = "https://thingsboard.cs.cf.ac.uk/dashboard/74d87180-0dbc-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2"
 
-    return render_template('index.html', temp_url=temp_url, humid_url = humid_url) #, notifications=notifications, unread_count=unread_count)
+    return render_template('index.html', temp_url=temp_url, humid_url = humid_url)
 
 @app.route('/notification/mark_read', methods=['POST'])
 @user_only
@@ -567,6 +567,7 @@ def inject_notifications():
 @app.route('/get_notifications', methods=['GET', 'POST']) 
 @user_only
 def get_notifications():
+    # retrieving sensor data from telemetry by connecting to thingsboard using JWT token
     device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
     user_id = current_user.id
     token = thingsboard.get_jwt_token()
@@ -579,12 +580,18 @@ def get_notifications():
     
     notification.expiry_notification(user_id)
 
+    # clear read notification
+    notification.remove_read_notifications(user_id)
+
     result = notification.get_notifications(user_id) 
     if not result.get("success"):
         return jsonify(result), 500
-    notifications = result.get("notifications")
     
-    unread_count = sum(1 for n in notifications if n[4] == 0)
+    notifications = [
+        n for n in result.get("notifications", [])
+        if n[4] == 0
+    ]
+
     return jsonify({
         'notifications': [
             {
@@ -592,11 +599,11 @@ def get_notifications():
                 'message': n[2],
                 'timestamp': n[3].strftime('%Y-%m-%d %H:%M'),
                 'severity': n[5],
-                'read': n[4] == 1
+                'read': False
             }
             for n in notifications
         ],
-        'unread_count': unread_count
+        'unread_count': len(notifications)
     })
   
 ### INVENTORY ROUTES ###

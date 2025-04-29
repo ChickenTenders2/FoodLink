@@ -1362,7 +1362,9 @@ def get_shoppingList():
             result = shopping.remove_item(user_id, item_id)  
         elif 'mark_bought' in request.form:
             item_id = request.form.get('mark_bought')
-            bought_str = request.form.get('bought', 0)
+            bought_str = request.form.get('bought')
+            if bought_str is None:
+                return jsonify({"success": False, "message": "Missing 'bought' status"}), 400
             bought = int(bought_str)
             result = shopping.item_bought(user_id, item_id, bought)
         
@@ -1370,17 +1372,17 @@ def get_shoppingList():
             return jsonify(result), 500
         return jsonify(result)
     
-    result = shopping.get_items(user_id)
-    if not result.get("success"):
+    item_result = shopping.get_items(user_id)
+    if not item_result.get("success"):
         return jsonify(result), 500
-    items = result.get("items")
+    items = item_result.get("items")
     unbought_items = [item for item in items if item[3] == 0]
     bought_items = [item for item in items if item[3] == 1]
 
-    result = shopping.low_stock_items(user_id)
-    if not result.get("success"):
+    low_stock_result = shopping.low_stock_items(user_id)
+    if not low_stock_result.get("success"):
         return jsonify(result), 500
-    low_stock = result.get("items")
+    low_stock = low_stock_result.get("items")
     return render_template("shoppinglist.html", items=items, unbought_items=unbought_items, bought_items=bought_items, low_stock=low_stock)
 
 @app.route('/shopping_list/add', methods=['POST'])

@@ -142,6 +142,7 @@ body {
     height: 100vh;
     margin: 0;
     padding-top: 60px;
+    margin-top: 60px;
 }
 
 
@@ -486,12 +487,16 @@ input.form-control {
 
 
 /* Inventory Grid */
+
 .inventory-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 7px;
     max-width: 1000px;
+    max-height: 500px;
+    overflow-y: auto;
     margin: 0 auto;
+    margin-bottom: 10px;
     background-color: #f4f4f4;
     padding: 15px;
     border-radius: 10px;
@@ -755,7 +760,10 @@ a.tile-link {
 .shopping-list-container {
     width: 100%;
     max-width: 800px;
-    margin: 0 auto;
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 20px auto;
     display: flex;
     flex-direction: column;
     gap: 15px;

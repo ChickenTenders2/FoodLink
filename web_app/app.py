@@ -475,11 +475,6 @@ def email_verification_page():
 @app.route('/email/send-code', methods=['POST'])
 @unverified_only
 def send_verification_code_route():
-    # Check if email is already verified
-    if current_user.email_verified:
-        flash('Your email is already verified.', 'info')
-        return redirect(url_for('email_verification_page'))
-    
     # Send verification code
     send_verification_code(current_user, mail, 'verify')
     flash('A verification code has been sent to your email address.', 'success')
@@ -501,7 +496,6 @@ def verify_code():
     
     if not stored_code:
         flash('No verification code found. Please request a new code.', 'danger')
-        return redirect(url_for('email_verification_page'))
     
     if stored_code == entered_code:
         # Code matches, update verification status
@@ -513,10 +507,12 @@ def verify_code():
         session.modified = True
         
         flash('Your email has been verified successfully!', 'success')
+        return redirect(url_for("select_tools"))
     else:
         flash('Invalid verification code. Please try again.', 'danger')
     
     return redirect(url_for('email_verification_page'))
+    
 
 
 ### SETTINGS PAGE ROUTE
@@ -580,8 +576,8 @@ def get_notifications():
     
     notification.expiry_notification(user_id)
 
-    # clear read notification
-    notification.remove_read_notifications(user_id)
+    # # clear read notification
+    # notification.remove_read_notifications(user_id)
 
     result = notification.get_notifications(user_id) 
     if not result.get("success"):

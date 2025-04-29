@@ -14,7 +14,7 @@ def get_notifications(user_id):
         query = """
             SELECT id, type, message, date_created, is_read, severity
             FROM notification
-            WHERE user_id = %s
+            WHERE user_id = %s AND is_read = 0
             ORDER BY date_created DESC;
         """
         cursor.execute(query, (user_id,))
@@ -211,20 +211,20 @@ def cooldown_check(user_id, notif_type, cooldown_minutes=10):
         if cursor:
             cursor.close()
 
-def remove_read_notifications(user_id):
-    cursor = get_cursor()
-    try:
-        cursor.execute(
-            """
-            DELETE FROM notification
-            WHERE user_id = ? AND is_read = 1
-            """,
-            (user_id,)
-        )
-        commit()
-        return {"success": True}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
+# def remove_read_notifications(user_id):
+#     cursor = get_cursor()
+#     try:
+#         cursor.execute(
+#             """
+#             DELETE FROM notification
+#             WHERE user_id = ? AND is_read = 1
+#             """,
+#             (user_id,)
+#         )
+#         commit()
+#         return {"success": True}
+#     except Exception as e:
+#         return {"success": False, "error": str(e)}
 
 def send_email(user_id, subject_type, message_text):
     cursor = None

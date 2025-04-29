@@ -533,4 +533,8 @@ try:
     commit()
     logging.info("All recipes inserted successfully.")
 except Exception as e:
+    safe_rollback()
     logging.error(f"[ERROR] Failed to insert recipes: {e}")
+finally:
+    if cursor:
+        cursor.close()

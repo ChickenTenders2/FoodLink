@@ -1,6 +1,6 @@
 from database import get_cursor, commit, safe_rollback
 import logging
-from datetime import datetime
+from datetime import datetime, date
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -45,16 +45,18 @@ def mark_read(notif_id):
             cursor.close()
 
 # checks for duplicate notification
-def notification_exists(user_id, notif_type, message, date_created):
+def notification_exists(user_id, notif_type, message):
     cursor = None
     try:
         cursor = get_cursor()
-        query = "SELECT COUNT(*) FROM notification WHERE user_id = %s AND type = %s AND message = %s AND date_created = %s;"
-        cursor.execute(query, (user_id, notif_type, message, date_created))
-        return cursor.fetchone()[0]
+        query = "SELECT COUNT(*) FROM notification WHERE user_id = %s AND type = %s AND message = %s;"
+        cursor.execute(query, (user_id, notif_type, message))
+        count = cursor.fetchone()[0]
+        return count != 0
     except Exception as e:
         logging.error(f"[notification_exists error] {e}")
-        return 1
+        # set as true even with error so duplicate notifications do not occur
+        return True
     finally:
         if cursor:
             cursor.close()
@@ -105,17 +107,16 @@ def expiry_notification(user_id):
             return
 
         query = """
-            SELECT inv.id, i.id, i.name, expiry_date
+            SELECT i.name, expiry_date
             FROM FoodLink.inventory inv
             JOIN FoodLink.item i ON (inv.item_id = i.id)
             WHERE inv.user_id = %s;
         """
         cursor.execute(query, (user_id,))
         expiries = cursor.fetchall()
-        today = datetime.today().date()
-        for _, _, name, expiry_date in expiries:
-            if isinstance(expiry_date, datetime):
-                expiry_date = expiry_date.date()
+        today = date.today()
+        # expiry_date is parsed from mariadb as datetime.date object
+        for name, expiry_date in expiries:
             days_left = (expiry_date - today).days
             if days_left == 2:
                 message, severity = f"{name} will expire in 2 days.", "info"
@@ -127,7 +128,7 @@ def expiry_notification(user_id):
                 message, severity = f"{name} has expired!", "critical"
             else:
                 continue
-            if notification_exists(user_id, 'expiry', message, datetime.now()) == 0:
+            if not notification_exists(user_id, 'expiry', message):
                 insert_notification(user_id, 'expiry', message, severity)
                 send_email(user_id, 'expiry', f"{message} Please check your inventory.")
     except Exception as e:

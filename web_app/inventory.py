@@ -13,10 +13,8 @@ def get_items(user_id):
         """
         cursor.execute(query, (user_id,))
         items = cursor.fetchall()
-        # formats expiry date to string for front end
-        items = [list(i) for i in items]
-        for item in items:
-            item[6] = item[6].strftime('%Y-%m-%d')
+        items = format_items(items)
+        print(items)
         return {"success": True, "items": items}
     except Exception as e:
         logging.error(f"[get_items error] {e}")
@@ -38,9 +36,7 @@ def search_items(user_id, search_term):
         """
         cursor.execute(query, (user_id, search_term))
         items = cursor.fetchall()
-        items = [list(i) for i in items]
-        for item in items:
-            item[6] = item[6].strftime('%Y-%m-%d')
+        items = format_items(items)
         return {"success": True, "items": items}
     except Exception as e:
         logging.error(f"[search_items error] {e}")
@@ -169,3 +165,52 @@ def correct_personal_item(personal_item_id, item_id, default_quantity):
     finally:
         if cursor:
             cursor.close()
+
+# returns the best match for an ingredient that a user has in their inventory
+# returns the first item that fully matches the item name, are in the users inventory, and are in date
+def strict_search(user_id, item_name, quantity_threshold):
+    cursor = None
+    try:
+        cursor = get_cursor()
+        # gets each word in item name seperately
+        terms = item_name.strip().split()
+        # adds a + before each word to make sure that results must include ALL words in the item name
+        boolean_search = " ".join(f"+{word}" for word in terms)
+        # gets items which fully match the name, and are still in date
+        # then sorts by items with:
+        #   atleast 95% of the quantity first, so the meal is not altered to drastically
+        #   then prioritising soon to expire items, which makes sure they get used first, reducing food waste
+        #   then prioritising smaller quantities, to make sure an item with less quantity gets used up first
+        query = """
+            SELECT inv.id, i.id, i.name, i.brand, quantity, i.unit, expiry_date
+            FROM FoodLink.inventory inv
+            JOIN FoodLink.item i ON inv.item_id = i.id
+            WHERE inv.user_id = %s 
+            AND MATCH(i.name) AGAINST (%s IN BOOLEAN MODE)
+            AND inv.expiry_date > CURRENT_DATE
+            ORDER BY
+                CASE WHEN inv.quantity >= %s THEN 1 ELSE 0 END DESC,   
+                inv.expiry_date ASC,
+                inv.quantity ASC;
+        """
+        data = (user_id, boolean_search, quantity_threshold)
+        cursor.execute(query, data)
+        item = cursor.fetchone()
+        return {"success": True, "item": item}
+    except Exception as e:
+        logging.error(f"[strict_search error] {e}")
+        return {"success": False, "error": "An internal error occurred."}
+    finally:
+        if cursor:
+            cursor.close()
+
+
+def format_items(items):
+    return [format_item(item) for item in items]
+
+# formats date of item to string for front end
+def format_item(item):
+    item = list(item)
+    item[6] = item[6].isoformat()
+    return item
+

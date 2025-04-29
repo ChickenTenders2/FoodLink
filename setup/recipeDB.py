@@ -1,4 +1,4 @@
-from database import get_cursor, commit, safe_rollback
+from web_app.database import get_cursor, commit, safe_rollback
 import logging
 
 recipes = [

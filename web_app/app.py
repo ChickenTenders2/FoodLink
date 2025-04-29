@@ -5,7 +5,7 @@ import os
 
 ### shared operations for user and admin:
 # for scanning items (barcode or ai object recogniser)
-import scanner
+#import scanner
 # for checking item image exists
 from os.path import isfile as file_exists
 
@@ -76,7 +76,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'foodlink2305@gmail.com'  
-app.config['MAIL_PASSWORD'] = 'fmgz nrxz mwul nqju'    
+app.config['MAIL_PASSWORD'] = 'ngjw ejzx cfwn wnew'    
 app.config['MAIL_DEFAULT_SENDER'] = 'FoodLink <foodlink2305@gmail.com>'
 
 # Import and register the settings blueprint (i'm sorry it wasnt me :( )
@@ -1519,10 +1519,10 @@ def get_recipes():
         
         filtered.append(recipe_object)
     
-    print(filtered)
+    print([r.get("name") for r in filtered])
     # sorts recipe by how many soon to expire items it uses
     filtered.sort(key=lambda x: x["sort_value"])
-    print(filtered)
+    print([r.get("name") for r in filtered])
     
     return jsonify({"success": True, "recipes": filtered})
     

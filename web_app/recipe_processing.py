@@ -1,5 +1,6 @@
-import recipe as recipe_sql
-from datetime import datetime
+from recipe import get_recipe_tools, get_recipe_items
+from inventory import strict_search, format_item
+from datetime import date
 
 def create(record):
     recipe_id = int(record[0])
@@ -23,13 +24,13 @@ def create(record):
         "sort_value": 0
     }
 
-    result = recipe_sql.get_recipe_tools(recipe_id)
+    result = get_recipe_tools(recipe_id)
     if result.get("success"):
         recipe["tool_ids"] = result.get("tool_ids", [])
     else:
         return result
 
-    result = recipe_sql.get_recipe_items(recipe_id)
+    result = get_recipe_items(recipe_id)
     if result.get("success"):
         recipe["ingredients"] = result.get("items", [])
     else:
@@ -57,7 +58,7 @@ def find_items_in_inventory(recipe, user_id, missing_allowed, insufficient_allow
         # item must have at least 95% of the needed quantity to match
         quantity_threshold = ingredient[1] * 0.95
         # finds the best match in inventory
-        result = recipe_sql.strict_search(user_id, ingredient_name, quantity_threshold)
+        result = strict_search(user_id, ingredient_name, quantity_threshold)
         if not result.get("success"):
             return result
         inv_item = result.get("item")
@@ -72,6 +73,20 @@ def find_items_in_inventory(recipe, user_id, missing_allowed, insufficient_allow
             # adds attribute to each ingredient so it can be highlighted
             # a different colour based on how good the match to the inventory was
             ingredient.append("missing")
+            continue
+
+        # calculates the days_left and counts it if its soon
+        expiry_date = inv_item[6]
+        today = date.today()
+        days_left = (expiry_date - today).days
+        if days_left < DAYS_LEFT_LIMIT:
+            if days_left in days_left_count:
+                days_left_count[days_left] += 1
+            else:
+                days_left_count[days_left] = 1
+        
+        # formats date for front end
+        inv_item = format_item(inv_item)
         
         # if item found in inventory and enough quantity
         if inv_item[4] >= quantity_threshold:
@@ -86,16 +101,6 @@ def find_items_in_inventory(recipe, user_id, missing_allowed, insufficient_allow
             recipe["inventory_ingredients"].append(inv_item)
             recipe["shopping_list"].append(ingredient)
             ingredient.append("insufficient")
-     
-        # calculates the days_left and counts it if its soon
-        expiry_date = inv_item[6]
-        today = datetime.today()
-        days_left = expiry_date - today
-        if days_left < DAYS_LEFT_LIMIT:
-            if days_left in days_left_count:
-                days_left_count[days_left] += 1
-            else:
-                days_left_count[days_left] = 1
 
     # to prioritise items closer to expiring 
     # 2x 2 days left items = 1x 1 day left item
@@ -108,5 +113,7 @@ def find_items_in_inventory(recipe, user_id, missing_allowed, insufficient_allow
     # negative value of the sum, so recipes with more close to expire items come first in sort
     # if no items are close to expire sum([]) = 0 (base value)
     recipe["sort_value"]  = -sum(days_left_count[k] / k for k in days_left_count.keys())  
+
+
     
     return {"success": True, "allowed": True}

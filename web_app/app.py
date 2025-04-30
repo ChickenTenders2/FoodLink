@@ -8,18 +8,17 @@ import os
 import scanner
 # for checking item image exists
 from os.path import isfile as file_exists
-
-import tool
 import item
 
 ### user operations
+import tool
 import inventory
 import notification
+import shopping
 # for getting temperature and humidity of fridge
 import thingsboard
 # for alerting when item is added on raspberry pi screen
 import success
-import shopping
 # for recipe handling
 import recipe as recipe_sql
 import recipe_processing
@@ -30,7 +29,7 @@ import json
 # for admin, item and recipe view
 import admin_recipe
 import input_handling
-
+# for report handling
 import report
 
 ### for login systems
@@ -45,25 +44,25 @@ from time import time as current_time
 from re import search as re_search
 # for encrypting password
 from werkzeug.security import generate_password_hash, check_password_hash
+# for storing user variables in server side session
 from flask_session import Session
-# for accessing database
+# for accessing database (via alchemy)
+from alchemy_db import db, safe_execute
 from models import User, Admin
 # login forms
 from flask_forms import LoginForm, CreateAccountForm, CombinedResetForm, ResetPasswordForm, AdminCreateForm, AdminPasswordForm
-from database import close_connection
-from alchemy_db import db, safe_execute
 
 # for closing db connection on exit
+from database import close_connection
 import atexit
 atexit.register(close_connection)
 
 # Import database and user model
 app = Flask(__name__, template_folder = "templates")
 
+# Initialize Flask-Session
 app.config["SESSION_PERMANENT"] = False     
 app.config["SESSION_TYPE"] = "filesystem"
-
-# Initialize Flask-Session
 Session(app)
 
 # Configuration
@@ -78,6 +77,7 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'foodlink2305@gmail.com'  
 app.config['MAIL_PASSWORD'] = 'ngjw ejzx cfwn wnew'    
 app.config['MAIL_DEFAULT_SENDER'] = 'FoodLink <foodlink2305@gmail.com>'
+mail = Mail(app)
 
 # Import and register the settings blueprint (i'm sorry it wasnt me :( )
 from settings import settings_bp
@@ -85,12 +85,19 @@ app.register_blueprint(settings_bp)
 
 # Initialize extensions
 bootstrap = Bootstrap(app)
+
 # Flask-Login for managing user sessions
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login'  # This ensures users are redirected to login when needed
+# This ensures users are redirected to login when needed (used by @login_required decorator)
+login_manager.login_view = 'login' 
 db.init_app(app)
-mail = Mail(app)
+
+# clears alchemy db session after every request so errors dont occur
+# helps stop crashing when clicking between pages fast
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.remove()
 
 # Load user to database based on user ID (or admin ID if admin login)
 @login_manager.user_loader
@@ -101,12 +108,6 @@ def load_user(user_id):
         return safe_execute(db.session.get, Admin, int(user_id))
     elif user_type == "user":
         return safe_execute(db.session.get, User, int(user_id))
-
-# clears alchemy db session after every request so errors dont occur
-# helps stop crashing when clicking between pages fast
-@app.teardown_appcontext
-def shutdown_session(exception=None):
-    db.session.remove()
 
 
 ###     DECORATOR FUNCTIONS TO STOP UNAUTHORISED ACCESS TO PAGES
@@ -215,7 +216,6 @@ def admin_login():
             error = "Invalid admin credentials."
 
     return render_template('admin_login.html', form=form, error=error)
-
 
 @app.route("/admin/add", methods=["GET", "POST"])
 @admin_only
@@ -521,6 +521,7 @@ def verify_code():
 @user_only
 def settings_page():
     return redirect(url_for('settings.settings_page'))
+
 
 #### USER DASHBOARD ROUTES
 

@@ -9,12 +9,14 @@
 
   <div class="button-group">
     <button style="margin-top: 0px;" onclick="openAddPopup()">Add Item</button>
+    <!-- Form to clear entire shopping list -->
     <form id="clearForm" class="clear-form" method="post" action="/shopping_list/add">
       <input type="hidden" name="clear" value="1">
       <button type="submit">Clear Shopping List</button>
     </form>
   </div>
 
+  <!-- Suggest items based on low stock (if available) -->
   <div class="shopping-list-container">
     {% if low_stock %}
     <h3>Suggested Items</h3>
@@ -37,6 +39,7 @@
 
   <div id="overlay" class="popup-overlay"></div>
 
+  <!-- Add item popup form -->
   <div id="add-popup" class="popup">
     <form id="addForm" class="input-group">
       <h2>Add Item</h2>
@@ -49,6 +52,7 @@
     </form>
   </div>
 
+  <!-- Edit item popup form -->
   <div id="edit-popup" class="popup">
     <form id="editForm" class="input-group">
       <h2>Edit Item</h2>
@@ -62,6 +66,7 @@
     </form>
   </div>
 
+  <!-- Unbough shopping list items -->
   <div class="shopping-list-container">
     <h3>Shopping List</h3>
     {% for item in unbought_items %}
@@ -69,11 +74,13 @@
       {{ item[1] }}
       <div class="item-actions">
         <button type="button" disabled>{{ item[2] }}</button>
+        <!-- Form to mark item as bought -->
         <form class="boughtForm" method="post" action="/shopping_list">
           <input type="hidden" name="mark_bought" value="{{ item[0] }}">
           <input type="hidden" name="bought" value="1">
           <button type="submit" onclick="event.stopPropagation();">✔</button>
         </form>
+        <!-- Form to remove item from shopping list -->
         <form class="removeForm" method="post" action="/shopping_list">
           <input type="hidden" name="remove" value="{{ item[0] }}">
           <button type="submit" onclick="event.stopPropagation();">🗑</button>
@@ -83,6 +90,7 @@
     {% endfor %}
   </div>
 
+  <!-- Bough shopping list items -->
   <div class="shopping-list-container">
     {% if bought_items %}
     <h3>Bought Items</h3>
@@ -91,11 +99,13 @@
       <span class="bought">{{ item[1] }}</span>
       <div class="item-actions">
         <button type="button" disabled>{{ item[2] }}</button>
+        <!-- For to move item back to shopping list (unmark item as bought) -->
         <form class="boughtForm" method="post" action="/shopping_list">
           <input type="hidden" name="mark_bought" value="{{ item[0] }}">
           <input type="hidden" name="bought" value="0">
           <button type="submit" onclick="event.stopPropagation();">↩</button>
         </form>
+        <!-- Form to remove item from shopping list -->
         <form class="removeForm" method="post" action="/shopping_list">
           <input type="hidden" name="remove" value="{{ item[0] }}">
           <button type="submit" onclick="event.stopPropagation();">🗑</button>

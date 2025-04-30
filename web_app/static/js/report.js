@@ -30,22 +30,29 @@ async function get_item(id, original = false) {
     }
 }
 
+// Function to update the UI for a missing item report
 function set_missing_report() {
     document.getElementById("original_item").style.display = "none";
     document.getElementById("new_item_heading").innerHTML = "Missing Item Information";
 }
 
+// Function to set the selected report action (e.g., approve, deny) in a hidden input
 function set_action(action) {
     document.getElementById("report_action").value = action;
 }
 
 window.onload = async function() {
+    // Get the new item ID from the form/input
     const new_item_id = document.getElementById("new_item_id").value;
+    // Fetch and display the new item data
     await get_item(new_item_id);
+    // Get the original item ID if it exists (for comparison)
     const original_item_id = document.getElementById("original_item_id").value;
     if (original_item_id) {
+        // If there's an original item, fetch and display it as well (true = isOriginal)
         await get_item(original_item_id, true);
     } else {
+        // If not, configure the page to show it's a missing item report
         set_missing_report();
     }
 }

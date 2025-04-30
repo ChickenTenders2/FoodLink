@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block navbar %}
-
+<!-- Navigation bar for user interface -->
 <div class="topnav" id="myTopnav">
   <div class="nav-left">
     <a href="{{ url_for('index') }}">FoodLink</a>
@@ -34,10 +34,12 @@
         <a href="{{ url_for('login') }}">Sign In</a>
     {% endif %}
   </div>    
+  <!-- Responsive Menu -->
   <a href="#" class="icon" onclick="navbar()">
     <i class="fa fa-bars"></i>
   </a>
 </div>
+<!-- Add notification to notification popup -->
 <div id="notification-popup" class="notification-popup" style="display: none;">
     <h3>Notifications</h3>
     <ul id="notification-list">
@@ -63,7 +65,7 @@
 {% block content %}
   <div class="container">
 
-
+<!-- Siaplay flash messages -->
 {% with messages = get_flashed_messages() %}
   {% if messages %}
     <ul class=flashes>

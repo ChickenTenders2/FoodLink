@@ -8,6 +8,7 @@ import os
 import scanner
 # for checking item image exists
 from os.path import isfile as file_exists
+# general item operations
 import item
 
 ### user operations

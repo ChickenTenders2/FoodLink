@@ -3,6 +3,7 @@
 {% block page_content %}
     <div class="auth-container">
         <h2>Add New Admin</h2>
+        <!-- Form to create a new admin user - uses POST method to send data securely -->
         <form method="POST">
             {{ form.hidden_tag() }}
             {{ form.username.label }}

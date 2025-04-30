@@ -1,6 +1,8 @@
 from database import get_cursor, commit, safe_rollback
 import logging
 
+
+# Retrieve all shopping list items for a given user
 def get_items(user_id):
     cursor = None
     try:
@@ -17,6 +19,7 @@ def get_items(user_id):
         if cursor:
             cursor.close()
 
+# Add a single item to the shopping list
 def add_item(user_id, item_name, quantity):
     cursor = None
     try:
@@ -32,6 +35,7 @@ def add_item(user_id, item_name, quantity):
         if cursor:
             cursor.close()
 
+# Add multiple items to the shopping list at once
 def add_items(user_id, items):
     cursor = None
     try:
@@ -49,6 +53,7 @@ def add_items(user_id, items):
         if cursor:
             cursor.close()
 
+# Update the name and/or quantity of an existing item in the shopping list
 def update_item(user_id, item_id, item_name, quantity):
     cursor = None
     try:
@@ -66,6 +71,7 @@ def update_item(user_id, item_id, item_name, quantity):
         if cursor:
             cursor.close()
 
+# Mark an item as bought or unbought
 def item_bought(user_id, item_id, bought):
     cursor = None
     try:
@@ -84,6 +90,7 @@ def item_bought(user_id, item_id, bought):
         if cursor:
             cursor.close()
 
+# Retrieve items from the inventory that are low in stock
 def low_stock_items(user_id):
     cursor = None
     try:
@@ -100,6 +107,7 @@ def low_stock_items(user_id):
         if cursor:
             cursor.close()
 
+# Remove a specific item from the shopping list
 def remove_item(user_id, item_id):
     cursor = None
     try:
@@ -115,6 +123,7 @@ def remove_item(user_id, item_id):
         if cursor:
             cursor.close()
 
+# Clear the entire shopping list for a given user
 def clear_items(user_id):
     cursor = None
     try:

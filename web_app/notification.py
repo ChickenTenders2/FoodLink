@@ -7,6 +7,7 @@ from email.mime.text import MIMEText
 from email.header import Header
 from email import charset
 
+# Retrieves all notifications for a given user, ordered by most recent
 def get_notifications(user_id):
     cursor = None
     try:
@@ -27,7 +28,7 @@ def get_notifications(user_id):
         if cursor:
             cursor.close()
 
-# changes the is_read value from 0 to 1 when user reads the notification and clicks it to confirm read
+# Marks a specific notification as read (is_read = 1)
 def mark_read(notif_id):
     cursor = None
     try:
@@ -44,7 +45,7 @@ def mark_read(notif_id):
         if cursor:
             cursor.close()
 
-# checks for duplicate notification
+# Checks whether a notification with the same type and message already exists for the user
 def notification_exists(user_id, notif_type, message):
     cursor = None
     try:
@@ -61,7 +62,7 @@ def notification_exists(user_id, notif_type, message):
         if cursor:
             cursor.close()
 
-# add notifications into the notification table
+# Inserts a new notification into the database
 def insert_notification(user_id, notif_type, message, severity):
     cursor = None
     try:
@@ -90,15 +91,17 @@ def insert_notification(user_id, notif_type, message, severity):
         if cursor:
             cursor.close()
 
+# Creates a support notification (saves in DB and sends email)
 def support_notification(user_id, message):
     send_email(user_id, 'support', message)
     return insert_notification(user_id, 'support', message, 'info')
 
+# Sends expiry notifications based on inventory expiry dates
 def expiry_notification(user_id):
     cursor = None
     try:
         cursor = get_cursor()
-
+        # Check if user has expiry alerts enabled
         settings_query = "SELECT expiring_food FROM FoodLink.settings WHERE user_id = %s;"
         cursor.execute(settings_query, (user_id,))
         settings = cursor.fetchone()
@@ -106,6 +109,7 @@ def expiry_notification(user_id):
         if not settings or not settings[0]:
             return
 
+        # Get all items and expiry dates for the user
         query = """
             SELECT i.name, expiry_date
             FROM FoodLink.inventory inv
@@ -115,7 +119,7 @@ def expiry_notification(user_id):
         cursor.execute(query, (user_id,))
         expiries = cursor.fetchall()
         today = date.today()
-        # expiry_date is parsed from mariadb as datetime.date object
+        # Evaluate expiry status and send alerts accordingly
         for name, expiry_date in expiries:
             days_left = (expiry_date - today).days
             if days_left == 2:
@@ -128,6 +132,7 @@ def expiry_notification(user_id):
                 message, severity = f"{name} has expired!", "critical"
             else:
                 continue
+            # Avoid duplicate alerts
             if not notification_exists(user_id, 'expiry', message):
                 insert_notification(user_id, 'expiry', message, severity)
                 send_email(user_id, 'expiry', f"{message} Please check your inventory.")
@@ -137,11 +142,12 @@ def expiry_notification(user_id):
         if cursor:
             cursor.close()
 
+# Sends temperature and humidity notifications based on thresholds
 def temperature_humidity_notification(user_id, temperature, humidity):
     cursor = None
     try:
         cursor = get_cursor()
-        # retrieve user settings
+        # Fetch user-defined temperature/humidity thresholds
         cursor.execute("SELECT min_temperature, max_temperature, max_humidity, temperature_alerts FROM settings WHERE user_id = %s;", (user_id,))
         settings = cursor.fetchone()
         if not settings:
@@ -149,22 +155,21 @@ def temperature_humidity_notification(user_id, temperature, humidity):
         min_temp, max_temp, max_hum, alerts_enabled = float(settings[0]), float(settings[1]), float(settings[2]), settings[3]
         if not alerts_enabled:
             return
+        # Temperature checks
         if temperature is not None:
             temperature = round(float(temperature), 2)
             notif_type = 'temperature'
-            #check temperture against thresholds
             if temperature < min_temp:
                 message = f"Low temperature detected: {temperature}°C"
-                # send new notification if cooldown minutes are satisfied
                 if not cooldown_check(user_id, notif_type):
                     insert_notification(user_id, notif_type, message, 'warning')
                     send_email(user_id, notif_type, f"Warning: Your fridge temperature is below {min_temp}°C.\nDetected: {temperature}°C")
             elif temperature > max_temp:
                 message = f"High temperature detected: {temperature}°C"
-                # send new notification if cooldown minutes are satisfied
                 if not cooldown_check(user_id, notif_type):
                     insert_notification(user_id, notif_type, message, 'critical')
                     send_email(user_id, notif_type, f"Warning: Your fridge temperature is above {max_temp}°C.\nDetected: {temperature}°C")
+        # Humidity checks
         if humidity is not None:
             humidity = round(float(humidity), 2)
             # check humidity aginst threshold
@@ -181,11 +186,8 @@ def temperature_humidity_notification(user_id, temperature, humidity):
         if cursor:
             cursor.close()
 
+# Prevents sending duplicate notifications within a short cooldown period (default: 10 mins)
 def cooldown_check(user_id, notif_type, cooldown_minutes=10):
-    # """
-    # Returns True if a notification of the given type was sent within cooldown_minutes.
-    # Otherwise returns False, meaning it's okay to send a new one.
-    # """
     cursor = None
     try:
         cursor = get_cursor()
@@ -217,15 +219,17 @@ def cooldown_check(user_id, notif_type, cooldown_minutes=10):
         if cursor:
             cursor.close()
 
-
+# Sends an email to the user using Gmail SMTP
 def send_email(user_id, subject_type, message_text):
     cursor = None
     try:
         cursor = get_cursor()
+        # Check if user has enabled email notifications
         cursor.execute("SELECT email_notifications FROM settings WHERE user_id = %s;", (user_id,))
         enabled = cursor.fetchone()
         if not enabled or not enabled[0]:
             return {"success": True}
+        # Retrieve the user's email
         cursor.execute("SELECT email FROM user WHERE id = %s;", (user_id,))
         recipient_email = cursor.fetchone()[0]
     except Exception as e:
@@ -234,7 +238,7 @@ def send_email(user_id, subject_type, message_text):
     finally:
         if cursor:
             cursor.close()
-    # Define subject labels and styles per type
+    # Email subject styling based on notification type
     subjects = {
         "temperature": {"title": "Temperature Alert", "color": "#f44336"}, #red
         "humidity": {"title": "Humidity Alert", "color": "#ff9800"}, #orange

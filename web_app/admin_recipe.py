@@ -1,6 +1,7 @@
 from database import get_cursor, commit, safe_rollback
 import logging
 
+# Retrieve all system (admin-only) recipes, i.e., those not linked to a user
 def get_all():
     cursor = None
     try:
@@ -16,18 +17,22 @@ def get_all():
         if cursor:
             cursor.close()
 
+# Delete a recipe and all its associated items and tools
 def remove_recipe(id):
     cursor = None
     try:
         cursor = get_cursor()
+        # Delete from main recipe table
         query1 = "DELETE FROM recipe WHERE id = %s;"
         # one item tuple
         data1 = (id,)
         cursor.execute(query1, data1)
+        # Delete associated ingredients
         query2 = "DELETE FROM recipe_items WHERE recipe_id = %s;"
         # one item tuple
         data2 = (id,)
         cursor.execute(query2, data2)
+        # Delete associated tools
         query3 = "DELETE FROM recipe_tool WHERE recipe_id = %s;"
         # one item tuple
         data3 = (id,)
@@ -42,6 +47,7 @@ def remove_recipe(id):
         if cursor:
             cursor.close()
 
+# Update a recipe’s core information
 def update_recipe(recipe_id, name, serv, prep, cook, instructions, user_id = None):
     cursor = None
     try:
@@ -59,6 +65,7 @@ def update_recipe(recipe_id, name, serv, prep, cook, instructions, user_id = Non
         if cursor:
             cursor.close()
 
+# Add a new recipe (system-level or user-submitted)
 def add_recipe(name, serv, prep, cook, instructions, user_id = None):
     cursor = None
     try:
@@ -77,14 +84,17 @@ def add_recipe(name, serv, prep, cook, instructions, user_id = None):
         if cursor:
             cursor.close()
 
+# Replace all ingredients for a given recipe
 def update_recipe_ingredients(recipe_id, names, units, quantities):
     cursor = None
     try:
         cursor = get_cursor()
+        # Remove existing ingredients
         query = "DELETE FROM recipe_items WHERE recipe_id = %s"
         data = (recipe_id, )
         cursor.execute(query, data)
-        
+
+        # Insert new ingredient list
         for name, unit, quantity in zip(names, units, quantities):
             query = "INSERT INTO recipe_items (recipe_id, item_name, unit, quantity) VALUES (%s, %s, %s, %s);"
             data = [recipe_id, name, unit, quantity]
@@ -100,6 +110,7 @@ def update_recipe_ingredients(recipe_id, names, units, quantities):
         if cursor:
             cursor.close()
 
+# Add ingredients to a recipe (without deleting existing ones)
 def add_recipe_ingredients(recipe_id, names, units, quantities):
     cursor = None
     try:
@@ -119,6 +130,7 @@ def add_recipe_ingredients(recipe_id, names, units, quantities):
         if cursor:
             cursor.close()
 
+# Get the current maximum recipe ID (useful after adding a new one)
 def get_id():
     cursor = None
     try:
@@ -137,14 +149,17 @@ def get_id():
         if cursor:
             cursor.close()
 
+# Replace all tools required for a given recipe
 def update_recipe_tools(recipe_id, tool_ids):
     cursor = None
     try:
         cursor = get_cursor()
+        # Remove existing tools
         query = "DELETE FROM recipe_tool WHERE recipe_id = %s"
         data = (recipe_id, )
         cursor.execute(query, data)
         
+        # Insert new tools
         for tool in tool_ids:
             query = "INSERT INTO recipe_tool (recipe_id, tool_id) VALUES (%s, %s);"
             data = [recipe_id, tool]
@@ -160,6 +175,7 @@ def update_recipe_tools(recipe_id, tool_ids):
         if cursor:
             cursor.close()
 
+# Add tools to a recipe (without deleting existing ones)
 def add_recipe_tools(recipe_id, tool_ids):
     cursor = None
     try:

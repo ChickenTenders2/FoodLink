@@ -8,8 +8,15 @@ item_name = None
 pause = False
 ai_mode = False
 
-# Custom model trained on pre labeled fruit / veg datasets obtained from RoboFlow
-model = YOLO("web_app/YOLO_model/FoodLink.pt")
+model = YOLO("yolov8s-worldv2.pt")
+# YOLO world uses a set of classes so the model 'knows' what it needs to try and 
+# identify. In this application it is food items often sold without a barcode
+model.set_classes([
+    "Apple", "Banana", "Orange", "Grapes", "Strawberry", "Blueberry", "Lemon", "Lime",
+    "Lettuce", "Bell pepper", "Carrot", "Broccoli", "Cucumber", "Tomato",
+    "Potato", "Onion", "Garlic", "Courgette", "Celery", "Corn", "Pear", "Peach", "Plum",
+    "Nectarine", "Avocado", "Mango", "Watermelon", "Cantaloupe", "Pineapple"
+])
 
 # returns barcode or name of identified object
 def get_scanned():
@@ -36,7 +43,7 @@ def scan():
 
     while True:
         # Read is a boolean variable signifying if a frame was successfully or 
-        # unsuccessfully read
+        # unsuccessfully read.
         read, frame = capture.read()
         if not read:
             break
@@ -48,7 +55,7 @@ def scan():
                 results = model(frame, verbose=False)
                 # if there are any detections
                 if len(results[0].boxes.cls) > 0:
-                    # Get the class ID of the first detected object (from its bounding box)
+                    # Get the class ID of the first detected object
                     class_id = int(results[0].boxes.cls[0])
 
                     # Get the name corresponding to the first detected class
@@ -70,7 +77,7 @@ def scan():
         _, buffer = cv2.imencode('.jpeg', frame)
         frame = buffer.tobytes()
         # Yields part of a multipart HTTP response so that the indivdual frames
-        # are sent to the browser and are interpreted as a motion JPEG video
+        # are sent to the browser and are interpreted as a motion JPEG video.
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 

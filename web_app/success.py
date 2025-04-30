@@ -9,7 +9,7 @@ def send_success_alert():
 
     telemetry_with_ts = {
         "ts": int(round(time.time() * 1000)),
-        "values": {"message": "Added"},
+        "values": {"message": "Added"}
     }
 
     client = TBDeviceMqttClient(
@@ -37,6 +37,5 @@ def send_success_alert():
             # Disconnect to prevent connection conflicts when the next message is sent.
             client.disconnect()
         except Exception:
-            logging.error(f"Connection to ThingsBoard Failed!")
-
-send_success_alert()
+            # If connection was never made, disconnect might fail — ignore silently
+            pass

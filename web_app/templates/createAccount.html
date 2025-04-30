@@ -12,28 +12,19 @@
 
 
         <h2>Create Account</h2>
+        <!-- Form to create new user account -->
             <form method="post" id="form" role="form" class="w-100">
 	           {{ form.hidden_tag() }}
 	           {{ wtf.form_errors(form, hiddens="only") }}
-               <!-- <div class="input-group"> -->
 	            {{ wtf.form_field(form.username, form="form", placeholder="Max 16 characters")}}
-                <!-- </div> -->
                 
-                <!-- <div class="input-group"> -->
                 {{ wtf.form_field(form.email, form="form", placeholder="Max 64 characters")}}
-	           <!-- </div> -->
 
-               <!-- <div class="input-group"> -->
                 {{ wtf.form_field(form.password, form="form", placeholder="Must include at least 6 characters, 2 numbers and 1 special character")}}
-	           <!-- </div> -->
 
-               <!-- <div class="input-group"> -->
                 {{ wtf.form_field(form.passwordConfirm, form="form")}}
-               <!-- </div> -->
 
-               <!-- <div class="input-group"> -->
      	            {{ wtf.form_field(form.submit, form="form") }}
-               <!-- </div> -->
 	        </form>
 
         <div class="mt-4">

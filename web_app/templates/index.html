@@ -6,14 +6,14 @@
 
 {% block page_content %}
 
-
+<!-- User dashboard tiles -->
     <div class="dashboard-grid">
       <a href="{{ url_for('get_inventory') }}">
         <div class="tile">
           <h2>Inventory</h2>
         </div>
       </a>
-      
+      <!-- temperature and humidity tile pair -->
         <div class="tile-pair">
           <div class="tile">
             <iframe src="{{ temp_url }}" width="225px" height="180px" frameborder="0"></iframe>

@@ -47,22 +47,28 @@ function sort_filter_reports() {
     fill_table(reports);
 }
 
+// Fills the table with report data
 function fill_table(reports) {
     const table_body = document.getElementById("table_body");
     table_body.innerHTML = "";
+    // Loop through each report and create a row
     for (let report of reports) {
         const [new_item_id, item_id, error_type, date_created, username, new_item_name] = report;
+        // Create a new table row with report details
         const row = document.createElement("tr");
         row.innerHTML = `<td>${new_item_id}</td>
                         <td>${new_item_name}</td>
                         <td>${error_type}</td>
                         <td>${date_created}</td>
                         <td>${username}</td>`;
+        // Clicking the row redirects to the individual report page
         row.onclick = () => window.location.href = "/items/reports/" + new_item_id + "/" + item_id;
 
+        // Create a cell for the "Assign to Me" button
         const assignCell = document.createElement("td");
         const assignBtn = document.createElement("button");
         assignBtn.innerText = "Assign to Me";
+        // Clicking the button assigns the report to the current user
         assignBtn.onclick = async (event) => assign_report(event, new_item_id);
         
         assignBtn.style.fontSize = "12px";
@@ -75,30 +81,35 @@ function fill_table(reports) {
     }
 }
 
+// Function to handle assigning a report to the current admin
 async function assign_report(event, new_item_id) {
     event.stopPropagation();
     const confirmAssign = confirm(`Assign report?`);
     if (!confirmAssign) return;
+    // Check if the report is already assigned to someone
     const response = await fetch("/items/reports/check_assigned/"+ new_item_id);
     const result = await response.json();
     if (!result.success) {
-        alert(result.error);
+        alert(result.error); // Show error if check failed
     }
     console.log(result.admin_id);
+    // If already assigned to another admin, ask if user wants to reassign
     if (result.admin_id) {
         const confirmReplace = confirm(`This report is already assigned to an admin. Reassign it to yourself?`);
         if (!confirmReplace) return;
     }
+    // Proceed with assigning the report to the current admin
     const response2 = await fetch("/items/reports/assign/"+ new_item_id);
     const result2 = await response2.json();
     if (result2.success) {
         alert("Successfully assigned report!");
-        get_reports();
+        get_reports(); // Refresh the table with updated assignments
     } else {
-        alert(result2.error);
+        alert(result2.error); // Show error if assignment fails
     }
 }
 
+// When the page loads, fetch and display the reports
 window.onload = function(){
     get_reports();
 }

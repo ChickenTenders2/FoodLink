@@ -93,10 +93,12 @@ async function fetchInventory() {
     const result = await response.json();
     if (result.success) {
       const container = document.querySelector('.inventory-container');
-      container.innerHTML = '';
+      container.innerHTML = ''; // Clear current tiles
       let items = result.items;
       console.log(sortParam);
-      sort_items(items, sortParam);
+      sort_items(items, sortParam); // Sort items client-side
+
+      // Render each item as a tile
       for (let item of items) {
         let tile = document.createElement('div');
         await fill_tile(tile, item);
@@ -169,6 +171,7 @@ function sort_items(items, sort) {
   }
 }
 
+// Deletes an item from inventory
 async function removeItem() {
     const inventoryId = document.getElementById('inventory-id').value;
     const formData = new FormData();
@@ -191,6 +194,7 @@ async function removeItem() {
     }
 }
 
+// Displays a temporary toast message
 function showToast(message) {
     const toast = document.getElementById("toast");
     toast.innerText = message;

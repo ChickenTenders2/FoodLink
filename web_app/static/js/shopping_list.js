@@ -1,8 +1,11 @@
+// Function to open the 'Add Item' popup
 function openAddPopup() {
     document.getElementById('overlay').style.display = 'block';
     document.getElementById('add-popup').style.display = 'block';
     document.body.style.overflow = 'hidden';
 }
+
+// Function to close the 'Add Item' popup and clear form fields
 function closeAddPopup() {
     document.getElementById('overlay').style.display = 'none';
     document.getElementById('add-popup').style.display = 'none';
@@ -10,11 +13,15 @@ function closeAddPopup() {
     document.getElementById('quantity').value = '';
     document.body.style.overflow = '';
 }
+
+// Function to open the 'Edit Item' popup
 function openEditPopup() {
     document.getElementById('overlay').style.display = 'block';
     document.getElementById('edit-popup').style.display = 'block';
     document.body.style.overflow = 'hidden';
 }
+
+// Function to close the 'Edit Item' popup and clear form fields
 function closeEditPopup() {
     document.getElementById('overlay').style.display = 'none';
     document.getElementById('edit-popup').style.display = 'none';
@@ -23,22 +30,29 @@ function closeEditPopup() {
     document.getElementById('edit_quantity').value = '';
     document.body.style.overflow = '';
 }
+
+// Function to visually mark an item as bought (strikethrough text)
 function markBought(button) {
     button.closest('.shopping-item').style.textDecoration = 'line-through';
 }
+
+// Pre-fill the edit popup with item values and open it
 function editItem(id, name, quantity){
     document.getElementById('edit_item_id').value = id;
     document.getElementById('edit_item_name').value = name;
     document.getElementById('edit_quantity').value = quantity;
     openEditPopup();
 }
+
+// Function to show a temporary toast notification
 function showToast(message) {
     const toast = document.getElementById("toast");
     toast.innerText = message;
     toast.className = "toast show";
     setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
 }
-  
+
+// Submit handler for editing an item in the shopping list
 document.getElementById('editForm').addEventListener('submit', function (e) {
     e.preventDefault();
     e.stopPropagation();
@@ -59,6 +73,7 @@ document.getElementById('editForm').addEventListener('submit', function (e) {
     });
 });
 
+// Submit handler for adding a new item to the shopping list
 document.getElementById('addForm').addEventListener('submit', function (e) {
     e.preventDefault();
     const form = e.target;
@@ -78,6 +93,7 @@ document.getElementById('addForm').addEventListener('submit', function (e) {
     });
 });
 
+// Submit handlers for marking items as bought or unbought
 document.querySelectorAll('.boughtForm').forEach(form => {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -100,6 +116,7 @@ document.querySelectorAll('.boughtForm').forEach(form => {
     });
 });
 
+// Submit handlers for suggesting items to the shopping list
 document.querySelectorAll('.suggestForm').forEach(form => {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -118,6 +135,7 @@ document.querySelectorAll('.suggestForm').forEach(form => {
     });
 });
 
+// Submit handlers for removing individual items
 document.querySelectorAll('.removeForm').forEach(form => {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -136,6 +154,7 @@ document.querySelectorAll('.removeForm').forEach(form => {
     });
 });
 
+// Submit handler for clearing the entire shopping list
 document.getElementById('clearForm').addEventListener('submit', function (e) {
     e.preventDefault();
     const formData = new FormData(e.target);

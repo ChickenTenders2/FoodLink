@@ -15,6 +15,7 @@ function showUtensils() {
     document.getElementById("backButton").style.display = "none";
     document.getElementById("saveButton").style.display = "none";
 }
+// Handles submission of the tool selection form (utensils/appliances)
 document.getElementById("tool-form").addEventListener("submit", async function(e) {
     e.preventDefault();
     
@@ -37,7 +38,7 @@ document.getElementById("tool-form").addEventListener("submit", async function(e
         showToast(result.message, false);
     }
 });
-
+// Function to display a toast notification
 function showToast(message, isSuccess = true) {
     const toast = document.getElementById("toast");
     toast.innerText = message;

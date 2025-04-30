@@ -1,26 +1,29 @@
-
+// Function to fetch notifications from the server and update the UI
 function fetchNotifications() {
     const list = document.getElementById('notification-list');
     const badge = document.getElementById('notification-badge');
-
+    
+    // Show a loading message while fetching
     list.innerHTML = '<li class="loading">Loading notifications...</li>';
 
+    // Fetch notifications from the server
     fetch('/get_notifications')
         .then(response => {
             if (!response.ok) throw new Error("Network response was not ok");
             return response.json();
         })
         .then(data => {
-            // clear the list
+            // Clear previous notifications
             list.innerHTML = '';
-            // create bothe unread and read notification but hide read ones
+            // Clear previous notifications
             data.notifications.forEach(n => {
                 const li = document.createElement('li');
                 li.className = n.read ? 'read' : 'unread';
                 li.setAttribute('data-id', n.id);
                 li.setAttribute('data-severity', n.severity);
                 li.onclick = function () { markRead(this); };
-
+                
+                // Set inner content of the list item
                 li.innerHTML = `<strong>${n.severity.charAt(0).toUpperCase() + n.severity.slice(1)}</strong> : ${n.message}
                                 <small>${n.timestamp}</small>`;
 
@@ -30,7 +33,7 @@ function fetchNotifications() {
                 list.appendChild(li);
             });
 
-            // Update badge
+            // Update the notification badge with unread count
             if (data.unread_count > 0) {
                 badge.textContent = data.unread_count;
                 badge.style.display = 'inline';
@@ -45,18 +48,19 @@ function fetchNotifications() {
 }
 
 
-
+// Event listener when the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", function () { 
     const popup = document.getElementById('notification-popup'); 
     const icon = document.getElementById('notification-icon');
 
+    // Check that popup and icon exist
     if (!popup || !icon) {
         console.error('Notification popup or icon not found');
         return;
     }
-    
+    // Toggle the popup visibility when the icon is clicked
     icon.addEventListener('click', function (e) {
-        e.stopPropagation(); // Prevent body click from hiding it immediately
+        e.stopPropagation();  // Prevent the click from propagating to the window
         popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
     });
     
@@ -65,20 +69,25 @@ document.addEventListener("DOMContentLoaded", function () {
         popup.style.display = 'none';
     });
     
+    // Prevent hiding the popup when clicking inside it
     popup.addEventListener('click', function (e) {
         e.stopPropagation();
     });
 
+    // Hide ThingsBoard branding footer if present
     const tbFooter = document.querySelector('.tb-powered-by-footer');
     if (tbFooter) tbFooter.style.display = 'none';
     
+    // Load notifications immediately
     fetchNotifications();
+    // Refresh notifications every 30 seconds
     setInterval(fetchNotifications, 30000);
 });
 
-
+// Function to mark a notification as read
 function markRead(elem) {
     const notifId = elem.getAttribute('data-id');
+    // Send request to mark the notification as read
     fetch('/notification/mark_read', {
         method: 'POST',
         headers: {
@@ -93,7 +102,7 @@ function markRead(elem) {
             elem.classList.remove('unread');
             elem.classList.add('read');
             const badge = document.getElementById('notification-badge');
-            // update badge
+            // update badge count
             if (badge) {
                 let count = parseInt(badge.textContent);
                 if (count > 1) {

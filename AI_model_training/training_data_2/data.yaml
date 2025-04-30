@@ -1,0 +1,13 @@
+train: C:/group1_cm2305/model_training/training_data_2/train/images
+val: C:/group1_cm2305/model_training/training_data_2/valid/images
+test: C:/group1_cm2305/model_training/training_data_2/test/images
+
+nc: 6
+names: ['apple', 'banana', 'guava', 'lemon', 'orange', 'pomegranate']
+
+roboflow:
+  workspace: foodlink
+  project: fruit-dataset-comp5544-qe7l3
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/foodlink/fruit-dataset-comp5544-qe7l3/dataset/1

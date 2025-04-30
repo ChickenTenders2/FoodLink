@@ -1,0 +1,13 @@
+train: ../model_training/training_data_1/train/images
+val: ../model_training/training_data_1/valid/images
+test: ../model_training/training_data_1/test/images
+
+nc: 11
+names: ['apple', 'cabbage', 'carrot', 'grape', 'lemon', 'mango', 'napa cabbage', 'peach', 'pepper', 'potato', 'radish']
+
+roboflow:
+  workspace: foodlink
+  project: fruite-vegetable-detection-cdidz
+  version: 2
+  license: Public Domain
+  url: https://universe.roboflow.com/foodlink/fruite-vegetable-detection-cdidz/dataset/2

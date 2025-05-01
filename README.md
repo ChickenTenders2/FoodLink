@@ -28,44 +28,6 @@ Usage:
 
 ### HOW TO NAVIGATE THE WEBSITE AND USE FUNCTIONALITY
 
-### 1. Login / Create Account
-
-### 2. Email Verification
-
-### 3. User Dashboard
-
-### 4. Settings
-
-### 5. Inventory
-
-### 6. Add Items to Inventory (Manual, Barcode scanner, AI recognitions)
-
-### 7. Report
-
-### 8. Shopping List
-- Click the Shopping List tile, or the Shopping List button in the Navigation bar.
-- Click the 'Add Item' button to add items manually by entering the name and quantity.
-- Click 'Add to Shopping List' to add items from suggestions.
-- Mark items as bough by clicking '✔'.
-- Remove items from list by clicking '🗑' or clicking the 'Clear Shopping List' to clear all items.
-
-### 9. Notifications
-
-### 10. Email Notification
-
-### 11. Recipes
-
-### 12. Admin Dashboard (Admin Only)
-
-### 13. Item Management (Admin Only)
-
-### 14. Recipe Managemnt (Admin Only)
-
-### 15. Manage Report (Admin Only)
-
-### 16. Create Admins (Admin Only)
-
-
 
 Folder Structure:
 
@@ -78,7 +40,7 @@ FoodLink/
 ├── raspberry_pi/                               # Code for fridge add-on raspberry pi
 │   └── notify.py
 │
-├── setup/                                      # Sensor-related code
+├── setup/                                      # Files needed for setup
 │   ├── recipeDB.py
 │   └── requirements.txt
 │
@@ -156,8 +118,8 @@ FoodLink/
 │   ├── settings.py                                                                                                                                     
 │   ├── shopping.py                                                                                                                                     
 │   ├── success.py                                                                                                                                      
-│   ├── thingsboard.py                                                                                                                                  
-│   └── tool.py  
-│
-├──  yolov8s-worldv2.pt                         # 
+│   ├── thingsboard.py
+│   ├── tool.py
+│   └── yolov8s-worldv2.pt
+│ 
 └──  README.md                                  # Project readme file

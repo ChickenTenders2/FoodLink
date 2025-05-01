@@ -50,8 +50,18 @@ Usage:
 - Remove items from list by clicking '🗑' or clicking the 'Clear Shopping List' to clear all items.
 
 ### 9. Notifications
+- Click the 🔔 icon of the top right of the navigation bar to view unread notifications.
+- Notifcation include:
+    - Expiring Food
+    - Fidge Temperature/Humidity
+    - Support messages on reported items
+- Click on notification to mark it as read.
 
 ### 10. Email Notification
+- Enable via settings to recieve notifications when:
+    - Items are about to expire or have expired.
+    - Fridge temperature/humidity is abnormal.
+    - Report has been resolved by admin.
 
 ### 11. Recipes
 

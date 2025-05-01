@@ -203,7 +203,7 @@ Usage:
 
 
 # FoodLink Project Folder Structure
-
+```
 FoodLink/
     arduino/                                    # Arduino-related code     
         sensor_readings_to_bluetooth/
@@ -294,7 +294,7 @@ FoodLink/
         yolov8s-worldv2.pt
 
     README.md                                   # Project README file (this file)
-
+```
 
 Backend Explanation:
 

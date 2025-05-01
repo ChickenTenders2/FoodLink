@@ -17,6 +17,10 @@ class BaseSettingsView(MethodView):
 # Main settings page
 class SettingsView(BaseSettingsView):
     def get(self):
+        """
+        This function loads the main settings page for the authenticated user.
+        Furthermore creates default notifcation preferences if none exists.
+        """
         # login_required ensures a user is authenticated
         user_id = current_user.id
         
@@ -34,6 +38,10 @@ class SettingsView(BaseSettingsView):
 # Account Management Views
 class AccountUpdateView(BaseSettingsView):
     def post(self):
+        """
+        This function updates the user's profile information (e.g. username and name).
+        Furthermore checks for username uniqueness before updating.
+        """
         username = request.form.get('username')
         name = request.form.get('name')
         
@@ -57,6 +65,10 @@ class AccountUpdateView(BaseSettingsView):
 
 # Delete all data associated with a user from all related tables 
 def delete_user_data(user_id):
+    """
+    This function deletes all data associated with a user from all related tables.
+    At the end, the function will return True if successfully deleted, False otherwise.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -108,6 +120,10 @@ def delete_user_data(user_id):
     
 class AccountDeleteView(BaseSettingsView):
     def post(self):
+        """
+        This function permanently deletes the user account and all associated data
+        after verifying the password. Then logs the user out after deletion.
+        """
         password = request.form.get('password')
         user_id = current_user.id
         
@@ -133,6 +149,10 @@ class AccountDeleteView(BaseSettingsView):
 # Security Settings Views
 class PasswordChangeView(BaseSettingsView):
     def post(self):
+        """
+        This function changes the user's password after verifying the current password,
+        and confirming the new password matches the confirmation. 
+        """
         current_password = request.form.get('current_password')
         new_password = request.form.get('new_password')
         confirm_password = request.form.get('confirm_password')
@@ -157,6 +177,10 @@ class PasswordChangeView(BaseSettingsView):
 # Notification Settings View
 class NotificationUpdateView(BaseSettingsView):
     def post(self):
+        """
+        This function updates notification and alert preferences, this includes
+        email notifications, fridge monitoring alerts, and temperature/humidity thresholds.
+        """
         # Get form data
         email_notifications = request.form.get('email_notifications') == 'on'
         fridge_open = request.form.get('fridge_open') == 'on'

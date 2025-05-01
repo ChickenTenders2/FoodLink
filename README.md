@@ -216,12 +216,15 @@ FoodLink/
         recipeDB.py
         requirements.txt
 
-    web_app/                                    # All files and folders for the web app   
+    web_app/                                    # All files and folders for the web app
+        flask_session/                          # Stores flask session data in filesystem
+
         static/     
             images/                             # Uploaded item images or icons        
                 1.jpg                           # Example of image for item with id 1                                                                                         
-                2.jpg                           # etc..    
+                2.jpg                           # etc...    
                 3.jpg
+                ...
                 notification_bell.png           # Notification icon   
                 null.jpg                        # Placeholder image if item doesn't have one
                
@@ -274,23 +277,34 @@ FoodLink/
         admin_recipe.py
         alchemy_db.py                           # Loads sql alchemy with flask and handles safe execution of commands with error handling
         app.py                                  # Main Flask app entry point
-        database.py
+        database.py                             # Connects to the database using the envrionment variables set and acts as a single point to connect to the database (
+                                                  for all sql commands using mariadb connector). Auto-reconnects on connection loss and handles rollbacks safely on execute failure. Handles closing connection when server stops so connections don't build up on the database.
+                                                  
         email_verification.py
         flask_forms.py
         input_handling.py
-        inventory.py
+        inventory.py                            # Handles basic CRUD sql commands for a users inventory, html form processing for adding an item to inventory,
+                                                  formatting of expiry date for the front end, and more advanced sql commands: 
+                                                  strict_search (used in recipe proccesing):         finds an item which is the best match for an ingredient
+                                                  correct_personal_item (used in resolving reports): replaces a users personal item (with quantity checks) if their report
+                                                                                                     gets approved
+                                                  
         item.py                                 # Handles sql commands for item table, image storing functionality, and form processing
         models.py
         notification.py
-        recipe.py
-        recipe_processing.py
-        report.py
-        scanner.py
+        recipe.py                               # Handles recipe sql commands (CRUD), and html form processing for adding and editing a recipe
+        recipe_processing.py                    # Creates a "smart recipe object" which matches a recipe against a users tools and inventory, calculates missing tools, 
+                                                  finds missing or insufficient quantity ingredients, and sorts recipes by which uses most soon to expire items (with weighting applied)
+
+        report.py                               # Handles SQL operations for item errors: adding user report of an item, admin get all, find duplicate and remove report
+                                                  (after resolving), admins can assign a report to themselves (with override checks)
+
+        scanner.py                              # Processes users camera feed as a video and scans each frame using a barcode reader or AI object recogniser based on the mode
         settings.py
         shopping.py
         success.py
         thingsboard.py
-        tool.py
+        tool.py                                 # Handles tool SQL commands (CRUD)
         yolov8s-worldv2.pt
 
     README.md                                   # Project README file (this file)

@@ -219,8 +219,8 @@ def cooldown_check(user_id, notif_type, cooldown_minutes=10):
         if cursor:
             cursor.close()
 
-# Sends an email to the user using Gmail SMTP
 def send_email(user_id, subject_type, message_text):
+    """Sends an email to the user using Gmail SMTP"""
     cursor = None
     try:
         cursor = get_cursor()

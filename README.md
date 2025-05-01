@@ -213,8 +213,9 @@ FoodLink/
         notify.py
 
     setup/                                      # Files needed for setup  
-        recipeDB.py
-        requirements.txt
+        itemDB.py                               # Python script to insert items to item table.
+        recipeDB.py                             # Inserts recipes into recipe table, recipe ingredients into recipe_items table and recipe utensils and appliance into recipe_tool table.
+        requirements.txt                        # Python dependecies
 
     web_app/                                    # All files and folders for the web app
         flask_session/                          # Stores flask session data in filesystem
@@ -235,15 +236,15 @@ FoodLink/
                 inventory_add.js
                 item_handling.js
                 item_view.js
-                navbar.js
-                notification.js
+                navbar.js                       # Collapses the navigation bar when the screen is minimised.
+                notification.js                 # Handles the dynamic updating of the notification popup, updates number of unread notification in badge, chnages notification style when marked as read.
                 recipes.js
                 recipe_view.js
                 report.js
                 reports.js
                 select_utensils.js
                 settings.js
-                shopping_list.js
+                shopping_list.js                # Handles form submissions, hides and displays add/edit popups, shows toast notification to confirm success.
 
             settings_style.css                  # Style sheet for settings page      
             style.css                           # Style sheet for all pages apart from settings        
@@ -255,10 +256,10 @@ FoodLink/
             admin_dashboard.html
             admin_login.html
             admin_update_password.html
-            base.html
+            base.html                           # Base layout used across all templates (navigation bar, contianer for flash messages, js scripts, styling sheets)
             createAccount.html
             email_verification.html
-            index.html
+            index.html                          # User dashboard (diplays temp/humidity real time data, tiles to navugate to inventory, shopping list and recipes)
             inventory.html
             inventory_add.html
             item_view.html
@@ -272,7 +273,7 @@ FoodLink/
             resetPassword.html
             select_utensils.html
             settings.html
-            shoppinglist.html
+            shoppinglist.html                   # Shooping List UI (add/edit/remove/clear items)
 
         admin_recipe.py
         alchemy_db.py                           # Loads sql alchemy with flask and handles safe execution of commands with error handling
@@ -293,7 +294,7 @@ FoodLink/
                                                   
         item.py                                 # Handles sql commands for item table, image storing functionality, and form processing
         models.py
-        notification.py
+        notification.py                         # Handles sql commands for notification table, temp/humidity notification cooldown, and email notifications
         recipe.py                               # Handles recipe sql commands (CRUD), and html form processing for adding and editing a recipe
         recipe_processing.py                    # Creates a "smart recipe object" which matches a recipe against a users tools and inventory, calculates missing tools, 
                                                   finds missing or insufficient quantity ingredients, and sorts recipes by which uses most soon to expire items (with weighting applied)
@@ -313,7 +314,3 @@ FoodLink/
 
     README.md                                   # Project README file (this file)
 ```
-
-Backend Explanation:
-
-### EXPLAIN FUNCTION HERE

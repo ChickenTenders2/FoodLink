@@ -695,7 +695,6 @@ function createAddButton(i = null) {
 }
 
 async function inventory_selector(i, tile) {
-    //const searchParam = document.getElementById("selector-search-input").value || "";
     const searchParam = "";
 
     const response = await fetch("/inventory/get/" + searchParam);

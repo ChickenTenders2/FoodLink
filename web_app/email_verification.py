@@ -5,7 +5,6 @@ from flask import current_app, session
 def generate_verification_code():
     return str(random.randint(100000, 999999))
 
-
 ## action text is either "verify" or "reset" and mofifies email text to match accordingly
 def send_verification_code(user, mail, action_text):
     code = generate_verification_code()

@@ -10,6 +10,15 @@ from os import getenv as get_dotenv
 
 # Retrieves all notifications for a given user, ordered by most recent
 def get_notifications(user_id):
+    """
+    Retrieve all notifications for a given user.
+
+    Args:
+        user_id (int): The ID of the user.
+
+    Returns:
+        dict: A dictionary with 'success' and a list of 'notifications', or an error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -31,6 +40,15 @@ def get_notifications(user_id):
 
 # Marks a specific notification as read (is_read = 1)
 def mark_read(notif_id):
+    """
+    Mark a specific notification as read.
+
+    Args:
+        notif_id (int): The ID of the notification to mark as read.
+
+    Returns:
+        dict: A dictionary indicating success or failure.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -48,6 +66,17 @@ def mark_read(notif_id):
 
 # Checks whether a notification with the same type and message already exists for the user
 def notification_exists(user_id, notif_type, message):
+    """
+    Check if a duplicate notification already exists for a user.
+
+    Args:
+        user_id (int): The ID of the user.
+        notif_type (str): The type/category of the notification.
+        message (str): The notification message to check.
+
+    Returns:
+        bool: True if the notification already exists, False otherwise.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -65,6 +94,18 @@ def notification_exists(user_id, notif_type, message):
 
 # Inserts a new notification into the database
 def insert_notification(user_id, notif_type, message, severity):
+    """
+    Insert a new notification into the database.
+
+    Args:
+        user_id (int): The ID of the user.
+        notif_type (str): The type/category of the notification.
+        message (str): The message to be stored.
+        severity (str): The severity level ('info', 'warning', 'critical').
+
+    Returns:
+        dict: Success status and optional error details.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -94,11 +135,31 @@ def insert_notification(user_id, notif_type, message, severity):
 
 # Creates a support notification (saves in DB and sends email)
 def support_notification(user_id, message):
+    """
+    Handle creation and email delivery of a support-related notification.
+
+    Args:
+        user_id (int): The ID of the user.
+        message (str): The support message content.
+
+    Returns:
+        dict: Result from `insert_notification`.
+    """
     send_email(user_id, 'support', message)
     return insert_notification(user_id, 'support', message, 'info')
 
 # Sends expiry notifications based on inventory expiry dates
 def expiry_notification(user_id):
+    """
+    Check the user's inventory for expired or soon-to-expire items
+    and send notifications and emails accordingly.
+
+    Args:
+        user_id (int): The ID of the user.
+
+    Returns:
+        None
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -145,6 +206,17 @@ def expiry_notification(user_id):
 
 # Sends temperature and humidity notifications based on thresholds
 def temperature_humidity_notification(user_id, temperature, humidity):
+    """
+    Compare fridge temperature and humidity to thresholds and notify user if needed.
+
+    Args:
+        user_id (int): The ID of the user.
+        temperature (float): Current temperature reading.
+        humidity (float): Current humidity reading.
+
+    Returns:
+        None
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -189,6 +261,17 @@ def temperature_humidity_notification(user_id, temperature, humidity):
 
 # Prevents sending duplicate notifications within a short cooldown period (default: 10 mins)
 def cooldown_check(user_id, notif_type, cooldown_minutes=10):
+    """
+    Prevents sending the same type of notification repeatedly within a short time frame.
+
+    Args:
+        user_id (int): The ID of the user.
+        notif_type (str): The notification type (e.g., 'temperature', 'humidity').
+        cooldown_minutes (int, optional): Time window in minutes. Defaults to 10.
+
+    Returns:
+        bool: True if the cooldown is still active, False if a new notification can be sent.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -221,7 +304,17 @@ def cooldown_check(user_id, notif_type, cooldown_minutes=10):
             cursor.close()
 
 def send_email(user_id, subject_type, message_text):
-    """Sends an email to the user using Gmail SMTP"""
+     """
+    Sends an HTML email to the user for a given notification type using Gmail SMTP.
+
+    Args:
+        user_id (int): The ID of the user to send the email to.
+        subject_type (str): The type/category of the notification (e.g., 'expiry', 'temperature').
+        message_text (str): The body content of the email.
+
+    Returns:
+        dict: A dictionary indicating success or failure, with an error message if applicable.
+    """
     cursor = None
     try:
         cursor = get_cursor()

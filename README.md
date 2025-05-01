@@ -18,11 +18,136 @@ Technology Stack:
 
 Installation:
 
-### CLONING THE REPOSITORY/EXTRACTING FROM ZIP FOLDER
-### SETTING UP VIRTUAL ENVIRONMENT
-### INSTALLING PYTHON DEPENDENCIES
-### SETTING UP DATABASE
-## RUNNING THE APPLICATION
+## Prerequisites
+
+- Raspberry Pi with Raspberry Pi OS
+- Python 3.9+ and pip
+- Virtualenv: `pip install virtualenv`
+- Internet access
+- Basic terminal and sudo access
+
+---
+
+## Extracting the Project from ZIP
+
+Unzip the provided FoodLink project folder and navigate into it:
+
+```bash
+unzip FoodLink.zip
+cd FoodLink
+```
+
+---
+
+## Setting Up Python Virtual Environment
+
+```bash
+cd setup
+virtualenv venv
+source venv/bin/activate
+```
+
+---
+
+## Installing Python Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Setting Up MariaDB on Raspberry Pi
+
+### 1. Install MariaDB
+
+```bash
+sudo apt update
+sudo apt install mariadb-server -y
+```
+
+### 2. Secure the Installation
+
+```bash
+sudo mysql_secure_installation
+```
+
+Choose:
+- Set root password
+- Remove anonymous users
+- Disallow remote root login
+- Remove test database
+- Reload privileges
+
+---
+
+### 3. Create User and Database
+
+```bash
+sudo mariadb
+```
+
+Inside the MariaDB prompt:
+
+```sql
+CREATE DATABASE foodlink_db;
+CREATE USER 'foodlink_user'@'localhost' IDENTIFIED BY 'strongpassword';
+GRANT ALL PRIVILEGES ON foodlink_db.* TO 'foodlink_user'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+---
+
+## Importing the Database (provided schema)
+
+```bash
+sudo mariadb -u foodlink_user -p foodlink_db < setup/foodlink_schema.sql
+```
+
+---
+
+## Ensure MariaDB is Running
+
+```bash
+sudo systemctl status mariadb
+```
+
+If it is not active, start it using:
+
+```bash
+sudo systemctl start mariadb
+```
+
+---
+
+## Configuring the Web App
+
+Update DB config in your Flask code (e.g. `.env`):
+
+```python
+DB_USER = "foodlink_user"
+DB_PASSWORD = "strongpassword"
+DB_NAME = "foodlink_db"
+```
+
+---
+
+## Running the Application
+
+```bash
+cd ../web_app
+python app.py
+```
+
+Visit: `http://localhost:5000` in your browser.
+
+---
+
+## Final Notes
+
+- Keep your Raspberry Pi connected to ThingsBoard for IoT features
+- Default port is 5000; can be configured in `app.py`
 
 Usage:
 

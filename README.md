@@ -281,7 +281,9 @@ FoodLink/
         database.py                             # Connects to the database using the envrionment variables set and acts as a single point to connect to the database (
                                                   for all sql commands using mariadb connector). Auto-reconnects on connection loss and handles rollbacks safely on execute failure. Handles closing connection when server stops so connections don't build up on the database.
                                                   
-        email_verification.py
+        email_verification.py                   # Manages user email verification through verification
+                                                  codes, sending emails, and confirming user identity.
+                                                  Made through Flask's Blueprint and Flask Mail, and render_template.
         flask_forms.py
         input_handling.py
         inventory.py                            # Handles basic CRUD sql commands for a users inventory, html form processing for adding an item to inventory,
@@ -301,8 +303,10 @@ FoodLink/
                                                   (after resolving), admins can assign a report to themselves (with override checks)
 
         scanner.py                              # Processes users camera feed as a video and scans each frame using a barcode reader or AI object recogniser based on the mode
-        settings.py
-        shopping.py                             # Handles sql commands for shoppinglist table
+        settings.py                             # Handles user preferences through multiple view classes
+                                                  that control account details and notification preferences. Made through Flask's Blueprint, MethodView,
+                                                  Flask Login, and werkzeug.security for password hashing.
+        shopping.py
         success.py
         thingsboard.py
         tool.py                                 # Handles tool SQL commands (CRUD)

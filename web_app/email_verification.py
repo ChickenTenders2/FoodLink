@@ -3,10 +3,21 @@ from flask_mail import Message
 from flask import current_app, session
 
 def generate_verification_code():
+    """
+    This function generates a random 6-digit verification code as a string. 
+    Then returns the code as a string to be used for email verification. 
+    """
     return str(random.randint(100000, 999999))
 
 ## action text is either "verify" or "reset" and mofifies email text to match accordingly
 def send_verification_code(user, mail, action_text):
+    """
+    This function sends a verification code email to the user with
+    different messages based on user actions.
+
+    The function then stores the verification code in the user's session
+    and sends an email with the HTML version of the message.
+    """
     code = generate_verification_code()
     if "verification_codes" not in session:
         session["verification_codes"] = {}
@@ -22,7 +33,6 @@ def send_verification_code(user, mail, action_text):
         sender=current_app.config['MAIL_DEFAULT_SENDER']
     )
 
-    
     # Email content
     msg.body = f"""
     Hello {user.username},

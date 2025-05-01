@@ -171,3 +171,8 @@ FoodLink/
 │
 ├──  yolov8s-worldv2.pt                         # 
 └──  README.md                                  # Project readme file
+
+
+Backend Explanation:
+
+### EXPLAIN FUNCTION HERE

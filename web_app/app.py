@@ -1,7 +1,6 @@
 ### general imports for flask setup
 from flask import Flask, jsonify, render_template, request, url_for, Response, redirect, session, flash
 from flask_bootstrap import Bootstrap
-import os
 
 ### shared operations for user and admin:
 # for scanning items (barcode or ai object recogniser)
@@ -58,6 +57,12 @@ from database import close_connection
 import atexit
 atexit.register(close_connection)
 
+
+### for loading environment variables
+from dotenv import load_dotenv
+from os import getenv as get_dotenv
+load_dotenv()
+
 # Import database and user model
 app = Flask(__name__, template_folder = "templates")
 
@@ -67,17 +72,19 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Configuration
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev_key_for_testing')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://FoodLink:Pianoconclusiontown229!@80.0.43.124/FoodLink'
+app.config['SECRET_KEY'] = get_dotenv('SECRET_KEY', 'dev_key_for_testing')
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    f"mysql+pymysql://{get_dotenv('DB_USER')}:{get_dotenv('DB_PASS')}@{get_dotenv('DB_HOST')}/{get_dotenv('DB_NAME')}"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Email configuration
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'foodlink2305@gmail.com'  
-app.config['MAIL_PASSWORD'] = 'ngjw ejzx cfwn wnew'    
-app.config['MAIL_DEFAULT_SENDER'] = 'FoodLink <foodlink2305@gmail.com>'
+app.config['MAIL_SERVER'] = get_dotenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(get_dotenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = get_dotenv('MAIL_USE_TLS', 'True') == 'True'
+app.config['MAIL_USERNAME'] = get_dotenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = get_dotenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = get_dotenv('MAIL_DEFAULT_SENDER')
 mail = Mail(app)
 
 # Import and register the settings blueprint (i'm sorry it wasnt me :( )
@@ -530,8 +537,8 @@ def settings_page():
 @user_only
 def dashboard():
     # display realtime temperature and humidity sensor data
-    temp_url = "https://thingsboard.cs.cf.ac.uk/dashboard/9c597b10-0b04-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2" 
-    humid_url = "https://thingsboard.cs.cf.ac.uk/dashboard/74d87180-0dbc-11f0-8ef6-c9c91908b9e2?publicId=0d105160-0daa-11f0-8ef6-c9c91908b9e2"
+    temp_url = get_dotenv("TEMP_DASHBOARD_URL")
+    humid_url = get_dotenv("HUMID_DASHBOARD_URL")
 
     return render_template('index.html', temp_url=temp_url, humid_url = humid_url)
 

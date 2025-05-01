@@ -1098,6 +1098,10 @@ def resolve_report():
 @app.route('/admin/item_view')
 @admin_only
 def get_items():
+    """This function handles the pagination of item pages:
+       The first page is returned as well as the maximum page
+       With an error returned in case of failure.
+    """
     result = item.get_page(0)
     if not result.get("success"):
         return result, 500
@@ -1113,6 +1117,11 @@ def get_items():
 @app.route('/admin/item_view/get/<search_query>')
 @admin_only
 def search_items(search_query = None):
+        """This function handles the searching items:
+        Checks if the search query is for a specific page 
+        (A page change button is pressed) or if the query is
+        a search term and handles these cases appropriately. 
+        """
         # Checks if the search is for a specifc page.
         if search_query.isnumeric():
             result = item.get_max_page()
@@ -1146,6 +1155,10 @@ def search_items(search_query = None):
 @app.route('/admin/recipe_view')
 @admin_only
 def admin_get_recipes():
+    """This function handles recipe retrieval:
+       All of the recipes are retrieved from the database
+       and passed to the front end.
+    """
     result = admin_recipe.get_all()
     if not result.get("success"):
         return jsonify(result), 500
@@ -1155,25 +1168,41 @@ def admin_get_recipes():
 @app.route('/admin/recipe_view/gets_items/<int:recipe_id>', methods=['GET'])
 @admin_only
 def get_ingredients(recipe_id):
+    """This function handles ingredient retrieval:
+       All of the ingredients associated with the 
+       recipe being edited are retrieved from the 
+       database and passed to the front end.
+    """
     result = recipe_sql.get_recipe_items(recipe_id)
     if not result.get("success"):
         return jsonify(result), 500
     ingredients = result.get("items")
     return jsonify(ingredients)
 
-@app.route('/admin/recipe_view/get_tools_ids/<int:recipe_id>', methods=['GET'])
+@app.route('/admin/recipe_view/get_tools_names/<int:recipe_id>', methods=['GET'])
 @admin_only
-def get_tools_ids(recipe_id):
+def get_tools_names(recipe_id):
+    """This function handles tool retrieval:
+       All of the ingredients associated with the 
+       recipe being edited are retrieved from the 
+       database and passed to the front end.
+    """
     result = recipe_sql.get_recipe_tools(recipe_id)
     if not result.get("success"):
         return jsonify(result), 500
     tools = result.get("tool_ids")
     return jsonify(tools)
 
+
 # Returns the tools as a dictionary so that names can be mapped to ids in the js code. 
 @app.route('/admin/recipe_view/get_tools/', methods=['GET'])
 @admin_only
 def admin_get_tools():
+    """This function handles tool retrieval:
+       All of the tools are retrieved from the 
+       database and passed to the front end as a 
+       dictionary mapping the tool names to tool ids.
+    """
     result = tool.get_tools()
     if not result.get("success"):
         return jsonify(result), 500
@@ -1185,6 +1214,11 @@ def admin_get_tools():
 @app.route('/admin/item_view/delete', methods = ['POST'])
 @admin_only
 def delete_item():
+    """Handles deletion of an item by 
+       decoding the utf-8 body of a form 
+       that constains the ID and passing 
+       it to a query.
+    """
     # Form data is formatted in utf-8 so it needs to be decoded.
     id = request.data.decode('utf-8')
     result = item.remove_item(id)
@@ -1195,6 +1229,11 @@ def delete_item():
 # Removes an item from the item table.
 @app.route('/admin/recipe_view/delete', methods = ['POST'])
 def delete_recipe():
+    """Handles deletion of a recipe by 
+       decoding the utf-8 body of a form 
+       that constains the ID and passing 
+       it to a query.
+    """
     # Form data is formatted in utf-8 so it needs to be decoded since id was not submitted in a form.
     id = request.data.decode('utf-8')
     result = admin_recipe.remove_recipe(id)
@@ -1202,11 +1241,15 @@ def delete_recipe():
         return jsonify(result), 500
     return jsonify(result)
         
-
 # Updates the details of a selected item in the item table.
 @app.route('/admin/item_view/update_item', methods = ['POST'])
 @admin_only
 def update_item_admin(): 
+    """Handles updating an item as well as 
+       sanitising the inputs to prevent SQL 
+       injection attacks. Expiry input is 
+       validated to prevent submission failure.
+    """
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_handling.sanitise_all(['name', 'brand', 'quantity', 
                                                 'expiry', 'unit'])
@@ -1239,6 +1282,11 @@ def update_item_admin():
 @app.route('/admin/item_view/add_item', methods = ['POST'])
 @admin_only
 def add_item_admin(): 
+    """Handles adding an item to the 
+       database items table as well as 
+       sanitising the inputs to prevent SQL 
+       injection attacks.
+    """
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_handling.sanitise_all(['barcode', 'name', 'brand', 'quantity', 
                                                 'expiry', 'unit'])
@@ -1270,6 +1318,11 @@ def add_item_admin():
 @app.route('/admin/recipe_view/update_recipe', methods = ['POST'])
 @admin_only
 def update_recipe_admin():
+    """Handles updating a recipe as well as 
+       sanitising the inputs to prevent SQL 
+       injection attacks. Expiry input is 
+       validated to prevent submission failure.
+    """
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_handling.sanitise_all(['name', 'instructions', 
                                                 'prep', 'cook', 'servings'])
@@ -1288,6 +1341,11 @@ def update_recipe_admin():
 @app.route('/admin/recipe_view/add_recipe', methods = ['POST'])
 @admin_only
 def add_recipe_admin():
+    """Handles adding an item to the 
+       database recipe table as well as 
+       sanitising the inputs to prevent SQL 
+       injection attacks.
+    """
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_handling.sanitise_all(['name', 'instructions', 
                                                 'prep', 'cook', 'servings'])
@@ -1304,6 +1362,10 @@ def add_recipe_admin():
 @app.route('/admin/recipe_view/update_recipe_ingredients', methods=['POST'])
 @admin_only
 def update_recipe_ingredients():
+    """Handles row by row ingredient updates
+       for the ingredients associated with the 
+       recipe that is being edited.
+    """
     # Requests lists since the rows are dynamically generated.
     names = request.form.getlist('name[]')
     units = request.form.getlist('unit[]')
@@ -1318,6 +1380,10 @@ def update_recipe_ingredients():
 @app.route('/admin/recipe_view/add_recipe_ingredients', methods=['POST'])
 @admin_only
 def add_recipe_ingredients():
+    """Handles row by row addition of ingredients
+       associated with the recipe being added to the
+       recipe-ingredient database table.
+    """
     # Requests lists since the rows are dynamically generated.
     names = request.form.getlist('name[]')
     units = request.form.getlist('unit[]')
@@ -1332,6 +1398,11 @@ def add_recipe_ingredients():
 @app.route('/admin/recipe_view/recipe_id/', methods=['GET'])
 @admin_only
 def get_recipe_id():
+    """Handles the retrieval of a recipe ID
+       for a newly added recipe so that the 
+       associated tools and ingredients can 
+       be updated.
+    """
     result = admin_recipe.get_id()
     if not result.get("success"):
         return jsonify(result), 500
@@ -1341,6 +1412,10 @@ def get_recipe_id():
 @app.route('/admin/recipe_view/update_recipe_tools', methods=['POST'])
 @admin_only
 def update_recipe_tools():
+    """Handles row by row updates
+       for the tools associated with the 
+       recipe that is being edited.
+    """
     tool_ids = request.form.getlist('tools[]')
     recipe_id = request.form.get('recipe-id')
     result = admin_recipe.update_recipe_tools(recipe_id, tool_ids)
@@ -1351,6 +1426,10 @@ def update_recipe_tools():
 @app.route('/admin/recipe_view/add_recipe_tools', methods=['POST'])
 @admin_only
 def add_recipe_tools():
+    """Handles row by additions for 
+       the tools associated with the 
+       recipe that is being edited.
+    """
     tool_ids = request.form.getlist('tools[]')
     recipe_id = request.form.get('recipe-id')
     result = admin_recipe.add_recipe_tools(recipe_id, tool_ids)

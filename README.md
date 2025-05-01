@@ -204,31 +204,31 @@ Usage:
 
 Folder Structure:
 
-FoodLink/
-│
-├── arduino/                                    # Arduino-related code
-│   └── sensor_readings_to_bluetooth/
-│       └── sensor_readings_to_bluetooth.ino
-│
-├── raspberry_pi/                               # Code for fridge add-on raspberry pi
-│   └── notify.py
-│
-├── setup/                                      # Files needed for setup
-│   ├── recipeDB.py
-│   └── requirements.txt
-│
-├── web_app/                                    # All files and folders for the web app
-│   ├── static/
-│   |   ├── images/                             # Uploaded item images or icons
-│   │   │   ├ 1.jpg                             # Example of image for item with id 1
-│   │   │   ├ 2.jpg                             # etc..
-│   │   │   ├ 3.jpg
-│   │   │   ├ ...
-│   │   │   ├ notification_bell.png             # Notification icon
-│   │   │   └ null.jpg                          # Placeholder image if item doesn't have one
-│   │   │
-│   │   ├── js/                                 # Frontend scripts
-│   │   │   ├── add_item.js                     # 
+FoodLink/                                                                                                                                                                     
+│                                                                                                                                                                             
+├── arduino/                                    # Arduino-related code                                                                                                        
+│   └── sensor_readings_to_bluetooth/                                                                                                                                         
+│       └── sensor_readings_to_bluetooth.ino                                                                                                                                  
+│                                                                                                                                                                             
+├── raspberry_pi/                               # Code for fridge add-on raspberry pi                                                                                         
+│   └── notify.py                                                                                                                                                             
+│                                                                                                                                                                             
+├── setup/                                      # Files needed for setup                                                                                                      
+│   ├── recipeDB.py                                                                                                                                                           
+│   └── requirements.txt                                                                                                                                                      
+│                                                                                                                                                                             
+├── web_app/                                    # All files and folders for the web app                                                                                       
+│   ├── static/                                                                                                                                                               
+│   |   ├── images/                             # Uploaded item images or icons                                                                                               
+│   │   │   ├ 1.jpg                             # Example of image for item with id 1                                                                                         
+│   │   │   ├ 2.jpg                             # etc..                                                                                                                       
+│   │   │   ├ 3.jpg                                                                                                                                                           
+│   │   │   ├ ...                                                                                                                                                             
+│   │   │   ├ notification_bell.png             # Notification icon                                                                                                           
+│   │   │   └ null.jpg                          # Placeholder image if item doesn't have one                                                                                  
+│   │   │                                                                                                                                                                     
+│   │   ├── js/                                 # Frontend scripts                                                                                                            
+│   │   │   ├── add_item.js                     #                                                                                                                             
 │   │   │   ├── barcode_scan.js
 │   │   │   ├── inventory.js                                                                                                                                   
 │   │   │   ├── inventory_add.js                                                                                                                               
@@ -244,10 +244,10 @@ FoodLink/
 │   │   │   ├── settings.js                                                                                                                                    
 │   │   │   └── shopping_list.js  
 │   │   │
-│   │   ├── settings_style.css                  # Style sheet for settings page
-│   │   └── style.css                           # Style sheet for all pages apart from settings
-│   │
-│   ├── templates/                              # HTML templates (rendered by Flask)
+│   │   ├── settings_style.css                  # Style sheet for settings page                                                                                               
+│   │   └── style.css                           # Style sheet for all pages apart from settings                                                                               
+│   │                                                                                                                                                                         
+│   ├── templates/                              # HTML templates (rendered by Flask)                                                                                          
 │   │   ├── add_item.html                                                                                                                                  
 │   │   ├── admin_add.html                                                                                                                                 
 │   │   ├── admin_base.html                                                                                                                                
@@ -272,7 +272,7 @@ FoodLink/
 │   │   ├── select_utensils.html                                                                                                                           
 │   │   ├── settings.html                                                                                                                                  
 │   │   └── shoppinglist.html   
-│   │
+│   │                                                                                                                                                                       
 │   ├── admin_recipe.py                         #                                                                                                      
 │   ├── alchemy_db.py                           # Loads sql alchemy with flask and handles safe execution of commands with error handling
 │   ├── app.py                                  # Main Flask app entry point

@@ -206,11 +206,13 @@ Usage:
 ```
 FoodLink/
     arduino/                                    # Arduino-related code     
-        sensor_readings_to_bluetooth/
-            sensor_readings_to_bluetooth.ino
+        sensor_readings_to_bluetooth/           # Folder required to run the Raspberry Pi code in the IDE
+            sensor_readings_to_bluetooth.ino    # Arduino C++ code for collecting temperature humidity and distance readings. These are sent to the Pi in JSON
+                                                  string form using Bluetooth so that they are ready to be sent to ThingsBoard.
 
     raspberry_pi/                               # Code for fridge add-on raspberry pi     
-        notify.py
+        notify.py                               # Collects values for both the distance and message keys from ThingsBoard and uses them to check if the buzzer 
+                                                  and LCD.
 
     setup/                                      # Files needed for setup  
         itemDB.py                               # Python script to insert items to item table.
@@ -275,42 +277,43 @@ FoodLink/
             settings.html
             shoppinglist.html                   # Shooping List UI (add/edit/remove/clear items)
 
-        admin_recipe.py
-        alchemy_db.py                           # Loads sql alchemy with flask and handles safe execution of commands with error handling
-        app.py                                  # Main Flask app entry point
+        admin_recipe.py                         # Handles operations performed on the recipe database table when the admin recipe_view page is in use.
+        alchemy_db.py                           # Loads sql alchemy with flask and handles safe execution of commands with error handling.
+        app.py                                  # Main Flask app entry point. Docstrings, aided by comments explain the purpose of each function.
         database.py                             # Connects to the database using the envrionment variables set and acts as a single point to connect to the database (
-                                                  for all sql commands using mariadb connector). Auto-reconnects on connection loss and handles rollbacks safely on execute failure. Handles closing connection when server stops so connections don't build up on the database.
+                                                  for all sql commands using mariadb connector). Auto-reconnects on connection loss and handles rollbacks safely. on execute failure. Handles closing connection when server stops so connections don't build up on the database.
                                                   
-        email_verification.py                   # Manages user email verification through verification
+        email_verification.py                   # Manages user email verification through verification.
                                                   codes, sending emails, and confirming user identity.
                                                   Made through Flask's Blueprint and Flask Mail, and render_template.
         flask_forms.py
-        input_handling.py
+        input_handling.py                       # Contains a function for validating date format as well as functions that sanitise inputs to prevent malicious 
+                                                  SQl injection attacks. Both of these functions use the re module to achieve their goals.
         inventory.py                            # Handles basic CRUD sql commands for a users inventory, html form processing for adding an item to inventory,
                                                   formatting of expiry date for the front end, and more advanced sql commands: 
                                                   strict_search (used in recipe proccesing):         finds an item which is the best match for an ingredient
-                                                  correct_personal_item (used in resolving reports): replaces a users personal item (with quantity checks) if their report
-                                                                                                     gets approved
+                                                  correct_personal_item (used in resolving reports): replaces a users personal item (with quantity checks) if their report gets approved.
                                                   
-        item.py                                 # Handles sql commands for item table, image storing functionality, and form processing
+        item.py                                 # Handles sql commands for item table, image storing functionality, and form processing.
         models.py
-        notification.py                         # Handles sql commands for notification table, temp/humidity notification cooldown, and email notifications
-        recipe.py                               # Handles recipe sql commands (CRUD), and html form processing for adding and editing a recipe
-        recipe_processing.py                    # Creates a "smart recipe object" which matches a recipe against a users tools and inventory, calculates missing tools, 
-                                                  finds missing or insufficient quantity ingredients, and sorts recipes by which uses most soon to expire items (with weighting applied)
+        notification.py                         # Handles sql commands for notification table, temp/humidity notification cooldown, and email notifications.
+
+        recipe.py                               # Handles recipe sql commands (CRUD), and html form processing for adding and editing a recipe.
+
+        recipe_processing.py                    # Creates a "smart recipe object" which matches a recipe against a users tools and inventory, calculates missing  
+                                                  tools, finds missing or insufficient quantity ingredients, and sorts recipes by which uses most soon to expire items (with weighting applied).
 
         report.py                               # Handles SQL operations for item errors: adding user report of an item, admin get all, find duplicate and remove report
                                                   (after resolving), admins can assign a report to themselves (with override checks)
 
-        scanner.py                              # Processes users camera feed as a video and scans each frame using a barcode reader or AI object recogniser based on the mode
-        settings.py                             # Handles user preferences through multiple view classes
+        scanner.py                              # Processes users camera feed as a video and scans each frame using a barcode reader or AI object recogniser. based on the mode
+        settings.py                             # Handles user preferences through multiple view classes.
                                                   that control account details and notification preferences. Made through Flask's Blueprint, MethodView,
                                                   Flask Login, and werkzeug.security for password hashing.
         shopping.py
-        success.py
+        success.py                              # Publishes a message with the value 'Added' to ThingsBoard over secure MQTT using the tb_mqtt_client library. 
         thingsboard.py
         tool.py                                 # Handles tool SQL commands (CRUD)
-        yolov8s-worldv2.pt
 
     README.md                                   # Project README file (this file)
 ```

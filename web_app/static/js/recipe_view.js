@@ -277,7 +277,7 @@ async function update_ingredients(event, recipe_id) {
 async function get_tools(recipe_id) {
     try {
         // Gets the tools asociated with the recipe that is being edited.
-        const response_id = await fetch('/admin/recipe_view/get_tools_ids/' + recipe_id, {
+        const response_id = await fetch('/admin/recipe_view/get_tools_names/' + recipe_id, {
             method: 'GET', 
         });
         

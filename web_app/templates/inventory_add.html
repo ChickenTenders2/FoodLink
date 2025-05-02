@@ -12,7 +12,8 @@
         <label>Switch to AI Item recognition?</label>
         <input type="checkbox" id="scan_mode" onchange="toggle_scan_mode()">
         <br>
-        <img id="barcode_scanner" src="{{ url_for('get_scanner') }}" alt="Barcode Scanner">
+        <!-- Video stream from backend (MJPEG stream) -->
+        <img id="camera" src="/scanner/get" alt="Camera Feed" />
     </div>
 
     <div id="not_found_popup" class="popup">
@@ -33,16 +34,10 @@
         <button onclick="open_add_popup('search')">Add Missing Item</button>
     </div>
 
-    <!-- added popup from inventory.html for inputting data of new item-->
     <div id="popup" class="popup">
         <h2 id="inv-popup-title">Add Item To Inventory</h2>
         <button id="close-popup" onclick="close_item_popup(false)">×</button>
-        <!-- on error used to set default image if there is no image for the item-->
-        <img class="item_img" id="item_image" src="" alt="">
-        <!-- allows user to edit incorrect item information -->
-        <button id="modify_action_button" onclick="open_add_popup('clone')">Clone Item</button>
         <form id="update-form" method="POST" onsubmit="add_item(event)">
-            <!-- item fields are readonly apart from expiry and quantity as they can be different per item-->
             <label>Barcode:</label>
             <input type="text" id="barcode" name="barcode" readonly>
             <br>
@@ -66,71 +61,9 @@
             <button type="submit">Add Item</button>
         </form>
     </div>
-
-    <div id="add-popup" class="popup">
-        <h2 id="add-popup-title">Add To Personal Items</h2>
-        <button id="close-add-popup" onclick="close_add_popup(false)">×</button>
-        <!-- on error used to set default image if there is no image for the item-->
-        <img class="item_img" id="image_preview" src="/static/images/null.jpg" alt="">
-        <!-- allows user to edit incorrect item information -->
-        <form id="add-form" method="POST" onsubmit="add_new_item(event)">
-            <label>Select Image:</label>
-            <!-- only accepts image files -->
-            <input type="file" id="item_image_edit" name="item_image" accept="image/jpeg" onchange="update_image_preview(event)">
-            <br>
-            <label>Barcode:</label>
-            <input type="text" id="barcode_edit" name="barcode">
-            <br>
-            <label>Item Name:</label>
-            <input type="text" id="name_edit" name="name" required>
-            <br>
-            <label>Brand:</label>
-            <input type="text" id="brand_edit" name="brand">
-            <br>
-            <label>Expiry Time:</label>
-            <div class="expiry-time-group">
-                <input type="number" id="expiry_day" class="date_field" name="expiry_day" min="0" max="30" placeholder="DD" required>
-                <label>/</label>
-                <input type="number" id="expiry_month" class="date_field" name="expiry_month" min="0" max="11" placeholder="MM" required>
-                <label>/</label>
-                <input type="number" id="expiry_year" class="date_field" name="expiry_year" min="0" max="99" placeholder="YY" required>
-            </div>
-            <!-- <br> -->
-            <label>Default Quantity:</label>
-            <input type="number" id="default_quantity" name="default_quantity" min="1" required>
-            <br>
-            <label>Unit:</label>
-            <input type="text" id="unit_edit" name="unit" required>
-            <br>
-            <label>Add item to inventory?</label>
-            <input type="checkbox" id="add_to_inventory" name="add_to_inventory" onchange="toggle_inventory_fields()">
-            <br>
-            <div id="inventory_fields">
-                <label>Expiry Date:</label>
-                <input type="date" id="expiry_date2" name="expiry_date">
-                <br>
-                <label>Quantity:</label>
-                <input type="number" id="quantity2" name="quantity" min="1">
-            </div>
-            <input type="hidden" id="original_item_id" name="item_id">
-            <button id="add-popup-submit" type="submit">Add Item</button>
-        </form>
-        <button class="hidden-button" id="delete_item" onclick="delete_item()">Delete item</button>
-    </div>
-
-    <div id="report_popup" class="popup">
-        <h2>Report Item</h2>
-        <button id="close_report_popup" onclick="close_report_popup()">×</button>
-        <p id="report_message">Send request for missing item to be available for all?</p>
-        <p id="report_message_2">If successful, your personal item will be replaced.</p>
-        <button id="report_button">Send Report</button>       
-    </div>
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
-    <script src="{{ url_for('static', filename='js/barcode_scan.js') }}"></script> 
-    <script src="{{ url_for('static', filename='js/item_handling.js') }}"></script> 
-    <script src="{{ url_for('static', filename='js/inventory_add.js') }}"></script> 
+    <script src="{{ url_for('static', filename='js/barcode_scan.js') }}"></script>
 {% endblock %}
-    

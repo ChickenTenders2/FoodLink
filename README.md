@@ -204,19 +204,21 @@ Usage:
 
 # FoodLink Project Folder Structure
 ```
-FoodLink/
+FoodLink/                                       # Project directory containing code for all components of the 
+                                                system.               
     arduino/                                    # Arduino-related code     
         sensor_readings_to_bluetooth/           # Folder required to run the Raspberry Pi code in the IDE
-            sensor_readings_to_bluetooth.ino    # Arduino C++ code for collecting temperature humidity and distance readings. These are sent to the Pi in JSON
-                                                  string form using Bluetooth so that they are ready to be sent to ThingsBoard.
+            sensor_readings_to_bluetooth.ino    # Arduino C++ code for collecting temperature humidity and distance readings. 
+                                                  These are sent to the Pi in JSON string form using Bluetooth so that they are ready to be sent to ThingsBoard.
 
-    raspberry_pi/                               # Code for fridge add-on raspberry pi     
-        notify.py                               # Collects values for both the distance and message keys from ThingsBoard and uses them to check if the buzzer 
-                                                  and LCD.
+    raspberry_pi/                               # Code for raspberry pi.     
+        feedback.py                              # Collects values for both the distance and message keys from ThingsBoard and 
+                                                 uses them to check if the buzzer and LCD need to be updated (if the door is left open for too long or if an item has been added to the user inventory).
 
-    setup/                                      # Files needed for setup  
+    setup/                                      # Files needed for setup.
         itemDB.py                               # Python script to insert items to item table.
-        recipeDB.py                             # Inserts recipes into recipe table, recipe ingredients into recipe_items table and recipe utensils and appliance into recipe_tool table.
+        recipeDB.py                             # Inserts recipes into recipe table, recipe ingredients into recipe_items table 
+                                                  and recipe utensils and appliance into recipe_tool table.
         requirements.txt                        # Python dependecies
 
     trained_AI_model/
@@ -252,7 +254,8 @@ FoodLink/
                 reports.js
                 select_utensils.js
                 settings.js
-                shopping_list.js                # Handles form submissions, hides and displays add/edit popups, shows toast notification to confirm success.
+                shopping_list.js                # Handles form submissions, hides and displays add/edit popups, shows 
+                                                  notification to confirm success.
 
             settings_style.css                  # Style sheet for settings page      
             style.css                           # Style sheet for all pages apart from settings        
@@ -264,10 +267,12 @@ FoodLink/
             admin_dashboard.html
             admin_login.html
             admin_update_password.html
-            base.html                           # Base layout used across all templates (navigation bar, contianer for flash messages, js scripts, styling sheets)
+            base.html                           # Base layout used across all templates (navigation bar, contianer for flash 
+                                                messages, js scripts, styling sheets)
             createAccount.html
             email_verification.html
-            index.html                          # User dashboard (diplays temp/humidity real time data, tiles to navugate to inventory, shopping list and recipes)
+            index.html                          # User dashboard (diplays temp/humidity real time data, tiles to navigate to 
+                                                inventory, shopping list and recipes)
             inventory.html
             inventory_add.html
             item_view.html

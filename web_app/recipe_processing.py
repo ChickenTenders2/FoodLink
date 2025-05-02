@@ -3,6 +3,8 @@ from inventory import strict_search, format_item
 from datetime import date
 
 def create(record):
+    """Creates the recipe object (dictionary) using the information from the record. It also gets the 
+    ingredients and tools needed for the recipe, from the the other recipe tables."""
     recipe_id = int(record[0])
     recipe = {
         "id": recipe_id,
@@ -42,6 +44,7 @@ def create(record):
 # sets the list of the ids for any tools required for a recipe that a user doesn't own
 # only passes tool_ids to front end as sets are used to calculate, which has a faster time complexity
 def calculate_missing_tools(recipe, user_tool_ids):
+    """Calculates the id of each tool the user doesn't own but needs for the recipe."""
     missing_tools = list(set(recipe["tool_ids"]) - set(user_tool_ids))
     recipe["missing_tool_ids"] = missing_tools
     # returns if tools are missing
@@ -49,6 +52,12 @@ def calculate_missing_tools(recipe, user_tool_ids):
 
 DAYS_LEFT_LIMIT = 14
 def find_items_in_inventory(recipe, user_id, missing_allowed, insufficient_allowed):
+    """Finds the best match for an ingredient in a users inventory. If the ingredient is within
+    the soon to expire range (DAYS_LEFT_LIMIT), it increments the count for that amount of days left. 
+    To calculate the recipes sort value, each count has weighting applied (later to expire, less importance)
+    and the negative sum is taken. This is used to sort the recipes so the once which reduce food waste most
+    appear first in the page."""
+
     # for each item, counts for how close the item is to expiring,
     # if its already close to expire (within the limit defined above)
     days_left_count = {}

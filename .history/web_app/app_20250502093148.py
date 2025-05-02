@@ -1,5 +1,5 @@
 ### general imports for flask setup
-from flask import Flask, stream_with_context, jsonify, render_template, request, url_for, Response, redirect, session, flash
+from flask import Flask, jsonify, render_template, request, url_for, Response, redirect, session, flash
 from flask_bootstrap import Bootstrap
 
 ### shared operations for user and admin:
@@ -793,7 +793,7 @@ def user_delete_item(item_id):
 @app.route('/scanner/get')
 @verified_only
 def get_scanner():
-    return Response(stream_with_context(scanner.scan()), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # Closes camera module
 @app.route('/scanner/close')

@@ -4,6 +4,15 @@ import logging
 
 # Retrieve all shopping list items for a given user
 def get_items(user_id):
+    """
+    Retrieve all shopping list items for a specific user.
+
+    Args:
+        user_id (int): The ID of the user.
+
+    Returns:
+        dict: Contains a list of items if successful, otherwise an error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -21,6 +30,17 @@ def get_items(user_id):
 
 # Add a single item to the shopping list
 def add_item(user_id, item_name, quantity):
+    """
+    Add a single item to the shopping list.
+
+    Args:
+        user_id (int): The ID of the user.
+        item_name (str): Name of the item to add.
+        quantity (int): Quantity of the item.
+
+    Returns:
+        dict: Success status, action performed, and item name.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -37,6 +57,16 @@ def add_item(user_id, item_name, quantity):
 
 # Add multiple items to the shopping list at once
 def add_items(user_id, items):
+    """
+    Add multiple items to the shopping list.
+
+    Args:
+        user_id (int): The ID of the user.
+        items (list of tuple): A list of (item_name, quantity) tuples.
+
+    Returns:
+        dict: Success status or error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -55,6 +85,18 @@ def add_items(user_id, items):
 
 # Update the name and/or quantity of an existing item in the shopping list
 def update_item(user_id, item_id, item_name, quantity):
+    """
+    Update the name or quantity of an existing item in the shopping list.
+
+    Args:
+        user_id (int): The ID of the user.
+        item_id (int): The ID of the item to update.
+        item_name (str): The new item name.
+        quantity (int): The new quantity.
+
+    Returns:
+        dict: Success status, action performed, and updated item name.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -73,6 +115,17 @@ def update_item(user_id, item_id, item_name, quantity):
 
 # Mark an item as bought or unbought
 def item_bought(user_id, item_id, bought):
+    """
+    Mark a shopping list item as bought or unbought.
+
+    Args:
+        user_id (int): The ID of the user.
+        item_id (int): The ID of the item.
+        bought (bool or int): 1 if bought, 0 if not.
+
+    Returns:
+        dict: Success status and action.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -92,6 +145,15 @@ def item_bought(user_id, item_id, bought):
 
 # Retrieve items from the inventory that are low in stock
 def low_stock_items(user_id):
+    """
+    Retrieve inventory items that are low in stock for the user.
+
+    Args:
+        user_id (int): The ID of the user.
+
+    Returns:
+        dict: Success status and a list of low-stock items.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -109,6 +171,16 @@ def low_stock_items(user_id):
 
 # Remove a specific item from the shopping list
 def remove_item(user_id, item_id):
+    """
+    Remove a specific item from the shopping list.
+
+    Args:
+        user_id (int): The ID of the user.
+        item_id (int): The ID of the item to remove.
+
+    Returns:
+        dict: Success status and removed item ID.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -125,6 +197,15 @@ def remove_item(user_id, item_id):
 
 # Clear the entire shopping list for a given user
 def clear_items(user_id):
+    """
+    Clear all items from the user's shopping list.
+
+    Args:
+        user_id (int): The ID of the user.
+
+    Returns:
+        dict: Success status and action performed.
+    """
     cursor = None
     try:
         cursor = get_cursor()

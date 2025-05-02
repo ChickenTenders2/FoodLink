@@ -1,6 +1,5 @@
 FROM python:3.9
 
-RUN echo "🔥 THIS IS THE RIGHT DOCKERFILE 🔥"
 RUN apt-get update && apt-get install -y \
     gcc g++ make build-essential pkg-config \
     libmariadb-dev default-libmysqlclient-dev mariadb-client \
@@ -9,23 +8,16 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Log what's in web_app — DEBUG
-RUN mkdir -p web_app
-
-COPY web_app/ ./web_app/
-COPY setup/requirements.txt ./requirements.txt
-
-# Log for debugging
-RUN ls -l ./web_app/
+COPY . .
 
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-ENV FLASK_APP=web_app/app.py
+ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=8080
 ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8080
 
-CMD ["gunicorn", "-b", "0.0.0.0:8080", "web_app.app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]

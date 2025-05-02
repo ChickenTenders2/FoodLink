@@ -240,7 +240,8 @@ FoodLink/                                       # Project folder containing code
                 null.jpg                        # Placeholder image if item doesn't have one
 
             js/                                 # Frontend scripts  
-                add_item.js
+                add_item.js                     # Handles the dynamic checking of item names / barcodes in the database and
+                                                  enables the dynamic switching between scanning modes.
                 barcode_scan.js
                 inventory.js
                 inventory_add.js

@@ -1,7 +1,6 @@
-RUN echo "🔥 THIS IS THE RIGHT DOCKERFILE 🔥"
-
 FROM python:3.9
 
+RUN echo "🔥 THIS IS THE RIGHT DOCKERFILE 🔥"
 RUN apt-get update && apt-get install -y \
     gcc g++ make build-essential pkg-config \
     libmariadb-dev default-libmysqlclient-dev mariadb-client \

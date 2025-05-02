@@ -790,47 +790,21 @@ def user_delete_item(item_id):
 
 # ### BARCODE SCANNING ROUTES ###
 
-# Opens camera module and returns feed
-@app.route('/scanner/get')
+@app.route('/scanner/analyze_frame', methods=['POST'])
 @verified_only
-def get_scanner():
-    return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
+def analyze_frame():
+    from scanner import process_frame
 
-# Closes camera module
-@app.route('/scanner/close')
-@verified_only
-def close_scanner():
-    scanner.release_capture()
-    return jsonify({"success":True})
+    if 'frame' not in request.files:
+        return jsonify({"success": False, "error": "No frame sent"})
 
-# Returns the barcode number if one is found or item name if object recognised
-@app.route('/scanner/get_object')
-@verified_only
-def get_object():
-    object = scanner.get_scanned()
-    if (object):
-        scanner.clear_scanned()
-        return jsonify({"success": True, "object": object})
+    file = request.files['frame']
+    result = process_frame(file.read())  # expects bytes
+    if result:
+        return jsonify({"success": True, "object": result})
     else:
         return jsonify({"success": False})
 
-@app.route("/unpause_scanner")
-@verified_only
-def unpause_scanner():
-    scanner.unpause_scanner()
-    return jsonify({"success":True})
-
-@app.route("/scanner/toggle_mode/<value>")
-@verified_only
-def toggle_scan_mode(value):
-    if value == "true":
-        scanner.toggle_mode(True)
-        return jsonify({"success": True})
-    elif value == "false":
-        scanner.toggle_mode(False)
-        return jsonify({"success": True})
-    else:
-        return jsonify({"success": False})
 
 ### ITEM ROUTES ###
     

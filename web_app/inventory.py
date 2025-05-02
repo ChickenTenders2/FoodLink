@@ -14,7 +14,6 @@ def get_items(user_id):
         cursor.execute(query, (user_id,))
         items = cursor.fetchall()
         items = format_items(items)
-        print(items)
         return {"success": True, "items": items}
     except Exception as e:
         logging.error(f"[get_items error] {e}")

@@ -95,7 +95,6 @@ async function fetchInventory() {
       const container = document.querySelector('.inventory-container');
       container.innerHTML = ''; // Clear current tiles
       let items = result.items;
-      console.log(sortParam);
       sort_items(items, sortParam); // Sort items client-side
 
       // Render each item as a tile

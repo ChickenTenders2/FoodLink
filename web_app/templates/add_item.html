@@ -8,7 +8,8 @@
     <div class="video-window">
         <button onclick="open_popup(null)">Manually enter barcode</button>
         <br>
-        <img src="{{ url_for('get_scanner') }}" alt="Barcode Scanner">
+        <video id="camera" autoplay playsinline></video>
+        <canvas id="snapshot" style="display:none;"></canvas>
     </div>
 
     <!-- added popup from inventory.html for inputting data of new item-->

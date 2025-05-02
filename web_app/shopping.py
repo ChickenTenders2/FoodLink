@@ -133,7 +133,6 @@ def item_bought(user_id, item_id, bought):
         data = (bought, item_id, user_id)
         cursor.execute(query, data)
         commit()
-        print("Item:", item_id, "Bought:", bought)
         return {"success": True, "action": "mark_bought"}
     except Exception as e:
         safe_rollback()

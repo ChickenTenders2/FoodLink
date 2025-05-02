@@ -190,7 +190,16 @@ Usage:
 
 ### 11. Recipes
 
-### 12. Admin Dashboard (Admin Only)
+### 12. Admin Dashboard (Admin Only) 
+- Log in as an existing admin 
+- Actions in dashboard include:
+    - Display reports
+    - Add new item
+    - Get items
+    - View item table
+    - View recipe table
+    - Add new admin
+    - Change password
 
 ### 13. Item Management (Admin Only)
 
@@ -199,6 +208,10 @@ Usage:
 ### 15. Manage Report (Admin Only)
 
 ### 16. Create Admins (Admin Only)
+- Log in as an existing admin with privileges
+- Click the add new admin button
+- Fill form
+- Admin Added
 
 
 

@@ -193,19 +193,36 @@ Usage:
 ### 12. Admin Dashboard (Admin Only) 
 - Log in as an existing admin 
 - Actions in dashboard include:
-    - Display reports
+    - Manage reports
     - Add new item
-    - Get items
     - View item table
     - View recipe table
     - Add new admin
-    - Change password
+    - Change my password
 
 ### 13. Item Management (Admin Only)
-
+- Sign in as an admin
+- Click add new item button to add new item
+- Click view item table to see all products
+    - Use search bar to find specific items
+    - Click edit in the item to edit it
+    - Click delete to delete an icon
 ### 14. Recipe Managemnt (Admin Only)
+- Sign in as admin
+- Click View recipe table button to view all recipes
+- CLick add to add a recipe
+    - Add the name, instructions
+    - Add ingredient, tools
+- Click edit in a recipe to edit it
+- Click delete in a recipe to delete it
 
 ### 15. Manage Report (Admin Only)
+- Sign in as an admin
+- Click manage reports button to see all unresolved issues
+- Click in one of them to assign it to you
+- Resolve report by adding item or updating existing item
+- Sends user a notification
+- Report disappears from queue once resolved
 
 ### 16. Create Admins (Admin Only)
 - Log in as an existing admin with privileges

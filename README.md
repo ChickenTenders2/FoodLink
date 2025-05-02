@@ -247,7 +247,8 @@ FoodLink/                                       # Project folder containing code
                 item_handling.js
                 item_view.js
                 navbar.js                       # Collapses the navigation bar when the screen is minimised.
-                notification.js                 # Handles the dynamic updating of the notification popup, updates number of unread notification in badge, chnages notification style when marked as read.
+                notification.js                 # Handles the dynamic updating of the notification popup, updates number of 
+                                                  unread notification in badge, chnages notification style when marked as read.
                 recipes.js
                 recipe_view.js
                 report.js

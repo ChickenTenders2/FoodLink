@@ -204,10 +204,10 @@ Usage:
 
 # FoodLink Project Folder Structure
 ```
-FoodLink/                                       # Project directory containing code for all components of the 
+FoodLink/                                       # Project folder containing code for all components of the 
                                                 system.               
     arduino/                                    # Arduino-related code     
-        sensor_readings_to_bluetooth/           # Folder required to run the Raspberry Pi code in the IDE
+        sensor_readings_to_bluetooth/           # Folder required to run the Arduino code in the IDE
             sensor_readings_to_bluetooth.ino    # Arduino C++ code for collecting temperature humidity and distance readings. 
                                                   These are sent to the Pi in JSON string form using Bluetooth so that they are ready to be sent to ThingsBoard.
 

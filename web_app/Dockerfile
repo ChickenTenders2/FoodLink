@@ -1,5 +1,6 @@
 FROM python:3.9
 
+
 # Set working directory
 # Install ALL the system packages you need
 RUN apt-get update && apt-get install -y \
@@ -42,4 +43,4 @@ ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8080
 
-CMD ["gunicorn", "-b", "0.0.0.0:8080", "-k", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]

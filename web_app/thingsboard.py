@@ -6,7 +6,7 @@ from os import getenv as get_dotenv
 # stops page reloading taking forever after clicking rapdily
 timeout = 3
 
-login_url = f"{get_dotenv("THINGSBOARD_API")}/api/auth/login"
+login_url = f"{get_dotenv('THINGSBOARD_API')}/api/auth/login"
 headers = {
     "Content-Type": "application/json"
 }

@@ -304,7 +304,7 @@ def cooldown_check(user_id, notif_type, cooldown_minutes=10):
             cursor.close()
 
 def send_email(user_id, subject_type, message_text):
-     """
+    """
     Sends an HTML email to the user for a given notification type using Gmail SMTP.
 
     Args:

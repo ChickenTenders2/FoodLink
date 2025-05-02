@@ -1,7 +1,9 @@
 import mariadb
 import logging
 from os import getenv as get_dotenv
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # lambda function to create a new connection
 create_connection = lambda: mariadb.connect(

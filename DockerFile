@@ -1,39 +1,25 @@
-# Use full Debian-based Python image, not "slim"
 FROM python:3.9
 
-# Install OS-level dependencies for mariadb, opencv, etc.
 RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    make \
-    build-essential \
-    pkg-config \
-    libmariadb-dev \
-    default-libmysqlclient-dev \
-    mariadb-client \
-    mariadb-server \
-    libssl-dev \
-    libffi-dev \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender1 \
-    zlib1g-dev \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+    gcc g++ make build-essential pkg-config \
+    libmariadb-dev default-libmysqlclient-dev mariadb-client \
+    libssl-dev libffi-dev libglib2.0-0 libsm6 libxext6 libxrender1 \
+    zlib1g-dev curl && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
 WORKDIR /app
 
-# Copy app and requirements
+# Log what's in web_app — DEBUG
+RUN mkdir -p web_app
+
 COPY web_app/ ./web_app/
 COPY setup/requirements.txt ./requirements.txt
 
-# Upgrade pip and install Python packages
+# Log for debugging
+RUN ls -l ./web_app/
+
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Environment variables
 ENV FLASK_APP=web_app/app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=8080
@@ -41,5 +27,4 @@ ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8080
 
-# Start with gunicorn
 CMD ["gunicorn", "-b", "0.0.0.0:8080", "web_app.app:app"]

@@ -69,6 +69,7 @@ def process_add_form(user_id, item_id, form):
     return add_item(user_id, item_id, quantity, expiry)
 
 def remove_item(inventory_id):
+    """Delete an item from the database with id."""
     cursor = None
     try:
         cursor = get_cursor()
@@ -85,6 +86,7 @@ def remove_item(inventory_id):
             cursor.close()
 
 def update_quantities(items_used):
+    """Updates the quantity for multiple items."""
     cursor = None
     try:
         cursor = get_cursor()
@@ -106,6 +108,7 @@ def update_quantities(items_used):
             cursor.close()
 
 def update_item(inventory_id, quantity, expiry_date):
+    """Updates the quantity and expiry date of an item with id."""
     cursor = None
     try:
         cursor = get_cursor()
@@ -121,9 +124,10 @@ def update_item(inventory_id, quantity, expiry_date):
         if cursor:
             cursor.close()
 
-# Replaces the users peronsal item with the item they reported once its been corrected/added to the table
-# also makes sure the quantity set by the user do not exceed the corrected item max quantity
+
 def correct_personal_item(personal_item_id, item_id, default_quantity):
+    """Replaces the users personal item in their inventory with the item they reported once its been corrected/added to the table publicly.
+    Ensuring the quantity set by the user do not exceed the corrected item max quantity."""
     cursor = None
     try:
         cursor = get_cursor()
@@ -166,9 +170,9 @@ def correct_personal_item(personal_item_id, item_id, default_quantity):
         if cursor:
             cursor.close()
 
-# returns the best match for an ingredient that a user has in their inventory
-# returns the first item that fully matches the item name, are in the users inventory, and are in date
+
 def strict_search(user_id, item_name, quantity_threshold):
+    """Returns the best match for an ingredient that a user has in their inventory."""
     cursor = None
     try:
         cursor = get_cursor()
@@ -206,10 +210,12 @@ def strict_search(user_id, item_name, quantity_threshold):
 
 
 def format_items(items):
+    """Formats date in list of items for frontend."""
     return [format_item(item) for item in items]
 
 # formats date of item to string for front end
 def format_item(item):
+    """Formats date in item."""
     item = list(item)
     item[6] = item[6].isoformat()
     return item

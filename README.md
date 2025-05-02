@@ -192,7 +192,7 @@ Usage:
 
 ### 12. Admin Dashboard (Admin Only) 
 - Log in as an existing admin 
-- Actions in dashboard inclue:
+- Actions in dashboard include:
     - Display reports
     - Add new item
     - Get items

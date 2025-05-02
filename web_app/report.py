@@ -3,6 +3,7 @@ import logging
 
 # user function
 def add_report(new_item_id, item_id, user_id):
+    """Adds an item error report to the database."""
     cursor = None
     try:
         cursor = get_cursor()
@@ -22,8 +23,8 @@ def add_report(new_item_id, item_id, user_id):
         if cursor:
             cursor.close()
 
-# removes an error report once its been resolved
 def remove_report(new_item_id):
+    """Removes an item error report once its been resolved."""
     cursor = None
     try:
         cursor = get_cursor()
@@ -44,6 +45,9 @@ def remove_report(new_item_id):
 # gets each report where the original item id or barcode is the same (as these are unique identifiers)
 # also gets the report by new_item_id incase item was missing and barcode is null
 def get_reports_by(new_item_id, identifier=None, type=None):
+    """Gets the original report (identified by new_item_id) and all the other reports that report the same item.
+    When type is "barcode" it searches by the identifier (barcode) on the barcode field, used for missing item reports.
+    When type is "id" it searches by the indentifier (original item id) on the item_id field, used for misinformation reports."""
     cursor = None
     try:
         cursor = get_cursor()
@@ -70,6 +74,7 @@ def get_reports_by(new_item_id, identifier=None, type=None):
             cursor.close()
 
 def get_reports():
+    """Gets every item error report information."""
     cursor = None
     try:
         cursor = get_cursor()
@@ -90,6 +95,7 @@ def get_reports():
             cursor.close()
 
 def check_assigned(new_item_id):
+    """Checks if a report is already assigned to an admin."""
     cursor = None
     try:
         cursor = get_cursor()
@@ -107,6 +113,7 @@ def check_assigned(new_item_id):
             cursor.close()
 
 def assign(new_item_id, admin_id):
+    """Assigns a report (using primary key new_item_id) to and admin with id"""
     cursor = None
     try:
         cursor = get_cursor()

@@ -13,22 +13,30 @@ model = YOLO("trained_AI_model\FoodLink.pt")
 
 # returns barcode or name of identified object
 def get_scanned():
+    """Returns the barcode or object name found"""
     return item_name if ai_mode else barcode
 
 def clear_scanned():
+    """Resets the object name or barcode found"""
     global barcode, item_name
     barcode = None
     item_name = None
 
 def unpause_scanner():
+    """Allows for analysis of frames after pausing"""
     global pause
     pause = False
 
 def toggle_mode(value):
+    """Toggles what is analysed in each frame (barcode or object) based on value (True or False)"""
     global ai_mode
     ai_mode = value
 
 def scan():
+    """Yields a video stream of a users camera using OpenCV. It also analyses each frame
+    for a barcode (using pyzbar) if ai_mode is False, or for an object (using ultralytics YOLO).
+    Once an object or barcode is found, the frames are no longer analysed, until a user requests
+    for scanning to commence again."""
     global capture, barcode, item_name, pause
 
     clear_scanned()

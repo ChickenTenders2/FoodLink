@@ -238,7 +238,7 @@ FoodLink/                                       # Project directory containing c
                 ...
                 notification_bell.png           # Notification icon   
                 null.jpg                        # Placeholder image if item doesn't have one
-               
+
             js/                                 # Frontend scripts  
                 add_item.js
                 barcode_scan.js

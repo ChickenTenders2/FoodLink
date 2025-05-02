@@ -1,24 +1,8 @@
 from database import get_cursor, commit, safe_rollback
 import logging
 
-def add_tool(name, tool_type):
-    cursor = None
-    try:
-        cursor = get_cursor()
-        query = "INSERT INTO tool (name, type) VALUES (%s, %s);"
-        data = (name, tool_type)
-        cursor.execute(query, data)
-        commit()
-        return {"success": True}
-    except Exception as e:
-        safe_rollback()
-        logging.error(f"[add_tool error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
-    finally:
-        if cursor:
-            cursor.close()
-
 def get_tools(type=None):
+    """SQL command to get every tool and id as a tuple pair (id, name)"""
     cursor = None
     try:
         cursor = get_cursor()
@@ -39,6 +23,7 @@ def get_tools(type=None):
             cursor.close()
 
 def get_user_tool_ids(user_id):
+    """SQL command to get the id of each tool the user selected."""
     cursor = None
     try:
         cursor = get_cursor()
@@ -58,6 +43,7 @@ def get_user_tool_ids(user_id):
             cursor.close()
 
 def save_user_tools(user_id, tool_ids):
+    """SQL command to store the id of each tool the user selected."""
     cursor = None
     try:
         cursor = get_cursor()

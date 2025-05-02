@@ -1,4 +1,4 @@
-gevent>=1.4
+gevent>=21.0
 gunicorn==23.0.0
 ultralytics[export]
 Flask==3.1.0

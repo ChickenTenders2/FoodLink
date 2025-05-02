@@ -1,33 +1,28 @@
-FROM python:3.9-buster
+FROM continuumio/miniconda3
 
-# Install system dependencies — all the common ones used in your stack
-RUN apt-get update && apt-get install -y \
-    gcc g++ make build-essential pkg-config \
-    libmariadb-dev default-libmysqlclient-dev mariadb-client \
-    libssl-dev libffi-dev \
-    libglib2.0-0 libsm6 libxext6 libxrender1 libgl1 \
-    libzbar0 \
-    zlib1g-dev curl git unzip \
-    && rm -rf /var/lib/apt/lists/*
+# Create and activate conda env
+RUN conda create -n foodlink python=3.9 -y
 
-# Set working directory
+# Activate env + install all major deps
+RUN /bin/bash -c "source activate foodlink && \
+    conda install -y flask gunicorn opencv pyzbar mariadb numpy scipy && \
+    pip install --no-cache-dir -r /app/requirements.txt"
+
+# Set working dir
 WORKDIR /app
 
-# Copy app code (assumes everything is inside web_app/)
+# Copy everything into container
 COPY . .
 
-# Install Python dependencies
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-
-# Set env variables
+# Set environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=8080
 ENV PYTHONUNBUFFERED=1
 
-# Expose app port
+# Make conda env the default
+ENV PATH=/opt/conda/envs/foodlink/bin:$PATH
+
 EXPOSE 8080
 
-# Run the app
 CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]

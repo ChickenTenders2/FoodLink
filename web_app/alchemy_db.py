@@ -8,6 +8,7 @@ db = SQLAlchemy()
 
 # *args **kwargs means variables can be parsed without using lambda
 def safe_execute(func, *args, **kwargs):
+    """Runs an SQLAlchemy operation with error handling."""
     try:
         # parses variables to function
         return func(*args, **kwargs)
@@ -24,12 +25,14 @@ def safe_execute(func, *args, **kwargs):
 
 # any db command using alchemy must be rolledback upon failure (even .get i.e. SELECT)
 def safe_rollback():
+    """Rolls database back, with error handling, if operation failed."""
     try:
         db.session.rollback()
     except Exception as e:
         logging.error(f"[ERROR] Rollback also failed after operation failure: {e}")
 
 def reconnect_session():
+    """Trys to reconnect to database upon connection loss."""
     try:
         logging.info("[INFO] Reconnecting SQLAlchemy session...")
         # closes broken session

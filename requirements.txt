@@ -1,4 +1,4 @@
-tensorflow==2.19.0
+gunicorn
 ultralytics[export]
 Flask==3.1.0
 Flask_Bootstrap==3.3.7.1

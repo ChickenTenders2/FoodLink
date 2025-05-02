@@ -9,7 +9,6 @@ import scanner
 from os.path import isfile as file_exists
 # general item operations
 import item
-
 ### user operations
 import tool
 import inventory
@@ -57,6 +56,8 @@ from database import close_connection
 import atexit
 atexit.register(close_connection)
 
+import numpy as np
+import cv2
 
 ### for loading environment variables
 from dotenv import load_dotenv
@@ -793,7 +794,7 @@ def user_delete_item(item_id):
 @app.route('/scanner/get')
 @verified_only
 def get_scanner():
-    return Response(stream_with_context(scanner.scan()), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 # Closes camera module
 @app.route('/scanner/close')
@@ -830,7 +831,6 @@ def toggle_scan_mode(value):
         return jsonify({"success": True})
     else:
         return jsonify({"success": False})
-
 
 ### ITEM ROUTES ###
     
@@ -1735,6 +1735,6 @@ def remove_recipe(recipe_id):
 
 if __name__ == '__main__':
     # Runs the app
-    app.run()
+    app.run(host='0.0.0.0')
 
 

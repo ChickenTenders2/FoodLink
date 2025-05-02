@@ -1106,8 +1106,14 @@ def resolve_report():
 @admin_only
 def get_items():
     """This function handles the pagination of item pages:
-       The first page is returned as well as the maximum page
-       With an error returned in case of failure.
+       The first page is identified as well as the maximum page.
+
+       Args:
+       search_query (str): The ID of the user to send the email to.
+
+       Returns:
+       Response: A HTML response is returned with the list of items 
+       to display and maximum number of pages to be split into.
     """
     result = item.get_page(0)
     if not result.get("success"):
@@ -1128,6 +1134,12 @@ def search_items(search_query = None):
         Checks if the search query is for a specific page 
         (A page change button is pressed) or if the query is
         a search term and handles these cases appropriately. 
+
+        Args:
+        search_query (str): The ID of the user to send the email to.
+
+        Returns:
+        Response: A HTML response is returned with the filtered list of items to display.
         """
         # Checks if the search is for a specifc page.
         if search_query.isnumeric():
@@ -1165,6 +1177,14 @@ def admin_get_recipes():
     """This function handles recipe retrieval:
        All of the recipes are retrieved from the database
        and passed to the front end.
+
+        Args:
+        None.
+
+        Returns:
+        Response: A JSON response containing thr list of ingredients 
+        or an error status code: 500 response if recipe retrieval is
+        unsuccessful.
     """
     result = admin_recipe.get_all()
     if not result.get("success"):
@@ -1179,6 +1199,14 @@ def get_ingredients(recipe_id):
        All of the ingredients associated with the 
        recipe being edited are retrieved from the 
        database and passed to the front end.
+
+       
+        Args:
+        recipe_id (int): An integer used to indentify which recipe 
+        the ingredients are associated with.
+
+        Returns:
+        Response: A HTML response is returned with the list of recipes.
     """
     result = recipe_sql.get_recipe_items(recipe_id)
     if not result.get("success"):
@@ -1193,6 +1221,13 @@ def get_tools_names(recipe_id):
        All of the ingredients associated with the 
        recipe being edited are retrieved from the 
        database and passed to the front end.
+
+       Args:
+       recipe_id (int): An integer used to indentify which recipe 
+       the tools are associated with.
+
+       Returns:
+       Response: A JSON response is returned with the list of tool names.
     """
     result = recipe_sql.get_recipe_tools(recipe_id)
     if not result.get("success"):
@@ -1209,6 +1244,13 @@ def admin_get_tools():
        All of the tools are retrieved from the 
        database and passed to the front end as a 
        dictionary mapping the tool names to tool ids.
+
+       Args:
+       None.
+
+       Returns:
+       Response: A JSON response containing a dictionary mapping
+       tool ids to tool names.
     """
     result = tool.get_tools()
     if not result.get("success"):

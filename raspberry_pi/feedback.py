@@ -86,7 +86,7 @@ def buzz():
 
 # Triggers the buzzer 3 times.
 def alarm():
-    x = 'ADDED!'
+    x = 'CLOSE DOOR!'
     setText(x)
     for i in range(3):
         buzz()
@@ -156,9 +156,10 @@ if __name__=="__main__":
            last_time = time_stamp
           
           # Triggers the alarm if the door is left open for two minutes.
-          if distance > door_to_wall and (time.time() - start_time >= delay):
-            alarm()
-          start_time = time.time()
+          if time.time() - start_time >= delay:
+            if distance > door_to_wall:
+                alarm()
+            start_time = time.time()
                 
          except KeyboardInterrupt:
             print ("Terminated.")

@@ -790,18 +790,20 @@ def user_delete_item(item_id):
 
 # ### BARCODE SCANNING ROUTES ###
 
-# Opens camera module and returns feed
-@app.route('/scanner/get')
+@app.route('/scanner/analyze_frame', methods=['POST'])
 @verified_only
-def get_scanner():
-    return Response(scanner.scan(), mimetype='multipart/x-mixed-replace; boundary=frame')
+def analyze_frame():
+    from scanner import process_frame
 
-# Closes camera module
-@app.route('/scanner/close')
-@verified_only
-def close_scanner():
-    scanner.release_capture()
-    return jsonify({"success":True})
+    if 'frame' not in request.files:
+        return jsonify({"success": False, "error": "No frame sent"})
+
+    file = request.files['frame']
+    result = process_frame(file.read())  # expects bytes
+    if result:
+        return jsonify({"success": True, "object": result})
+    else:
+        return jsonify({"success": False})
 
 # Returns the barcode number if one is found or item name if object recognised
 @app.route('/scanner/get_object')

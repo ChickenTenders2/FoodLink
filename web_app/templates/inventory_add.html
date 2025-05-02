@@ -13,7 +13,11 @@
         <input type="checkbox" id="scan_mode" onchange="toggle_scan_mode()">
         <br>
         <!-- Video stream from backend (MJPEG stream) -->
-        <img id="camera" src="/scanner/get" alt="Camera Feed" />
+        <!-- Webcam preview -->
+        <video id="camera" autoplay playsinline></video>
+
+        <!-- Hidden canvas for capturing frames -->
+        <canvas id="snapshot" style="display:none;"></canvas>
     </div>
 
     <div id="not_found_popup" class="popup">

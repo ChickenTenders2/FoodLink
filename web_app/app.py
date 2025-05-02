@@ -1,5 +1,5 @@
 ### general imports for flask setup
-from flask import Flask, stream_with_context, jsonify, render_template, request, url_for, Response, redirect, session, flash
+from flask import Flask, jsonify, render_template, request, url_for, redirect, session, flash
 from flask_bootstrap import Bootstrap
 
 ### shared operations for user and admin:
@@ -55,9 +55,6 @@ from flask_forms import LoginForm, CreateAccountForm, CombinedResetForm, ResetPa
 from database import close_connection
 import atexit
 atexit.register(close_connection)
-
-import numpy as np
-import cv2
 
 ### for loading environment variables
 from dotenv import load_dotenv
@@ -1723,6 +1720,6 @@ def remove_recipe(recipe_id):
 
 if __name__ == '__main__':
     # Runs the app
-    app.run(host='0.0.0.0')
+    app.run()
 
 

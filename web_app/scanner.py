@@ -1,92 +1,47 @@
 import cv2
+import numpy as np
+from io import BytesIO
+from PIL import Image
 from pyzbar.pyzbar import decode
 from ultralytics import YOLO
 
-capture = cv2.VideoCapture(0)
-barcode = None
-item_name = None
-pause = False
+# Trained AI Model
+model = YOLO("FoodLink.pt")
+# Boolean toggle for scanning mode
 ai_mode = False
 
-# Custom model trained on pre labeled fruit / veg datasets obtained from RoboFlow
-model = YOLO("trained_AI_model\FoodLink.pt")
+# Process the frame and analyze it
+def process_frame(frame_data):
+    """Process the uploaded frame (image) and return barcode or object name."""
 
-# returns barcode or name of identified object
-def get_scanned():
-    """Returns the barcode or object name found"""
-    return item_name if ai_mode else barcode
+    # Convert byte data to image (from PIL format to Open CV format)
+    image = Image.open(BytesIO(frame_data))
+    frame = np.array(image)
+    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-def clear_scanned():
-    """Resets the object name or barcode found"""
-    global barcode, item_name
-    barcode = None
-    item_name = None
-
-def unpause_scanner():
-    """Allows for analysis of frames after pausing"""
-    global pause
-    pause = False
+    # AI mode: Object detection using YOLO
+    if ai_mode:
+        results = model(frame, verbose=False)
+        # Get the name of the with highest confidence value from the first items detected.
+        if len(results[0].boxes.cls) > 0:
+            boxes = results[0].boxes
+            confidences = boxes.conf
+            classes = boxes.cls
+            max_conf_index = confidences.argmax()
+            class_id = int(classes[max_conf_index])
+            item_name = model.names[class_id]
+            return item_name
+    else:
+        # Barcode scanning mode
+        decoded = decode(frame)
+        if decoded:
+            # Barcode data is in utf-8 format so must be decoded.
+            barcode = decoded[0].data.decode('utf-8')
+            return barcode
+    # returns none if not found
+    return None
 
 def toggle_mode(value):
-    """Toggles what is analysed in each frame (barcode or object) based on value (True or False)"""
+    """Toggle between barcode and object AI recognition modes."""
     global ai_mode
     ai_mode = value
-
-def scan():
-    """Yields a video stream of a users camera using OpenCV. It also analyses each frame
-    for a barcode (using pyzbar) if ai_mode is False, or for an object (using ultralytics YOLO).
-    Once an object or barcode is found, the frames are no longer analysed, until a user requests
-    for scanning to commence again."""
-    global capture, barcode, item_name, pause
-
-    clear_scanned()
-    capture = cv2.VideoCapture(0)
-
-    while True:
-        # Read is a boolean variable signifying if a frame was successfully or 
-        # unsuccessfully read
-        read, frame = capture.read()
-        if not read:
-            break
-
-        if not pause:
-            # if barcode scanning
-            if ai_mode:
-                # tries to identify if any of items specified are in the frame
-                results = model(frame, verbose=False)
-                # if there are any detections
-                if len(results[0].boxes.cls) > 0:
-                    # Get the class ID of the detected object with the highest 
-                    # degree of confidence (from its bounding box)
-                    boxes = results[0].boxes
-                    confidences = boxes.conf
-                    classes = boxes.cls
-                    max_confidence_index = confidences.argmax()
-                    class_id = int(classes[max_confidence_index])
-
-                    # Get the name corresponding to the first detected class
-                    item_name = model.names[class_id]                    
-
-                    pause = True
-            else:
-                # searches for barcode in frame
-                decoded = decode(frame)
-                # if found
-                if decoded:
-                    barcode = decoded[0].data.decode('utf-8')
-                    # pausing the scanner after finding a barcode makes sure the 
-                    # barcode number is not stored whilst barcode checking is stopped
-                    # which stops duplicate popup after action is performed
-                    pause = True
-
-        # Encode the frame to JPEG
-        _, buffer = cv2.imencode('.jpeg', frame)
-        frame = buffer.tobytes()
-        # Yields part of a multipart HTTP response so that the indivdual frames
-        # are sent to the browser and are interpreted as a motion JPEG video
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-def release_capture():
-    if capture.isOpened:
-        capture.release()

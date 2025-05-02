@@ -789,7 +789,6 @@ async function update_inventory_quantities() {
             // set quantity (the amount the quantity will end up at in the db)
             const set_quantity = quantity - amount_used;
             // adds inv_id and quantity together for processing server side
-            console.log(inv_id, set_quantity);
             items_used.push([inv_id, set_quantity]);
         }
     }

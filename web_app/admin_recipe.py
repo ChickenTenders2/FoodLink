@@ -72,7 +72,6 @@ def add_recipe(name, serv, prep, cook, instructions, user_id = None):
         cursor = get_cursor()
         query = "INSERT INTO FoodLink.recipe (name, servings, prep_time, cook_time, instructions, user_id) VALUES (%s, %s, %s, %s, %s, %s);"
         data = [name, serv, prep, cook, instructions, user_id]
-        print(data)
         cursor.execute(query, data)
         commit()
         return {"success": True}
@@ -138,7 +137,6 @@ def get_id():
         query = "SELECT MAX(id) from FoodLink.recipe;"
         cursor.execute(query)
         id = cursor.fetchone()
-        print(id)
         commit()
         return {"success": True, "id": id}
     except Exception as e:

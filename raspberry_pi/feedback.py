@@ -156,9 +156,9 @@ if __name__=="__main__":
            last_time = time_stamp
           
           # Triggers the alarm if the door is left open for two minutes.
-          elif distance > door_to_wall and (time.time() - start_time >= delay):
+          if distance > door_to_wall and (time.time() - start_time >= delay):
             alarm()
-            start_time = time.time()
+          start_time = time.time()
                 
          except KeyboardInterrupt:
             print ("Terminated.")

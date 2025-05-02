@@ -1,3 +1,5 @@
+RUN echo "🔥 THIS IS THE RIGHT DOCKERFILE 🔥"
+
 FROM python:3.9
 
 RUN apt-get update && apt-get install -y \

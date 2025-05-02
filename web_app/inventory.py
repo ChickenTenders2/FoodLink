@@ -86,7 +86,15 @@ def remove_item(inventory_id):
             cursor.close()
 
 def update_quantities(items_used):
-    """Updates the quantity for multiple items."""
+    """
+    Updates the quantity for multiple items.
+
+    Args:
+        items_used ([list]): List of lists in form (inventory_id, quantity)
+
+    Returns:
+        dict: A dictionary with success value (True,False) and possibly an error message
+    """
     cursor = None
     try:
         cursor = get_cursor()

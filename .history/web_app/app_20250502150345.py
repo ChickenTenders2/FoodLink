@@ -9,6 +9,7 @@ import scanner
 from os.path import isfile as file_exists
 # general item operations
 import item
+
 ### user operations
 import tool
 import inventory
@@ -56,8 +57,6 @@ from database import close_connection
 import atexit
 atexit.register(close_connection)
 
-import numpy as np
-import cv2
 
 ### for loading environment variables
 from dotenv import load_dotenv
@@ -791,19 +790,47 @@ def user_delete_item(item_id):
 # ### BARCODE SCANNING ROUTES ###
 
 # Opens camera module and returns feed
-@app.route('/scanner/analyze', methods=['POST'])
+@app.route('/scanner/get')
 @verified_only
-def analyze_scanner_frame():
+def get_scanner():
+    return Response(stream_with_context(scanner.scan()), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-    mode = request.args.get('mode', 'barcode')
-    image_bytes = request.data
-    frame = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
-    result = scanner.analyze_frame(frame, ai_mode=(mode == 'ai'))
+# Closes camera module
+@app.route('/scanner/close')
+@verified_only
+def close_scanner():
+    scanner.release_capture()
+    return jsonify({"success":True})
 
-    return jsonify({
-        "success": True if result else False,
-        "object": result
-})
+# Returns the barcode number if one is found or item name if object recognised
+@app.route('/scanner/get_object')
+@verified_only
+def get_object():
+    object = scanner.get_scanned()
+    if (object):
+        scanner.clear_scanned()
+        return jsonify({"success": True, "object": object})
+    else:
+        return jsonify({"success": False})
+
+@app.route("/unpause_scanner")
+@verified_only
+def unpause_scanner():
+    scanner.unpause_scanner()
+    return jsonify({"success":True})
+
+@app.route("/scanner/toggle_mode/<value>")
+@verified_only
+def toggle_scan_mode(value):
+    if value == "true":
+        scanner.toggle_mode(True)
+        return jsonify({"success": True})
+    elif value == "false":
+        scanner.toggle_mode(False)
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False})
+
 
 ### ITEM ROUTES ###
     

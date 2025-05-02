@@ -31,11 +31,14 @@ def analyse_frames(frame, AI_mode = False):
             class_id = int(classes[max_confidence_index])
 
             # Get the name corresponding to the first detected class
-            return model.names[class_id]                    
+            item_name = model.names[class_id]                    
             
     else:
         # searches for barcode in frame
         decoded = decode(frame)
         # if found
         if decoded:
-            return decoded[0].data.decode('utf-8')
+            barcode = decoded[0].data.decode('utf-8')
+            # pausing the scanner after finding a barcode makes sure the 
+            # barcode number is not stored whilst barcode checking is stopped
+            # which stops duplicate popup after action is performed

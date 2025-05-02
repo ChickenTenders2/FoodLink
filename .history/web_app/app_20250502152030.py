@@ -56,8 +56,6 @@ from database import close_connection
 import atexit
 atexit.register(close_connection)
 
-import numpy as np
-import cv2
 
 ### for loading environment variables
 from dotenv import load_dotenv

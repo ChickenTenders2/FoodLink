@@ -9,7 +9,7 @@ pause = False
 ai_mode = False
 
 # Custom model trained on pre labeled fruit / veg datasets obtained from RoboFlow
-model = YOLO("trained_AI_model\FoodLink.pt")
+model = YOLO("FoodLink.pt")
 
 # returns barcode or name of identified object
 def get_scanned():

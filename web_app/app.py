@@ -790,16 +790,19 @@ def user_delete_item(item_id):
 
 # ### BARCODE SCANNING ROUTES ###
 
-@app.route('/scanner/analyze_frame', methods=['POST'])
+@app.route('/scanner/analyse_frame', methods=['POST'])
 @verified_only
-def analyze_frame():
-    from scanner import process_frame
-
+def analyse_frame():
     if 'frame' not in request.files:
         return jsonify({"success": False, "error": "No frame sent"})
-
+    
+    # Requesting the and readings the frame file.
     file = request.files['frame']
-    result = process_frame(file.read())  # expects bytes
+    frame_data = file.read() 
+    
+    # Passes the byte data to the scanner processing function.
+    result = scanner.process_frame(frame_data)
+    
     if result:
         return jsonify({"success": True, "object": result})
     else:
@@ -816,7 +819,7 @@ def get_object():
     else:
         return jsonify({"success": False})
 
-@app.route("/unpause_scanner")
+@app.route("/scanner/unpause")
 @verified_only
 def unpause_scanner():
     scanner.unpause_scanner()

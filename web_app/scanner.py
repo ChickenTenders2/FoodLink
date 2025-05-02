@@ -6,7 +6,7 @@ from pyzbar.pyzbar import decode
 from ultralytics import YOLO
 
 # Your AI and other variables here
-model = YOLO("trained_AI_model/FoodLink.pt")
+model = YOLO("FoodLink.pt")
 ai_mode = False
 barcode = None
 item_name = None

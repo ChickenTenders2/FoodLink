@@ -69,6 +69,7 @@ app = Flask(__name__, template_folder = "templates")
 # Initialize Flask-Session
 app.config["SESSION_PERMANENT"] = False     
 app.config["SESSION_TYPE"] = "filesystem"
+app.config['SESSION_FILE_DIR'] = "/tmp/flask_session"
 Session(app)
 
 # Configuration

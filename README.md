@@ -219,8 +219,14 @@ FoodLink/
         recipeDB.py                             # Inserts recipes into recipe table, recipe ingredients into recipe_items table and recipe utensils and appliance into recipe_tool table.
         requirements.txt                        # Python dependecies
 
-    web_app/                                    # All files and folders for the web app
-        flask_session/                          # Stores flask session data in filesystem
+    trained_AI_model/
+        FoodLink.pt                             # Custom trained YOLOv8n object detection model.
+        reference.bib                           # Bib file containing full references to the datasets that form the custom      
+                                                  set.
+        train.py                                # File used to train the YOLO model.    
+         
+    web_app/                                    # All files and folders for the web app.
+        flask_session/                          # Stores flask session data in filesystem.
 
         static/     
             images/                             # Uploaded item images or icons        

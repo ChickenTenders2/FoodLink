@@ -1,8 +1,9 @@
 FROM python:3.9-slim
 
-# Install system packages for mariadb, OpenCV, and builds
+# Install system dependencies for Python + MariaDB + OpenCV
 RUN apt-get update && apt-get install -y \
     gcc \
+    g++ \
     libmariadb-dev \
     libmariadb-dev-compat \
     build-essential \
@@ -15,15 +16,15 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Copy app and install requirements
+# Copy project files
 COPY web_app/ ./web_app/
 COPY setup/requirements.txt ./requirements.txt
 
-# Upgrade pip and install dependencies
+# Upgrade pip and install Python packages
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Set environment variables
+# Environment variables
 ENV FLASK_APP=web_app/app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=8080
@@ -31,5 +32,5 @@ ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8080
 
-# Start app with Gunicorn for production (use Flask run if you prefer)
+# Start app using Gunicorn (preferred) or Flask
 CMD ["gunicorn", "-b", "0.0.0.0:8080", "web_app.app:app"]

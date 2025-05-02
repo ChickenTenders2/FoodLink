@@ -34,7 +34,6 @@ function close_item_popup(to_scanner) {
     // If the scanner will be in focus after closing
     if (to_scanner) {
         document.getElementById("close-popup").onclick = () => close_item_popup(false);
-        fetch('/scanner/unpause');
         start_check();
     }
     // only attribute that has the ability to not get overriden on next open
@@ -143,7 +142,6 @@ async function add_clone_info() {
 async function close_add_popup(to_scanner, edit_mode = false) {
     console.log("close add popup");
     if (to_scanner) {
-        fetch('scanner/unpause_scanner');
         start_check();
         document.getElementById("close-add-popup").onclick = () => close_add_popup(false);
     }

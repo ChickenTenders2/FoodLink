@@ -808,23 +808,6 @@ def analyse_frame():
     else:
         return jsonify({"success": False})
 
-# Returns the barcode number if one is found or item name if object recognised
-@app.route('/scanner/get_object')
-@verified_only
-def get_object():
-    object = scanner.get_scanned()
-    if (object):
-        scanner.clear_scanned()
-        return jsonify({"success": True, "object": object})
-    else:
-        return jsonify({"success": False})
-
-@app.route("/scanner/unpause")
-@verified_only
-def unpause_scanner():
-    scanner.unpause_scanner()
-    return jsonify({"success":True})
-
 @app.route("/scanner/toggle_mode/<value>")
 @verified_only
 def toggle_scan_mode(value):

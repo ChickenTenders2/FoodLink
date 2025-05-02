@@ -12,8 +12,7 @@
         <label>Switch to AI Item recognition?</label>
         <input type="checkbox" id="scan_mode" onchange="toggle_scan_mode()">
         <br>
-        <video id="camera" autoplay playsinline></video>
-        <canvas id="snapshot" style="display:none;"></canvas>
+        <img id="barcode_scanner" src="{{ url_for('get_scanner') }}" alt="Barcode Scanner">
     </div>
 
     <div id="not_found_popup" class="popup">

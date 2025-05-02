@@ -92,7 +92,6 @@ async function assign_report(event, new_item_id) {
     if (!result.success) {
         alert(result.error); // Show error if check failed
     }
-    console.log(result.admin_id);
     // If already assigned to another admin, ask if user wants to reassign
     if (result.admin_id) {
         const confirmReplace = confirm(`This report is already assigned to an admin. Reassign it to yourself?`);

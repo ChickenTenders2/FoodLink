@@ -139,8 +139,7 @@ async function add_clone_info() {
     document.getElementById("unit_edit").value = unit;
 }
 
-function close_add_popup(to_scanner, edit_mode = false) {
-    console.log("close add popup");
+async function close_add_popup(to_scanner, edit_mode = false) {
     if (to_scanner) {
         start_check();
         document.getElementById("close-add-popup").onclick = () => close_add_popup(false);

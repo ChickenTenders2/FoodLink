@@ -99,9 +99,6 @@ def process_form(action, form, user_id):
 
     if not (ingredients or tool_ids):
         return {"success": False, "error": "Ingredients or tools were empty."}
-    
-    print(ingredients)
-    print(tool_ids)
 
     action(recipe_id, name, servings, prep_time, cook_time, instructions, ingredients, tool_ids, user_id)
 

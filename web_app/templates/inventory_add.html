@@ -12,7 +12,8 @@
         <label>Switch to AI Item recognition?</label>
         <input type="checkbox" id="scan_mode" onchange="toggle_scan_mode()">
         <br>
-        <img id="barcode_scanner" src="{{ url_for('get_scanner') }}" alt="Barcode Scanner">
+        <video id="camera" autoplay playsinline></video>
+        <canvas id="snapshot" style="display:none;"></canvas>
     </div>
 
     <div id="not_found_popup" class="popup">
@@ -129,8 +130,8 @@
 
 {% block scripts %}
     {{ super() }}
-    <script src="{{ url_for('static', filename='js/barcode_scan.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/item_handling.js') }}"></script> 
     <script src="{{ url_for('static', filename='js/inventory_add.js') }}"></script> 
+    <script src="{{ url_for('static', filename='js/barcode_scan.js') }}"></script> 
 {% endblock %}
-    
+

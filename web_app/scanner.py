@@ -2,16 +2,18 @@ import cv2
 from pyzbar.pyzbar import decode
 from ultralytics import YOLO
 
-capture = cv2.VideoCapture(0)
+# Removed OpenCV video capture initialization
 barcode = None
 item_name = None
 pause = False
 ai_mode = False
 
-# Custom model trained on pre labeled fruit / veg datasets obtained from RoboFlow
+# Custom model trained on pre-labeled fruit/veg datasets obtained from RoboFlow
 model = YOLO("trained_AI_model\FoodLink.pt")
 
-# returns barcode or name of identified object
+# Global variables for MJPEG stream
+camera_feed = None  # This will store the camera feed to be streamed
+
 def get_scanned():
     """Returns the barcode or object name found"""
     return item_name if ai_mode else barcode
@@ -28,65 +30,51 @@ def unpause_scanner():
     pause = False
 
 def toggle_mode(value):
-    """Toggles what is analysed in each frame (barcode or object) based on value (True or False)"""
+    """Toggles what is analyzed in each frame (barcode or object) based on value (True or False)"""
     global ai_mode
     ai_mode = value
 
 def scan():
-    """Yields a video stream of a users camera using OpenCV. It also analyses each frame
-    for a barcode (using pyzbar) if ai_mode is False, or for an object (using ultralytics YOLO).
-    Once an object or barcode is found, the frames are no longer analysed, until a user requests
-    for scanning to commence again."""
-    global capture, barcode, item_name, pause
+    """Yield a video stream of user's camera. It also analyzes each frame for a barcode (using pyzbar) if ai_mode is False, or for an object (using YOLO)."""
+    global barcode, item_name, pause, camera_feed
 
     clear_scanned()
-    capture = cv2.VideoCapture(0)
 
     while True:
-        # Read is a boolean variable signifying if a frame was successfully or 
-        # unsuccessfully read
-        read, frame = capture.read()
+        if camera_feed is None:
+            break  # Ensure video feed exists before proceeding
+
+        read, frame = camera_feed.read()
         if not read:
             break
 
         if not pause:
-            # if barcode scanning
             if ai_mode:
-                # tries to identify if any of items specified are in the frame
                 results = model(frame, verbose=False)
-                # if there are any detections
                 if len(results[0].boxes.cls) > 0:
-                    # Get the class ID of the detected object with the highest 
-                    # degree of confidence (from its bounding box)
                     boxes = results[0].boxes
                     confidences = boxes.conf
                     classes = boxes.cls
                     max_confidence_index = confidences.argmax()
                     class_id = int(classes[max_confidence_index])
 
-                    # Get the name corresponding to the first detected class
-                    item_name = model.names[class_id]                    
-
+                    item_name = model.names[class_id]
                     pause = True
             else:
-                # searches for barcode in frame
                 decoded = decode(frame)
-                # if found
                 if decoded:
                     barcode = decoded[0].data.decode('utf-8')
-                    # pausing the scanner after finding a barcode makes sure the 
-                    # barcode number is not stored whilst barcode checking is stopped
-                    # which stops duplicate popup after action is performed
                     pause = True
 
-        # Encode the frame to JPEG
         _, buffer = cv2.imencode('.jpeg', frame)
         frame = buffer.tobytes()
-        # Yields part of a multipart HTTP response so that the indivdual frames
-        # are sent to the browser and are interpreted as a motion JPEG video
+
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 def release_capture():
-    if capture.isOpened:
-        capture.release()
+    """Release camera feed if it was opened"""
+    global camera_feed
+    if camera_feed:
+        camera_feed.release()
+        camera_feed = None

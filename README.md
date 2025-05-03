@@ -13,7 +13,11 @@ We have implemented various features to help us achieve a variety of objectives 
 
 - Admin system ---> Full customer support with a reporting system that can help to swiftly fix any error in item information. Items and recipes can be edited using the admin account as an efficient alternative to manual database querying. 
 
-To access the website, either run the project locally (not secure) following the steps below or access the website securely at:
+To access the website, either run the project locally (not secure) following the steps below or access the website securely at*:
+
+https://foodlink-foodlink.apps.containers.cs.cf.ac.uk/
+
+\* ThingsBoard API login requests appear to be blocked on OpenShift so the temperature and humidity notifications will not work when accessing the website online. 
 
 Technology Stack:
 
@@ -170,6 +174,33 @@ Usage:
 ### 5. Inventory
 
 ### 6. Add Items to Inventory (Manual, Barcode scanner, AI recognitions)
+- When in the inventory, click 'Add Item'.
+
+- Adding Personal Items:
+- Click 'Personal Items' to view items that you have created and only you can access. 
+- Click on an item from the list to edit it.
+- Click 'Add Item' to add the item to the inventory.
+- Alternatively click 'Add Missing Item' to add an item that is not in your personal inventory
+  or the items database and cannot be detected by the AI or barcode scanner methods.
+- Complete each of the fields.
+- Click 'Report Item' if you want admins to review the item that you added and potentially add
+  add it to the system database. 
+
+- Barcode detection:
+- This is the default scanning mode.
+- Hold the barcode in front of the camera but keep the entire barcode within the frame.
+- If an item is detected click 'Add Item' to add it to the inventory. 
+
+- AI Object Recognition (Experimental):
+- Can currently detect Apples, Bananas, Oranges, Bell Peppers and Potatoes. We plan to further train the model
+  to increase the accuracy of Orange detection.
+- Check the box for AI Item Recognition.
+- Hold the item close to the camera so the finer details are in view.
+- If an item is detected click 'Add Item' to add it to the inventory.
+
+- (NOTE: This mode is experimental and may not always be accurate. You can modify the fields before adding 
+  in case the item in case of error. May need to adjust the angle of the item you are holding to gain more
+  accurate results.)
 
 ### 7. Report
 
@@ -246,11 +277,13 @@ FoodLink/                                       # Project folder containing code
     arduino/                                    # Arduino-related code     
         sensor_readings_to_bluetooth/           # Folder required to run the Arduino code in the IDE
             sensor_readings_to_bluetooth.ino    # Arduino C++ code for collecting temperature humidity and distance readings. 
-                                                  These are sent to the Pi in JSON string form using Bluetooth so that they are ready to be sent to ThingsBoard.
+                                                  These are sent to the Pi in JSON string form using Bluetooth so that they are 
+                                                  ready to be sent to ThingsBoard.
 
     raspberry_pi/                               # Code for raspberry pi.     
         feedback.py                              # Collects values for both the distance and message keys from ThingsBoard and 
-                                                 uses them to check if the buzzer and LCD need to be updated (if the door is left open for too long or if an item has been added to the user inventory).
+                                                 uses them to check if the buzzer and LCD need to be updated (if the door is left open 
+                                                 for too long or if an item has been added to the user inventory).
 
     setup/                                      # Files needed for setup.
         itemDB.py                               # Python script to insert items to item table.
@@ -259,7 +292,6 @@ FoodLink/                                       # Project folder containing code
         requirements.txt                        # Python dependecies
 
     trained_AI_model/
-        FoodLink.pt                             # Custom trained YOLOv8n object detection model.
         reference.bib                           # Bib file containing full references to the datasets that form the custom      
                                                   set.
         train.py                                # File used to train the YOLO model.    
@@ -279,18 +311,21 @@ FoodLink/                                       # Project folder containing code
             js/                                 # Frontend scripts  
                 add_item.js                     # Handles the dynamic checking of item names / barcodes in the database and
                                                   enables the dynamic switching between scanning modes.
-                barcode_scan.js                 # Enables dynamic posting of frames as BLOB data to be analysed in the backend
+                scanner.js                      # Enables dynamic posting of frames as BLOB data to be analysed in the backend
                                                   so that items and barcodes can be identified. Allows for dynamic and efficient
-                                                  switching between scanning modes. 
+                                                  switching between scanning scanning modes. 
                 inventory.js
                 inventory_add.js
                 item_handling.js
-                item_view.js
+                item_view.js                    # Handles the dynamic popup forms and transmission of data between the front back end 
+                                                  AJAX (GET/POST) requests for efficient recipe modification.
                 navbar.js                       # Collapses the navigation bar when the screen is minimised.
                 notification.js                 # Handles the dynamic updating of the notification popup, updates number of 
                                                   unread notification in badge, chnages notification style when marked as read.
                 recipes.js
-                recipe_view.js
+                recipe_view.js                  # As with item_view.js this file handles the dynamic popup forms and transmission 
+                                                  of data between the front and back end AJAX (GET/POST) requests for efficient recipe 
+                                                  modification.
                 report.js
                 reports.js
                 select_utensils.js
@@ -311,6 +346,7 @@ FoodLink/                                       # Project folder containing code
             base.html                           # Base layout used across all templates (navigation bar, contianer for flash 
                                                   messages, js scripts, styling sheets)
             createAccount.html
+            Dockerfile                          # Docker file which includes specifications required for deployment to OpenShift.
             email_verification.html
             index.html                          # User dashboard (diplays temp/humidity real time data, tiles to navigate to 
                                                   inventory, shopping list and recipes)
@@ -340,12 +376,14 @@ FoodLink/                                       # Project folder containing code
                                                   codes, sending emails, and confirming user identity.
                                                   Made through Flask's Blueprint and Flask Mail, and render_template.
         flask_forms.py
+        FoodLink.pt                             # Custom trained YOLOv8n object detection model.
         input_handling.py                       # Contains a function for validating date format as well as functions that sanitise inputs to prevent malicious 
                                                   SQl injection attacks. Both of these functions use the re module to achieve their goals.
         inventory.py                            # Handles basic CRUD sql commands for a users inventory, html form processing for adding an item to inventory,
                                                   formatting of expiry date for the front end, and more advanced sql commands: 
                                                   strict_search (used in recipe proccesing):         finds an item which is the best match for an ingredient
-                                                  correct_personal_item (used in resolving reports): replaces a users personal item (with quantity checks) if their report gets approved.
+                                                  correct_personal_item (used in resolving reports): replaces a users personal item (with quantity checks) if their 
+                                                  report gets approved.
                                                   
         item.py                                 # Handles sql commands for item table, image storing functionality, and form processing.
         models.py
@@ -354,7 +392,8 @@ FoodLink/                                       # Project folder containing code
         recipe.py                               # Handles recipe sql commands (CRUD), and html form processing for adding and editing a recipe.
 
         recipe_processing.py                    # Creates a "smart recipe object" which matches a recipe against a users tools and inventory, calculates missing  
-                                                  tools, finds missing or insufficient quantity ingredients, and sorts recipes by which uses most soon to expire items (with weighting applied).
+                                                  tools, finds missing or insufficient quantity ingredients, and sorts recipes by which uses most soon to expire items 
+                                                  (with weighting applied).
 
         report.py                               # Handles SQL operations for item errors: adding user report of an item, admin get all, find duplicate and remove report
                                                   (after resolving), admins can assign a report to themselves (with override checks)
@@ -369,4 +408,3 @@ FoodLink/                                       # Project folder containing code
         tool.py                                 # Handles tool SQL commands (CRUD)
 
     README.md                                   # Project README file (this file)
-```

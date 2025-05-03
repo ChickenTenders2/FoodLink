@@ -1639,7 +1639,7 @@ def get_recipes():
         if not allow_missing_tools and is_missing_tools:
             continue
 
-        result = recipe_processing.find_items_in_inventory(recipe_object, user_id, allow_insufficient_items, allow_missing_items)
+        result = recipe_processing.find_items_in_inventory(recipe_object, user_id, allow_missing_items, allow_insufficient_items)
         if not result.get("success"):
             return jsonify(result), 500
 
@@ -1649,10 +1649,8 @@ def get_recipes():
         
         filtered.append(recipe_object)
     
-    print([r.get("name") for r in filtered])
     # sorts recipe by how many soon to expire items it uses
     filtered.sort(key=lambda x: x["sort_value"])
-    print([r.get("name") for r in filtered])
     
     return jsonify({"success": True, "recipes": filtered})
     

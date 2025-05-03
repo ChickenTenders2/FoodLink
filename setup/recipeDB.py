@@ -224,7 +224,7 @@ recipes = [
   {
     "name": "Teriyaki Salmon",
     "servings": 2,
-    "prep_time": "15 mi"n,
+    "prep_time": "15 min",
     "cook_time": "15 min",
     "instructions": "Marinate salmon fillets in soy sauce, mirin, brown sugar, and ginger for 15 minutes. Heat a grill or pan. Cook salmon on each side for 4–5 minutes until caramelized and flaky. Reduce leftover marinade in a saucepan until thickened. Drizzle sauce over salmon and serve with steamed rice.",
     "ingredients": [

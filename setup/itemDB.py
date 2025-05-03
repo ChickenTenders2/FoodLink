@@ -1,3 +1,10 @@
+import sys
+import os
+
+# Add the root directory (parent of itemDB.py) to sys.path
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(ROOT_DIR)
+
 from web_app.database import get_cursor, commit, safe_rollback
 import logging
 
@@ -8,11 +15,11 @@ items = {
     'Bean Sprouts': {'brand': 'Generic', 'barcode': None, 'expiry_time': '3/0/0', 'default_quantity': 100, 'unit': 'grams'},
     'Black Pepper': {'brand': 'Generic', 'barcode': None, 'expiry_time': '0/0/2', 'default_quantity': 100, 'unit': 'grams'},
     'Brown Sugar': {'brand': 'Tesco', 'barcode': 5000119113252, 'expiry_time': '0/0/2', 'default_quantity': 500, 'unit': 'grams'},
-    'Celery': {'brand': 'Generic', 'barcode': None, 'expiry_time': '14/0/0', 'default_quantity': 100, 'unit': 'grams'},
+    'Celery': {'brand': 'Generic', 'barcode': None, 'expiry_time': '14/0/0', 'default_quantity': 1, 'unit': 'celery sticks'},
     'Cumin Powder': {'brand': 'Generic', 'barcode': None, 'expiry_time': '0/0/2', 'default_quantity': 100, 'unit': 'grams'},
-    'Dumpling Wrappers': {'brand': 'Generic', 'barcode': None, 'expiry_time': '14/0/0', 'default_quantity': 100, 'unit': 'grams'},
-    'Ginger': {'brand': 'Generic', 'barcode': None, 'expiry_time': '30/0/0', 'default_quantity': 100, 'unit': 'grams'},
-    'Green Onions': {'brand': 'Generic', 'barcode': None, 'expiry_time': '7/0/0', 'default_quantity': 100, 'unit': 'grams'},
+    'Dumpling Wrappers': {'brand': 'Generic', 'barcode': None, 'expiry_time': '14/0/0', 'default_quantity': 50, 'unit': 'wrapper'},
+    'Ginger': {'brand': 'Generic', 'barcode': None, 'expiry_time': '30/0/0', 'default_quantity': 1, 'unit': 'ginger'},
+    'Green Onions': {'brand': 'Generic', 'barcode': None, 'expiry_time': '7/0/0', 'default_quantity': 1, 'unit': 'green onions'},
     'Ground Beef': {'brand': 'Generic', 'barcode': None, 'expiry_time': '7/0/0', 'default_quantity': 500, 'unit': 'grams'},
     'Lasagna Sheets': {'brand': 'Baresa', 'barcode': 4056489633341, 'expiry_time': '0/0/2', 'default_quantity': 500, 'unit': 'grams'},
     'Lemon Juice': {'brand': 'Generic', 'barcode': None, 'expiry_time': '30/0/0', 'default_quantity': 250, 'unit': 'ml'},

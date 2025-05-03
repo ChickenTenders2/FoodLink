@@ -790,6 +790,14 @@ def user_delete_item(item_id):
 @app.route('/scanner/analyse_frame', methods=['POST'])
 @verified_only
 def analyse_frame():
+    """
+       This function requests the image file that was posted to this route
+       and passes it to the scanner module's process frame function so that
+       the barcode or object can be identified.
+
+       Returns:
+            Response: A JSON success / failure response containing the name / barcode of the item if successfully identified.
+    """
     if 'frame' not in request.files:
         return jsonify({"success": False, "error": "No frame sent"})
     
@@ -808,6 +816,17 @@ def analyse_frame():
 @app.route("/scanner/toggle_mode/<value>")
 @verified_only
 def toggle_scan_mode(value):
+    """
+       This function uses a true / false value to determine
+       which mode needs to be switched to when switching 
+       between the scanning modes.
+
+       Args:
+            value (str): value to determine which mode needs to be switched to.
+
+       Returns:
+            Response: A JSON true / false response.
+    """
     if value == "true":
         scanner.toggle_mode(True)
         return jsonify({"success": True})
@@ -1091,15 +1110,13 @@ def resolve_report():
 @app.route('/admin/item_view')
 @admin_only
 def get_items():
-    """This function handles the pagination of item pages:
+    """
+       This function handles the pagination of item pages:
        The first page is identified as well as the maximum page.
 
-       Args:
-       search_query (str): The ID of the user to send the email to.
-
        Returns:
-       Response: A HTML response is returned with the list of items 
-       to display and maximum number of pages to be split into.
+            Response: A HTML response is returned with the list of items 
+            to display and maximum number of pages to be split into.
     """
     result = item.get_page(0)
     if not result.get("success"):
@@ -1116,16 +1133,18 @@ def get_items():
 @app.route('/admin/item_view/get/<search_query>')
 @admin_only
 def search_items(search_query = None):
-        """This function handles the searching items:
+        """
+        This function handles the searching items:
         Checks if the search query is for a specific page 
         (A page change button is pressed) or if the query is
-        a search term and handles these cases appropriately. 
+        a search term and looks for matches within the items 
+        database by searching by name. 
 
         Args:
-        search_query (str): The ID of the user to send the email to.
+            search_query (str): The query string used to determine how the results are filtered.
 
         Returns:
-        Response: A HTML response is returned with the filtered list of items to display.
+            Response: A HTML response is returned with the filtered list of items to display.
         """
         # Checks if the search is for a specifc page.
         if search_query.isnumeric():
@@ -1160,17 +1179,15 @@ def search_items(search_query = None):
 @app.route('/admin/recipe_view')
 @admin_only
 def admin_get_recipes():
-    """This function handles recipe retrieval:
+    """
+       This function handles recipe retrieval:
        All of the recipes are retrieved from the database
        and passed to the front end.
 
-        Args:
-        None.
-
-        Returns:
-        Response: A JSON response containing thr list of ingredients 
-        or an error status code: 500 response if recipe retrieval is
-        unsuccessful.
+       Returns:
+            Response: A JSON response containing the list of ingredients 
+            or an error status code: 500 response if recipe retrieval is
+            unsuccessful.
     """
     result = admin_recipe.get_all()
     if not result.get("success"):
@@ -1181,18 +1198,17 @@ def admin_get_recipes():
 @app.route('/admin/recipe_view/gets_items/<int:recipe_id>', methods=['GET'])
 @admin_only
 def get_ingredients(recipe_id):
-    """This function handles ingredient retrieval:
+    """
+       This function handles ingredient retrieval:
        All of the ingredients associated with the 
        recipe being edited are retrieved from the 
        database and passed to the front end.
 
-       
-        Args:
-        recipe_id (int): An integer used to indentify which recipe 
-        the ingredients are associated with.
+       Args:
+            recipe_id (int): An integer used to indentify which recipe the ingredients are associated with.
 
-        Returns:
-        Response: A HTML response is returned with the list of recipes.
+       Returns:
+            Response: A HTML response is returned with the list of recipes.
     """
     result = recipe_sql.get_recipe_items(recipe_id)
     if not result.get("success"):
@@ -1203,17 +1219,17 @@ def get_ingredients(recipe_id):
 @app.route('/admin/recipe_view/get_tools_names/<int:recipe_id>', methods=['GET'])
 @admin_only
 def get_tools_names(recipe_id):
-    """This function handles tool retrieval:
+    """
+       This function handles tool retrieval:
        All of the ingredients associated with the 
        recipe being edited are retrieved from the 
        database and passed to the front end.
 
        Args:
-       recipe_id (int): An integer used to indentify which recipe 
-       the tools are associated with.
+            recipe_id (int): An integer used to indentify which recipe the tools are associated with.
 
        Returns:
-       Response: A JSON response is returned with the list of tool names.
+            Response: A JSON response is returned with the list of tool names.
     """
     result = recipe_sql.get_recipe_tools(recipe_id)
     if not result.get("success"):
@@ -1226,17 +1242,14 @@ def get_tools_names(recipe_id):
 @app.route('/admin/recipe_view/get_tools/', methods=['GET'])
 @admin_only
 def admin_get_tools():
-    """This function handles tool retrieval:
+    """
+       This function handles tool retrieval:
        All of the tools are retrieved from the 
        database and passed to the front end as a 
        dictionary mapping the tool names to tool ids.
 
-       Args:
-       None.
-
        Returns:
-       Response: A JSON response containing a dictionary mapping
-       tool ids to tool names.
+            Response: A JSON response containing a dictionary mapping tool ids to tool names.
     """
     result = tool.get_tools()
     if not result.get("success"):

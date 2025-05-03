@@ -12,17 +12,26 @@ ai_mode = False
 
 # Process the frame and analyze it
 def process_frame(frame_data):
-    """Process the uploaded frame (image) and return barcode or object name."""
+    """The function converts the frame opens the frame in byte format using PIL
+       so that it can be passed to either the YOLO object detection model
+       or Pyzbar. The name is then returned.
 
-    # Convert byte data to image (from PIL format to Open CV format)
+       Args:
+           value (Bool): True / False value used to determine scanning the mode.
+
+       Returns:
+            item_name/barcode/none (str/none): Item name or barcode used to match the item with one in the database. None returned if nothing is identified.
+    """
+
+    # Convert byte data to image (from PIL format to Open CV format).
     image = Image.open(BytesIO(frame_data))
     frame = np.array(image)
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-    # AI mode: Object detection using YOLO
+    # AI mode: Object detection using YOLO trained on a custom dataset.
     if ai_mode:
         results = model(frame, verbose=False)
-        # Get the name of the with highest confidence value from the first items detected.
+        # Gets the name of the with highest confidence value from the first items detected.
         if len(results[0].boxes.cls) > 0:
             boxes = results[0].boxes
             confidences = boxes.conf
@@ -32,16 +41,22 @@ def process_frame(frame_data):
             item_name = model.names[class_id]
             return item_name
     else:
-        # Barcode scanning mode
+        # Barcode scanning mode using Pyzbar.
         decoded = decode(frame)
         if decoded:
             # Barcode data is in utf-8 format so must be decoded.
             barcode = decoded[0].data.decode('utf-8')
             return barcode
-    # returns none if not found
+    # Returns none if not found.
     return None
 
 def toggle_mode(value):
-    """Toggle between barcode and object AI recognition modes."""
+    """This function requests the image file that was posted to this route
+       and passes it to the scanner module's process frame function so that
+       the barcode or object can be identified.
+
+       Args:
+            value (Bool): True / False value used to determine scanning the mode
+    """
     global ai_mode
     ai_mode = value

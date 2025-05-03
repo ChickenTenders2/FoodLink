@@ -1,4 +1,12 @@
+import sys
+import os
+
+# Add the root directory (parent of itemDB.py) to sys.path
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(ROOT_DIR)
+
 from web_app.database import get_cursor, commit, safe_rollback
+
 import logging
 
 items = {

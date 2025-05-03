@@ -176,7 +176,7 @@ Usage:
 ### 6. Add Items to Inventory (Manual, Barcode scanner, AI recognitions)
 - When in the inventory, click 'Add Item'.
 
-- Adding Personal Items:
+Adding Personal Items:
 - Click 'Personal Items' to view items that you have created and only you can access. 
 - Click on an item from the list to edit it.
 - Click 'Add Item' to add the item to the inventory.
@@ -186,12 +186,12 @@ Usage:
 - Click 'Report Item' if you want admins to review the item that you added and potentially add
   add it to the system database. 
 
-- Barcode detection:
+Barcode detection:
 - This is the default scanning mode.
 - Hold the barcode in front of the camera but keep the entire barcode within the frame.
 - If an item is detected click 'Add Item' to add it to the inventory. 
 
-- AI Object Recognition (Experimental):
+AI Object Recognition (Experimental):
 - Can currently detect Apples, Bananas, Oranges, Bell Peppers and Potatoes. We plan to further train the model
   to increase the accuracy of Orange detection.
 - Check the box for AI Item Recognition.
@@ -201,6 +201,12 @@ Usage:
 - (NOTE: This mode is experimental and may not always be accurate. You can modify the fields before adding 
   the item in case of error. May need to adjust the angle of the item you are holding to gain more
   accurate results.)
+
+Text Search:
+- Click 'Add Missing Item' to open 'Add Personal Items'.
+- Alternatively enter a search term in the search field and click on 'Search'.
+- Select an item from the list of results.
+- Verify that the quantity is correct and click 'Add Item' to add it to your inventory.
 
 ### 7. Report
 
@@ -291,7 +297,7 @@ FoodLink/                                       # Project folder containing code
                                                   and recipe utensils and appliance into recipe_tool table.
         requirements.txt                        # Python dependecies
 
-    trained_AI_model/
+    ai_model_training_reference/
         reference.bib                           # Bib file containing full references to the datasets that form the custom      
                                                   set.
         train.py                                # File used to train the YOLO model.    
@@ -311,12 +317,12 @@ FoodLink/                                       # Project folder containing code
             js/                                 # Frontend scripts  
                 add_item.js                     # Handles the dynamic checking of item names / barcodes in the database and
                                                   enables the dynamic switching between scanning modes.
-                scanner.js                      # Enables dynamic posting of frames as BLOB data to be analysed in the backend
-                                                  so that items and barcodes can be identified. Allows for dynamic and efficient
-                                                  switching between scanning scanning modes. 
-                inventory.js
-                inventory_add.js
-                item_handling.js
+                scanner.js                      # Gets the user's permission for access to the camera. Enables dynamic posting of 
+                                                  frames as BLOB data to be analysed in the backend so that items and barcodes can be 
+                                                  identified. Allows for dynamic and efficient switching between scanning scanning modes. 
+                inventory.js                    
+                inventory_add.js                
+                item_handling.js                
                 item_view.js                    # Handles the dynamic popup forms and transmission of data between the front back end 
                                                   AJAX (GET/POST) requests for efficient recipe modification.
                 navbar.js                       # Collapses the navigation bar when the screen is minimised.
@@ -351,19 +357,19 @@ FoodLink/                                       # Project folder containing code
             index.html                          # User dashboard (diplays temp/humidity real time data, tiles to navigate to 
                                                   inventory, shopping list and recipes)
             inventory.html
-            inventory_add.html
-            item_view.html                      # Displays the database table for items with each row dynamically rendered using Jinja.
-            item_view_search.html               # Statically displays the filtered items with each row dynamically rendered using Jinja.
+            inventory_add.html                  # UI with user camera footage and options buttons for item addition options.
+            item_view.html                      # Database table UI for items with each row dynamically rendered using Jinja.
+            item_view_search.html               # Database table UI for filtered items with each row dynamically rendered using Jinja.
             login.html
             recipes.html
-            recipe_view.html                    # Displays the database table for recipes with each row dynamically rendered using Jinja.
+            recipe_view.html                    # Database table UI for recipes with each row dynamically rendered using Jinja.
             report.html
             reports.html
             resetByEmail.html
             resetPassword.html
             select_utensils.html
             settings.html
-            shoppinglist.html                   # Shooping List UI (add/edit/remove/clear items)
+            shoppinglist.html                   # Shopping List UI (add/edit/remove/clear items)
 
         admin_recipe.py                         # Handles operations performed on the recipe database table when the admin recipe_view page is in use.
         alchemy_db.py                           # Loads sql alchemy with flask and handles safe execution of commands with error handling.
@@ -383,7 +389,7 @@ FoodLink/                                       # Project folder containing code
                                                   formatting of expiry date for the front end, and more advanced sql commands: 
                                                   strict_search (used in recipe proccesing):         finds an item which is the best match for an ingredient
                                                   correct_personal_item (used in resolving reports): replaces a users personal item (with quantity checks) if their 
-                                                  report gets approved.
+                                                                                                     report gets approved.
                                                   
         item.py                                 # Handles sql commands for item table, image storing functionality, and form processing.
         models.py

@@ -335,7 +335,7 @@ recipes = [
       {"name": "Onion", "quantity": 1, "unit": "onions"},
       {"name": "Garlic", "quantity": 2, "unit": "cloves"},
       {"name": "Carrot", "quantity": 2, "unit": "carrots"},
-      {"name": "Celery", "quantity": 2, "unit": "celeries"},
+      {"name": "Celery", "quantity": 2, "unit": "celery sticks"},
       {"name": "Chicken Broth", "quantity": 1500, "unit": "ml"},
       {"name": "Egg Noodles", "quantity": 200, "unit": "grams"},
       {"name": "Salt", "quantity": 8, "unit": "grams"},

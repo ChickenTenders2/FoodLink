@@ -1,7 +1,5 @@
 FROM python:3.9
 
-
-# Set working directory
 # Install ALL the system packages you need
 RUN apt-get update && apt-get install -y \
     gcc \
@@ -41,6 +39,8 @@ ENV FLASK_RUN_HOST=0.0.0.0
 ENV FLASK_RUN_PORT=8080
 ENV PYTHONUNBUFFERED=1
 
+# Allows connections on port 8080
 EXPOSE 8080
 
+# Runs the flask app with gunicorn
 CMD ["gunicorn", "-b", "0.0.0.0:8080", "app:app"]

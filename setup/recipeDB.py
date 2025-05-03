@@ -5,8 +5,8 @@ recipes = [
   {
     "name": "Butter Chicken",
     "servings": 4,
-    "prep_time": 20 min,
-    "cook_time": 35 min,
+    "prep_time": "20 min",
+    "cook_time": "35 min",
     "instructions": "Cut chicken into cubes. In a bowl, mix yogurt, ginger-garlic paste, chili powder, turmeric, and salt. Marinate chicken for 1 hour. Heat butter in a frying pan. Add chopped onions and saute until golden. Add tomato puree, garam masala, cumin, and coriander powder. Cook the sauce for 10 minutes. Add marinated chicken and cook until done. Stir in cream and simmer for 5 minutes. Garnish with fresh coriander and serve hot with rice or naan.",
     "ingredients": [
       {"name": "Chicken Breast", "quantity": 500, "unit": "grams"},
@@ -29,8 +29,8 @@ recipes = [
   {
     "name": "Spaghetti Bolognese",
     "servings": 4,
-    "prep_time": 15 min,
-    "cook_time": 45 min,
+    "prep_time": "15 min",
+    "cook_time": "45 min",
     "instructions": "Heat olive oil in a saucepan. Add chopped onions and garlic. Cook until soft. Add minced beef and cook until browned. Stir in tomato puree, oregano, basil, salt, and pepper. Simmer for 30 minutes. Boil spaghetti until al dente. Drain and combine with sauce. Serve with grated Parmesan.",
     "ingredients": [
       {"name": "Spaghetti", "quantity": 300, "unit": "grams"},
@@ -50,8 +50,8 @@ recipes = [
   {
     "name": "Vegetable Biryani",
     "servings": 5,
-    "prep_time": 25 min,
-    "cook_time": 40 min,
+    "prep_time": "25 min",
+    "cook_time": "40 min",
     "instructions": "Wash and soak basmati rice for 20 minutes. Heat ghee in a saucepan. Saute sliced onions, ginger-garlic paste, and green chilies. Add chopped vegetables, yogurt, turmeric, red chili powder, and salt. Cook until vegetables are half done. In another pan, boil rice with whole spices until 70% cooked. Layer rice and vegetable curry in a pot. Top with saffron milk and fried onions. Cover and steam cook for 15 minutes. Let it rest before serving.",
     "ingredients": [
       {"name": "Basmati Rice", "quantity": 480, "unit": "ml"},
@@ -72,8 +72,8 @@ recipes = [
   {
     "name": "Fish Tacos",
     "servings": 4,
-    "prep_time": 20 min,
-    "cook_time": 15 min,
+    "prep_time": "20 min",
+    "cook_time": "15 min",
     "instructions": "Marinate fish fillets with lime juice, cumin, paprika, salt, and pepper. Let sit for 15 minutes. Heat a frying pan and cook the fish for 3-4 minutes per side. Warm taco shells. Prepare a slaw with shredded cabbage, mayonnaise, and vinegar. Assemble tacos with fish and slaw. Garnish with fresh cilantro and serve.",
     "ingredients": [
       {"name": "Fish Fillet", "quantity": 400, "unit": "grams"},
@@ -93,8 +93,8 @@ recipes = [
   {
     "name": "Pasta Carbonara",
     "servings": 3,
-    "prep_time": 10 min,
-    "cook_time": 20 min,
+    "prep_time": "10 min",
+    "cook_time": "20 min",
     "instructions": "Boil pasta in salted water until al dente. In a bowl, whisk together eggs, grated Parmesan, and black pepper. Fry chopped pancetta until crispy. Drain pasta and immediately toss with pancetta and its fat. Stir in egg mixture quickly to coat the pasta without scrambling the eggs. Serve immediately.",
     "ingredients": [
       {"name": "Spaghetti", "quantity": 250, "unit": "grams"},
@@ -109,8 +109,8 @@ recipes = [
   {
     "name": "Tomato Soup",
     "servings": 4,
-    "prep_time": 15 min,
-    "cook_time": 30 min,
+    "prep_time": "15 min",
+    "cook_time": "30 min",
     "instructions": "Heat olive oil in a saucepan. Add chopped onions and garlic, cook until soft. Add chopped tomatoes, tomato paste, salt, sugar, black pepper, and vegetable broth. Simmer for 20 minutes. Blend until smooth. Return to heat and add cream. Simmer briefly and serve hot.",
     "ingredients": [
       {"name": "Tomatoes", "quantity": 600, "unit": "grams"},
@@ -129,8 +129,8 @@ recipes = [
   {
     "name": "Cheesy Potato Bake",
     "servings": 6,
-    "prep_time": 20 min,
-    "cook_time": 50 min,
+    "prep_time": "20 min",
+    "cook_time": "50 min",
     "instructions": "Peel and slice potatoes thinly. In a saucepan, melt butter and saute garlic until fragrant. Add cream, salt, pepper, and nutmeg. Layer potatoes in a baking dish with shredded cheese. Pour cream mixture over. Cover and bake until potatoes are tender. Uncover, sprinkle cheese on top, and bake until golden.",
     "ingredients": [
       {"name": "Potatoes", "quantity": 1200, "unit": "grams"},
@@ -147,8 +147,8 @@ recipes = [
   {
     "name": "Spinach Omelette",
     "servings": 2,
-    "prep_time": 10 min,
-    "cook_time": 5 min,
+    "prep_time": "10 min",
+    "cook_time": "5 min",
     "instructions": "Wash and chop spinach. Beat eggs in a bowl with salt and pepper. Heat butter in a frying pan. Add spinach and cook briefly. Pour in the eggs. Cook until set, then fold the omelette and serve hot.",
     "ingredients": [
       {"name": "Spinach", "quantity": 100, "unit": "grams"},
@@ -162,8 +162,8 @@ recipes = [
   {
     "name": "Mushroom Risotto",
     "servings": 4,
-    "prep_time": 15 min,
-    "cook_time": 40 min,
+    "prep_time": "15 min",
+    "cook_time": "40 min",
     "instructions": "Heat olive oil in a pan and sauté chopped onions and garlic. Add sliced mushrooms and cook until soft. Stir in arborio rice and cook for 1 minute. Gradually add warm broth, stirring constantly. Continue until rice is tender and creamy. Stir in butter and Parmesan. Serve immediately.",
     "ingredients": [
       {"name": "Arborio Rice", "quantity": 300, "unit": "grams"},
@@ -180,8 +180,8 @@ recipes = [
   {
     "name": "Lamb Curry",
     "servings": 5,
-    "prep_time": 25 min,
-    "cook_time": 60 min,
+    "prep_time": "25 min",
+    "cook_time": "60 min",
     "instructions": "Marinate lamb with yogurt, turmeric, chili powder, and salt for 30 minutes. Heat oil in a pan. Sauté onions until golden, add ginger-garlic paste and tomatoes. Cook until soft. Add spices and cook briefly. Add lamb and cook covered until tender. Serve hot with rice or naan.",
     "ingredients": [
       {"name": "Lamb", "quantity": 600, "unit": "grams"},
@@ -201,8 +201,8 @@ recipes = [
   {
     "name": "Veggie Lasagna",
     "servings": 6,
-    "prep_time": 30 min,
-    "cook_time": 45 min,
+    "prep_time": "30 min",
+    "cook_time": "45 min",
     "instructions": "Preheat oven. Sauté onions, garlic, and vegetables in olive oil. Add tomato sauce, salt, pepper, oregano, and simmer. Prepare béchamel sauce with butter, flour, and milk. Layer lasagna sheets with veggie sauce, béchamel, and cheese. Repeat layers. Top with cheese and bake until golden.",
     "ingredients": [
       {"name": "Lasagna Sheets", "quantity": 180, "unit": "grams"},
@@ -224,8 +224,8 @@ recipes = [
   {
     "name": "Teriyaki Salmon",
     "servings": 2,
-    "prep_time": 15 min,
-    "cook_time": 15 min,
+    "prep_time": "15 mi"n,
+    "cook_time": "15 min",
     "instructions": "Marinate salmon fillets in soy sauce, mirin, brown sugar, and ginger for 15 minutes. Heat a grill or pan. Cook salmon on each side for 4–5 minutes until caramelized and flaky. Reduce leftover marinade in a saucepan until thickened. Drizzle sauce over salmon and serve with steamed rice.",
     "ingredients": [
       {"name": "Salmon Fillets", "quantity": 300, "unit": "grams"},
@@ -240,8 +240,8 @@ recipes = [
   {
     "name": "Pancakes",
     "servings": 4,
-    "prep_time": 10 min,
-    "cook_time": 20 min,
+    "prep_time": "10 min",
+    "cook_time": "20 min",
     "instructions": "Mix flour, baking powder, salt, and sugar in a bowl. In another bowl, whisk milk, eggs, and melted butter. Combine wet and dry ingredients. Heat a pan and pour batter. Cook until bubbles form, flip and cook until golden. Serve with syrup or toppings.",
     "ingredients": [
       {"name": "Flour", "quantity": 200, "unit": "gramsg"},
@@ -257,8 +257,8 @@ recipes = [
   {
     "name": "Garlic Bread",
     "servings": 6,
-    "prep_time": 10 min,
-    "cook_time": 12 min,
+    "prep_time": "10 min",
+    "cook_time": "12 min",
     "instructions": "Preheat oven. Mix softened butter with minced garlic, parsley, and salt. Slice baguette and spread garlic butter on each slice. Place on baking tray. Bake until crispy and golden. Serve warm.",
     "ingredients": [
       {"name": "Baguette", "quantity": 1, "unit": "baguette"},
@@ -272,8 +272,8 @@ recipes = [
   {
     "name": "Egg Fried Rice",
     "servings": 4,
-    "prep_time": 15 min,
-    "cook_time": 15 min,
+    "prep_time": "15 min",
+    "cook_time": "15 min",
     "instructions": "Cook rice and let it cool. Beat eggs and scramble in a hot wok with oil. Set aside. Sauté garlic and vegetables. Add rice, soy sauce, salt, and pepper. Toss to mix. Return eggs to the wok and stir through. Serve hot.",
     "ingredients": [
       {"name": "Cooked Rice", "quantity": 720, "unit": "ml"},
@@ -290,8 +290,8 @@ recipes = [
   {
     "name": "Steamed Dumplings",
     "servings": 4,
-    "prep_time": 30 min,
-    "cook_time": 10 min,
+    "prep_time": "30 min",
+    "cook_time": "10 min",
     "instructions": "Prepare filling with minced meat, cabbage, garlic, soy sauce, sesame oil, and seasonings. Place a spoonful in each wrapper, fold and seal. Steam for 10 minutes until cooked through. Serve with dipping sauce.",
     "ingredients": [
       {"name": "Dumpling Wrappers", "quantity": 30, "unit": "wrappers"},
@@ -308,8 +308,8 @@ recipes = [
   {
     "name": "Beef Tacos",
     "servings": 4,
-    "prep_time": 15 min,
-    "cook_time": 15 min,
+    "prep_time": "15 min",
+    "cook_time": "15 min",
     "instructions": "Cook ground beef with onion and garlic until browned. Add taco seasoning, water, and simmer. Warm taco shells. Fill with beef, lettuce, cheese, and salsa. Serve immediately.",
     "ingredients": [
       {"name": "Ground Beef", "quantity": 400, "unit": "grams"},
@@ -327,8 +327,8 @@ recipes = [
   {
     "name": "Chicken Noodle Soup",
     "servings": 6,
-    "prep_time": 20 min,
-    "cook_time": 40 min,
+    "prep_time": "20 min",
+    "cook_time": "40 min",
     "instructions": "In a large pot, sauté onions, garlic, carrots, and celery in olive oil. Add diced chicken and cook until white. Pour in chicken broth and bring to a boil. Add noodles and cook until tender. Season with salt and pepper. Garnish with parsley and serve hot.",
     "ingredients": [
       {"name": "Chicken Breast", "quantity": 300, "unit": "grams"},
@@ -348,8 +348,8 @@ recipes = [
   {
     "name": "Shrimp Scampi",
     "servings": 3,
-    "prep_time": 10 min,
-    "cook_time": 15 min,
+    "prep_time": "10 min",
+    "cook_time": "15 min",
     "instructions": "Cook pasta until al dente. In a pan, melt butter with olive oil. Sauté garlic and add shrimp. Cook until pink. Stir in lemon juice and cooked pasta. Toss to coat and garnish with parsley. Serve hot.",
     "ingredients": [
       {"name": "Shrimp", "quantity": 300, "unit": "grams"},
@@ -366,8 +366,8 @@ recipes = [
   {
     "name": "Quiche Lorraine",
     "servings": 6,
-    "prep_time": 25 min,
-    "cook_time": 40 min,
+    "prep_time": "25 min",
+    "cook_time": "40 min",
     "instructions": "Preheat oven. Prepare pastry crust using flour, butter, and water. Line a pie dish and blind bake. Whisk eggs, cream, salt, and pepper. Add cooked bacon and cheese. Pour mixture into crust. Bake until set and golden. Let cool slightly before serving.",
     "ingredients": [
       {"name": "Flour", "quantity": 200, "unit": "grams"},
@@ -385,8 +385,8 @@ recipes = [
   {
     "name": "Miso Soup",
     "servings": 4,
-    "prep_time": 10 min,
-    "cook_time": 10 min,
+    "prep_time": "10 min",
+    "cook_time": "10 min",
     "instructions": "Bring water to a gentle simmer. Add dashi granules and stir to dissolve. Add cubed tofu and wakame seaweed. Reduce heat. Dissolve miso paste in a ladleful of broth and return to pot. Do not boil. Garnish with green onions and serve.",
     "ingredients": [
       {"name": "Water", "quantity": 1000, "unit": "ml"},
@@ -401,8 +401,8 @@ recipes = [
   {
     "name": "Pad Thai",
     "servings": 4,
-    "prep_time": 20 min,
-    "cook_time": 15 min,
+    "prep_time": "20 min",
+    "cook_time": "15 min",
     "instructions": "Soak rice noodles in warm water. Stir-fry garlic, tofu, and shrimp in oil. Push aside, scramble eggs in same pan. Add noodles and sauce. Toss everything together. Add bean sprouts and peanuts. Garnish with lime wedges and serve.",
     "ingredients": [
       {"name": "Rice Noodles", "quantity": 200, "unit": "grams"},
@@ -421,8 +421,8 @@ recipes = [
   {
     "name": "Chicken Satay",
     "servings": 4,
-    "prep_time": 30 min,
-    "cook_time": 15 min,
+    "prep_time": "30 min",
+    "cook_time": "15 min",
     "instructions": "Marinate chicken pieces in coconut milk, curry powder, garlic, and soy sauce for at least 30 minutes. Thread onto skewers. Grill or pan-fry until golden and cooked through. Serve with warm peanut dipping sauce.",
     "ingredients": [
       {"name": "Chicken Thighs", "quantity": 500, "unit": "grams"},
@@ -437,8 +437,8 @@ recipes = [
   {
     "name": "Lentil Soup",
     "servings": 6,
-    "prep_time": 15 min,
-    "cook_time": 45 min,
+    "prep_time": "15 min",
+    "cook_time": "45 min",
     "instructions": "Heat olive oil in a pot. Sauté onions, carrots, and garlic until soft. Add lentils, cumin, salt, pepper, and vegetable broth. Bring to a boil, then simmer for 30 minutes. Blend part of the soup for a thicker texture. Stir in lemon juice and serve.",
     "ingredients": [
       {"name": "Red Lentils", "quantity": 300, "unit": "grams"},
@@ -457,8 +457,8 @@ recipes = [
   {
     "name": "Falafel",
     "servings": 4,
-    "prep_time": 25 min,
-    "cook_time": 10 min,
+    "prep_time": "25 min",
+    "cook_time": "10 min",
     "instructions": "Soak chickpeas overnight. Blend with onion, garlic, parsley, cumin, coriander, and salt. Form into balls. Heat oil and fry falafel until golden. Drain and serve with tahini sauce and pita bread.",
     "ingredients": [
       {"name": "Dried Chickpeas", "quantity": 250, "unit": "grams"},
@@ -476,8 +476,8 @@ recipes = [
   {
     "name": "Grilled Cheese Sandwich",
     "servings": 1,
-    "prep_time": 5 min,
-    "cook_time": 5 min,
+    "prep_time": "5 min",
+    "cook_time": "5 min",
     "instructions": "Spread butter on one side of each bread slice. Place cheese between slices with buttered sides out. Heat a pan and grill sandwich until golden brown on both sides. Serve immediately.",
     "ingredients": [
       {"name": "Bread Slices", "quantity": 2, "unit": "sciles"},
@@ -489,8 +489,8 @@ recipes = [
   {
     "name": "Hummus",
     "servings": 6,
-    "prep_time": 10 min,
-    "cook_time": 0 min,
+    "prep_time": "10 min",
+    "cook_time": "0 min",
     "instructions": "In a food processor, blend chickpeas, tahini, garlic, lemon juice, salt, and olive oil until smooth. Add water to adjust consistency. Serve drizzled with olive oil and a sprinkle of paprika.",
     "ingredients": [
       {"name": "Cooked Chickpeas", "quantity": 300, "unit": "grams"},

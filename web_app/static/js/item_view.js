@@ -1,6 +1,9 @@
 // Using local storage so that the index value persists on page refresh.
 let index = localStorage.getItem('pageIndex') || 0;
 
+/** Posts the item id to the back end Python route so the item with the 
+ *  ID can be removed from the database.
+ */
 async function remove_item(id) {
     if (!confirm("Are you sure you want to delete this item?")) {
         return;
@@ -23,7 +26,8 @@ async function remove_item(id) {
     }
 }
 
-// Opens the item information popup.
+/** Opens the item information popup by unhiding it and sets the relevent information for each field.  
+ */
 async function open_popup(itemName, barcode, name, brand, quantity, expiry_date, unit, item_id, add=false) {
     // Sets values in popup to those of the item.
 
@@ -69,13 +73,16 @@ async function open_popup(itemName, barcode, name, brand, quantity, expiry_date,
 
 }
 
-// Closes item information popup
+/** Closes the item information popup by hiding it.  
+ */
 function close_popup() {
     document.getElementById('popup').style.display = 'none';
     document.getElementById('delete_button').style.display = "none";
 }
 
-// Updates item in inventory
+/** Gets the field values and checks if they are unchanged to determine if the form should be posted to the
+ *  back end route for the information to be updated in the database.  
+ */
 async function submit_update(event) {
     // Prevent the form from submitting normally
     event.preventDefault(); 
@@ -125,6 +132,9 @@ async function submit_update(event) {
     }
 }
 
+/** If the event happens (button press) the item information in the form is posted to the
+ *  back end route for the information to be added to the database.     
+ */
 async function submit_add(event) {
     // Prevents the form from submitting normally.
     event.preventDefault(); 
@@ -150,13 +160,16 @@ async function submit_add(event) {
     }
 }
 
-// fetches inventory after search term is applied
+// Binds the search function to the submit button of the filter form (next or previous button (no fields))
 document.getElementById('filter-form').addEventListener('submit', function (e) {
     e.preventDefault();
-    search()
+    switch_page()
 });
 
-async function search() {
+/** Checks if a query is input to determine if the defualt page should be fetched or the 
+ *  filtered page based on the page index.
+ */
+async function switch_page() {
     // Uses defaults value if undefined or null.
     if (document.getElementById('search-input').value != ''){
         const searchParam = document.getElementById('search-input').value;
@@ -175,7 +188,8 @@ async function search() {
     }
 }
 
-
+/** Increments the page index if it is lower than the maximum number of pages.
+ */
 async function next(event, max) {
     event.preventDefault()
     if (index < max) {
@@ -191,6 +205,8 @@ async function next(event, max) {
     }
 }
 
+/** Decrements the page index if it is higher than 0 (the initial page) than the maximum number of pages.
+ */
 async function previous(event) {
     event.preventDefault()
     if (index > 0) {

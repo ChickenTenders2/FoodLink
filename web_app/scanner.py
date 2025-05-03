@@ -11,12 +11,12 @@ model = YOLO("FoodLink.pt")
 ai_mode = False
 
 def process_frame(frame_data):
-    """The function converts the frame opens the frame in byte format using PIL
+    """The function opens the byte-encoded frame using PIL
        so that it can be passed to either the YOLO object detection model
        or Pyzbar. The name is then returned.
 
        Args:
-           frame_data (byte): Frame data in bytes.
+           frame_data (bytes): Frame data in bytes.
 
        Returns:
             item_name/barcode/none (str/none): Item name or barcode used to match the item with one in the database. None returned if nothing is identified.

@@ -199,7 +199,7 @@ Usage:
 - If an item is detected click 'Add Item' to add it to the inventory.
 
 - (NOTE: This mode is experimental and may not always be accurate. You can modify the fields before adding 
-  in case the item in case of error. May need to adjust the angle of the item you are holding to gain more
+  the item in case of error. May need to adjust the angle of the item you are holding to gain more
   accurate results.)
 
 ### 7. Report

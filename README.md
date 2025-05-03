@@ -279,7 +279,7 @@ Text Search:
 # FoodLink Project Folder Structure
 ```
 FoodLink/                                       # Project folder containing code for all components of the 
-                                                system.               
+                                                  system.               
     arduino/                                    # Arduino-related code     
         sensor_readings_to_bluetooth/           # Folder required to run the Arduino code in the IDE
             sensor_readings_to_bluetooth.ino    # Arduino C++ code for collecting temperature humidity and distance readings. 
@@ -287,9 +287,9 @@ FoodLink/                                       # Project folder containing code
                                                   ready to be sent to ThingsBoard.
 
     raspberry_pi/                               # Code for raspberry pi.     
-        feedback.py                              # Collects values for both the distance and message keys from ThingsBoard and 
-                                                 uses them to check if the buzzer and LCD need to be updated (if the door is left open 
-                                                 for too long or if an item has been added to the user inventory).
+        feedback.py                             # Collects values for both the distance and message keys from ThingsBoard and 
+                                                  uses them to check if the buzzer and LCD need to be updated (if the door is left open 
+                                                  for too long or if an item has been added to the user inventory).
 
     setup/                                      # Files needed for setup.
         itemDB.py                               # Python script to insert items to item table.
@@ -317,23 +317,39 @@ FoodLink/                                       # Project folder containing code
             js/                                 # Frontend scripts  
                 add_item.js                     # Handles the dynamic checking of item names / barcodes in the database and
                                                   enables the dynamic switching between scanning modes.
+
                 scanner.js                      # Gets the user's permission for access to the camera. Enables dynamic posting of 
                                                   frames as BLOB data to be analysed in the backend so that items and barcodes can be 
                                                   identified. Allows for dynamic and efficient switching between scanning scanning modes. 
-                inventory.js                    
-                inventory_add.js                
-                item_handling.js                
+
+                inventory.js                    # Handles dynamic inventory operations using AJAX. Dynamically updates, remove and sorts items, as well as highlighting
+                                                  items that are soon to expire.
+
+                inventory_add.js                # Dynamically displays results from frame scan. Dynamic text search and item reports for missing items or items with 
+                                                  misinformation. Calculates estimate of expiry date for each item. Dynamic CRUD operations for personal items, including cloning public items. Option to add any item to inventory, with quantity constraints.
+
+                item_handling.js                # Handles some item functions which are shared between files. Dynamically gets image path, and updates image preview when 
+                                                  file is uploaded. Gets each expiry value from an expiry time for processing.
+
                 item_view.js                    # Handles the dynamic popup forms and transmission of data between the front back end 
                                                   AJAX (GET/POST) requests for efficient recipe modification.
+
                 navbar.js                       # Collapses the navigation bar when the screen is minimised.
+
                 notification.js                 # Handles the dynamic updating of the notification popup, updates number of 
                                                   unread notification in badge, chnages notification style when marked as read.
+
                 recipes.js
+
                 recipe_view.js                  # As with item_view.js this file handles the dynamic popup forms and transmission 
                                                   of data between the front and back end AJAX (GET/POST) requests for efficient recipe 
                                                   modification.
-                report.js
-                reports.js
+
+                report.js                       # Handles displaying new item information, and original if error type was misinformation. Dynamically resolves report, before 
+                                                redirecting back to main reports page.
+
+                reports.js                      # Dynamically fills item table, and  handles sorting of reports. Also allows admins to dynamically assign reports to 
+                                                  themselves with override checks.
                 select_utensils.js
                 settings.js
                 shopping_list.js                # Handles form submissions, hides and displays add/edit popups, shows 
@@ -352,7 +368,7 @@ FoodLink/                                       # Project folder containing code
             base.html                           # Base layout used across all templates (navigation bar, contianer for flash 
                                                   messages, js scripts, styling sheets)
             createAccount.html
-            Dockerfile                          # Docker file which includes specifications required for deployment to OpenShift.
+            
             email_verification.html
             index.html                          # User dashboard (diplays temp/humidity real time data, tiles to navigate to 
                                                   inventory, shopping list and recipes)
@@ -380,12 +396,15 @@ FoodLink/                                       # Project folder containing code
         database.py                             # Connects to the database using the envrionment variables set and acts as a single point to connect to the database (
                                                   for all sql commands using mariadb connector). Auto-reconnects on connection loss and handles rollbacks safely. on execute failure. 
                                                   Handles closing connection when server stops so connections don't build up on the database.
+                                    
+        Dockerfile                              # Docker file which includes specifications required for deployment to OpenShift.
                                                   
         email_verification.py                   # Manages user email verification through verification.
                                                   codes, sending emails, and confirming user identity.
                                                   Made through Flask's Blueprint and Flask Mail, and render_template.
 
-        flask_forms.py                          # Creates all the flask_wtf forms used
+        flask_forms.py                          # Handles all the flask_wtf forms used in the web app
+
         FoodLink.pt                             # Custom trained YOLOv8n object detection model.
 
         input_handling.py                       # Contains a function for validating date format as well as functions that sanitise inputs to prevent malicious 

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask.views import MethodView
 from flask_login import login_required, current_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -126,6 +126,8 @@ class AccountDeleteView(BaseSettingsView):
         """
         password = request.form.get('password')
         user_id = current_user.id
+
+        user_type = session.get("user_type")
         
         # Verify password before deletion
         if not check_password_hash(current_user.password, password):
@@ -134,6 +136,10 @@ class AccountDeleteView(BaseSettingsView):
             
         # Delete all user data
         if delete_user_data(user_id):
+            # Clear session first
+            if "user_type" in session:
+                session.pop("user_type")
+
             safe_execute(db.session.delete, current_user)
             safe_execute(db.session.commit)
 
@@ -141,7 +147,7 @@ class AccountDeleteView(BaseSettingsView):
             logout_user()
         
             flash('Your account has been deleted', 'info')
-            return redirect(url_for('auth.logout'))
+            return redirect(url_for('login'))
         else:
             flash('An error occured while deleting your account. PLease try again', 'danger')
             return redirect(url_for('settings.settings_page'))

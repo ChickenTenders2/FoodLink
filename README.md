@@ -359,12 +359,12 @@ FoodLink/                                       # Project folder containing code
             style.css                           # Style sheet for all pages apart from settings        
 
         templates/                              # HTML templates (rendered by Flask) 
-            add_item.html
-            admin_add.html
+            add_item.html                       
+            admin_add.html                      # HTML layout for an admin adding a new admin
             admin_base.html
-            admin_dashboard.html
-            admin_login.html
-            admin_update_password.html
+            admin_dashboard.html                # Admin dashboard
+            admin_login.html                    # HTML layout for an admin to log in
+            admin_update_password.html          # HTML layout for ad admin to change their password
             base.html                           # Base layout used across all templates (navigation bar, contianer for flash 
                                                   messages, js scripts, styling sheets)
             createAccount.html

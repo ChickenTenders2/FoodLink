@@ -209,6 +209,7 @@ def index():
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
+    """Handles admin login authentication."""
     form = LoginForm()
     error = None
     
@@ -227,7 +228,7 @@ def admin_login():
 @app.route("/admin/add", methods=["GET", "POST"])
 @admin_only
 def AddAdmin():
-    # Must be advanced admin to add new admins
+    """Allows advanced admins only to add a new admin account."""
     if not current_user.advanced_privileges:
         flash("You are not authorized to add new admins.", "danger")
         return redirect(url_for("AdminDashboard"))
@@ -267,6 +268,7 @@ def AddAdmin():
 @app.route("/admin/update-password", methods=["GET", "POST"])
 @admin_only
 def AdminUpdatePassword():
+    """Allows an admin to update their password."""
     form = AdminPasswordForm()
     message = None
 
@@ -289,6 +291,7 @@ def AdminUpdatePassword():
 @app.route("/admin/dashboard")
 @admin_only
 def AdminDashboard():
+    """Displays the admin dashboard."""
     return render_template("admin_dashboard.html")
 
 # Logout route

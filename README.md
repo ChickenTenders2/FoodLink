@@ -441,7 +441,7 @@ FoodLink/                                       # Project folder containing code
 
         success.py                              # Publishes a message with the value 'Added' to ThingsBoard over secure MQTT using the tb_mqtt_client library. 
         
-        thingsboard.py
+        thingsboard.py                          # Connect to Thingsboard using JWT tokens and fetching temperature/humidity data from telemtry.
         
         tool.py                                 # Handles tool SQL commands (CRUD)
 

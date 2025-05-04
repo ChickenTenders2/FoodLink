@@ -692,11 +692,12 @@ def update_item():
 @app.route('/inventory/remove_item', methods=['POST'])
 @user_only
 def remove_item():
+    user_id = current_user.id
     inventory_id = request.form.get('inventory_id')
     if not inventory_id:
         return jsonify({"success": False, "error": "Form was missing inventory ID."}), 400
     
-    result = inventory.remove_item(inventory_id)
+    result = inventory.remove_item(inventory_id, user_id)
     if not result.get("success"):
         return jsonify(result), 500
     return jsonify(result)

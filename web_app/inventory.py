@@ -67,13 +67,13 @@ def process_add_form(user_id, item_id, form):
         return {"success": False, "error": "Quantity or expiry was empty."}
     return add_item(user_id, item_id, quantity, expiry)
 
-def remove_item(inventory_id):
+def remove_item(inventory_id, user_id):
     """Delete an item from the database with id."""
     cursor = None
     try:
         cursor = get_cursor()
-        query = "DELETE FROM inventory WHERE id = %s;"
-        cursor.execute(query, (inventory_id,))
+        query = "DELETE FROM inventory WHERE id = %s AND user_id = %s;"
+        cursor.execute(query, (inventory_id, user_id))
         commit()
         return {"success": True}
     except Exception as e:

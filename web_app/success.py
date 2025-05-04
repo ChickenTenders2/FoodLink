@@ -20,7 +20,7 @@ def send_success_alert():
 
     try:
         # Connect to ThingsBoard.
-        client.connect()
+        client.connect(timeout = 10)
 
         # Sends the success message to ThingsBoard.
         result = client.send_telemetry(telemetry_with_ts)

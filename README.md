@@ -418,7 +418,7 @@ FoodLink/                                       # Project folder containing code
                                                   
         item.py                                 # Handles sql commands for item table, image storing functionality, and form processing.
 
-        models.py
+        models.py                               # Class database models for the database tables accessed with SQLAlchemy
 
         notification.py                         # Handles sql commands for notification table, temp/humidity notification cooldown, and email notifications.
 

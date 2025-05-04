@@ -29,7 +29,7 @@ class ResetPasswordForm(FlaskForm):
 class AdminCreateForm(FlaskForm):
         username = StringField('Username', validators=[DataRequired(), Length(1, 16)])
         name = StringField("Name", validators=[DataRequired(), Length(1, 16)])
-        email = StringField('Email', validators=[DataRequired(), Email()])
+        email = StringField('Email', validators=[DataRequired()])
         password = PasswordField('Password', validators=[DataRequired()])
         advanced_privileges = BooleanField('Grant Advanced Privileges')
         submit = SubmitField('Add Admin')

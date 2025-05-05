@@ -14,8 +14,19 @@ data = {
     "username": get_dotenv("THINGSBOARD_USER"),
     "password": get_dotenv("THINGSBOARD_PASS")
 }
+
 # Authenticates with ThingsBoard and retrieves a JWT token
 def get_jwt_token():
+    """
+    Authenticate with the ThingsBoard API and retrieve a JWT token.
+
+    Sends a POST request to the login endpoint using predefined credentials.
+    If the login is successful, the JWT token is extracted from the response.
+
+    Returns:
+        str or None: The JWT token string if successful, otherwise None.
+    """
+
     try:
         # Send POST request to login endpoint
         response = requests.post(login_url, json=data, headers=headers, timeout=timeout)
@@ -34,6 +45,20 @@ def get_jwt_token():
 
 # Retrieves temperature and humidity telemetry for a given device
 def get_telemetry(token, device_id):
+    """
+    Fetch the latest temperature and humidity telemetry data for a given ThingsBoard device.
+
+    Sends a GET request to the ThingsBoard timeseries API using the provided JWT token and device ID.
+    If the token is expired or unauthorized (401), it attempts to obtain a new token and retry once.
+
+    Args:
+        token (str): The JWT token used for ThingsBoard authentication.
+        device_id (str): The unique ID of the IoT device in ThingsBoard.
+
+    Returns:
+        dict or None: A dictionary containing telemetry data if successful, otherwise None.
+    """
+    
     try:
         headers = {
             "Authorization": f"Bearer {token}", # Use the provided token

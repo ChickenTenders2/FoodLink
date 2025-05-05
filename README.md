@@ -359,12 +359,12 @@ FoodLink/                                       # Project folder containing code
             style.css                           # Style sheet for all pages apart from settings        
 
         templates/                              # HTML templates (rendered by Flask) 
-            add_item.html
-            admin_add.html
+            add_item.html                       
+            admin_add.html                      # HTML layout for an admin adding a new admin
             admin_base.html
-            admin_dashboard.html
-            admin_login.html
-            admin_update_password.html
+            admin_dashboard.html                # Admin dashboard
+            admin_login.html                    # HTML layout for an admin to log in
+            admin_update_password.html          # HTML layout for ad admin to change their password
             base.html                           # Base layout used across all templates (navigation bar, contianer for flash 
                                                   messages, js scripts, styling sheets)
             createAccount.html
@@ -418,7 +418,7 @@ FoodLink/                                       # Project folder containing code
                                                   
         item.py                                 # Handles sql commands for item table, image storing functionality, and form processing.
 
-        models.py
+        models.py                               # Class database models for the database tables accessed with SQLAlchemy
 
         notification.py                         # Handles sql commands for notification table, temp/humidity notification cooldown, and email notifications.
 
@@ -441,7 +441,7 @@ FoodLink/                                       # Project folder containing code
 
         success.py                              # Publishes a message with the value 'Added' to ThingsBoard over secure MQTT using the tb_mqtt_client library. 
         
-        thingsboard.py
+        thingsboard.py                          # Connect to Thingsboard using JWT tokens and fetching temperature/humidity data from telemtry.
         
         tool.py                                 # Handles tool SQL commands (CRUD)
 

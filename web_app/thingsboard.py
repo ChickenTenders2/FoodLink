@@ -14,9 +14,10 @@ data = {
     "username": get_dotenv("THINGSBOARD_USER"),
     "password": get_dotenv("THINGSBOARD_PASS")
 }
+
 # Authenticates with ThingsBoard and retrieves a JWT token
 def get_jwt_token():
-     """
+    """
     Authenticate with the ThingsBoard API and retrieve a JWT token.
 
     Sends a POST request to the login endpoint using predefined credentials.

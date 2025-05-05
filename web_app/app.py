@@ -692,11 +692,12 @@ def update_item():
 @app.route('/inventory/remove_item', methods=['POST'])
 @user_only
 def remove_item():
+    user_id = current_user.id
     inventory_id = request.form.get('inventory_id')
     if not inventory_id:
         return jsonify({"success": False, "error": "Form was missing inventory ID."}), 400
     
-    result = inventory.remove_item(inventory_id)
+    result = inventory.remove_item(inventory_id, user_id)
     if not result.get("success"):
         return jsonify(result), 500
     return jsonify(result)
@@ -1704,7 +1705,7 @@ def get_recipe(recipe_id):
 def add_recipe():
     user_id = current_user.id
     # processes form and executes add function
-    result = recipe_sql.process_form(recipe_sql.add_recipe, request.form, user_id)
+    result = recipe_sql.process_form("add", request.form, user_id)
     if not result.get("success"):
         if result.get("error") == "An internal error occurred.":
             return jsonify(result), 500
@@ -1716,7 +1717,7 @@ def add_recipe():
 def update_recipe():
     user_id = current_user.id
     # processes form and executes update functions
-    result = recipe_sql.process_form(recipe_sql.edit_recipe, request.form, user_id)
+    result = recipe_sql.process_form("edit", request.form, user_id)
     if not result.get("success"):
         if result.get("error") == "An internal error occurred.":
             return jsonify(result), 500

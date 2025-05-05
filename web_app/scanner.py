@@ -6,7 +6,7 @@ from pyzbar.pyzbar import decode
 from ultralytics import YOLO
 
 # Trained AI Model
-model = YOLO("FoodLink.pt")
+model = YOLO("web_app\FoodLink.pt")
 # Boolean toggle for scanning mode
 ai_mode = False
 

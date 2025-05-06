@@ -384,18 +384,23 @@ FoodLink/                                       # Project folder containing code
     ai_model_training_reference/
         reference.bib                           # Bib file containing full references to the datasets that form the custom      
                                                   set.
+
         train.py                                # File used to train the YOLO model.    
          
     web_app/                                    # All files and folders for the web app.
         flask_session/                          # Stores flask session data in filesystem.
 
         static/     
-            images/                             # Uploaded item images or icons        
-                1.jpg                           # Example of image for item with id 1                                                                                         
+            images/                             # Uploaded item images or icons   
+
+                1.jpg                           # Example of image for item with id 1 
+
                 2.jpg                           # etc...    
+
                 3.jpg
                 ...
-                notification_bell.png           # Notification icon   
+                notification_bell.png           # Notification icon 
+                  
                 null.jpg                        # Placeholder image if item doesn't have one
 
             js/                                 # Frontend scripts  

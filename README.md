@@ -187,11 +187,17 @@ Reset Password:
 - Click on continue to confirm the new password
 
 ### 2. Email Verification
+- Click on Create Account
+- Enter username, email, password, confirm the password 
+- Once brought to the email verification page, press "Send Verification Code"
+- Check email to receive code
+- Paste code into field in email verification page, press "Verify Code"
 
 ### 3. User Dashboard
 - Click on any button to access that page 
 
 ### 4. Settings
+- Click on the "⚙️" menu on the navigation bar
 
 ### 5. Inventory
 To update an item:

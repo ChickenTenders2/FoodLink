@@ -538,4 +538,4 @@ Ultralytics Library for YOLO object recognition: https://github.com/ultralytics/
 
 Roboflow Universe for data sets: https://universe.roboflow.com/
 
-Arduino script and feedback.py used adapted sections of code from the IoT Lab Book: https://gitlab.com/IOTGarage/iot-lab-book
+Arduino script and feedback.py adapted sections of code from the IoT Lab Book: https://gitlab.com/IOTGarage/iot-lab-book

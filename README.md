@@ -1,4 +1,4 @@
-FoodLink: Smart Fridge Assistant
+## FoodLink: Smart Fridge Assistant
 
 
 FoodLink is a combined physical and web-based bespoke IoT platform with one main goal: reduce food waste. As an add-on, it provides an affordable and environmentally friendly way for consumers to achieve this goal. 
@@ -531,3 +531,11 @@ FoodLink/                                       # Project folder containing code
         tool.py                                 # Handles tool SQL commands (CRUD)
 
     README.md                                   # Project README file (this file)
+
+## References
+
+Ultralytics Library for YOLO object recognition: https://github.com/ultralytics/ultralytics/tree/main/docs
+
+Roboflow Universe for data sets: https://universe.roboflow.com/
+
+Arduino script and feedback.py used adapted sections of code from the IoT Lab Book: https://gitlab.com/IOTGarage/iot-lab-book

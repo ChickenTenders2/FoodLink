@@ -97,10 +97,15 @@ def process_form(action, form, user_id):
     ingredients = json.loads(ingredients_string)
     tool_ids = json.loads(tool_ids_string)
 
-    if not (ingredients or tool_ids):
+    if not (ingredients and tool_ids):
         return {"success": False, "error": "Ingredients or tools were empty."}
 
-    action(recipe_id, name, servings, prep_time, cook_time, instructions, ingredients, tool_ids, user_id)
+    if action == "edit":
+        return edit_recipe(recipe_id, name, servings, prep_time, cook_time, instructions, ingredients, tool_ids, user_id)
+    elif action == "add":
+        return add_recipe(name, servings, prep_time, cook_time, instructions, ingredients, tool_ids, user_id)
+
+    return {"success": False, "error": "An internal error occured."}
 
 def add_recipe(name, servings, prep_time, cook_time, instructions, items, tool_ids, user_id):
     cursor = None
@@ -126,7 +131,7 @@ def add_recipe(name, servings, prep_time, cook_time, instructions, items, tool_i
         if cursor:
             cursor.close()
 
-def edit_recipe(cursor, recipe_id, name, servings, prep_time, cook_time, instructions, items, tool_ids, user_id=None):
+def edit_recipe(recipe_id, name, servings, prep_time, cook_time, instructions, items, tool_ids, user_id=None):
     ## if user submitted, make sure theyre editing their own recipe
     if user_id:
         result = owner_check(recipe_id, user_id)

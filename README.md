@@ -13,7 +13,7 @@ We have implemented various features to help us achieve a variety of objectives 
 
 - Admin system ---> Full customer support with a reporting system that can help to swiftly fix any error in item information. Items and recipes can be edited using the admin account as an efficient alternative to manual database querying. 
 
-To access the website, either run the project locally (not secure) following the steps below or access the website securely at*:
+To access the website, either run the project locally (not secure) following the steps below or access the website securely at:
 
 https://foodlink-foodlink.apps.containers.cs.cf.ac.uk/
 
@@ -165,13 +165,50 @@ Usage:
 
 ### 1. Login / Create Account
 
+Create account:
+- Click on the first field to enter a username
+- Click on the second field to enter an email address
+- Click on the third field to enter a password that fits the format
+- Re-enter the password in the fourth field(same as third field)
+- Click on continue to create the account
+Login:
+- Click on the first field to enter your username
+- Click on the second field to enter your password
+- Click on continue to login
+- If you are a new user, click on create account and it will redirect you to the create account page
+- Click forgot password to reset your password
+Reset Password:
+- Press forgot password button
+- Click on the first field to enter the email of the account you want to reset password on
+- Click on send code button to receive the code for your email
+- Enter the code in the second field
+- Click on verify to redirect to forget password page
+- Click on the first field to enter your new password
+- Re-enter the password in the fourth field(same as first field)
+- Click on continue to confirm the new password
+
 ### 2. Email Verification
 
 ### 3. User Dashboard
+- Click on any button to access that page 
 
 ### 4. Settings
 
 ### 5. Inventory
+To update an item:
+- Click on the item tile
+- Edit the quantity or the expiry
+- Click on save
+
+To remove an item:
+- Click on the item tile
+- Click on the remove button
+
+To search and sort the items:
+- Enter the item names you want to find (optional)
+- Click on sort drop down
+- Click on a sort option
+- Click apply
 
 ### 6. Add Items to Inventory (Manual, Barcode scanner, AI recognitions)
 - When in the inventory, click 'Add Item'.
@@ -208,8 +245,6 @@ Text Search:
 - Select an item from the list of results.
 - Verify that the quantity is correct and click 'Add Item' to add it to your inventory.
 
-### 7. Report
-
 ### 8. Shopping List
 - Click the Shopping List tile, or the Shopping List button in the Navigation bar.
 - Click the 'Add Item' button to add items manually by entering the name and quantity.
@@ -232,6 +267,51 @@ Text Search:
     - Report has been resolved by admin.
 
 ### 11. Recipes
+Add a recipe:
+- Click on create new recipe
+- Enter the name, servings, prep time, cook time, and instructions
+- Click on edit ingredients button
+- Click on add ingredients and fill in inputs
+  (repeat until all ingredients are added)
+- Click on save changes
+- Click on edit tools buttons
+- Select tool from dropdown 
+- Click on add tool button 
+  (repeat until all tools are added)
+- Click on save recipe button
+Clone a recipe:
+- Select a public recipe
+- Click on the clone button
+- Repeat add recipe steps
+Edit a personal recipe:
+- Select a personal recipe
+- Click on edit recipe button
+- Repeat add recipe steps
+Delete a personal recipe:
+- Select a personal recipe
+- Click on delete button
+- Confirm delete
+Create a recipe:
+- Select a recipe
+- Click on the create recipe button
+- Change any of the quantity values as needed
+- If subtitutions are required click on the remove button
+- Click on add from inventory
+- Click on an item which is not already added and in date
+- Follow the last 2 steps for any additional ingredients aswell
+- Update the quantity inputs of each to match the amount used
+- Click on update inventory to update quantites and remove any fully used items
+Filter and search recipes:
+- Enter the search term
+- Click on show filters button
+- Select filters to apply
+- Click on search
+Add missing/insufficient ingredients to shopping list:
+- Select a recipe
+- Press shop insufficient items
+- Deselect any items not needed
+- Update quantities of any items needed
+- Click on add selected
 
 ### 12. Admin Dashboard (Admin Only) 
 - Log in as an existing admin 
@@ -273,7 +353,6 @@ Text Search:
 - Click the add new admin button
 - Fill form
 - Admin Added
-
 
 
 # FoodLink Project Folder Structure
@@ -339,7 +418,8 @@ FoodLink/                                       # Project folder containing code
                 notification.js                 # Handles the dynamic updating of the notification popup, updates number of 
                                                   unread notification in badge, chnages notification style when marked as read.
 
-                recipes.js
+                recipes.js                      # Handles all dynamic features of recipes: adding a recipe, cloning a public recipe, edit personal (with cancel edit    
+                                                  button) and removing a personal recipe. Allows for filters to be applied and seperates recipes by pages. Allows users to modify ingredient quantities, substitute ingredients and add additional ingredients before dynamically updating inventory. Dynamically adds missing/insufficient ingredients to the shopping list with options to change the quantity or remove ingredients that will be addded.
 
                 recipe_view.js                  # As with item_view.js this file handles the dynamic popup forms and transmission 
                                                   of data between the front and back end AJAX (GET/POST) requests for efficient recipe 
@@ -350,8 +430,11 @@ FoodLink/                                       # Project folder containing code
 
                 reports.js                      # Dynamically fills item table, and  handles sorting of reports. Also allows admins to dynamically assign reports to 
                                                   themselves with override checks.
-                select_utensils.js
-                settings.js
+
+                select_utensils.js              # Dynamically saves users utensils before redirecting to dashboard
+
+                settings.js                     # Handles delete account popup
+                
                 shopping_list.js                # Handles form submissions, hides and displays add/edit popups, shows 
                                                   notification to confirm success.
 
@@ -359,32 +442,32 @@ FoodLink/                                       # Project folder containing code
             style.css                           # Style sheet for all pages apart from settings        
 
         templates/                              # HTML templates (rendered by Flask) 
-            add_item.html                       
+            add_item.html                       # Barcode scanner for admins to add new items efficiently
             admin_add.html                      # HTML layout for an admin adding a new admin
-            admin_base.html
+            admin_base.html                     # Navigation bar for admin pages
             admin_dashboard.html                # Admin dashboard
             admin_login.html                    # HTML layout for an admin to log in
             admin_update_password.html          # HTML layout for ad admin to change their password
             base.html                           # Base layout used across all templates (navigation bar, contianer for flash 
                                                   messages, js scripts, styling sheets)
-            createAccount.html
-            
-            email_verification.html
+            createAccount.html                  # Form to input sign up information with button to create account
+            email_verification.html             # Options to send and enter email verification cod
             index.html                          # User dashboard (diplays temp/humidity real time data, tiles to navigate to 
                                                   inventory, shopping list and recipes)
-            inventory.html
+            inventory.html                      # Container for all items and form for searching applying filters
             inventory_add.html                  # UI with user camera footage and options buttons for item addition options.
             item_view.html                      # Database table UI for items with each row dynamically rendered using Jinja.
             item_view_search.html               # Database table UI for filtered items with each row dynamically rendered using Jinja.
-            login.html
-            recipes.html
+            login.html                          # Handles inputs of user information for login, with forgot password and create new account options. Also allows admins to 
+                                                  access admin login by pressing sign in text.
+            recipes.html                        # Sets all the base popups and scrollable windows for recipe features mentioned in recipes.js
             recipe_view.html                    # Database table UI for recipes with each row dynamically rendered using Jinja.
-            report.html
-            reports.html
-            resetByEmail.html
-            resetPassword.html
-            select_utensils.html
-            settings.html
+            report.html                         # Shows single report and allows for admins to correct information, shows original item if applicable
+            reports.html                        # Shows a table with all the reports and allows admins to assign a report to themselves
+            resetByEmail.html                   # Gets users email and send reset code, allows for entering of the code 
+            resetPassword.html                  # Allows user to enter new password
+            select_utensils.html                # 2 stage form for users to select tools
+            settings.html                       # All the user profile options
             shoppinglist.html                   # Shopping List UI (add/edit/remove/clear items)
 
         admin_recipe.py                         # Handles operations performed on the recipe database table when the admin recipe_view page is in use.
@@ -437,7 +520,9 @@ FoodLink/                                       # Project folder containing code
         settings.py                             # Handles user preferences through multiple view classes.
                                                   that control account details and notification preferences. Made through Flask's Blueprint, MethodView,
                                                   Flask Login, and werkzeug.security for password hashing.
-        shopping.py
+
+        shopping.py                             # Handle sql commands for adding, updating removing and clearing items. Splits the list into 3 sections: Sugested Items, 
+                                                  Shopping List and Bought Items.
 
         success.py                              # Publishes a message with the value 'Added' to ThingsBoard over secure MQTT using the tb_mqtt_client library. 
         

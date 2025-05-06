@@ -394,8 +394,11 @@ FoodLink/                                       # Project folder containing code
 
                 reports.js                      # Dynamically fills item table, and  handles sorting of reports. Also allows admins to dynamically assign reports to 
                                                   themselves with override checks.
+
                 select_utensils.js              # Dynamically saves users utensils before redirecting to dashboard
+
                 settings.js                     # Handles delete account popup
+                
                 shopping_list.js                # Handles form submissions, hides and displays add/edit popups, shows 
                                                   notification to confirm success.
 
@@ -481,8 +484,9 @@ FoodLink/                                       # Project folder containing code
         settings.py                             # Handles user preferences through multiple view classes.
                                                   that control account details and notification preferences. Made through Flask's Blueprint, MethodView,
                                                   Flask Login, and werkzeug.security for password hashing.
-                                                
-        shopping.py
+
+        shopping.py                             # Handle sql commands for adding, updating removing and clearing items. Splits the list into 3 sections: Sugested Items, 
+                                                  Shopping List and Bought Items.
 
         success.py                              # Publishes a message with the value 'Added' to ThingsBoard over secure MQTT using the tb_mqtt_client library. 
         

@@ -13,7 +13,7 @@ We have implemented various features to help us achieve a variety of objectives 
 
 - Admin system ---> Full customer support with a reporting system that can help to swiftly fix any error in item information. Items and recipes can be edited using the admin account as an efficient alternative to manual database querying. 
 
-To access the website, either run the project locally (not secure) following the steps below or access the website securely at*:
+To access the website, either run the project locally (not secure) following the steps below or access the website securely at:
 
 https://foodlink-foodlink.apps.containers.cs.cf.ac.uk/
 
@@ -164,29 +164,28 @@ Usage:
 ### HOW TO NAVIGATE THE WEBSITE AND USE FUNCTIONALITY
 
 ### 1. Login / Create Account
-    Login create account:
 
-create account:
--press the first field to enter a username
--press the second field to enter an email address
--press the third field to enter a password that fits the format
--re-enter the password in the fourth field(same as third field)
--press continue to create the account
-login:
--press the first field to enter your username
--press the second field to enter your password
--press continue to login
--if you are a new user press create account and it will redirect you to the create account page
--click forgot password to reset your password
-resetByEmail page:
--press the first field to enter the email of the account you want to reset password on
---press send code button to receive the code for your email
--enter the code in the second field
--press verify to redirect to forget password page
-resetPassword page:
--press the first field to enter your new password
--re-enter the password in the fourth field(same as first field)
--press continue to confirm the new password
+Create account:
+- Click on the first field to enter a username
+- Click on the second field to enter an email address
+- Click on the third field to enter a password that fits the format
+- Re-enter the password in the fourth field(same as third field)
+- Click on continue to create the account
+Login:
+- Click on the first field to enter your username
+- Click on the second field to enter your password
+- Click on continue to login
+- If you are a new user, click on create account and it will redirect you to the create account page
+- Click forgot password to reset your password
+Reset Password:
+- Press forgot password button
+- Click on the first field to enter the email of the account you want to reset password on
+- Click on send code button to receive the code for your email
+- Enter the code in the second field
+- Click on verify to redirect to forget password page
+- Click on the first field to enter your new password
+- Re-enter the password in the fourth field(same as first field)
+- Click on continue to confirm the new password
 
 ### 2. Email Verification
 
@@ -199,11 +198,11 @@ resetPassword page:
 To update an item:
 - Click on the item tile
 - Edit the quantity or the expiry
-- Press save
+- Click on save
 
 To remove an item:
 - Click on the item tile
-- Press the remove button
+- Click on the remove button
 
 To search and sort the items:
 - Enter the item names you want to find (optional)
@@ -269,13 +268,50 @@ Text Search:
 
 ### 11. Recipes
 Add a recipe:
-- Press create new recipe
+- Click on create new recipe
 - Enter the name, servings, prep time, cook time, and instructions
-- Press edit ingredients button
-- Press add ingredients and fill in inputs
-- Press save changes
-- Pres edit tools buttons
-- Pr 
+- Click on edit ingredients button
+- Click on add ingredients and fill in inputs
+  (repeat until all ingredients are added)
+- Click on save changes
+- Click on edit tools buttons
+- Select tool from dropdown 
+- Click on add tool button 
+  (repeat until all tools are added)
+- Click on save recipe button
+Clone a recipe:
+- Select a public recipe
+- Click on the clone button
+- Repeat add recipe steps
+Edit a personal recipe:
+- Select a personal recipe
+- Click on edit recipe button
+- Repeat add recipe steps
+Delete a personal recipe:
+- Select a personal recipe
+- Click on delete button
+- Confirm delete
+Create a recipe:
+- Select a recipe
+- Click on the create recipe button
+- Change any of the quantity values as needed
+- If subtitutions are required click on the remove button
+- Click on add from inventory
+- Click on an item which is not already added and in date
+- Follow the last 2 steps for any additional ingredients aswell
+- Update the quantity inputs of each to match the amount used
+- Click on update inventory to update quantites and remove any fully used items
+Filter and search recipes:
+- Enter the search term
+- Click on show filters button
+- Select filters to apply
+- Click on search
+Add missing/insufficient ingredients to shopping list:
+- Select a recipe
+- Press shop insufficient items
+- Deselect any items not needed
+- Update quantities of any items needed
+- Click on add selected
 
 ### 12. Admin Dashboard (Admin Only) 
 - Log in as an existing admin 

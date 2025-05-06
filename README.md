@@ -1,4 +1,4 @@
-## FoodLink: Smart Fridge Assistant
+# FoodLink: Smart Fridge Assistant
 
 FoodLink is a combined physical and web-based bespoke IoT platform with one main goal: reduce food waste. As an add-on, it provides an affordable and environmentally friendly way for consumers to achieve this goal. 
 
@@ -160,7 +160,7 @@ Visit: `http://localhost:5000` in your browser.
 
 Usage:
 
-### HOW TO NAVIGATE THE WEBSITE AND USE FUNCTIONALITY
+# How to navigate and use the website:
 
 ### 1. Login / Create Account
 
@@ -368,6 +368,7 @@ Add missing/insufficient ingredients to shopping list:
 
 # FoodLink Project Folder Structure
 
+```
 FoodLink/                                       # Project folder containing code for all components of the 
                                                   system.               
     arduino/                                    # Arduino-related code     
@@ -572,6 +573,7 @@ FoodLink/                                       # Project folder containing code
         tool.py                                 # Handles tool SQL commands (CRUD)
 
     README.md                                   # Project README file (this file)
+```
 
 ## References
 

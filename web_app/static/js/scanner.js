@@ -11,7 +11,7 @@ navigator.mediaDevices.getUserMedia({ video: true })
     console.error("Webcam access error:", err);
 });
 
-// Repeatedly captures frames and sends to the server to be processed.
+// Repeatedly captures frames and sends them to the server to be processed.
 function captureAndSendFrame() {
     if (!video.videoWidth) return;
 

@@ -1,6 +1,5 @@
 ## FoodLink: Smart Fridge Assistant
 
-
 FoodLink is a combined physical and web-based bespoke IoT platform with one main goal: reduce food waste. As an add-on, it provides an affordable and environmentally friendly way for consumers to achieve this goal. 
 
 We have implemented various features to help us achieve a variety of objectives that help to contribute to our overall goal with efficiency and innovation:
@@ -279,18 +278,22 @@ Add a recipe:
 - Click on add tool button 
   (repeat until all tools are added)
 - Click on save recipe button
+
 Clone a recipe:
 - Select a public recipe
 - Click on the clone button
 - Repeat add recipe steps
+
 Edit a personal recipe:
 - Select a personal recipe
 - Click on edit recipe button
 - Repeat add recipe steps
+
 Delete a personal recipe:
 - Select a personal recipe
 - Click on delete button
 - Confirm delete
+
 Create a recipe:
 - Select a recipe
 - Click on the create recipe button
@@ -301,11 +304,13 @@ Create a recipe:
 - Follow the last 2 steps for any additional ingredients aswell
 - Update the quantity inputs of each to match the amount used
 - Click on update inventory to update quantites and remove any fully used items
+
 Filter and search recipes:
 - Enter the search term
 - Click on show filters button
 - Select filters to apply
 - Click on search
+
 Add missing/insufficient ingredients to shopping list:
 - Select a recipe
 - Press shop insufficient items
@@ -356,7 +361,7 @@ Add missing/insufficient ingredients to shopping list:
 
 
 # FoodLink Project Folder Structure
-```
+
 FoodLink/                                       # Project folder containing code for all components of the 
                                                   system.               
     arduino/                                    # Arduino-related code     
@@ -372,9 +377,9 @@ FoodLink/                                       # Project folder containing code
 
     setup/                                      # Files needed for setup.
         itemDB.py                               # Python script to insert items to item table.
+
         recipeDB.py                             # Inserts recipes into recipe table, recipe ingredients into recipe_items table 
                                                   and recipe utensils and appliance into recipe_tool table.
-        requirements.txt                        # Python dependecies
 
     ai_model_training_reference/
         reference.bib                           # Bib file containing full references to the datasets that form the custom      
@@ -405,7 +410,8 @@ FoodLink/                                       # Project folder containing code
                                                   items that are soon to expire.
 
                 inventory_add.js                # Dynamically displays results from frame scan. Dynamic text search and item reports for missing items or items with 
-                                                  misinformation. Calculates estimate of expiry date for each item. Dynamic CRUD operations for personal items, including cloning public items. Option to add any item to inventory, with quantity constraints.
+                                                  misinformation. Calculates estimate of expiry date for each item. Dynamic CRUD operations for personal items, including 
+                                                  cloning public items. Option to add any item to inventory, with quantity constraints.
 
                 item_handling.js                # Handles some item functions which are shared between files. Dynamically gets image path, and updates image preview when 
                                                   file is uploaded. Gets each expiry value from an expiry time for processing.
@@ -419,7 +425,10 @@ FoodLink/                                       # Project folder containing code
                                                   unread notification in badge, chnages notification style when marked as read.
 
                 recipes.js                      # Handles all dynamic features of recipes: adding a recipe, cloning a public recipe, edit personal (with cancel edit    
-                                                  button) and removing a personal recipe. Allows for filters to be applied and seperates recipes by pages. Allows users to modify ingredient quantities, substitute ingredients and add additional ingredients before dynamically updating inventory. Dynamically adds missing/insufficient ingredients to the shopping list with options to change the quantity or remove ingredients that will be addded.
+                                                  button) and removing a personal recipe. Allows for filters to be applied and seperates recipes by pages. Allows users 
+                                                  to modify ingredient quantities, substitute ingredients and add additional ingredients before dynamically updating inventory. 
+                                                  Dynamically adds missing/insufficient ingredients to the shopping list with options to change the quantity or remove ingredients 
+                                                  that will be addded.
 
                 recipe_view.js                  # As with item_view.js this file handles the dynamic popup forms and transmission 
                                                   of data between the front and back end AJAX (GET/POST) requests for efficient recipe 
@@ -438,36 +447,60 @@ FoodLink/                                       # Project folder containing code
                 shopping_list.js                # Handles form submissions, hides and displays add/edit popups, shows 
                                                   notification to confirm success.
 
-            settings_style.css                  # Style sheet for settings page      
+            settings_style.css                  # Style sheet for settings page    
+
             style.css                           # Style sheet for all pages apart from settings        
 
         templates/                              # HTML templates (rendered by Flask) 
             add_item.html                       # Barcode scanner for admins to add new items efficiently
+
             admin_add.html                      # HTML layout for an admin adding a new admin
+
             admin_base.html                     # Navigation bar for admin pages
+
             admin_dashboard.html                # Admin dashboard
+
             admin_login.html                    # HTML layout for an admin to log in
+
             admin_update_password.html          # HTML layout for ad admin to change their password
+
             base.html                           # Base layout used across all templates (navigation bar, contianer for flash 
                                                   messages, js scripts, styling sheets)
+
             createAccount.html                  # Form to input sign up information with button to create account
-            email_verification.html             # Options to send and enter email verification cod
+
+            email_verification.html             # Options to send and enter email verification code
+
             index.html                          # User dashboard (diplays temp/humidity real time data, tiles to navigate to 
                                                   inventory, shopping list and recipes)
+
             inventory.html                      # Container for all items and form for searching applying filters
+
             inventory_add.html                  # UI with user camera footage and options buttons for item addition options.
+
             item_view.html                      # Database table UI for items with each row dynamically rendered using Jinja.
+
             item_view_search.html               # Database table UI for filtered items with each row dynamically rendered using Jinja.
+
             login.html                          # Handles inputs of user information for login, with forgot password and create new account options. Also allows admins to 
                                                   access admin login by pressing sign in text.
+
             recipes.html                        # Sets all the base popups and scrollable windows for recipe features mentioned in recipes.js
+
             recipe_view.html                    # Database table UI for recipes with each row dynamically rendered using Jinja.
+
             report.html                         # Shows single report and allows for admins to correct information, shows original item if applicable
+
             reports.html                        # Shows a table with all the reports and allows admins to assign a report to themselves
+
             resetByEmail.html                   # Gets users email and send reset code, allows for entering of the code 
+
             resetPassword.html                  # Allows user to enter new password
+
             select_utensils.html                # 2 stage form for users to select tools
+
             settings.html                       # All the user profile options
+
             shoppinglist.html                   # Shopping List UI (add/edit/remove/clear items)
 
         admin_recipe.py                         # Handles operations performed on the recipe database table when the admin recipe_view page is in use.
@@ -513,6 +546,8 @@ FoodLink/                                       # Project folder containing code
 
         report.py                               # Handles SQL operations for item errors: adding user report of an item, admin get all, find duplicate and remove report
                                                   (after resolving), admins can assign a report to themselves (with override checks)
+
+        requirements.txt                        # Python dependecies
 
         scanner.py                              # Processes users camera feed as a video and scans each frame using a barcode reader or AI object recogniser based on the
                                                   mode.

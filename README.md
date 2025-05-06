@@ -164,6 +164,29 @@ Usage:
 ### HOW TO NAVIGATE THE WEBSITE AND USE FUNCTIONALITY
 
 ### 1. Login / Create Account
+    Login create account:
+
+create account:
+-press the first field to enter a username
+-press the second field to enter an email address
+-press the third field to enter a password that fits the format
+-re-enter the password in the fourth field(same as third field)
+-press continue to create the account
+login:
+-press the first field to enter your username
+-press the second field to enter your password
+-press continue to login
+-if you are a new user press create account and it will redirect you to the create account page
+-click forgot password to reset your password
+resetByEmail page:
+-press the first field to enter the email of the account you want to reset password on
+--press send code button to receive the code for your email
+-enter the code in the second field
+-press verify to redirect to forget password page
+resetPassword page:
+-press the first field to enter your new password
+-re-enter the password in the fourth field(same as first field)
+-press continue to confirm the new password
 
 ### 2. Email Verification
 

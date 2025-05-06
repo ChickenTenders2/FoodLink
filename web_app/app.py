@@ -674,6 +674,7 @@ def append_inventory():
 @app.route('/inventory/update_item', methods = ['POST'])
 @user_only
 def update_item(): 
+    user_id = current_user.id
     # gets variables needed to update item
     inventory_id = request.form.get('inventory_id')
     quantity = request.form.get('quantity')
@@ -683,7 +684,7 @@ def update_item():
         return jsonify({"success": False, "error": "Form was missing a value"}), 400
     
     # Update the database with new quantity and expiry date
-    result = inventory.update_item(inventory_id, quantity, expiry_date)
+    result = inventory.update_item(inventory_id, quantity, expiry_date, user_id)
     # returns response to js code
     if not result.get("success"):
         return jsonify(result), 500
@@ -762,6 +763,7 @@ def update_item_information():
 @app.route("/inventory/update_items_quantity", methods=["POST"])
 @user_only
 def update_quantities():
+    user_id = current_user.id
     items_used_string = request.form.get("items_used")
 
     # list variables must be stringified client side so lists transfer correctly
@@ -772,7 +774,7 @@ def update_quantities():
         return jsonify({"success": False, "error": "No items added."})
 
     # performs updates function (set to amount or removes if quantity <= 0)
-    result = inventory.update_quantities(items_used)
+    result = inventory.update_quantities(items_used, user_id)
     if not result.get("success"):
         return jsonify(result), 500
     return jsonify(result)

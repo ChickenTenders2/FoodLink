@@ -84,7 +84,7 @@ def remove_item(inventory_id, user_id):
         if cursor:
             cursor.close()
 
-def update_quantities(items_used):
+def update_quantities(items_used, user_id):
     """
     Updates the quantity for multiple items.
 
@@ -100,10 +100,10 @@ def update_quantities(items_used):
         for inventory_id, quantity in items_used:
             # Delete item if quantity is zero or less
             if quantity <= 0:
-                cursor.execute("DELETE FROM inventory WHERE id = %s;", (inventory_id,))
+                cursor.execute("DELETE FROM inventory WHERE id = %s AND user_id = %s;", (inventory_id, user_id))
             # Otherwise, update the quantity
             else:
-                cursor.execute("UPDATE inventory SET quantity = %s WHERE id = %s;", (quantity, inventory_id))
+                cursor.execute("UPDATE inventory SET quantity = %s WHERE id = %s AND user_id = %s;", (quantity, inventory_id, user_id))
         commit()
         return {"success": True}
     except Exception as e:
@@ -114,12 +114,12 @@ def update_quantities(items_used):
         if cursor:
             cursor.close()
 
-def update_item(inventory_id, quantity, expiry_date):
+def update_item(inventory_id, quantity, expiry_date, user_id):
     """Updates the quantity and expiry date of an item with id."""
     cursor = None
     try:
         cursor = get_cursor()
-        query = "UPDATE inventory SET quantity = %s, expiry_date = %s WHERE id = %s;"
+        query = "UPDATE inventory SET quantity = %s, expiry_date = %s WHERE id = %s AND user_id = %s;"
         cursor.execute(query, (quantity, expiry_date, inventory_id))
         commit()
         return {"success": True}

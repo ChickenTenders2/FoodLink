@@ -553,7 +553,7 @@ FoodLink/                                       # Project folder containing code
         report.py                               # Handles SQL operations for item errors: adding user report of an item, admin get all, find duplicate and remove report
                                                   (after resolving), admins can assign a report to themselves (with override checks)
 
-        requirements.txt                        # Python dependecies
+        requirements.txt                        # Python dependencies
 
         scanner.py                              # Processes users camera feed as a video and scans each frame using a barcode reader or AI object recogniser based on the
                                                   mode.

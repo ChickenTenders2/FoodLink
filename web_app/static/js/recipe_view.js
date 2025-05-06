@@ -1,3 +1,6 @@
+/** Posts the item id to the back end Python route so the recipe with the 
+ *  ID can be removed from the database.
+ */
 async function remove_item(id) {
     if (!confirm("Are you sure you want to delete this recipe?")) {
         return;
@@ -21,7 +24,7 @@ async function remove_item(id) {
     }
 }
 
-// Opens the item information popup.
+/** Opens the item information popup. */ 
 function open_popup(recipeName, name, servings, prep, cook, instructions, recipe_id, add=false) {
     
     // Add is a boolean check to see if items are updated or added to the database.
@@ -69,6 +72,10 @@ function close_popup() {
     document.getElementById('delete_button').style.display = "none";
 }
 
+/** Posts the contents of the first form (recipe details)
+ *  to the Flask backend, closes the popup and opens the next
+ *  one. Updates the details in the database at the Flask route.
+ */
 async function submit_next_update(event, recipe_id) {
     // Prevents the form from submitting normally.
     event.preventDefault(); 
@@ -94,6 +101,10 @@ async function submit_next_update(event, recipe_id) {
     }
 }
 
+/** Posts the contents of the first form (recipe details)
+ *  to the Flask backend, closes the popup and opens the next
+ *  one. Adds the details to the database at the Flask route.
+ */
 async function submit_next_add(event) {
     // Prevents the form from submitting normally.
     event.preventDefault(); 
@@ -132,6 +143,10 @@ async function submit_next_add(event) {
     }
 }
 
+/** Gets the ingredients from the backend database query
+ *  and displays them in a dynamically rendered form to 
+ *  be updated.
+ */
 async function get_ingredients_update(recipe_id) {
     try {
         const response = await fetch('/admin/recipe_view/gets_items/' + recipe_id, {
@@ -164,6 +179,7 @@ async function get_ingredients_update(recipe_id) {
     }
 }
 
+/** Dynamically renders the field rows. */
 async function create_list_ingredients(recipe_id) {
     try {
     // Adding empty rows to be filled by the user.
@@ -180,6 +196,7 @@ async function create_list_ingredients(recipe_id) {
 }
 }
 
+/** HTML for ingredient rows. */
 function add_ingredient_row(name = "", quantity = "", unit = "", recipe_id) {
     const row = document.createElement("div");
     row.className = "ingredient-row";
@@ -197,11 +214,16 @@ function add_ingredient_row(name = "", quantity = "", unit = "", recipe_id) {
     document.getElementById("ingredients_list_container").appendChild(row);
 }
 
-// Closes the recipe ingredients popup.
+/** Closes the recipe ingredients popup. */
 function close_edit_ingredients_popup() {
     document.getElementById("edit_ingredients_popup").style.display = "none";
 }
 
+
+/** Posts the contents of the second form (recipe ingredients)
+ *  to the Flask backend, closes the popup and opens the next
+ *  one. Updates the details in the database at the Flask route.
+ */
 async function update_ingredients(event, recipe_id) {
     event.preventDefault();
 
@@ -226,6 +248,10 @@ async function update_ingredients(event, recipe_id) {
     }
 }
 
+/** Posts the contents of the second form (recipe ingredients)
+ *  to the Flask backend, closes the popup and opens the next
+ *  one. Adds the details to the database at the Flask route.
+ */
 async function add_ingredients(event, recipe_id) {
     event.preventDefault();
 
@@ -250,30 +276,10 @@ async function add_ingredients(event, recipe_id) {
     }
 }
 
-async function update_ingredients(event, recipe_id) {
-    event.preventDefault();
-
-    // Recreates the form.
-    const form = event.target;
-    const formData = new FormData(form);
-     
-    // Fetches the flask route for updating ingredients in the database.
-    const response = await fetch('/admin/recipe_view/update_recipe_ingredients', {
-             method: 'POST',
-             body: formData,
-         });
-     
-    //Waits until result is recieved
-    const result = await response.json();
-     
-    if (result.success) {
-        close_edit_ingredients_popup();
-        get_tools(recipe_id);
-    } else {
-        alert('There was an error updating the item.');
-    }
-}
-
+/** Gets the tools associated with the recipe as well as the
+ *  tool -> id map to match the tool ids to names. Each row
+ *  is dynamically rendered.
+ */
 async function get_tools(recipe_id) {
     try {
         // Gets the tools asociated with the recipe that is being edited.
@@ -313,6 +319,7 @@ async function get_tools(recipe_id) {
     }
 }
 
+/** Dynamically generates a tool row. */
 async function create_list_tools(recipe_id) {
     try {
         // Adding an empty row to be filled in by the user.
@@ -328,6 +335,7 @@ async function create_list_tools(recipe_id) {
     }
 }
 
+/** HTML for tool row. */
 function add_tool_display_row(tool_id = "", recipe_id = "", add = false) {
     const row = document.createElement("div");
     row.className = "tool-input-row";
@@ -351,12 +359,16 @@ function add_tool_display_row(tool_id = "", recipe_id = "", add = false) {
     document.getElementById("tools_list_container").appendChild(row);
 }
 
-// Closes the recipe tools popup.
+/** Closes the tools popup. */
 function close_edit_tools_popup() {
     document.getElementById("edit_tools_popup").style.display = "none";
     location.reload();
 }
 
+/** Posts the contents of the third form (recipe tools)
+ *  to the Flask backendand and closes the final popup.
+ *  Updates the details in the database at the Flask route.
+ */
 async function update_tools(event) {
     event.preventDefault();
 
@@ -380,6 +392,10 @@ async function update_tools(event) {
     }
 }
 
+/** Posts the contents of the third form (recipe tools)
+ *  to the Flask backendand and closes the final popup.
+ *  Adds the details to the database at the Flask route.
+ */
 async function add_tools(event) {
     event.preventDefault();
 
@@ -403,6 +419,7 @@ async function add_tools(event) {
     }
 }
 
+/** Only allows rows to be removed if there is one or more. */
 function remove_conditional(button) {
     const parent = button.parentElement;
     const container = parent.parentElement;

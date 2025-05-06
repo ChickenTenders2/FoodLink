@@ -158,7 +158,6 @@ Visit: `http://localhost:5000` in your browser.
 - Keep your Raspberry Pi connected to ThingsBoard for IoT features
 - Default port is 5000; can be configured in `app.py`
 
-Usage:
 
 # How to navigate and use the website:
 

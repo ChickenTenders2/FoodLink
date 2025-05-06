@@ -95,74 +95,83 @@ def alarm():
     setText(x)
 
 if __name__=="__main__":
-        
-        # ID of the device (used to connect to ThingsBoard).
-        device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
-        start_time = time.time()
-        
-        # The distance measured by the ultrasonic sensor when the door is closed.
-        # Needs to be altered depending on the fridge model. 
-        door_to_wall = 10
     
-        last_time = ""
+    # ID of the device (used to connect to ThingsBoard).
+    device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
+    start_time = time.time()
+    
+    # The distance measured by the ultrasonic sensor when the door is closed.
+    # Needs to be altered depending on the fridge model. 
+    door_to_wall = 10
 
-        buzzer = 8
+    last_time = ""
 
-        grovepi.pinMode(buzzer, "output")
-        grovepi.set_bus("RPI_1")
+    buzzer = 8
 
-        if sys.platform == 'uwp':
-            import winrt_smbus as smbus
+    grovepi.pinMode(buzzer, "output")
+    grovepi.set_bus("RPI_1")
+
+    if sys.platform == 'uwp':
+        import winrt_smbus as smbus
+        bus = smbus.SMBus(1)
+    else:
+        import smbus
+        import RPi.GPIO as GPIO
+        rev = GPIO.RPI_REVISION
+        if rev == 2 or rev == 3:
             bus = smbus.SMBus(1)
         else:
-            import smbus
-            import RPi.GPIO as GPIO
-            rev = GPIO.RPI_REVISION
-            if rev == 2 or rev == 3:
-                bus = smbus.SMBus(1)
-            else:
-                bus = smbus.SMBus(0)
+            bus = smbus.SMBus(0)
 
-        DISPLAY_TEXT_ADDR = 0x3e
+    DISPLAY_TEXT_ADDR = 0x3e
 
+    
+    token = get_jwt_token()
+    x = 'FOODLINK'
+    setText(x)
+
+    countdown = False
+    delay = 120
+    
+    while True:
         
-        token = get_jwt_token()
-        x = 'FOODLINK'
-        setText(x)
-        
-        while True:
-          
-         try:
-             
-          delay = 120
-          data = get_telemetry(token, device_id)
-          if data:
-            distance = float(data['distance'][0]['value'])
-          
-          # If a new message (new timestamp) is recieved from ThingsBoard 
-          # then the display is updated for 5 seconds (when an item is added
-          # on the website.
-          if data and 'message' in data:
-           time_stamp = data['message'][0]['ts']
-           
-           if time_stamp != last_time:
-            x = 'ADDED!'
-            setText(x)
-            buzz()
-            time.sleep(5)
-            x = 'FOODLINK'
-            setText(x)
+        try:
             
-           last_time = time_stamp
-          
-          # Triggers the alarm if the door is left open for two minutes.
-          if time.time() - start_time >= delay:
-            if distance > door_to_wall:
+            data = get_telemetry(token, device_id)
+            if data:
+                distance = float(data['distance'][0]['value'])
+                # If door is open
+                if distance > door_to_wall:
+                    # And countdown isnt started, start the countdown
+                    if not countdown:
+                        countdown = True
+                        start_time = time.time()
+                # If door is closed stop countdown
+                else:
+                    countdown = False
+            
+            # If a new message (new timestamp) is recieved from ThingsBoard 
+            # then the display is updated for 5 seconds (when an item is added
+            # on the website.
+            if data and 'message' in data:
+                time_stamp = data['message'][0]['ts']
+            
+            if time_stamp != last_time:
+                x = 'ADDED!'
+                setText(x)
+                buzz()
+                time.sleep(5)
+                x = 'FOODLINK'
+                setText(x)
+            
+            last_time = time_stamp
+            
+            # Triggers the alarm if the door is left open for two minutes.
+            if countdown and (time.time() - start_time) >= delay:
                 alarm()
-            start_time = time.time()
-                
-         except KeyboardInterrupt:
+            
+        except KeyboardInterrupt:
             print ("Terminated.")
             os._exit(0)
-                
+            
 

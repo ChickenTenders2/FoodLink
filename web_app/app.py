@@ -1253,6 +1253,8 @@ def admin_get_tools():
        All of the tools are retrieved from the 
        database and passed to the front end as a 
        dictionary mapping the tool names to tool ids.
+       
+       request (POST): Item id value from a form.
 
        Returns:
             Response: A JSON response containing a dictionary mapping tool ids to tool names.
@@ -1270,8 +1272,14 @@ def admin_get_tools():
 def delete_item():
     """Handles deletion of an item by 
        decoding the utf-8 body of a form 
-       that constains the ID and passing 
-       it to a query.
+       that rather than a regular field
+       contains the ID and passing it to a 
+       query.
+       
+       request (POST): Item id value from a posted form.
+
+       Returns:
+            Response: A JSON response containing a success / failure (error 500) result.
     """
     # Form data is formatted in utf-8 so it needs to be decoded.
     id = request.data.decode('utf-8')
@@ -1285,8 +1293,13 @@ def delete_item():
 def delete_recipe():
     """Handles deletion of a recipe by 
        decoding the utf-8 body of a form 
-       that constains the ID and passing 
+       that contains the ID and passing 
        it to a query.
+
+       request (POST): Recipe id value from a posted form.
+
+       Returns:
+            Response: A JSON response containing a success / failure result.
     """
     # Form data is formatted in utf-8 so it needs to be decoded since id was not submitted in a form.
     id = request.data.decode('utf-8')
@@ -1303,6 +1316,11 @@ def update_item_admin():
        sanitising the inputs to prevent SQL 
        injection attacks. Expiry input is 
        validated to prevent submission failure.
+       
+       request (POST): item_name, brand, quantity, expiry date, unit, and barcode values.
+
+       Returns:
+            Response: A JSON response containing a success / failure result.
     """
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_handling.sanitise_all(['name', 'brand', 'quantity', 
@@ -1340,6 +1358,11 @@ def add_item_admin():
        database items table as well as 
        sanitising the inputs to prevent SQL 
        injection attacks.
+
+       request (POST): item_name, brand, quantity, expiry date, unit, and barcode values from the posted form.
+       
+       Returns:
+            Response: A JSON response containing a success / failure result.
     """
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_handling.sanitise_all(['barcode', 'name', 'brand', 'quantity', 
@@ -1376,6 +1399,11 @@ def update_recipe_admin():
        sanitising the inputs to prevent SQL 
        injection attacks. Expiry input is 
        validated to prevent submission failure.
+
+       request (POST): name, instructions, recipe_id, prep, cook and servings values from the posted form.
+       
+       Returns:
+            Response: A JSON response containing a success / failure result.
     """
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_handling.sanitise_all(['name', 'instructions', 
@@ -1399,6 +1427,11 @@ def add_recipe_admin():
        database recipe table as well as 
        sanitising the inputs to prevent SQL 
        injection attacks.
+       
+       request (POST): name, instructions, prep, cook and servings values from the posted form.
+       
+       Returns:
+            Response: A JSON response containing a success / failure result.
     """
     # Sanitise the input to prevent sql injection.
     sanitised_fields = input_handling.sanitise_all(['name', 'instructions', 
@@ -1419,6 +1452,13 @@ def update_recipe_ingredients():
     """Handles row by row ingredient updates
        for the ingredients associated with the 
        recipe that is being edited.
+
+       request (POST): lists of names, units 
+       and quantities for each dynamically
+       rendered row, and a recipe_id.
+       
+       Returns:
+            Response: A JSON response containing a success / failure result.
     """
     # Requests lists since the rows are dynamically generated.
     names = request.form.getlist('name[]')
@@ -1437,6 +1477,13 @@ def add_recipe_ingredients():
     """Handles row by row addition of ingredients
        associated with the recipe being added to the
        recipe-ingredient database table.
+
+       request (POST): lists of names, units
+       and quantities for each dynamically
+       rendered row, and a recipe_id.
+       
+       Returns:
+            Response: A JSON response containing a success / failure result.
     """
     # Requests lists since the rows are dynamically generated.
     names = request.form.getlist('name[]')
@@ -1456,6 +1503,9 @@ def get_recipe_id():
        for a newly added recipe so that the 
        associated tools and ingredients can 
        be updated.
+       
+       Returns:
+            Response: A JSON response containing a success / failure result.
     """
     result = admin_recipe.get_id()
     if not result.get("success"):
@@ -1469,6 +1519,13 @@ def update_recipe_tools():
     """Handles row by row updates
        for the tools associated with the 
        recipe that is being edited.
+
+       request (POST): lists of tool_ids
+       for each dynamically rendered row, 
+       and a recipe_id.
+
+       Returns:
+            Response: A JSON response containing a success / failure result.
     """
     tool_ids = request.form.getlist('tools[]')
     recipe_id = request.form.get('recipe-id')
@@ -1483,6 +1540,13 @@ def add_recipe_tools():
     """Handles row by additions for 
        the tools associated with the 
        recipe that is being edited.
+
+       request (POST): lists of tool_ids
+       for each dynamically rendered row, 
+       and a recipe_id.
+
+       Returns:
+            Response: A JSON response containing a success / failure result.
     """
     tool_ids = request.form.getlist('tools[]')
     recipe_id = request.form.get('recipe-id')

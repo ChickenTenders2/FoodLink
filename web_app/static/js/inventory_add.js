@@ -1,3 +1,11 @@
+/**
+ * Opens the item popup with pre-filled item details.
+ * If the popup is triggered by a scanner, it stops the scanner.
+ * 
+ * @param {Array} item - Array containing item details.
+ * @param {string} estimated_expiry - Estimated expiry date in YYYY-MM-DD.
+ * @param {boolean} from_scanner - Whether the popup was triggered by a scanner.
+ */
 async function open_item_popup(item, estimated_expiry, from_scanner) {
     // If the popup was opened from the scanner
     if (from_scanner) {
@@ -30,6 +38,12 @@ async function open_item_popup(item, estimated_expiry, from_scanner) {
     }
 }
 
+/**
+ * Closes the item popup and resets relevant values.
+ * Restarts scanner if triggered by scanner input.
+ * 
+ * @param {boolean} to_scanner - Whether to restart scanner on close.
+ */
 function close_item_popup(to_scanner) {
     // If the scanner will be in focus after closing
     if (to_scanner) {
@@ -44,12 +58,20 @@ function close_item_popup(to_scanner) {
     document.getElementById('popup').style.display = 'none';
 }
 
+/**
+ * Opens the search popup for finding public or personal items.
+ * Stops scanner before displaying the popup.
+ */
 function open_search_popup() {
     close_not_found_popup();
     stop_check();
     document.getElementById('search_popup').style.display = 'block';
 }
 
+/**
+ * Closes the search popup and clears its contents.
+ * Restarts the scanner afterward.
+ */
 function close_search_popup() {
     start_check();
     document.getElementById("search_term").value = "";
@@ -57,6 +79,10 @@ function close_search_popup() {
     document.getElementById('search_popup').style.display = 'none';
 }
 
+/**
+ * Opens the personal item search view inside the popup.
+ * Temporarily hides the search form and loads personal items.
+ */
 async function open_personal_popup() {
     document.getElementById("search-popup-title").innerHTML = "Personal Items";
     document.getElementById("search-form").style.display = "none";
@@ -65,6 +91,9 @@ async function open_personal_popup() {
     open_search_popup();
 }
 
+/**
+ * Closes the personal items popup and restores public item search UI.
+ */
 function close_personal() {
     document.getElementById("close_search_popup").onclick = () => close_search_popup();
     document.getElementById("search-popup-title").innerHTML = "Search for item";
@@ -72,6 +101,13 @@ function close_personal() {
     close_search_popup();
 }
 
+/**
+ * Called when an item is selected from search results.
+ * Estimates expiry date and opens the item popup.
+ * 
+ * @param {Array} item - The selected item.
+ * @param {boolean} from_scanner - Whether it was selected via barcode/object scan.
+ */
 function select_item(item, from_scanner) {
     expiry_time = item[4];
     const [days, months, years] = get_expiry_values(expiry_time);
@@ -79,6 +115,13 @@ function select_item(item, from_scanner) {
     open_item_popup(item, estimated_expiry, from_scanner)
 }
 
+/**
+ * Opens the "Add Item" popup in various modes: clone, barcode, AI, search, or edit.
+ * Populates specific fields depending on the mode.
+ * 
+ * @param {string} where_from - Mode of popup ('clone', 'barcode', 'ai', 'search', 'edit').
+ * @param {string|null} object - Optional: barcode or item name.
+ */
 function open_add_popup(where_from, object = null) {
     if (where_from == "clone") {
         add_clone_info();
@@ -111,6 +154,10 @@ function open_add_popup(where_from, object = null) {
     document.getElementById('add-popup').style.display = 'block';
 }
 
+/**
+ * Populates the "Add Item" form with details cloned from the selected item.
+ * Used when cloning or editing existing item.
+ */
 async function add_clone_info() {
     // Gets information from the item to clone
     const original_id = document.getElementById("item_id").value;
@@ -139,6 +186,13 @@ async function add_clone_info() {
     document.getElementById("unit_edit").value = unit;
 }
 
+/**
+ * Closes the "Add Item" popup and resets all form fields.
+ * Optionally restarts scanner and resets form based on edit mode.
+ * 
+ * @param {boolean} to_scanner - Whether to restart barcode scanning.
+ * @param {boolean} edit_mode - Whether the form should be reset for add mode.
+ */
 async function close_add_popup(to_scanner, edit_mode = false) {
     if (to_scanner) {
         start_check();
@@ -183,6 +237,12 @@ async function close_add_popup(to_scanner, edit_mode = false) {
     document.getElementById("add-popup").style.display = "none";
 }
 
+/**
+ * Opens the "Item Not Found" popup and assigns an action to the confirm button.
+ * 
+ * @param {boolean} scan_mode - Whether the trigger was object recognition or barcode.
+ * @param {string} object - The name or barcode value that was not found.
+ */
 function open_not_found_popup(scan_mode, object) {
     stop_check();
     document.getElementById("not_found_popup").style.display = "block";
@@ -200,12 +260,21 @@ function open_not_found_popup(scan_mode, object) {
     }
 }
 
+/**
+ * Closes the "Item Not Found" popup and resets its confirm button behavior.
+ */
 function close_not_found_popup() {
     start_check();
     document.getElementById("not_found_popup").style.display = "none";
     document.getElementById("open_not_found_button").onclick = null;
 }
 
+/**
+ * Opens the "Report Item" popup for users to request correction or public addition.
+ * 
+ * @param {string} original_item_id - The personal item being reported.
+ * @param {string} item_id - The corrected public item to map to.
+ */
 function open_report_popup(original_item_id, item_id) { 
     if (original_item_id) {
         document.getElementById("report_message").innerHTML = "Send request to fix item error?";
@@ -222,6 +291,9 @@ function open_report_popup(original_item_id, item_id) {
     }
 }
 
+/**
+ * Closes the "Report Item" popup and resets its text and buttons.
+ */
 function close_report_popup() {
     document.getElementById("report_message").innerHTML = "Send request for missing item to be available for all?";
     document.getElementById("report_message_2").innerHTML = "If successful, your personal item will be replaced.";
@@ -230,6 +302,10 @@ function close_report_popup() {
     document.getElementById("report_button").onclick = null;
 }
 
+/**
+ * Toggles inventory-specific form fields when the "Add to Inventory" checkbox is toggled.
+ * Sets required fields and estimated expiry/quantity based on user input.
+ */
 function toggle_inventory_fields() {
     const checkbox = document.getElementById("add_to_inventory").checked;
     const expiry_input = document.getElementById("expiry_date2");
@@ -268,6 +344,11 @@ function toggle_inventory_fields() {
     inputs_container.style.display = "block";
 }
 
+/**
+ * Performs a text-based item search and displays matching results.
+ * 
+ * @param {Event} event - The form submission event (optional).
+ */
 async function text_search_item(event) {
     // Prevent the form from submitting normally
     if (event) {
@@ -288,6 +369,10 @@ async function text_search_item(event) {
     }
 }
 
+/**
+ * Fetches and displays the user's personal items.
+ * Calls backend `/items/get_personal` and passes results to `display_search_results()`.
+ */
 async function display_personal() {
 
     const response = await fetch('/items/get_personal');
@@ -301,6 +386,12 @@ async function display_personal() {
     }
 }
 
+/**
+ * Renders a list of personal items in the UI.
+ * Each item is clickable and triggers `select_item()`.
+
+ * @param {Array} items - List of item arrays from the backend.
+ */
 async function display_search_results(items) {
     // gets div to put results in
     const container = document.getElementById("search_results");
@@ -330,6 +421,11 @@ async function display_search_results(items) {
     }
 }
 
+/**
+ * Routes scanned object/barcode to the correct function based on mode.
+ * 
+ * @param {string} object - Item name or barcode number.
+ */
 // Redirects to correct function once barcode is found
 function process_barcode(object) {
     // Gets mode
@@ -342,6 +438,12 @@ function process_barcode(object) {
     }
 }
 
+/**
+ * Searches for an item using its name (used in object recognition mode).
+ * If found, selects it; otherwise opens "not found" popup.
+ * 
+ * @param {string} item_name - Name of the item to search.
+ */
 async function single_search_item(item_name) {
     // Searches for an item by name and awaits result
     const response = await fetch('/items/single_text_search/'+item_name)               
@@ -358,6 +460,12 @@ async function single_search_item(item_name) {
     }
 }
 
+/**
+ * Searches for an item using its barcode number.
+ * If found, selects it; otherwise opens "not found" popup.
+ * 
+ * @param {string} barcode_number - Barcode to search.
+ */
 // Checks if barcode is in item table
 async function barcode_search_item(barcode_number) {
     // Searches for item by barcode and awaits result
@@ -376,6 +484,12 @@ async function barcode_search_item(barcode_number) {
     }
 }
 
+/**
+ * Submits the add item form to add an item to the user's inventory.
+ * Uses AJAX and closes popup on success.
+ * 
+ * @param {Event} event - The form submission event.
+ */
 // Adds item to inventory
 async function add_item(event) {
     // Prevent the form from submitting normally
@@ -403,6 +517,11 @@ async function add_item(event) {
     }
 }
 
+/**
+ * Submits an update for an existing personal item and possibly updates inventory.
+ * 
+ * @param {Event} event - The form submission event.
+ */
 // Updates personal item and potentially adds to inventory
 async function add_update_item(event) {
     // Prevent the form from submitting normally
@@ -429,7 +548,12 @@ async function add_update_item(event) {
     }
 }
 
-
+/**
+ * Submits a new personal item and potentially adds it to the user's inventory.
+ * Also opens the reporting popup to report a missing or incorrect item.
+ * 
+ * @param {Event} event - The form submission event.
+ */
 // Adds new personal item and potentially to inventory
 async function add_new_item(event) {
     // Prevent the form from submitting normally
@@ -460,6 +584,9 @@ async function add_new_item(event) {
     }
 }
 
+/**
+ * Deletes a personal item from the database and the user's inventory after confirmation.
+ */
 // deletes item from table and inventory
 async function delete_item() {
     if (!confirm("Are you sure you want to delete this item? It will also be removed from your inventory.")) {
@@ -478,6 +605,12 @@ async function delete_item() {
     }
 }
 
+/**
+ * Sends a report to the backend that a personal item should be replaced or reviewed.
+ * 
+ * @param {string} original_item_id - The ID of the item being reported.
+ * @param {string} item_id - The new item ID the user is reporting as a replacement or correction.
+ */
 async function send_report(original_item_id, item_id) {
 
     const formData = new FormData();
@@ -498,6 +631,15 @@ async function send_report(original_item_id, item_id) {
     document.getElementById("report_message_2").innerHTML = "";
 }
 
+/**
+ * Estimates an expiry date by adding the specified days, months, and years to today's date.
+ * 
+ * @param {number} days - Days to add.
+ * @param {number} months - Months to add.
+ * @param {number} years - Years to add.
+ * 
+ * @returns {string} - Estimated expiry date in 'YYYY-MM-DD' format.
+ */
 // Calculate an estimate of the expiry date
 function estimate_expiry_date(days, months, years) {
     // Todays date

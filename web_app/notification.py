@@ -6,7 +6,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.header import Header
 from email import charset
-from os import getenv as get_dotenv
+from os import getenv
 
 # Retrieves all notifications for a given user, ordered by most recent
 def get_notifications(user_id):
@@ -359,9 +359,9 @@ def send_email(user_id, subject_type, message_text):
     msg.attach(MIMEText(html, "html", _charset="utf-8"))
     try:
         # Connect to Gmail SMTP
-        with smtplib.SMTP_SSL(get_dotenv("MAIL_SERVER"), get_dotenv("NOTIFICATION_PORT")) as server:
-            server.login(get_dotenv("MAIL_USERNAME"), get_dotenv("MAIL_PASSWORD"))
-            server.sendmail(get_dotenv("MAIL_USERNAME"), recipient_email, msg.as_bytes())
+        with smtplib.SMTP_SSL(getenv("MAIL_SERVER"), getenv("NOTIFICATION_PORT")) as server:
+            server.login(getenv("MAIL_USERNAME"), getenv("MAIL_PASSWORD"))
+            server.sendmail(getenv("MAIL_USERNAME"), recipient_email, msg.as_bytes())
         return {"success": True}
     except Exception as e:
         logging.error(f"[send_email SMTP error] {e}")

@@ -1,18 +1,18 @@
 import requests
 import logging
-from os import getenv as get_dotenv
+from os import getenv
 
 # makes sure requests dont retry and wait forever
 # stops page reloading taking forever after clicking rapdily
 timeout = 3
 
-login_url = f"{get_dotenv('THINGSBOARD_API')}/api/auth/login"
+login_url = f"{getenv('THINGSBOARD_API')}/api/auth/login"
 headers = {
     "Content-Type": "application/json"
 }
 data = {
-    "username": get_dotenv("THINGSBOARD_USER"),
-    "password": get_dotenv("THINGSBOARD_PASS")
+    "username": getenv("THINGSBOARD_USER"),
+    "password": getenv("THINGSBOARD_PASS")
 }
 
 # Authenticates with ThingsBoard and retrieves a JWT token

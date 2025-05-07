@@ -1,16 +1,16 @@
 import mariadb
 import logging
-from os import getenv as get_dotenv
+from os import getenv
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # lambda function to create a new connection
 create_connection = lambda: mariadb.connect(
-    host=get_dotenv("DB_HOST"),
-    user=get_dotenv("DB_USER"),
-    password=get_dotenv("DB_PASS"),
-    database=get_dotenv("DB_NAME")
+    host=getenv("DB_HOST"),
+    user=getenv("DB_USER"),
+    password=getenv("DB_PASS"),
+    database=getenv("DB_NAME")
 )
 
 # Shared connection for the entire app

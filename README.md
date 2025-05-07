@@ -25,7 +25,7 @@ Technology Stack:
 - **Database** : MariaDB
 - **IoT Integration** : Thingsboard API
 
-Installation:
+# Installation:
 
 ## Prerequisites
 
@@ -108,7 +108,7 @@ EXIT;
 
 ---
 
-## Importing the Database (provided schema)
+### Importing the Database (provided schema)
 
 ```bash
 sudo mariadb -u foodlink_user -p foodlink_db < setup/foodlink_schema.sql
@@ -116,7 +116,7 @@ sudo mariadb -u foodlink_user -p foodlink_db < setup/foodlink_schema.sql
 
 ---
 
-## Ensure MariaDB is Running
+### Ensure MariaDB is Running
 
 ```bash
 sudo systemctl status mariadb
@@ -389,7 +389,13 @@ Add missing/insufficient ingredients to shopping list:
 
 ```
 FoodLink/                                       # Project folder containing code for all components of the 
-                                                  system.               
+                                                  system.  
+
+    ai_model_training_reference/
+        reference.bib                           # Bib file containing full references to the datasets that form the custom      
+                                                  set.
+        train.py                                # File used to train the YOLO model.   
+                     
     arduino/                                    # Arduino-related code     
         sensor_readings_to_bluetooth/           # Folder required to run the Arduino code in the IDE
             sensor_readings_to_bluetooth.ino    # Arduino C++ code for collecting temperature humidity and distance readings. 
@@ -402,16 +408,13 @@ FoodLink/                                       # Project folder containing code
                                                   for too long or if an item has been added to the user inventory).
 
     setup/                                      # Files needed for setup.
+        foodlink_schema.sql                     # Database schema file for importing.
+
         itemDB.py                               # Python script to insert items to item table.
 
         recipeDB.py                             # Inserts recipes into recipe table, recipe ingredients into recipe_items table 
                                                   and recipe utensils and appliance into recipe_tool table.
-
-    ai_model_training_reference/
-        reference.bib                           # Bib file containing full references to the datasets that form the custom      
-                                                  set.
-        train.py                                # File used to train the YOLO model.    
-         
+          
     web_app/                                    # All files and folders for the web app.
         flask_session/                          # Stores flask session data in filesystem.
 
@@ -427,10 +430,6 @@ FoodLink/                                       # Project folder containing code
             js/                                 # Frontend scripts  
                 add_item.js                     # Handles the dynamic checking of item names / barcodes in the database and
                                                   enables the dynamic switching between scanning modes.
-
-                scanner.js                      # Gets the user's permission for access to the camera. Enables dynamic posting of 
-                                                  frames as BLOB data to be analysed in the backend so that items and barcodes can be 
-                                                  identified. Allows for dynamic and efficient switching between scanning scanning modes. 
 
                 inventory.js                    # Handles dynamic inventory operations using AJAX. Dynamically updates, remove and sorts items, as well as highlighting
                                                   items that are soon to expire.
@@ -465,6 +464,10 @@ FoodLink/                                       # Project folder containing code
 
                 reports.js                      # Dynamically fills item table, and  handles sorting of reports. Also allows admins to dynamically assign reports to 
                                                   themselves with override checks.
+                
+                scanner.js                      # Gets the user's permission for access to the camera. Enables dynamic posting of 
+                                                  frames as BLOB data to be analysed in the backend so that items and barcodes can be 
+                                                  identified. Allows for dynamic and efficient switching between scanning scanning modes. 
 
                 select_utensils.js              # Dynamically saves users utensils before redirecting to dashboard
 
@@ -528,6 +531,8 @@ FoodLink/                                       # Project folder containing code
             settings.html                       # All the user profile options
 
             shoppinglist.html                   # Shopping List UI (add/edit/remove/clear items)
+        
+        .env                                    # For storing environment variables.
 
         admin_recipe.py                         # Handles operations performed on the recipe database table when the admin recipe_view page is in use.
 
@@ -600,4 +605,4 @@ Ultralytics Library for YOLO object recognition: https://github.com/ultralytics/
 
 Roboflow Universe for data sets: https://universe.roboflow.com/
 
-Arduino script and feedback.py adapted sections of code from the IoT Lab Book: https://gitlab.com/IOTGarage/iot-lab-book
+Arduino script, feedback.py and thingsboard.py adapted sections of code from the IoT Lab Book: https://gitlab.com/IOTGarage/iot-lab-book

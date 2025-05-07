@@ -58,7 +58,7 @@ atexit.register(close_connection)
 
 ### for loading environment variables
 from dotenv import load_dotenv
-from os import getenv as get_dotenv
+from os import getenv
 load_dotenv()
 
 # Import database and user model
@@ -71,19 +71,19 @@ app.config['SESSION_FILE_DIR'] = "/tmp/flask_session"
 Session(app)
 
 # Configuration
-app.config['SECRET_KEY'] = get_dotenv('SECRET_KEY', 'dev_key_for_testing')
+app.config['SECRET_KEY'] = getenv('SECRET_KEY', 'dev_key_for_testing')
 app.config['SQLALCHEMY_DATABASE_URI'] = (
-    f"mysql+pymysql://{get_dotenv('DB_USER')}:{get_dotenv('DB_PASS')}@{get_dotenv('DB_HOST')}/{get_dotenv('DB_NAME')}"
+    f"mysql+pymysql://{getenv('DB_USER')}:{getenv('DB_PASS')}@{getenv('DB_HOST')}/{getenv('DB_NAME')}"
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Email configuration
-app.config['MAIL_SERVER'] = get_dotenv('MAIL_SERVER')
-app.config['MAIL_PORT'] = int(get_dotenv('MAIL_PORT', 587))
-app.config['MAIL_USE_TLS'] = get_dotenv('MAIL_USE_TLS', 'True') == 'True'
-app.config['MAIL_USERNAME'] = get_dotenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = get_dotenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = get_dotenv('MAIL_DEFAULT_SENDER')
+app.config['MAIL_SERVER'] = getenv('MAIL_SERVER')
+app.config['MAIL_PORT'] = int(getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = getenv('MAIL_USE_TLS', 'True') == 'True'
+app.config['MAIL_USERNAME'] = getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = getenv('MAIL_DEFAULT_SENDER')
 mail = Mail(app)
 
 # Import and register the settings blueprint (i'm sorry it wasnt me :( )
@@ -539,8 +539,8 @@ def settings_page():
 @user_only
 def dashboard():
     # display realtime temperature and humidity sensor data
-    temp_url = get_dotenv("TEMP_DASHBOARD_URL")
-    humid_url = get_dotenv("HUMID_DASHBOARD_URL")
+    temp_url = getenv("TEMP_DASHBOARD_URL")
+    humid_url = getenv("HUMID_DASHBOARD_URL")
 
     return render_template('index.html', temp_url=temp_url, humid_url = humid_url)
 
@@ -1759,7 +1759,7 @@ def get_recipe(recipe_id):
 
     recipe_processing.calculate_missing_tools(recipe_object, user_tool_ids)
 
-    result = recipe_processing.find_items_in_inventory(recipe_object, user_id)
+    result = recipe_processing.find_items_in_inventory(recipe_object, user_id, missing_allowed=True, insufficient_allowed=True)
     if not result.get("success"):
         return jsonify(result), 500
     

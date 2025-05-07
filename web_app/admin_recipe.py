@@ -3,6 +3,12 @@ import logging
 
 # Retrieve all system (admin-only) recipes, i.e., those not linked to a user
 def get_all():
+    """
+    Retrieves all system-level (admin-only) recipes.
+
+    Returns:
+        dict: A dictionary with the result of the operation. If successful, includes a list of recipes.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -19,6 +25,15 @@ def get_all():
 
 # Delete a recipe and all its associated items and tools
 def remove_recipe(id):
+    """
+    Deletes a recipe by ID along with all associated ingredients and tools.
+
+    Args:
+        id (int): ID of the recipe to delete.
+
+    Returns:
+        dict: Result status with success or error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -49,6 +64,21 @@ def remove_recipe(id):
 
 # Update a recipe’s core information
 def update_recipe(recipe_id, name, serv, prep, cook, instructions, user_id = None):
+    """
+    Updates core recipe fields.
+
+    Args:
+        recipe_id (int): ID of the recipe to update.
+        name (str): Recipe name.
+        serv (int): Number of servings.
+        prep (int): Preparation time in minutes.
+        cook (int): Cooking time in minutes.
+        instructions (str): Step-by-step instructions.
+        user_id (int, optional): Owner user ID (None for admin/system recipe).
+
+    Returns:
+        dict: Success or error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -67,6 +97,20 @@ def update_recipe(recipe_id, name, serv, prep, cook, instructions, user_id = Non
 
 # Add a new recipe (system-level or user-submitted)
 def add_recipe(name, serv, prep, cook, instructions, user_id = None):
+    """
+    Inserts a new recipe.
+
+    Args:
+        name (str): Recipe name.
+        serv (int): Number of servings.
+        prep (int): Preparation time.
+        cook (int): Cooking time.
+        instructions (str): Instructions.
+        user_id (int, optional): User ID if a user-created recipe.
+
+    Returns:
+        dict: Operation result.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -85,6 +129,18 @@ def add_recipe(name, serv, prep, cook, instructions, user_id = None):
 
 # Replace all ingredients for a given recipe
 def update_recipe_ingredients(recipe_id, names, units, quantities):
+    """
+    Replaces all ingredients for a specific recipe.
+
+    Args:
+        recipe_id (int): Recipe ID.
+        names (list of str): Ingredient names.
+        units (list of str): Units of measure.
+        quantities (list of float/int): Quantities.
+
+    Returns:
+        dict: Result status.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -111,6 +167,18 @@ def update_recipe_ingredients(recipe_id, names, units, quantities):
 
 # Add ingredients to a recipe (without deleting existing ones)
 def add_recipe_ingredients(recipe_id, names, units, quantities):
+    """
+    Adds ingredients to a recipe without deleting existing ones.
+
+    Args:
+        recipe_id (int): Recipe ID.
+        names (list): Ingredient names.
+        units (list): Units.
+        quantities (list): Quantities.
+
+    Returns:
+        dict: Result.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -131,6 +199,12 @@ def add_recipe_ingredients(recipe_id, names, units, quantities):
 
 # Get the current maximum recipe ID (useful after adding a new one)
 def get_id():
+    """
+    Gets the current highest recipe ID.
+
+    Returns:
+        dict: Success status and latest recipe ID.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -149,6 +223,16 @@ def get_id():
 
 # Replace all tools required for a given recipe
 def update_recipe_tools(recipe_id, tool_ids):
+    """
+    Replaces all tools used for a recipe.
+
+    Args:
+        recipe_id (int): Recipe ID.
+        tool_ids (list of int): Tool IDs.
+
+    Returns:
+        dict: Operation result.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -175,6 +259,16 @@ def update_recipe_tools(recipe_id, tool_ids):
 
 # Add tools to a recipe (without deleting existing ones)
 def add_recipe_tools(recipe_id, tool_ids):
+    """
+    Adds tools to a recipe without removing existing ones.
+
+    Args:
+        recipe_id (int): Recipe ID.
+        tool_ids (list of int): Tool IDs to add.
+
+    Returns:
+        dict: Operation result.
+    """
     cursor = None
     try:
         cursor = get_cursor()

@@ -1,4 +1,4 @@
-## FoodLink: Smart Fridge Assistant
+# FoodLink: Smart Fridge Assistant
 
 FoodLink is a combined physical and web-based bespoke IoT platform with one main goal: reduce food waste. As an add-on, it provides an affordable and environmentally friendly way for consumers to achieve this goal. 
 
@@ -25,7 +25,7 @@ Technology Stack:
 - **Database** : MariaDB
 - **IoT Integration** : Thingsboard API
 
-Installation:
+# Installation:
 
 ## Prerequisites
 
@@ -108,7 +108,7 @@ EXIT;
 
 ---
 
-## Importing the Database (provided schema)
+### Importing the Database (provided schema)
 
 ```bash
 sudo mariadb -u foodlink_user -p foodlink_db < setup/foodlink_schema.sql
@@ -116,7 +116,7 @@ sudo mariadb -u foodlink_user -p foodlink_db < setup/foodlink_schema.sql
 
 ---
 
-## Ensure MariaDB is Running
+### Ensure MariaDB is Running
 
 ```bash
 sudo systemctl status mariadb
@@ -158,9 +158,8 @@ Visit: `http://localhost:5000` in your browser.
 - Keep your Raspberry Pi connected to ThingsBoard for IoT features
 - Default port is 5000; can be configured in `app.py`
 
-Usage:
 
-### HOW TO NAVIGATE THE WEBSITE AND USE FUNCTIONALITY
+# How to navigate and use the website:
 
 ### 1. Login / Create Account
 
@@ -170,12 +169,14 @@ Create account:
 - Click on the third field to enter a password that fits the format
 - Re-enter the password in the fourth field(same as third field)
 - Click on continue to create the account
+
 Login:
 - Click on the first field to enter your username
 - Click on the second field to enter your password
 - Click on continue to login
 - If you are a new user, click on create account and it will redirect you to the create account page
 - Click forgot password to reset your password
+
 Reset Password:
 - Press forgot password button
 - Click on the first field to enter the email of the account you want to reset password on
@@ -187,11 +188,35 @@ Reset Password:
 - Click on continue to confirm the new password
 
 ### 2. Email Verification
+- Click on Create Account
+- Enter username, email, password, confirm the password 
+- Once brought to the email verification page, click "Send Verification Code"
+- Check email to receive code
+- Paste code into field in email verification page, click "Verify Code"
 
 ### 3. User Dashboard
 - Click on any button to access that page 
 
 ### 4. Settings
+- Click on the "⚙️" menu on the navigation bar
+
+Notification Settings:
+- Click on the switch buttons to modify notification preferences and types
+- Edit the number field to modify the temperature range settings
+- Click on "Save Preferences" to save changes
+
+My Account Settings:
+- Click on either "Username" or "Name" fields, modify to change them (email is unchangable)
+- Click on "Update Profile" to save changes
+
+Delete Settings:
+- Click on "Delete My Account"
+- Enter account password
+
+Privacy and Security Settings:
+- Enter current password to "Current Password" field
+- Enter new password into "New Password" and "Confirm New Password"
+- Click on "Change Password" to save changes
 
 ### 5. Inventory
 To update an item:
@@ -362,8 +387,15 @@ Add missing/insufficient ingredients to shopping list:
 
 # FoodLink Project Folder Structure
 
+```
 FoodLink/                                       # Project folder containing code for all components of the 
-                                                  system.               
+                                                  system.  
+
+    ai_model_training_reference/
+        reference.bib                           # Bib file containing full references to the datasets that form the custom      
+                                                  set.
+        train.py                                # File used to train the YOLO model.   
+                     
     arduino/                                    # Arduino-related code     
         sensor_readings_to_bluetooth/           # Folder required to run the Arduino code in the IDE
             sensor_readings_to_bluetooth.ino    # Arduino C++ code for collecting temperature humidity and distance readings. 
@@ -376,10 +408,13 @@ FoodLink/                                       # Project folder containing code
                                                   for too long or if an item has been added to the user inventory).
 
     setup/                                      # Files needed for setup.
+        foodlink_schema.sql                     # Database schema file for importing.
+
         itemDB.py                               # Python script to insert items to item table.
 
         recipeDB.py                             # Inserts recipes into recipe table, recipe ingredients into recipe_items table 
                                                   and recipe utensils and appliance into recipe_tool table.
+<<<<<<< HEAD
 
     ai_model_training_reference/
         reference.bib                           # Bib file containing full references to the datasets that form the custom      
@@ -387,6 +422,9 @@ FoodLink/                                       # Project folder containing code
 
         train.py                                # File used to train the YOLO model.    
          
+=======
+          
+>>>>>>> 44b345979ac0e4646373ec8b348c72e2e1768c4c
     web_app/                                    # All files and folders for the web app.
         flask_session/                          # Stores flask session data in filesystem.
 
@@ -406,10 +444,6 @@ FoodLink/                                       # Project folder containing code
             js/                                 # Frontend scripts  
                 add_item.js                     # Handles the dynamic checking of item names / barcodes in the database and
                                                   enables the dynamic switching between scanning modes.
-
-                scanner.js                      # Gets the user's permission for access to the camera. Enables dynamic posting of 
-                                                  frames as BLOB data to be analysed in the backend so that items and barcodes can be 
-                                                  identified. Allows for dynamic and efficient switching between scanning scanning modes. 
 
                 inventory.js                    # Handles dynamic inventory operations using AJAX. Dynamically updates, remove and sorts items, as well as highlighting
                                                   items that are soon to expire.
@@ -444,6 +478,10 @@ FoodLink/                                       # Project folder containing code
 
                 reports.js                      # Dynamically fills item table, and  handles sorting of reports. Also allows admins to dynamically assign reports to 
                                                   themselves with override checks.
+                
+                scanner.js                      # Gets the user's permission for access to the camera. Enables dynamic posting of 
+                                                  frames as BLOB data to be analysed in the backend so that items and barcodes can be 
+                                                  identified. Allows for dynamic and efficient switching between scanning scanning modes. 
 
                 select_utensils.js              # Dynamically saves users utensils before redirecting to dashboard
 
@@ -507,6 +545,8 @@ FoodLink/                                       # Project folder containing code
             settings.html                       # All the user profile options
 
             shoppinglist.html                   # Shopping List UI (add/edit/remove/clear items)
+        
+        .env                                    # For storing environment variables.
 
         admin_recipe.py                         # Handles operations performed on the recipe database table when the admin recipe_view page is in use.
 
@@ -552,7 +592,7 @@ FoodLink/                                       # Project folder containing code
         report.py                               # Handles SQL operations for item errors: adding user report of an item, admin get all, find duplicate and remove report
                                                   (after resolving), admins can assign a report to themselves (with override checks)
 
-        requirements.txt                        # Python dependecies
+        requirements.txt                        # Python dependencies
 
         scanner.py                              # Processes users camera feed as a video and scans each frame using a barcode reader or AI object recogniser based on the
                                                   mode.
@@ -571,6 +611,7 @@ FoodLink/                                       # Project folder containing code
         tool.py                                 # Handles tool SQL commands (CRUD)
 
     README.md                                   # Project README file (this file)
+```
 
 ## References
 
@@ -578,4 +619,4 @@ Ultralytics Library for YOLO object recognition: https://github.com/ultralytics/
 
 Roboflow Universe for data sets: https://universe.roboflow.com/
 
-Arduino script and feedback.py adapted sections of code from the IoT Lab Book: https://gitlab.com/IOTGarage/iot-lab-book
+Arduino script, feedback.py and thingsboard.py adapted sections of code from the IoT Lab Book: https://gitlab.com/IOTGarage/iot-lab-book

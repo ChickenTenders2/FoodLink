@@ -98,38 +98,47 @@ def alarm():
     setText(x)
 
 if __name__=="__main__":
-        
-        # ID of the device (used to connect to ThingsBoard).
-        device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
-        start_time = time.time()
-        
-        # The distance measured by the ultrasonic sensor when the door is closed.
-        # Needs to be altered depending on the fridge model. 
-        door_to_wall = 10
     
-        last_time = ""
+    # ID of the device (used to connect to ThingsBoard).
+    device_id = "15b7a650-0b03-11f0-8ef6-c9c91908b9e2"
+    start_time = time.time()
+    
+    # The distance measured by the ultrasonic sensor when the door is closed.
+    # Needs to be altered depending on the fridge model. 
+    door_to_wall = 10
 
-        buzzer = 8
+    last_time = ""
 
-        countdown = False
+    buzzer = 4
 
-        grovepi.pinMode(buzzer, "output")
-        grovepi.set_bus("RPI_1")
+    countdown = False
 
-        if sys.platform == 'uwp':
-            import winrt_smbus as smbus
+    grovepi.pinMode(buzzer, "output")
+    grovepi.set_bus("RPI_1")
+
+    if sys.platform == 'uwp':
+        import winrt_smbus as smbus
+        bus = smbus.SMBus(1)
+    else:
+        import smbus
+        import RPi.GPIO as GPIO
+        rev = GPIO.RPI_REVISION
+        if rev == 2 or rev == 3:
             bus = smbus.SMBus(1)
         else:
-            import smbus
-            import RPi.GPIO as GPIO
-            rev = GPIO.RPI_REVISION
-            if rev == 2 or rev == 3:
-                bus = smbus.SMBus(1)
-            else:
-                bus = smbus.SMBus(0)
+            bus = smbus.SMBus(0)
 
-        DISPLAY_TEXT_ADDR = 0x3e
+    DISPLAY_TEXT_ADDR = 0x3e
 
+    
+    token = get_jwt_token()
+    x = 'FOODLINK'
+    setText(x)
+
+    countdown = False
+    delay = 120
+    
+    while True:
         
         token = get_jwt_token()
         x = 'FOODLINK'
@@ -173,5 +182,5 @@ if __name__=="__main__":
          except KeyboardInterrupt:
             print ("Terminated.")
             os._exit(0)
-                
+            
 

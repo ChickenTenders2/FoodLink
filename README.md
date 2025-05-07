@@ -414,7 +414,6 @@ FoodLink/                                       # Project folder containing code
 
         recipeDB.py                             # Inserts recipes into recipe table, recipe ingredients into recipe_items table 
                                                   and recipe utensils and appliance into recipe_tool table.
-<<<<<<< HEAD
 
     ai_model_training_reference/
         reference.bib                           # Bib file containing full references to the datasets that form the custom      
@@ -422,9 +421,6 @@ FoodLink/                                       # Project folder containing code
 
         train.py                                # File used to train the YOLO model.    
          
-=======
-          
->>>>>>> 44b345979ac0e4646373ec8b348c72e2e1768c4c
     web_app/                                    # All files and folders for the web app.
         flask_session/                          # Stores flask session data in filesystem.
 
@@ -436,7 +432,9 @@ FoodLink/                                       # Project folder containing code
                 2.jpg                           # etc...    
 
                 3.jpg
+
                 ...
+                
                 notification_bell.png           # Notification icon 
                   
                 null.jpg                        # Placeholder image if item doesn't have one

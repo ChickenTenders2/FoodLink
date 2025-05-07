@@ -1,4 +1,7 @@
-// Function to fetch notifications from the server and update the UI
+/**
+ * Fetches notifications from the server and updates the UI.
+ * Displays unread notification count and hides read notifications.
+ */
 function fetchNotifications() {
     const list = document.getElementById('notification-list');
     const badge = document.getElementById('notification-badge');
@@ -48,7 +51,10 @@ function fetchNotifications() {
 }
 
 
-// Event listener when the DOM is fully loaded
+/**
+ * Event listener that runs once the DOM is fully loaded.
+ * Initializes notification popup toggle, hides ThingsBoard footer, and starts auto-refresh.
+ */
 document.addEventListener("DOMContentLoaded", function () { 
     const popup = document.getElementById('notification-popup'); 
     const icon = document.getElementById('notification-icon');
@@ -84,7 +90,11 @@ document.addEventListener("DOMContentLoaded", function () {
     setInterval(fetchNotifications, 30000);
 });
 
-// Function to mark a notification as read
+/**
+ * Marks a single notification as read and updates UI and badge count.
+ * 
+ * @param {HTMLElement} elem - The notification list item element that was clicked.
+ */
 function markRead(elem) {
     const notifId = elem.getAttribute('data-id');
     // Send request to mark the notification as read

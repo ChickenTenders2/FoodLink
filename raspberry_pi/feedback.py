@@ -162,7 +162,7 @@ if __name__=="__main__":
             
            last_time = time_stamp
           
-          # Triggers the alarm if the door is left open for two minutes.
+          # Triggers the alarm if the door is left open for 30 seconds.
           if time.time() - start_time >= delay and countdown:
             alarm()
                 

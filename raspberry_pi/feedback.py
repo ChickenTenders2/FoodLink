@@ -3,9 +3,6 @@ import requests
 import sys
 import os
 import grovepi
-import math
-import json
-
 
 # The following 2 LCD functions are adapted from the IoT Lab Code:
 
@@ -133,12 +130,12 @@ if __name__=="__main__":
     setText(x)
 
     countdown = False
+    delay = 120
     
     while True:
           
         try:
              
-          delay = 120
           data = get_telemetry(token, device_id)
           if data:
             distance = float(data['distance'][0]['value'])
@@ -172,5 +169,3 @@ if __name__=="__main__":
         except KeyboardInterrupt:
             print ("Terminated.")
             os._exit(0)
-            
-

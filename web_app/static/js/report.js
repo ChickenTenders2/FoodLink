@@ -1,3 +1,18 @@
+/**
+ * Fills form fields with item data (used for new or original item).
+ * Supports both the new and original item form layouts by prefixing field IDs.
+ * 
+ * @param {number|string} id - Item ID.
+ * @param {string} barcode - Barcode of the item.
+ * @param {string} name - Item name.
+ * @param {string} brand - Item brand.
+ * @param {number} days - Expiry day.
+ * @param {number} months - Expiry month.
+ * @param {number} years - Expiry year.
+ * @param {number} default_quantity - Default quantity for item.
+ * @param {string} unit - Unit of measurement (e.g., grams, pieces).
+ * @param {boolean} original - Whether this is the original item being filled (adds ID prefix).
+ */
 async function fill_item(id, barcode, name, brand, days, months, years, default_quantity, unit, original=false) {
     let id_text = "";
     if (original) {
@@ -15,6 +30,12 @@ async function fill_item(id, barcode, name, brand, days, months, years, default_
     document.getElementById(id_text + "unit").value = unit;
 }
 
+/**
+ * Fetches item data by ID from the server and fills the form using `fill_item`.
+ * 
+ * @param {string|number} id - The item ID.
+ * @param {boolean} original - Whether this is the original item (used for comparison).
+ */
 async function get_item(id, original = false) {
     // Searches for item by barcode and awaits result
     const response = await fetch('/items/get_item/'+ id);               
@@ -30,17 +51,28 @@ async function get_item(id, original = false) {
     }
 }
 
-// Function to update the UI for a missing item report
+/**
+ * Updates the UI for missing item reports by hiding the original item section
+ * and updating the heading for the new item.
+ */
 function set_missing_report() {
     document.getElementById("original_item").style.display = "none";
     document.getElementById("new_item_heading").innerHTML = "Missing Item Information";
 }
 
-// Function to set the selected report action (e.g., approve, deny) in a hidden input
+/**
+ * Sets the selected admin action (approve/deny) into a hidden input field.
+ * 
+ * @param {string} action - The selected action value (e.g., "approve", "deny").
+ */
 function set_action(action) {
     document.getElementById("report_action").value = action;
 }
 
+/**
+ * Page load event handler to fetch and display both new and original item data.
+ * Detects if the report is for a missing item or correction.
+ */
 window.onload = async function() {
     // Get the new item ID from the form/input
     const new_item_id = document.getElementById("new_item_id").value;
@@ -57,6 +89,11 @@ window.onload = async function() {
     }
 }
 
+/**
+ * Submits the resolution of a report (approve or deny) to the server.
+ * 
+ * @param {Event} event - The form submission event.
+ */
 async function resolve_report(event) {
     // Prevent the form from submitting normally
     event.preventDefault(); 

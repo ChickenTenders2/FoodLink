@@ -1,5 +1,8 @@
 
-// hides the utensils checkboxes and shows appliances
+/**
+ * Switches the view from utensils to appliances.
+ * Hides the "Next" button and shows "Back" and "Save" buttons.
+ */
 function showAppliances() {
     document.getElementById("utensils").style.display = "none";
     document.getElementById("appliances").style.display = "block";
@@ -7,7 +10,11 @@ function showAppliances() {
     document.getElementById("backButton").style.display = "inline";
     document.getElementById("saveButton").style.display = "inline";
 }
-// hides the appliances checkboxes and shows utensils
+
+/**
+ * Switches the view from appliances back to utensils.
+ * Hides the "Back" and "Save" buttons and shows "Next".
+ */
 function showUtensils() {
     document.getElementById("appliances").style.display = "none";
     document.getElementById("utensils").style.display = "block";
@@ -15,7 +22,11 @@ function showUtensils() {
     document.getElementById("backButton").style.display = "none";
     document.getElementById("saveButton").style.display = "none";
 }
-// Handles submission of the tool selection form (utensils/appliances)
+
+/**
+ * Handles submission of the utensils/appliances selection form.
+ * Sends selected tools to the server and redirects to dashboard on success.
+ */
 document.getElementById("tool-form").addEventListener("submit", async function(e) {
     e.preventDefault();
     
@@ -38,7 +49,13 @@ document.getElementById("tool-form").addEventListener("submit", async function(e
         showToast(result.message, false);
     }
 });
-// Function to display a toast notification
+
+/**
+ * Displays a temporary toast message to indicate success or failure.
+ * 
+ * @param {string} message - The message to display.
+ * @param {boolean} isSuccess - Whether the toast indicates success (true) or error (false).
+ */
 function showToast(message, isSuccess = true) {
     const toast = document.getElementById("toast");
     toast.innerText = message;

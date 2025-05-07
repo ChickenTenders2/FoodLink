@@ -1,9 +1,19 @@
+/**
+ * Opens the popup form and fills in the barcode number.
+ * Also stops any background checks (e.g., scanner polling).
+ * 
+ * @param {string} barcode_number - The barcode to populate into the form.
+ */
 function open_popup(barcode_number) {
     stop_check();
     document.getElementById('barcode').value = barcode_number;
     document.getElementById('popup').style.display = 'block';
 }
 
+/**
+ * Closes the popup form and clears all form fields.
+ * Also restarts any background checks (e.g., scanner polling).
+ */
 function close_popup() {
     start_check();
     document.getElementById('popup').style.display = 'none';
@@ -17,11 +27,23 @@ function close_popup() {
     document.getElementById("item_image").value = null;
 }
 
+/**
+ * Triggers the popup form when a barcode is successfully scanned.
+ * 
+ * @param {string} barcode - The scanned barcode value.
+ */
 // Opens popup to add item information once barcode is scanned succesfully
 function process_barcode(barcode) {
     open_popup(barcode);
 }
 
+/**
+ * Submits the add item form using Fetch API (AJAX).
+ * Validates expiry date before sending.
+ * Displays alert messages based on the result.
+ * 
+ * @param {Event} event - The form submit event.
+ */
 // Adds item to item table
 async function add_item(event) {
     // Prevent the form from submitting normally
@@ -54,6 +76,12 @@ async function add_item(event) {
     }
 }
 
+
+/**
+ * Validates that the entered expiry date is not all zeros (00/00/0000).
+ * 
+ * @returns {boolean} - True if expiry date is valid (not all zero), false otherwise.
+ */
 // Returns if expiry time is more than a day
 function valid_expiry() {
     const day = parseInt(document.getElementById("expiry_day").value);

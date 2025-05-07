@@ -17,6 +17,17 @@ create_connection = lambda: mariadb.connect(
 connection = create_connection()
 
 def get_connection():
+    """
+    Returns a valid MariaDB connection object.
+    Checks if the current connection is alive using .ping().
+    If not, attempts to reconnect and logs the process.
+    
+    Raises:
+        Exception: If reconnection fails.
+    
+    Returns:
+        mariadb.Connection: Active MariaDB connection.
+    """
     global connection
     try:
         connection.ping()
@@ -32,13 +43,27 @@ def get_connection():
     return connection
 
 def get_cursor():
+    """
+    Returns a new cursor from the active database connection.
+    
+    Returns:
+        mariadb.Cursor: New cursor for executing SQL queries.
+    """
     connect = get_connection()
     return connect.cursor()
 
 def commit():
+    """
+    Commits the current transaction to the database.
+    """
     connection.commit()
 
 def safe_rollback():
+    """
+    Attempts to rollback the current transaction.
+    If the connection is lost, tries to reconnect and logs the event.
+    Raises an exception if reconnection fails.
+    """
     global connection
     try:
         connection.rollback()
@@ -55,6 +80,10 @@ def safe_rollback():
         logging.error(f"[ERROR] Rollback failed: {e}")
 
 def close_connection():
+    """
+    Closes the current database connection gracefully.
+    Logs any error encountered during the close operation.
+    """
     global connection
     if connection:
         try:

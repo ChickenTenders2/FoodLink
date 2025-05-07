@@ -206,7 +206,7 @@ Notification Settings:
 - Click on "Save Preferences" to save changes
 
 My Account Settings:
-- Click on either "Username" or "Name" fields, modify to change them (email is unchangable)
+- Click on either "Username" or "Name" fields, modify to change them (email is unchangeable)
 - Click on "Update Profile" to save changes
 
 Delete Settings:
@@ -273,22 +273,22 @@ Text Search:
 - Click the Shopping List tile, or the Shopping List button in the Navigation bar.
 - Click the 'Add Item' button to add items manually by entering the name and quantity.
 - Click 'Add to Shopping List' to add items from suggestions.
-- Mark items as bough by clicking '✔'.
+- Mark items as bought by clicking '✔'.
 - Remove items from list by clicking '🗑' or clicking the 'Clear Shopping List' to clear all items.
 
 ### 9. Notifications
 - Click the 🔔 icon of the top right of the navigation bar to view unread notifications.
-- Notifcation include:
+- Notifications include:
     - Expiring Food
-    - Fidge Temperature/Humidity
+    - Fridge Temperature/Humidity
     - Support messages on reported items
 - Click on notification to mark it as read.
 
 ### 10. Email Notification
-- Enable via settings to recieve notifications when:
+- Enable via settings to receive notifications when:
     - Items are about to expire or have expired.
     - Fridge temperature/humidity is abnormal.
-    - Report has been resolved by admin.
+    - Report has been resolved by an admin.
 
 ### 11. Recipes
 Add a recipe:
@@ -323,12 +323,12 @@ Create a recipe:
 - Select a recipe
 - Click on the create recipe button
 - Change any of the quantity values as needed
-- If subtitutions are required click on the remove button
+- If substitutions are required click on the remove button
 - Click on add from inventory
 - Click on an item which is not already added and in date
-- Follow the last 2 steps for any additional ingredients aswell
+- Follow the last 2 steps for any additional ingredients as well
 - Update the quantity inputs of each to match the amount used
-- Click on update inventory to update quantites and remove any fully used items
+- Click on update inventory to update quantities and remove any fully used items
 
 Filter and search recipes:
 - Enter the search term
@@ -361,10 +361,10 @@ Add missing/insufficient ingredients to shopping list:
     - Click edit in the item to edit it
     - Click delete to delete an icon
     
-### 14. Recipe Managemnt (Admin Only)
+### 14. Recipe Management (Admin Only)
 - Sign in as admin
 - Click View recipe table button to view all recipes
-- CLick add to add a recipe
+- Click add to add a recipe
     - Add the name, instructions
     - Add ingredient, tools
 - Click edit in a recipe to edit it
@@ -398,7 +398,7 @@ FoodLink/                                       # Project folder containing code
                      
     arduino/                                    # Arduino-related code     
         sensor_readings_to_bluetooth/           # Folder required to run the Arduino code in the IDE
-            sensor_readings_to_bluetooth.ino    # Arduino C++ code for collecting temperature humidity and distance readings. 
+            sensor_readings_to_bluetooth.ino    # Arduino C++ code for collecting temperature/humidity and distance readings. 
                                                   These are sent to the Pi in JSON string form using Bluetooth so that they are 
                                                   ready to be sent to ThingsBoard.
 
@@ -410,10 +410,10 @@ FoodLink/                                       # Project folder containing code
     setup/                                      # Files needed for setup.
         foodlink_schema.sql                     # Database schema file for importing.
 
-        itemDB.py                               # Python script to insert items to item table.
+        itemDB.py                               # Python script to insert items into the item table.
 
         recipeDB.py                             # Inserts recipes into recipe table, recipe ingredients into recipe_items table 
-                                                  and recipe utensils and appliance into recipe_tool table.
+                                                  and recipe utensils and appliances into recipe_tool table.
 
     ai_model_training_reference/
         reference.bib                           # Bib file containing full references to the datasets that form the custom      
@@ -459,13 +459,12 @@ FoodLink/                                       # Project folder containing code
                 navbar.js                       # Collapses the navigation bar when the screen is minimised.
 
                 notification.js                 # Handles the dynamic updating of the notification popup, updates number of 
-                                                  unread notification in badge, chnages notification style when marked as read.
+                                                  unread notification in badge, changes notification style when marked as read.
 
                 recipes.js                      # Handles all dynamic features of recipes: adding a recipe, cloning a public recipe, edit personal (with cancel edit    
-                                                  button) and removing a personal recipe. Allows for filters to be applied and seperates recipes by pages. Allows users 
+                                                  button) and removing a personal recipe. Allows for filters to be applied and separates recipes by pages. Allows users 
                                                   to modify ingredient quantities, substitute ingredients and add additional ingredients before dynamically updating inventory. 
-                                                  Dynamically adds missing/insufficient ingredients to the shopping list with options to change the quantity or remove ingredients 
-                                                  that will be addded.
+                                                  Dynamically adds missing/insufficient ingredients to the shopping list with options to change the quantity or remove ingredients that will be added.
 
                 recipe_view.js                  # As with item_view.js this file handles the dynamic popup forms and transmission 
                                                   of data between the front and back end AJAX (GET/POST) requests for efficient recipe 
@@ -505,14 +504,14 @@ FoodLink/                                       # Project folder containing code
 
             admin_update_password.html          # HTML layout for ad admin to change their password
 
-            base.html                           # Base layout used across all templates (navigation bar, contianer for flash 
+            base.html                           # Base layout used across all templates (navigation bar, container for flash 
                                                   messages, js scripts, styling sheets)
 
             createAccount.html                  # Form to input sign up information with button to create account
 
             email_verification.html             # Options to send and enter email verification code
 
-            index.html                          # User dashboard (diplays temp/humidity real time data, tiles to navigate to 
+            index.html                          # User dashboard (display temp/humidity real time data, tiles to navigate to 
                                                   inventory, shopping list and recipes)
 
             inventory.html                      # Container for all items and form for searching applying filters
@@ -552,9 +551,8 @@ FoodLink/                                       # Project folder containing code
 
         app.py                                  # Main Flask app entry point. Docstrings, aided by comments explain the purpose of each function.
 
-        database.py                             # Connects to the database using the envrionment variables set and acts as a single point to connect to the database (
-                                                  for all sql commands using mariadb connector). Auto-reconnects on connection loss and handles rollbacks safely. on execute failure. 
-                                                  Handles closing connection when server stops so connections don't build up on the database.
+        database.py                             # Connects to the database using the environment variables set and acts as a single point to connect to the database 
+                                                  (for all sql commands using mariadb connector). Auto-reconnects on connection loss and handles rollbacks safely on execute failure. Handles closing connection when server stops so connections don't build up on the database.
                                     
         Dockerfile                              # Docker file which includes specifications required for deployment to OpenShift.
                                                   
@@ -571,7 +569,7 @@ FoodLink/                                       # Project folder containing code
 
         inventory.py                            # Handles basic CRUD sql commands for a users inventory, html form processing for adding an item to inventory,
                                                   formatting of expiry date for the front end, and more advanced sql commands: 
-                                                  strict_search (used in recipe proccesing):         finds an item which is the best match for an ingredient
+                                                  strict_search (used in recipe processing):         finds an item which is the best match for an ingredient
                                                   correct_personal_item (used in resolving reports): replaces a users personal item (with quantity checks) if their 
                                                                                                      report gets approved.
                                                   
@@ -599,12 +597,12 @@ FoodLink/                                       # Project folder containing code
                                                   that control account details and notification preferences. Made through Flask's Blueprint, MethodView,
                                                   Flask Login, and werkzeug.security for password hashing.
 
-        shopping.py                             # Handle sql commands for adding, updating removing and clearing items. Splits the list into 3 sections: Sugested Items, 
+        shopping.py                             # Handle sql commands for adding, updating removing and clearing items. Splits the list into 3 sections: Suggested Items, 
                                                   Shopping List and Bought Items.
 
         success.py                              # Publishes a message with the value 'Added' to ThingsBoard over secure MQTT using the tb_mqtt_client library. 
         
-        thingsboard.py                          # Connect to Thingsboard using JWT tokens and fetching temperature/humidity data from telemtry.
+        thingsboard.py                          # Connect to Thingsboard using JWT tokens and fetching temperature/humidity data from telemetry.
         
         tool.py                                 # Handles tool SQL commands (CRUD)
 
@@ -618,3 +616,4 @@ Ultralytics Library for YOLO object recognition: https://github.com/ultralytics/
 Roboflow Universe for data sets: https://universe.roboflow.com/
 
 Arduino script, feedback.py and thingsboard.py adapted sections of code from the IoT Lab Book: https://gitlab.com/IOTGarage/iot-lab-book
+

@@ -188,15 +188,33 @@ Reset Password:
 ### 2. Email Verification
 - Click on Create Account
 - Enter username, email, password, confirm the password 
-- Once brought to the email verification page, press "Send Verification Code"
+- Once brought to the email verification page, click "Send Verification Code"
 - Check email to receive code
-- Paste code into field in email verification page, press "Verify Code"
+- Paste code into field in email verification page, click "Verify Code"
 
 ### 3. User Dashboard
 - Click on any button to access that page 
 
 ### 4. Settings
 - Click on the "⚙️" menu on the navigation bar
+
+Notification Settings
+- Click on the switch buttons to modify notification preferences and types
+- Edit the number field to modify the temperature range settings
+- Click on "Save Preferences" to save changes
+
+My Account Settings
+- Click on either "Username" or "Name" fields, modify to change them (email is unchangable)
+- Click on "Update Profile" to save changes
+
+Delete Settings
+- Click on "Delete My Account"
+- Enter account password
+
+Privacy and Security Settings
+- Enter current password to "Current Password" field
+- Enter new password into "New Password" and "Confirm New Password"
+- Click on "Change Password" to save changes
 
 ### 5. Inventory
 To update an item:

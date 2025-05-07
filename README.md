@@ -463,7 +463,7 @@ FoodLink/                                       # Project folder containing code
 
                 recipes.js                      # Handles all dynamic features of recipes: adding a recipe, cloning a public recipe, edit personal (with cancel edit    
                                                   button) and removing a personal recipe. Allows for filters to be applied and separates recipes by pages. Allows users 
-                                                  to modify ingredient quantities, substitute ingredients and add additional ingredients before dynamically updating inventory. 
+                                                  to modify ingredient quantities, substitute ingredients and add additional ingredients before dynamically updating inventory.
                                                   Dynamically adds missing/insufficient ingredients to the shopping list with options to change the quantity or remove ingredients that will be added.
 
                 recipe_view.js                  # As with item_view.js this file handles the dynamic popup forms and transmission 
@@ -552,7 +552,9 @@ FoodLink/                                       # Project folder containing code
         app.py                                  # Main Flask app entry point. Docstrings, aided by comments explain the purpose of each function.
 
         database.py                             # Connects to the database using the environment variables set and acts as a single point to connect to the database 
-                                                  (for all sql commands using mariadb connector). Auto-reconnects on connection loss and handles rollbacks safely on execute failure. Handles closing connection when server stops so connections don't build up on the database.
+                                                  (for all sql commands using mariadb connector). 
+                                                  Auto-reconnects on connection loss and handles rollbacks safely on execute failure. 
+                                                  Handles closing connection when server stops so connections don't build up on the database.
                                     
         Dockerfile                              # Docker file which includes specifications required for deployment to OpenShift.
                                                   

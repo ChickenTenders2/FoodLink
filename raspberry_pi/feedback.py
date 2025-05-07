@@ -6,11 +6,14 @@ import grovepi
 import math
 import json
 
+
+# The following 2 LCD functions are adapted from the IoT Lab Code:
+
 # Send command to display.   
 def textCommand(cmd):
     bus.write_byte_data(DISPLAY_TEXT_ADDR,0x80,cmd)
  
-# Set the display text \n for second line so that the text can wrap automatically.    
+# Set the display text \n for second line so that the text can wrap automatically. 
 def setText(text):
     #Clears the display
     textCommand(0x01)
@@ -108,6 +111,8 @@ if __name__=="__main__":
 
         buzzer = 8
 
+        countdown = False
+
         grovepi.pinMode(buzzer, "output")
         grovepi.set_bus("RPI_1")
 
@@ -138,6 +143,12 @@ if __name__=="__main__":
           data = get_telemetry(token, device_id)
           if data:
             distance = float(data['distance'][0]['value'])
+            if distance > door_to_wall:
+                if not countdown:
+                    countdown = True
+                    start_time = time.time()
+            else:
+                countdown = False
           
           # If a new message (new timestamp) is recieved from ThingsBoard 
           # then the display is updated for 5 seconds (when an item is added
@@ -156,10 +167,8 @@ if __name__=="__main__":
            last_time = time_stamp
           
           # Triggers the alarm if the door is left open for two minutes.
-          if time.time() - start_time >= delay:
-            if distance > door_to_wall:
-                alarm()
-            start_time = time.time()
+          if time.time() - start_time >= delay and countdown:
+            alarm()
                 
          except KeyboardInterrupt:
             print ("Terminated.")

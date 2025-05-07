@@ -1,4 +1,12 @@
-// Opens item information popup
+/**
+ * Opens the item edit popup with pre-filled values.
+ * 
+ * @param {string} itemName - Name of the item.
+ * @param {number} quantity - Current quantity in inventory.
+ * @param {number} default_quantity - Max allowable quantity.
+ * @param {string} expiry_date - Expiry date in YYYY-MM-DD format.
+ * @param {number} inventory_id - ID of the inventory record.
+ */
 function open_popup(itemName, quantity, default_quantity, expiry_date, inventory_id) {
     // Sets values in popup to those of the item
     document.getElementById('popup-title').innerText = `Edit ${itemName}`;
@@ -14,12 +22,21 @@ function open_popup(itemName, quantity, default_quantity, expiry_date, inventory
     document.getElementById('popup').style.display = 'block';
 }
 
-// Closes item information popup
+
+/**
+ * Closes the item popup without making changes.
+ */
 function close_popup() {
     document.getElementById('popup').style.display = 'none';
 }
 
-// Updates item in inventory
+
+/**
+ * Submits updated quantity or expiry for an inventory item.
+ * Only submits if actual changes were made.
+ * 
+ * @param {Event} event - Form submission event.
+ */
 async function submit_update(event) {
     // Prevent the form from submitting normally
     event.preventDefault(); 
@@ -63,13 +80,16 @@ async function submit_update(event) {
     }    
 }
 
-// gets inventory once html is loaded
+/**
+ * Loads inventory when the page is first loaded.
+ */
 window.addEventListener('DOMContentLoaded', () => {
   fetchInventory();
 });
 
-// fixes error were adding an item and then pressing back doesnt reflect update
-// everytime page is shown
+/**
+ * Reloads inventory if the page was restored from cache.
+ */
 window.addEventListener('pageshow', (event) => {
   // if page was loaded from cache instead of properly reloaded
   if (event.persisted) {
@@ -78,12 +98,17 @@ window.addEventListener('pageshow', (event) => {
   }
 });
 
-// fetches inventory after search term is applied
+/**
+ * Re-fetches inventory when the filter form is submitted.
+ */
 document.getElementById('filter-form').addEventListener('submit', function (e) {
   e.preventDefault();
   fetchInventory();
 });
 
+/**
+ * Fetches inventory items from the server and displays them as tiles.
+ */
 async function fetchInventory() {
     // Use empty string or default value if undefined or null
     const searchParam = document.getElementById('search-input').value || '';
@@ -108,7 +133,12 @@ async function fetchInventory() {
     }
   }
 
-// takes an item and creates a tile to be used in the inventory container
+/**
+ * Builds an inventory tile element from item data.
+ * 
+ * @param {HTMLElement} tile - The tile DOM element to populate.
+ * @param {Array} item - Array of item data.
+ */
 async function fill_tile(tile, item) {
   // extracts item attributes
   const [inv_id, item_id, name, , quantity, , expiry_date, default_quantity, ] = item;
@@ -137,6 +167,12 @@ async function fill_tile(tile, item) {
   return tile;
 }
 
+/**
+ * Calculates the number of days remaining until expiry.
+ * 
+ * @param {string} expiry_date - Expiry date in YYYY-MM-DD format.
+ * @returns {number} - Days left (can be negative).
+ */
 function calculate_days_Left(expiry_date) {
   const today = new Date();
   const expiry = new Date(expiry_date);
@@ -150,7 +186,12 @@ function calculate_days_Left(expiry_date) {
   return Math.round((expiry - today) / day_ms);
 }
 
-// moved sort to client side to reduce server load
+/**
+ * Sorts inventory items client-side based on selected method.
+ * 
+ * @param {Array} items - Array of item arrays.
+ * @param {string} sort - Sort criteria ('name' or 'expiry').
+ */
 function sort_items(items, sort) {
   // sort by name a>z
   if (sort == "name") {
@@ -170,7 +211,10 @@ function sort_items(items, sort) {
   }
 }
 
-// Deletes an item from inventory
+/**
+ * Sends a request to delete an item from the inventory.
+ * Removes the tile from the DOM on success.
+ */
 async function removeItem() {
     const inventoryId = document.getElementById('inventory-id').value;
     const formData = new FormData();
@@ -193,7 +237,11 @@ async function removeItem() {
     }
 }
 
-// Displays a temporary toast message
+/**
+ * Displays a short toast message for feedback.
+ * 
+ * @param {string} message - The message to display.
+ */
 function showToast(message) {
     const toast = document.getElementById("toast");
     toast.innerText = message;

@@ -4,6 +4,25 @@ import uuid
 from tb_device_mqtt import TBDeviceMqttClient, TBPublishInfo
 
 def send_success_alert():
+    """
+    Sends a "success" telemetry message to ThingsBoard.
+
+    This function:
+    - Generates a unique client ID using UUID.
+    - Creates a timestamped telemetry payload with the message "Added".
+    - Connects to the ThingsBoard server via MQTT.
+    - Sends the telemetry data.
+    - Logs whether the send was successful or not.
+    - Ensures the client is disconnected after the attempt.
+
+    Logging:
+        - Success or failure of the telemetry send.
+        - Any exceptions encountered during the process.
+
+    Note:
+        - Uses hardcoded ThingsBoard server URL and device access token.
+        - Uses a new MQTT client instance for each call to avoid conflicts.
+    """
     # Unique id is generated every time a connection is established.
     unique_id = str(uuid.uuid4())
 

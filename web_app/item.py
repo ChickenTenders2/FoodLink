@@ -9,6 +9,14 @@ from math import ceil
 ##### ADMIN ONLY FUNCTIONS
 
 def get_page(page):
+    """Fetches a paginated list of global (admin) items.
+
+    Args:
+        page (int): Page number starting from 0.
+
+    Returns:
+        dict: Success status and list of items or error message.
+    """
     cursor = None
     limit = 30
     try:
@@ -30,6 +38,11 @@ def get_page(page):
             cursor.close()
 
 def get_max_page():
+    """Returns the maximum page number for global items based on a page size of 30.
+
+    Returns:
+        dict: Success status and max page number or error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -48,6 +61,14 @@ def get_max_page():
             cursor.close()
 
 def get_item(item_id):
+    """Fetches a specific item by ID.
+
+    Args:
+        item_id (int): The item ID to retrieve.
+
+    Returns:
+        dict: Success status and item details or error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -64,6 +85,14 @@ def get_item(item_id):
             cursor.close()
 
 def get_item_from_name(name):
+    """Performs a case-insensitive search for items matching a given name.
+
+    Args:
+        name (str): The item name to search.
+
+    Returns:
+        dict: Success status and matching items or error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -80,6 +109,14 @@ def get_item_from_name(name):
             cursor.close()
 
 def get_default_quantity(item_id):
+    """Fetches the default quantity value for an item.
+
+    Args:
+        item_id (int): ID of the item.
+
+    Returns:
+        dict: Success status and quantity or error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -100,6 +137,15 @@ def get_default_quantity(item_id):
 ##### USER + ADMIN FUNCTIONS
             
 def get_personal(user_id):
+    """
+    Retrieves all items added by a specific user.
+
+    Args:
+        user_id (int): ID of the user.
+
+    Returns:
+        dict: Contains success status and either a list of items or an error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -117,6 +163,16 @@ def get_personal(user_id):
             cursor.close()
 
 def barcode_search(user_id, barcode_number):
+    """
+    Searches for an item by barcode, prioritizing the user's personal item if it exists.
+
+    Args:
+        user_id (int): ID of the user.
+        barcode_number (str): Barcode number to search for.
+
+    Returns:
+        dict: Contains success status and either the found item or an error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -139,6 +195,16 @@ def barcode_search(user_id, barcode_number):
             cursor.close()
 
 def text_search(user_id, search_term):
+    """
+    Performs a full-text search for items based on the name, returning multiple matches.
+
+    Args:
+        user_id (int): ID of the user.
+        search_term (str): Text to search for in item names.
+
+    Returns:
+        dict: Contains success status and either a list of items or an error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -161,6 +227,16 @@ def text_search(user_id, search_term):
             cursor.close()
 
 def text_single_search(user_id, search_term):
+    """
+    Performs a full-text search for a single item based on the name.
+
+    Args:
+        user_id (int): ID of the user.
+        search_term (str): Text to search for in item names.
+
+    Returns:
+        dict: Contains success status and either a single item or an error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -183,6 +259,21 @@ def text_single_search(user_id, search_term):
             cursor.close()
 
 def add_item(barcode, name, brand, expiry_time, default_quantity, unit, user_id=None):
+    """
+    Adds a new item to the database.
+
+    Args:
+        barcode (str): Item's barcode.
+        name (str): Item name.
+        brand (str): Brand name.
+        expiry_time (str): Expiry date in "day/month/year" format.
+        default_quantity (str): Default quantity of the item.
+        unit (str): Unit of measurement.
+        user_id (int, optional): ID of the user adding the item.
+
+    Returns:
+        dict: Contains success status and the new item's ID or an error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -202,6 +293,14 @@ def add_item(barcode, name, brand, expiry_time, default_quantity, unit, user_id=
 
 # no returns, as images arent important enough to return a whole request as failed
 def add_item_image(image, new_item_id, original_item_id=None):
+    """
+    Saves an uploaded image for an item or clones an image from an existing item.
+
+    Args:
+        image (FileStorage): Uploaded image file.
+        new_item_id (int): ID of the new item.
+        original_item_id (int, optional): ID of the original item to copy image from.
+    """
     try:
         if image:
             # store image in server with name item id
@@ -219,6 +318,16 @@ def add_item_image(image, new_item_id, original_item_id=None):
         logging.error(f"[add_item_image error] {e}")
 
 def process_add_form(form, user_id=None):
+    """
+    Processes a submitted form to add a new item.
+
+    Args:
+        form (ImmutableMultiDict): Form containing item details.
+        user_id (int, optional): ID of the user submitting the form.
+
+    Returns:
+        dict: Contains success status or an error message.
+    """
     # gets item information
     barcode = form.get("barcode") or None
     name = form.get("name")
@@ -255,6 +364,22 @@ def process_add_form(form, user_id=None):
     return add_item(barcode, name, brand, expiry_time, default_quantity, unit, user_id)
 
 def update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, user_id=None):
+    """
+    Updates an existing item in the database.
+
+    Args:
+        id (int): Item ID.
+        barcode (str): Updated barcode.
+        name (str): Updated item name.
+        brand (str): Updated brand.
+        expiry_time (str): Updated expiry date.
+        default_quantity (str): Updated quantity.
+        unit (str): Updated unit.
+        user_id (int, optional): ID of the user performing the update.
+
+    Returns:
+        dict: Contains success status or an error message.
+    """
     ## if user submitted update, make sure theyre modifying their own item
     if user_id:
         result = owner_check(id, user_id)
@@ -285,6 +410,17 @@ def update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, u
             cursor.close()
 
 def process_update_form(id, form, user_id=None):
+    """
+    Processes a submitted form to update an existing item.
+
+    Args:
+        id (int): ID of the item to update.
+        form (ImmutableMultiDict): Form containing updated item details.
+        user_id (int, optional): ID of the user submitting the form.
+
+    Returns:
+        dict: Contains success status or an error message.
+    """
     # gets item information
     barcode = form.get("barcode") or None
     name = form.get("name")
@@ -321,6 +457,16 @@ def process_update_form(id, form, user_id=None):
     return update_item(id, barcode, name, brand, expiry_time, default_quantity, unit, user_id)
 
 def remove_item(id, user_id = None):
+    """
+    Deletes an item, ensuring only the item's owner can delete it if user_id is provided.
+
+    Args:
+        id (int): ID of the item to delete.
+        user_id (int, optional): ID of the user attempting deletion.
+
+    Returns:
+        dict: Contains success status or an error message.
+    """
     ## if user submitted, make sure theyre deleting their own item
     if user_id:
         result = owner_check(id, user_id)
@@ -332,6 +478,16 @@ def remove_item(id, user_id = None):
     return remove_item_sql(id, user_item)
 
 def remove_item_sql(id, user_item):
+    """
+    Deletes an item and related records from the database.
+
+    Args:
+        id (int): Item ID.
+        user_item (bool): Indicates whether the item is user-specific.
+
+    Returns:
+        dict: Contains success status or an error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -352,6 +508,12 @@ def remove_item_sql(id, user_item):
             cursor.close()
 
 def remove_item_image(id):
+    """
+    Deletes the image file associated with an item.
+
+    Args:
+        id (int): Item ID whose image should be deleted.
+    """
     try:
         path = f"static/images/{id}.jpg"
         if file_exists(path):
@@ -362,6 +524,16 @@ def remove_item_image(id):
 
 # checks if user is modifying their own item
 def owner_check(id, user_id):
+    """
+    Verifies that a user is the owner of a given item.
+
+    Args:
+        id (int): Item ID.
+        user_id (int): User ID to check ownership.
+
+    Returns:
+        dict: Contains success status or an error message.
+    """
     cursor = None
     try:
         cursor = get_cursor()

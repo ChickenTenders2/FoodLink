@@ -1,4 +1,8 @@
-// Function to toggle responsive class on the navigation bar
+/**
+ * Toggles the responsive class on the top navigation bar.
+ * Adds "responsive" to the class name to show the mobile menu.
+ * Removes it to revert back to the default desktop view.
+ */
 function navbar() {
     const nav = document.getElementById("myTopnav");
     // If the current class is "topnav", add "responsive" to make it mobile-friendly

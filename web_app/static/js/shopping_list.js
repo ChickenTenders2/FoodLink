@@ -1,11 +1,15 @@
-// Function to open the 'Add Item' popup
+/**
+ * Opens the "Add Item" popup and disables page scrolling.
+ */
 function openAddPopup() {
     document.getElementById('overlay').style.display = 'block';
     document.getElementById('add-popup').style.display = 'block';
     document.body.style.overflow = 'hidden';
 }
 
-// Function to close the 'Add Item' popup and clear form fields
+/**
+ * Closes the "Add Item" popup, clears input fields, and restores page scroll.
+ */
 function closeAddPopup() {
     document.getElementById('overlay').style.display = 'none';
     document.getElementById('add-popup').style.display = 'none';
@@ -14,14 +18,18 @@ function closeAddPopup() {
     document.body.style.overflow = '';
 }
 
-// Function to open the 'Edit Item' popup
+/**
+ * Opens the "Edit Item" popup and disables page scrolling.
+ */
 function openEditPopup() {
     document.getElementById('overlay').style.display = 'block';
     document.getElementById('edit-popup').style.display = 'block';
     document.body.style.overflow = 'hidden';
 }
 
-// Function to close the 'Edit Item' popup and clear form fields
+/**
+ * Closes the "Edit Item" popup, clears input fields, and restores page scroll.
+ */
 function closeEditPopup() {
     document.getElementById('overlay').style.display = 'none';
     document.getElementById('edit-popup').style.display = 'none';
@@ -31,12 +39,22 @@ function closeEditPopup() {
     document.body.style.overflow = '';
 }
 
-// Function to visually mark an item as bought (strikethrough text)
+/**
+ * Applies a strikethrough effect to mark an item as bought in the UI.
+ * 
+ * @param {HTMLElement} button - The button inside the shopping item row.
+ */
 function markBought(button) {
     button.closest('.shopping-item').style.textDecoration = 'line-through';
 }
 
-// Pre-fill the edit popup with item values and open it
+/**
+ * Pre-fills the edit form fields with existing values and opens the edit popup.
+ * 
+ * @param {string|number} id - Item ID.
+ * @param {string} name - Item name.
+ * @param {string|number} quantity - Item quantity.
+ */
 function editItem(id, name, quantity){
     document.getElementById('edit_item_id').value = id;
     document.getElementById('edit_item_name').value = name;
@@ -44,7 +62,12 @@ function editItem(id, name, quantity){
     openEditPopup();
 }
 
-// Function to show a temporary toast notification
+/**
+ * Displays a temporary toast message with color based on success/failure.
+ * 
+ * @param {string} message - The message to display.
+ * @param {boolean} isSuccess - Optional, if true shows green toast, else red (default is success).
+ */
 function showToast(message) {
     const toast = document.getElementById("toast");
     toast.innerText = message;
@@ -52,7 +75,9 @@ function showToast(message) {
     setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
 }
 
-// Submit handler for editing an item in the shopping list
+/**
+ * Handles submission of the edit form and updates the item via AJAX.
+ */
 document.getElementById('editForm').addEventListener('submit', function (e) {
     e.preventDefault();
     e.stopPropagation();
@@ -73,7 +98,9 @@ document.getElementById('editForm').addEventListener('submit', function (e) {
     });
 });
 
-// Submit handler for adding a new item to the shopping list
+/**
+ * Handles submission of the add form and adds a new item to the list.
+ */
 document.getElementById('addForm').addEventListener('submit', function (e) {
     e.preventDefault();
     const form = e.target;
@@ -93,7 +120,9 @@ document.getElementById('addForm').addEventListener('submit', function (e) {
     });
 });
 
-// Submit handlers for marking items as bought or unbought
+/**
+ * Handles submission of bought/unbought toggle forms for each item.
+ */
 document.querySelectorAll('.boughtForm').forEach(form => {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -116,7 +145,9 @@ document.querySelectorAll('.boughtForm').forEach(form => {
     });
 });
 
-// Submit handlers for suggesting items to the shopping list
+/**
+ * Handles submission of suggest forms to add recommended items to the list.
+ */
 document.querySelectorAll('.suggestForm').forEach(form => {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -135,7 +166,9 @@ document.querySelectorAll('.suggestForm').forEach(form => {
     });
 });
 
-// Submit handlers for removing individual items
+/**
+ * Handles submission of remove buttons to delete individual items from the list.
+ */
 document.querySelectorAll('.removeForm').forEach(form => {
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -154,7 +187,9 @@ document.querySelectorAll('.removeForm').forEach(form => {
     });
 });
 
-// Submit handler for clearing the entire shopping list
+/**
+ * Handles submission of the clear form to remove all items from the list.
+ */
 document.getElementById('clearForm').addEventListener('submit', function (e) {
     e.preventDefault();
     const formData = new FormData(e.target);

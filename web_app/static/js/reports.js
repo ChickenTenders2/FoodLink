@@ -1,3 +1,7 @@
+/**
+ * Fetches all item reports from the server and populates the table.
+ * Stores them in a global `window.reports` variable.
+ */
 async function get_reports() {
 
     // Sends update command and waits for response
@@ -14,6 +18,10 @@ async function get_reports() {
     }
 }
 
+/**
+ * Filters and sorts the report list based on user selection.
+ * Updates the report table display.
+ */
 function sort_filter_reports() {
     let reports = [];
     const checked = document.getElementById("show_null_assign").checked;
@@ -47,7 +55,11 @@ function sort_filter_reports() {
     fill_table(reports);
 }
 
-// Fills the table with report data
+/**
+ * Populates the HTML table with the given reports.
+ * 
+ * @param {Array} reports - List of report arrays to display.
+ */
 function fill_table(reports) {
     const table_body = document.getElementById("table_body");
     table_body.innerHTML = "";
@@ -81,7 +93,13 @@ function fill_table(reports) {
     }
 }
 
-// Function to handle assigning a report to the current admin
+/**
+ * Assigns a report to the currently logged-in admin.
+ * Prompts for confirmation and handles reassignment if already assigned.
+ * 
+ * @param {MouseEvent} event - Click event (used to stop row navigation).
+ * @param {string} new_item_id - The ID of the item being reported.
+ */
 async function assign_report(event, new_item_id) {
     event.stopPropagation();
     const confirmAssign = confirm(`Assign report?`);
@@ -108,7 +126,10 @@ async function assign_report(event, new_item_id) {
     }
 }
 
-// When the page loads, fetch and display the reports
+
+/**
+ * Automatically fetches and displays reports when the page is loaded.
+ */
 window.onload = function(){
     get_reports();
 }

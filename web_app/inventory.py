@@ -2,6 +2,15 @@ from database import get_cursor, commit, safe_rollback
 import logging
 
 def get_items(user_id):
+    """
+    Fetches all inventory items for a given user.
+
+    Args:
+        user_id (int): The ID of the user.
+
+    Returns:
+        dict: A success flag and list of formatted items, or error message on failure.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -23,6 +32,16 @@ def get_items(user_id):
             cursor.close()
 
 def search_items(user_id, search_term):
+    """
+    Performs a full-text search for items in the user's inventory.
+
+    Args:
+        user_id (int): The user ID.
+        search_term (str): The search string for item names.
+
+    Returns:
+        dict: A success flag and list of matched items, or error message on failure.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -45,6 +64,18 @@ def search_items(user_id, search_term):
             cursor.close()
 
 def add_item(user_id, item_id, quantity, expiry_date):
+    """
+    Adds a new item to the user's inventory.
+
+    Args:
+        user_id (int): User ID.
+        item_id (int): Item ID.
+        quantity (int or float): Quantity of the item.
+        expiry_date (str): Expiry date in ISO format.
+
+    Returns:
+        dict: Success status or error.
+    """
     cursor = None
     try:
         cursor = get_cursor()
@@ -61,6 +92,17 @@ def add_item(user_id, item_id, quantity, expiry_date):
             cursor.close()
 
 def process_add_form(user_id, item_id, form):
+    """
+    Processes form data to add an item.
+
+    Args:
+        user_id (int): User ID.
+        item_id (int): Item ID.
+        form (dict): Dictionary containing 'quantity' and 'expiry_date'.
+
+    Returns:
+        dict: Result from add_item or error if missing fields.
+    """
     quantity = form["quantity"]
     expiry = form["expiry_date"]
     if not quantity or not expiry:

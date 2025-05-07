@@ -66,43 +66,55 @@ def get_recipe(recipe_id):
         if cursor:
             cursor.close()
 
-def remove_recipe(recipe_id, user_id=None):
+
+def get_recipe_tools(recipe_id):
     """
-    Deletes a recipe and its associated tools and ingredients, with optional ownership check.
+    Retrieves the list of tool IDs associated with a given recipe.
 
     Args:
-        recipe_id (int): ID of the recipe to delete.
-        user_id (int, optional): ID of the user requesting deletion.
+        recipe_id (int): ID of the recipe.
 
     Returns:
-        dict: Contains success status or an error message.
+        dict: Contains success status and a list of tool IDs or an error message.
     """
-    ## if user submitted, make sure theyre deleting their own recipe
-    if user_id:
-        result = owner_check(recipe_id, user_id)
-        if not result.get("success"):
-            return result
     cursor = None
     try:
         cursor = get_cursor()
-        # remove from recipe table
-        query = "DELETE FROM recipe WHERE id = %s;"
+        query = "SELECT tool_id FROM recipe_tool WHERE recipe_id = %s"
         data = (recipe_id,)
         cursor.execute(query, data)
-        # remove recipe tools
-        query = "DELETE FROM recipe_tool WHERE recipe_id = %s;"
-        data = (recipe_id,)
-        cursor.execute(query, data)
-        # remove recipe items
-        query = "DELETE FROM recipe_items WHERE recipe_id = %s;"
-        data = (recipe_id,)
-        cursor.execute(query, data)
-
-        commit()
-        return {"success": True}
+        tool_ids = cursor.fetchall()
+        # formats each id into a list
+        tool_ids = [id[0] for id in tool_ids]
+        return {"success": True, "tool_ids": tool_ids}
     except Exception as e:
-        safe_rollback()
-        logging.error(f"[remove_recipe error] {e}")
+        logging.error(f"[get_recipe_tools error] {e}")
+        return {"success": False, "error": "An internal error occurred."}
+    finally:
+        if cursor:
+            cursor.close()
+
+def get_recipe_items(recipe_id):
+    """
+    Retrieves the ingredients associated with a recipe.
+
+    Args:
+        recipe_id (int): ID of the recipe.
+
+    Returns:
+        dict: Contains success status and a list of ingredients or an error message.
+    """
+    cursor = None
+    try:
+        cursor = get_cursor()
+        query = "SELECT item_name, quantity, unit FROM FoodLink.recipe_items WHERE recipe_id = %s;"
+        data = (recipe_id,)
+        cursor.execute(query, data)
+        items = cursor.fetchall()
+        items = [list(item) for item in items]
+        return {"success": True, "items": items}
+    except Exception as e:
+        logging.error(f"[get_recipe_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:
@@ -278,6 +290,48 @@ def edit_recipe_items(cursor, recipe_id, items):
     # executes all queries
     cursor.executemany(query, data)
 
+def remove_recipe(recipe_id, user_id=None):
+    """
+    Deletes a recipe and its associated tools and ingredients, with optional ownership check.
+
+    Args:
+        recipe_id (int): ID of the recipe to delete.
+        user_id (int, optional): ID of the user requesting deletion.
+
+    Returns:
+        dict: Contains success status or an error message.
+    """
+    ## if user submitted, make sure theyre deleting their own recipe
+    if user_id:
+        result = owner_check(recipe_id, user_id)
+        if not result.get("success"):
+            return result
+    cursor = None
+    try:
+        cursor = get_cursor()
+        # remove from recipe table
+        query = "DELETE FROM recipe WHERE id = %s;"
+        data = (recipe_id,)
+        cursor.execute(query, data)
+        # remove recipe tools
+        query = "DELETE FROM recipe_tool WHERE recipe_id = %s;"
+        data = (recipe_id,)
+        cursor.execute(query, data)
+        # remove recipe items
+        query = "DELETE FROM recipe_items WHERE recipe_id = %s;"
+        data = (recipe_id,)
+        cursor.execute(query, data)
+
+        commit()
+        return {"success": True}
+    except Exception as e:
+        safe_rollback()
+        logging.error(f"[remove_recipe error] {e}")
+        return {"success": False, "error": "An internal error occurred."}
+    finally:
+        if cursor:
+            cursor.close()
+
 # checks if user is modifying their own recipe
 def owner_check(id, user_id):
     """
@@ -300,60 +354,6 @@ def owner_check(id, user_id):
         return {"success": True}
     except Exception as e:
         logging.error(f"[recipe.owner_check error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
-    finally:
-        if cursor:
-            cursor.close()
-
-
-def get_recipe_tools(recipe_id):
-    """
-    Retrieves the list of tool IDs associated with a given recipe.
-
-    Args:
-        recipe_id (int): ID of the recipe.
-
-    Returns:
-        dict: Contains success status and a list of tool IDs or an error message.
-    """
-    cursor = None
-    try:
-        cursor = get_cursor()
-        query = "SELECT tool_id FROM recipe_tool WHERE recipe_id = %s"
-        data = (recipe_id,)
-        cursor.execute(query, data)
-        tool_ids = cursor.fetchall()
-        # formats each id into a list
-        tool_ids = [id[0] for id in tool_ids]
-        return {"success": True, "tool_ids": tool_ids}
-    except Exception as e:
-        logging.error(f"[get_recipe_tools error] {e}")
-        return {"success": False, "error": "An internal error occurred."}
-    finally:
-        if cursor:
-            cursor.close()
-
-def get_recipe_items(recipe_id):
-    """
-    Retrieves the ingredients associated with a recipe.
-
-    Args:
-        recipe_id (int): ID of the recipe.
-
-    Returns:
-        dict: Contains success status and a list of ingredients or an error message.
-    """
-    cursor = None
-    try:
-        cursor = get_cursor()
-        query = "SELECT item_name, quantity, unit FROM FoodLink.recipe_items WHERE recipe_id = %s;"
-        data = (recipe_id,)
-        cursor.execute(query, data)
-        items = cursor.fetchall()
-        items = [list(item) for item in items]
-        return {"success": True, "items": items}
-    except Exception as e:
-        logging.error(f"[get_recipe_items error] {e}")
         return {"success": False, "error": "An internal error occurred."}
     finally:
         if cursor:

@@ -198,20 +198,20 @@ Reset Password:
 ### 4. Settings
 - Click on the "⚙️" menu on the navigation bar
 
-Notification Settings
+Notification Settings:
 - Click on the switch buttons to modify notification preferences and types
 - Edit the number field to modify the temperature range settings
 - Click on "Save Preferences" to save changes
 
-My Account Settings
+My Account Settings:
 - Click on either "Username" or "Name" fields, modify to change them (email is unchangable)
 - Click on "Update Profile" to save changes
 
-Delete Settings
+Delete Settings:
 - Click on "Delete My Account"
 - Enter account password
 
-Privacy and Security Settings
+Privacy and Security Settings:
 - Enter current password to "Current Password" field
 - Enter new password into "New Password" and "Confirm New Password"
 - Click on "Change Password" to save changes

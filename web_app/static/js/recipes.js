@@ -1,5 +1,12 @@
 //      DISPLAY RECIPE POPUP FUNCTIONS
 
+/**
+ * Opens the recipe popup and displays full recipe details.
+ * If the recipe is personal, enables edit/delete/save features.
+ * Otherwise, shows clone option for public recipes.
+ *
+ * @param {Object} recipe - The recipe object to display.
+ */
 function open_recipe_popup(recipe) {
     display_information(recipe);
 
@@ -63,6 +70,11 @@ function open_recipe_popup(recipe) {
     document.getElementById("recipe_popup").style.display = "block";
 }
 
+/**
+ * Opens the recipe creation popup, optionally pre-filling fields (used for cloning).
+ *
+ * @param {Object|null} recipe - Optional recipe to clone, or empty for new recipe.
+ */
 function open_create_recipe_popup(recipe) {
     // creates empty recipe and displays it
     if (!recipe) {
@@ -97,6 +109,11 @@ function open_create_recipe_popup(recipe) {
     }
 }
 
+/**
+ * Enables or disables editable fields and buttons for recipe editing mode.
+ *
+ * @param {boolean} show - If true, enables edit mode; otherwise disables it.
+ */
 function toggle_edit_features(show) {
     const title_input = document.getElementById("recipe_popup_title");
     const edit_ingredients = document.getElementById("edit_ingredients");
@@ -163,6 +180,10 @@ function toggle_edit_features(show) {
     }
 }
 
+/**
+ * Closes the recipe popup. If in edit mode, it simulates clicking the "Cancel Edit" button,
+ * hides edit/clone buttons, and resets popup state.
+ */
 function close_recipe_popup() {
     // if still in edit mode, simulate click to cancel changes when closing recipe
     // this hides modify buttons and closes popups, plus makes inputs readonly
@@ -179,7 +200,11 @@ function close_recipe_popup() {
     document.getElementById("recipe_popup").style.display = "none";
 }
 
-//shows all the recipe information
+/**
+ * Populates the recipe popup with the recipe's data: title, servings, time, instructions, ingredients, and tools.
+ * 
+ * @param {Object} recipe - The full recipe object.
+ */
 function display_information(recipe) {
     document.getElementById("recipe_popup_title").value = recipe.name;
     document.getElementById("recipe_popup_servings").value = recipe.servings;
@@ -192,6 +217,11 @@ function display_information(recipe) {
 
 }
 
+/**
+ * Populates the ingredient list in the popup and applies styling based on availability.
+ * 
+ * @param {Array} ingredients - List of ingredients [name, quantity, unit, status].
+ */
 function display_ingredients(ingredients) {
     // incase recipe is personal and user wants to edit recipe 
     // make sure the newest ingredients are the ones displayed in the edit popup
@@ -227,6 +257,12 @@ function display_ingredients(ingredients) {
     }
 }
 
+/**
+ * Displays the required tools for the recipe in the popup, highlighting any that are missing.
+ * 
+ * @param {Array} tool_ids - List of tool IDs.
+ * @param {Array} missing_tool_ids - List of tool IDs that are missing.
+ */
 function display_tools(tool_ids, missing_tool_ids) {
     // incase recipe is personal and user wants to edit recipe 
     // make sure the newest tools are the ones displayed in the edit popup
@@ -255,7 +291,12 @@ function display_tools(tool_ids, missing_tool_ids) {
 
 //          ADD INSUFFICIENT TO SHOPPING LIST FUNCTIONS
 
-
+/**
+ * Opens a popup listing all missing or insufficient ingredients and allows the user
+ * to select which ones to add to the shopping list.
+ * 
+ * @param {Array} ingredients - The full list of recipe ingredients.
+ */
 function open_add_to_shopping_popup(ingredients) {
     const container = document.getElementById("shopping_list_ingredient_container");
     container.innerHTML = "";
@@ -291,10 +332,18 @@ function open_add_to_shopping_popup(ingredients) {
     document.getElementById("add_to_shopping_popup").style.display = "block";
 }
 
+/**
+ * Closes the shopping list popup.
+ */
 function close_add_to_shopping_popup() {
     document.getElementById("add_to_shopping_popup").style.display = "none";
 }
 
+
+/**
+ * Submits selected missing/insufficient ingredients to the shopping list via POST.
+ * Validates user selections before sending the request.
+ */
 async function submit_to_shopping_list() {
     const selected = [];
 
@@ -342,6 +391,12 @@ async function submit_to_shopping_list() {
 
 //       EDIT INGREDIENTS FUNCTIONS
 
+/**
+ * Opens the edit ingredients popup and populates it with the current recipe's ingredients.
+ * Closes the tools popup if it's open.
+ * 
+ * @param {Array} ingredients - List of ingredient arrays [name, quantity, unit].
+ */
 function open_edit_ingredients_popup(ingredients) {
     // make sure other popup closed
     close_edit_tools_popup();
@@ -356,10 +411,21 @@ function open_edit_ingredients_popup(ingredients) {
     document.getElementById("edit_ingredients_popup").style.display = "block";
 }
 
+
+/**
+ * Closes the edit ingredients popup.
+ */
 function close_edit_ingredients_popup() {
     document.getElementById("edit_ingredients_popup").style.display = "none";
 }
 
+/**
+ * Adds a new editable ingredient row to the list.
+ * 
+ * @param {string} name - Ingredient name (default: "").
+ * @param {number|string} quantity - Quantity (default: "").
+ * @param {string} unit - Unit (default: "").
+ */
 function add_ingredient_row(name = "", quantity = "", unit = "") {
     const row = document.createElement("div");
     row.className = "ingredient-row";
@@ -375,6 +441,10 @@ function add_ingredient_row(name = "", quantity = "", unit = "") {
     document.getElementById("ingredients_list_container").appendChild(row);
 }
 
+
+/**
+ * Gathers updated ingredient values from the form and refreshes the display.
+ */
 function update_ingredients() {
     const container = document.getElementById("ingredients_list_container");
     const rows = container.querySelectorAll(".ingredient-row");
@@ -397,6 +467,12 @@ function update_ingredients() {
 
 //          EDIT TOOLS FUNCTIONS
 
+/**
+ * Opens the edit tools popup and populates it with the current tool selection.
+ * Closes the ingredients popup if it's open.
+ * 
+ * @param {Array} tool_ids - List of currently selected tool IDs.
+ */
 function open_edit_tools_popup(tool_ids) {
     // make sure other popup closed
     close_edit_ingredients_popup();
@@ -467,10 +543,19 @@ function open_edit_tools_popup(tool_ids) {
     document.getElementById("edit_tools_popup").style.display = "block";
 }
 
+/**
+ * Closes the edit tools popup.
+ */
 function close_edit_tools_popup() {
     document.getElementById("edit_tools_popup").style.display = "none";
 }
 
+/**
+ * Adds a display row for a selected tool, with a remove button.
+ * 
+ * @param {number} tool_id - ID of the tool to display.
+ * @param {HTMLElement} dropdown - The tool selection dropdown.
+ */
 function add_tool_display_row(tool_id, dropdown) {
     const container = document.getElementById("tools_list_container");
     const row = document.createElement("div");
@@ -526,6 +611,10 @@ function add_tool_display_row(tool_id, dropdown) {
     option_to_hide.hidden = true;
 }
 
+/**
+ * Gathers the list of tool IDs from the DOM and updates the displayed tool list.
+ * Closes the edit tools popup afterward.
+ */
 function update_tools() {
     const rows = document.querySelectorAll("#tools_list_container .tool-row span");
     const tool_ids = [];
@@ -540,6 +629,10 @@ function update_tools() {
 }
 
 
+/**
+ * Loads all available tools from the server when the window loads,
+ * and prepares a global dictionary for looking up tool names by ID.
+ */
 window.onload = async function() {
     // gets tools with ordering by type, name
     // so appliances are shown a > z with utensils below also shown a > z
@@ -552,6 +645,11 @@ window.onload = async function() {
     }
 }
 
+/**
+ * Fetches the list of tools from the backend.
+ * 
+ * @returns {Promise<Array>} A promise that resolves to a list of [id, name] pairs.
+ */
 async function get_tools() {
     const response = await fetch("/tools/get")
     const result = await response.json();
@@ -562,6 +660,12 @@ async function get_tools() {
 
 // INGREDIENT OVERVIEW FUNCTIONS
 
+/**
+ * Opens the popup showing how recipe ingredients match up with inventory items.
+ * Includes interactive fields to edit or supplement each ingredient.
+ * 
+ * @param {Object} recipe - The full recipe object.
+ */
 async function open_ingredients_overview(recipe) {
     const popup = document.getElementById("ingredient_overview_popup");
     const container = document.getElementById("ingredient_scroll_container");
@@ -603,11 +707,22 @@ async function open_ingredients_overview(recipe) {
     popup.style.display = "block";
 }
 
+
+/**
+ * Closes the ingredient overview popup and any active inventory selectors.
+ */
 function close_ingredient_overview() {
     document.getElementById("ingredient_overview_popup").style.display = "none";
     close_inventory_selector();
 }
 
+/**
+ * Creates and returns a UI block for an inventory item, including quantity input and remove button.
+ * 
+ * @param {number} i - Index of the ingredient this item matches in the recipe.
+ * @param {boolean} additional - True if this is an extra item, not directly tied to recipe.
+ * @returns {Promise<HTMLElement>} - A populated DOM element.
+ */
 async function add_inventory_ingredient(i, additional = false) {
     let inventory_item = await create_item_tile(window.inventory_ingredients[i]);
     inventory_item.className = "inventory-match";
@@ -661,6 +776,13 @@ async function add_inventory_ingredient(i, additional = false) {
     return inventory_item;
 }
 
+/**
+ * Creates and returns a DOM element representing a tile for an inventory item,
+ * including image, name, quantity, and expiry.
+ * 
+ * @param {Array} item - Inventory item array.
+ * @returns {Promise<HTMLElement>} - A formatted tile element.
+ */
 async function create_item_tile(item) {
     const [ , item_id, name, brand, quantity, unit, expiry_date] = item;
     // only items in inventory are stored in list, so only increments if not missing
@@ -680,6 +802,12 @@ async function create_item_tile(item) {
     return item_tile;
 }
 
+/**
+ * Creates a placeholder "Add from Inventory" button that launches the selector UI.
+ * 
+ * @param {number|null} i - Optional index to link button to specific ingredient.
+ * @returns {HTMLElement} - The add button element.
+ */
 function createAddButton(i = null) {
     const wrapper = document.createElement("div");
     wrapper.className = "inventory-placeholder";
@@ -694,6 +822,13 @@ function createAddButton(i = null) {
     return wrapper;
 }
 
+/**
+ * Opens the inventory selector popup for choosing an item from the user's inventory.
+ * Prevents adding expired or duplicate items and either replaces or appends items in the ingredient overview.
+ * 
+ * @param {number|null} i - Index of the recipe ingredient being replaced (or null to add a new one).
+ * @param {HTMLElement} tile - The placeholder or tile element to replace after selection.
+ */
 async function inventory_selector(i, tile) {
     const searchParam = "";
 
@@ -756,10 +891,17 @@ async function inventory_selector(i, tile) {
     }
 }
 
+
+/**
+ * Closes the inventory selector popup.
+ */
 function close_inventory_selector() {
     document.getElementById("select_inventory_popup").style.display = "none";
 }
 
+/**
+ * Filters displayed inventory items in the selector popup based on user input.
+ */
 function filter_inventory_items() {
     const input = document.getElementById("inventory_search_input").value.toLowerCase();
     const items = document.querySelectorAll("#inventory_items_scroll .inventory-scroll-tile");
@@ -771,7 +913,11 @@ function filter_inventory_items() {
 }
 
 // UPDATING INVENTORY (MAKING RECIPE) 
-
+/**
+ * Updates the user's inventory based on the amount of each ingredient used in the recipe.
+ * Reads the quantities input by the user, calculates the new values,
+ * and sends a POST request to update the database.
+ */
 async function update_inventory_quantities() {
     const items_used = [];
 
@@ -816,6 +962,12 @@ async function update_inventory_quantities() {
 
 // MAIN RECIPE LIST FUNCTIONS
 
+/**
+ * Changes the current recipe page by a given increment (forward/backward),
+ * and then loads the recipes for that page.
+ * 
+ * @param {number} amount - The number of pages to change by (e.g., +1 or -1).
+ */
 function change_page(amount) {
     const page = parseInt(document.getElementById("page_number").value);
     const new_page = page + amount;
@@ -830,6 +982,11 @@ function change_page(amount) {
     get_recipes()
 }
 
+/**
+ * Sends a search request to fetch recipes, based on the current form inputs.
+ * 
+ * @param {Event} [event] - Optional form submission event.
+ */
 async function get_recipes(event) {
     //if called from submit form
     if (event) {
@@ -852,6 +1009,11 @@ async function get_recipes(event) {
     }
 }
 
+/**
+ * Renders the list of recipe cards to the UI.
+ * 
+ * @param {Array} recipes - The array of recipe objects returned from the server.
+ */
 function display_recipe_results(recipes) {
     const container = document.getElementById("recipe_results");
     container.innerHTML = "";
@@ -882,7 +1044,12 @@ function display_recipe_results(recipes) {
 
 // RECIPE POST AND FETCH FUNCTIONS
 
-// gets all data needed to update/add recipe
+/**
+ * Gathers all values from the recipe popup form and returns them as a FormData object.
+ * This includes name, instructions, servings, prep/cook times, ingredients, and tool IDs.
+ * 
+ * @returns {FormData} The complete form data for adding or updating a recipe.
+ */
 function get_recipe_form() {
     const name = document.getElementById("recipe_popup_title").value.trim();
     const instructions = document.getElementById("recipe_popup_instructions").innerText.trim();
@@ -907,7 +1074,11 @@ function get_recipe_form() {
     return formData;
 }
 
-// gets the ingredient list elements and extracts the values into a list
+/**
+ * Extracts ingredient values (name, quantity, unit) from the DOM list into an array.
+ * 
+ * @returns {Array} Array of ingredient arrays: [[name, quantity, unit], ...]
+ */
 function get_ingredients_from_list() {
     const ingredient_elements = document.querySelectorAll("#recipe_popup_ingredients li");
     const ingredients = [];
@@ -921,7 +1092,11 @@ function get_ingredients_from_list() {
     return ingredients;
 }
 
-// gets the tools list elements and extracts the values into a list
+/**
+ * Extracts tool IDs from the tool list elements in the DOM.
+ * 
+ * @returns {Array} Array of tool IDs (numbers or strings).
+ */
 function get_tool_ids_from_list() {
     const tool_elements = document.querySelectorAll("#recipe_popup_tools li");
     const tool_ids = [];
@@ -931,6 +1106,10 @@ function get_tool_ids_from_list() {
     return tool_ids;
 }
 
+/**
+ * Sends a POST request to add a new recipe using form data from the UI.
+ * On success, shows the recipe in the popup.
+ */
 async function add_recipe() {
     let formData = get_recipe_form();
 
@@ -955,6 +1134,12 @@ async function add_recipe() {
     }
 }
 
+/**
+ * Sends a POST request to update an existing recipe by ID.
+ * Refreshes the recipe view and recipe list upon success.
+ * 
+ * @param {string|number} recipe_id - The ID of the recipe to update.
+ */
 async function update_recipe(recipe_id) {
     let formData = get_recipe_form();
     formData.append("recipe_id", recipe_id);
@@ -981,6 +1166,12 @@ async function update_recipe(recipe_id) {
     }
 }
 
+/**
+ * Sends a request to delete a recipe by its ID after confirmation.
+ * Refreshes the recipe list afterward.
+ * 
+ * @param {string|number} recipe_id - The ID of the recipe to delete.
+ */
 async function delete_recipe(recipe_id) {
     const confirm_delete = confirm("Are you sure you want to delete this recipe?");
     if (!confirm_delete) {
@@ -997,6 +1188,12 @@ async function delete_recipe(recipe_id) {
     }
 }
 
+/**
+ * Fetches a single recipe by ID from the server.
+ * 
+ * @param {string|number} recipe_id - The ID of the recipe to fetch.
+ * @returns {Object|null} The recipe object or null on error.
+ */
 async function fetch_recipe_by_id(recipe_id) {
     const response = await fetch(`/recipes/get/${recipe_id}`);
     const result = await response.json();
@@ -1011,7 +1208,10 @@ async function fetch_recipe_by_id(recipe_id) {
 
 // SEARCH FORM HANDLING
 
-// preserves checked boxes on page reload
+/**
+ * On DOM load, restore the state of each filter checkbox from localStorage,
+ * and add listeners to save any changes back to localStorage.
+ */
 document.addEventListener("DOMContentLoaded", () => {
     const checkboxes = ["personal_only", "missing_items", "insufficient_items", "missing_tools"];
 
@@ -1032,7 +1232,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// toggles the visibility of the recipe search filters via the Filter button
+/**
+ * Toggle the visibility of recipe filter options when the Filter button is clicked.
+ * Also updates the button text to reflect the current state.
+ */
 document.getElementById('filter-toggle').addEventListener('click', () => {
     const filters = document.getElementById('filter-options');
     const toggleBtn = document.getElementById('filter-toggle');

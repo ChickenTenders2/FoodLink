@@ -109,9 +109,7 @@ if __name__=="__main__":
 
     last_time = ""
 
-    buzzer = 4
-
-    countdown = False
+    buzzer = 8
 
     grovepi.pinMode(buzzer, "output")
     grovepi.set_bus("RPI_1")
@@ -130,23 +128,15 @@ if __name__=="__main__":
 
     DISPLAY_TEXT_ADDR = 0x3e
 
-    
     token = get_jwt_token()
     x = 'FOODLINK'
     setText(x)
 
     countdown = False
-    delay = 120
     
     while True:
-        
-        token = get_jwt_token()
-        x = 'FOODLINK'
-        setText(x)
-        
-        while True:
           
-         try:
+        try:
              
           delay = 120
           data = get_telemetry(token, device_id)
@@ -179,7 +169,7 @@ if __name__=="__main__":
           if time.time() - start_time >= delay and countdown:
             alarm()
                 
-         except KeyboardInterrupt:
+        except KeyboardInterrupt:
             print ("Terminated.")
             os._exit(0)
             

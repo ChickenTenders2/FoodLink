@@ -169,12 +169,14 @@ Create account:
 - Click on the third field to enter a password that fits the format
 - Re-enter the password in the fourth field(same as third field)
 - Click on continue to create the account
+
 Login:
 - Click on the first field to enter your username
 - Click on the second field to enter your password
 - Click on continue to login
 - If you are a new user, click on create account and it will redirect you to the create account page
 - Click forgot password to reset your password
+
 Reset Password:
 - Press forgot password button
 - Click on the first field to enter the email of the account you want to reset password on

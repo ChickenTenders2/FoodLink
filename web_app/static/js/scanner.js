@@ -2,7 +2,10 @@ let video = document.getElementById('camera');
 let canvas = document.getElementById('snapshot');
 let context = canvas.getContext('2d');
 
-// Starts the webcam stream.
+
+/**
+ * Starts the webcam video stream and sets it as the source for the video element.
+ */
 navigator.mediaDevices.getUserMedia({ video: true })
 .then((stream) => {
     video.srcObject = stream;
@@ -11,7 +14,11 @@ navigator.mediaDevices.getUserMedia({ video: true })
     console.error("Webcam access error:", err);
 });
 
-// Repeatedly captures frames and sends them to the server to be processed.
+
+/**
+ * Captures a frame from the webcam stream, sends it to the server,
+ * and processes the response if an object (barcode or item) is detected.
+ */
 function captureAndSendFrame() {
     if (!video.videoWidth) return;
 
@@ -37,22 +44,36 @@ function captureAndSendFrame() {
     }, 'image/jpeg');
 }
 
-// Start scanning on page load
+
+/**
+ * Automatically starts scanning when the page is fully loaded.
+ */
 window.onload = function() {
     start_check();
 };
 
+/**
+ * Starts the interval-based scanner loop which captures frames every second.
+ * Prevents multiple intervals by checking `window.interval_id`.
+ */
 function start_check() {
     if (!window.interval_id) {
         window.interval_id = setInterval(captureAndSendFrame, 1000); // every second
     }
 }
 
+/**
+ * Stops the interval-based scanner loop and clears the timer.
+ */
 function stop_check() {
     clearInterval(window.interval_id);
     window.interval_id = null;
 }
 
+
+/**
+ * Toggles the scan mode (barcode vs object recognition) by notifying the backend.
+ */
 function toggle_scan_mode() {
     const checked = document.getElementById("scan_mode").checked;
     fetch("/scanner/toggle_mode/" + checked);
